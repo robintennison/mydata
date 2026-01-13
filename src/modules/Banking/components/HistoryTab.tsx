@@ -133,7 +133,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({
         <h4>Deposits Trend</h4>
         <div style={chartStyles.container}>
           <div style={chartStyles.bars}>
-            {chartData.map((point, index) => (
+            {chartData.map((point, _index) => (
               <div key={point.month} style={chartStyles.barContainer}>
                 <div style={chartStyles.barLabel}>{point.month.slice(5)}</div>
                 <div style={chartStyles.barWrapper}>

@@ -1,21 +1,6 @@
 import React, { useEffect, useState } from "react";
-import type {
-  DepositsTabProps,
-  BankAccount,
-  Deposit,
-} from "../../../types/banking.types";
+import type { DepositsTabProps, Deposit } from "../../../types/banking.types";
 import { tableStyles, formStyles } from "../../../styles/components";
-
-// REMOVE THIS LOCAL INTERFACE - it's already imported
-// interface DepositsTabProps {
-//   deposits: Deposit[];
-//   accounts: BankAccount[];
-//   editingDeposit: Deposit | null;
-//   setEditingDeposit: (deposit: Deposit | null) => void;
-//   onSaveDeposit: (deposit: Deposit) => void;
-//   onDeleteDeposit: (depositId: string) => void;
-//   enableEditDelete: boolean;
-// }
 
 const DepositsTab: React.FC<DepositsTabProps> = ({
   deposits,

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { firestore } from "../../../lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 
 interface SmartDataViewerProps {
-  userId: string;
+  // userId: string;
 }
 
 interface BankAccount {
@@ -35,7 +35,7 @@ interface DepositAdjustment {
   // Add fields
 }
 
-const SmartDataViewer: React.FC<SmartDataViewerProps> = ({ userId }) => {
+const SmartDataViewer: React.FC<SmartDataViewerProps> = () => {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [history, setHistory] = useState<History[]>([]);

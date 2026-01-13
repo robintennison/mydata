@@ -1,49 +1,75 @@
 export const colors = {
   // Primary colors
-  primary: "#4285f4",
-  primaryLight: "#5c9aff",
-  primaryDark: "#357abd",
+  primary: "#2563eb", // Blue-600
+  primaryLight: "#3b82f6", // Blue-500
+  primaryDark: "#1d4ed8", // Blue-700
   
   // Secondary colors
-  secondary: "#34a853",
-  secondaryLight: "#4bc06c",
-  secondaryDark: "#2c8e46",
+  secondary: "#059669", // Emerald-600
+  secondaryLight: "#10b981", // Emerald-500
+  secondaryDark: "#047857", // Emerald-700
   
   // Status colors
-  success: "#28a745",
-  successLight: "#34ce57",
-  successDark: "#218838",
+  success: "#10b981", // Emerald-500
+  successLight: "#34d399", // Emerald-400
+  successDark: "#059669", // Emerald-600
   
-  danger: "#ea4335",
-  dangerLight: "#ff6b5c",
-  dangerDark: "#d32f2f",
+  danger: "#ef4444", // Red-500
+  dangerLight: "#f87171", // Red-400
+  dangerDark: "#dc2626", // Red-600
   
-  warning: "#fbbc05",
-  warningLight: "#ffd04d",
-  warningDark: "#e6a800",
+  warning: "#f59e0b", // Amber-500
+  warningLight: "#fbbf24", // Amber-400
+  warningDark: "#d97706", // Amber-600
   
-  info: "#4285f4",
-  infoLight: "#5c9aff",
-  infoDark: "#357abd",
+  info: "#3b82f6", // Blue-500
+  infoLight: "#60a5fa", // Blue-400
+  infoDark: "#2563eb", // Blue-600
   
-  // Neutral colors
-  light: "#f8f9fa",
-  dark: "#212529",
-  gray: "#6c757d",
-  grayLight: "#e9ecef",
-  grayDark: "#495057",
+  // Neutral colors - Better contrast
+  light: "#f8fafc", // Slate-50
+  lighter: "#f1f5f9", // Slate-100
+  dark: "#1e293b", // Slate-800
+  darker: "#0f172a", // Slate-900
+  gray: "#64748b", // Slate-500
+  grayLight: "#cbd5e1", // Slate-300
+  grayDark: "#475569", // Slate-600
   
   // Background colors
   white: "#ffffff",
   black: "#000000",
-  background: "#f5f5f5",
+  background: "#f8fafc", // Slate-50
   surface: "#ffffff",
+  card: "#ffffff",
   
-  // Text colors
-  textPrimary: "#212529",
-  textSecondary: "#6c757d",
-  textDisabled: "#adb5bd",
+  // Text colors - Better contrast
+  textPrimary: "#1e293b", // Slate-800 - Dark for good readability
+  textSecondary: "#475569", // Slate-600
+  textTertiary: "#64748b", // Slate-500
+  textDisabled: "#94a3b8", // Slate-400
   textInverse: "#ffffff",
+  textOnDark: "#f8fafc", // Slate-50
+  
+  // Border colors
+  border: "#e2e8f0", // Slate-200
+  borderLight: "#f1f5f9", // Slate-100
+  borderDark: "#cbd5e1", // Slate-300
+  
+  // Table colors
+  tableHeader: "#f1f5f9", // Slate-100
+  tableRowEven: "#ffffff",
+  tableRowOdd: "#f8fafc", // Slate-50
+  tableBorder: "#e2e8f0", // Slate-200
+  
+  // Form colors
+  formBackground: "#ffffff",
+  formBorder: "#cbd5e1", // Slate-300
+  formFocus: "#3b82f6", // Blue-500
+  
+  // Chart colors
+  chartPrimary: "#3b82f6", // Blue-500
+  chartSecondary: "#10b981", // Emerald-500
+  chartTertiary: "#f59e0b", // Amber-500
 };
 
 export const spacing = {
@@ -57,8 +83,8 @@ export const spacing = {
 };
 
 export const borderRadius = {
-  xs: "2px",
-  sm: "4px",
+  xs: "4px",
+  sm: "6px",
   md: "8px",
   lg: "12px",
   xl: "16px",
@@ -67,65 +93,11 @@ export const borderRadius = {
 };
 
 export const shadows = {
-  sm: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
-  md: "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)",
-  lg: "0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)",
-  xl: "0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)",
-  inner: "inset 0 2px 4px rgba(0,0,0,0.06)",
-};
-
-export const typography = {
-  fontFamily: {
-    primary: "'Roboto', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
-    mono: "'SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo', monospace",
-  },
-  fontSize: {
-    xs: "0.75rem",    // 12px
-    sm: "0.875rem",   // 14px
-    base: "1rem",     // 16px
-    lg: "1.125rem",   // 18px
-    xl: "1.25rem",    // 20px
-    xxl: "1.5rem",    // 24px
-    xxxl: "2rem",     // 32px
-  },
-  fontWeight: {
-    light: 300,
-    normal: 400,
-    medium: 500,
-    semibold: 600,
-    bold: 700,
-  },
-  lineHeight: {
-    tight: 1.25,
-    normal: 1.5,
-    relaxed: 1.75,
-    loose: 2,
-  },
-};
-
-export const breakpoints = {
-  xs: "0px",
-  sm: "600px",
-  md: "960px",
-  lg: "1280px",
-  xl: "1920px",
-};
-
-export const zIndex = {
-  dropdown: 1000,
-  sticky: 1020,
-  fixed: 1030,
-  modalBackdrop: 1040,
-  modal: 1050,
-  popover: 1060,
-  tooltip: 1070,
-};
-
-export const transitions = {
-  fast: "150ms ease",
-  normal: "250ms ease",
-  slow: "350ms ease",
-  bounce: "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+  sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+  md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+  lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+  xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+  inner: "inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)",
 };
 
 export const theme = {
@@ -133,8 +105,4 @@ export const theme = {
   spacing,
   borderRadius,
   shadows,
-  typography,
-  breakpoints,
-  zIndex,
-  transitions,
 };

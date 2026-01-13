@@ -1,8 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getDatabase } from 'firebase/database';
+import { getDatabase } from 'firebase/database';  // Keep Realtime DB
+import { getFirestore } from 'firebase/firestore'; // Add Firestore
 import { getStorage } from 'firebase/storage';
-// Remove analytics unless you need it
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,13 +17,10 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize the services your Android app uses
+// Initialize ALL services - export both databases
 export const auth = getAuth(app);
-export const database = getDatabase(app);
+export const database = getDatabase(app);     // Realtime Database (might be empty)
+export const firestore = getFirestore(app);   // Firestore Database (where your data probably is)
 export const storage = getStorage(app);
-
-// Only add analytics if you need it
-// import { getAnalytics } from "firebase/analytics";
-// const analytics = getAnalytics(app);
 
 export default app;

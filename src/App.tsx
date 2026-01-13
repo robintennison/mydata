@@ -3,7 +3,7 @@ import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
 import LoginForm from "./components/LoginForm";
-import DataViewer from "./components/DataViewer";
+import DualDataViewer from "./components/DualDataViewer"; // Changed import
 import FileUpload from "./components/FileUpload";
 import "./App.css";
 
@@ -105,8 +105,10 @@ function App() {
                     <strong>Project:</strong> robintennison-mydata
                   </p>
                   <p>
-                    <strong>Database:</strong> Firebase Realtime
-                  </p>
+                    <strong>Database:</strong> Testing Both (Realtime &
+                    Firestore)
+                  </p>{" "}
+                  {/* Updated text */}
                   <p>
                     <strong>Storage:</strong> Firebase Storage
                   </p>
@@ -115,7 +117,7 @@ function App() {
 
               <div style={styles.content}>
                 {activeTab === "data" ? (
-                  <DataViewer userId={user.uid} />
+                  <DualDataViewer userId={user.uid} />
                 ) : (
                   <FileUpload userId={user.uid} />
                 )}
@@ -136,6 +138,7 @@ function App() {
                     <li>☁️ Real-time Firebase sync</li>
                     <li>📁 File upload to Storage</li>
                     <li>🔒 Secure authentication</li>
+                    <li>🔍 Auto-detect database type</li> {/* Added feature */}
                   </ul>
                 </div>
               </div>

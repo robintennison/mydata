@@ -12,6 +12,7 @@
   overflow-x: hidden;
   margin: 0 auto;
   position: relative;
+  min-height: 100vh;
 }
 
 /* Loading State */
@@ -54,6 +55,7 @@
   width: 100%;
   box-sizing: border-box;
   word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .banking-title {
@@ -62,6 +64,8 @@
   line-height: 1.2;
   font-weight: 600;
   font-size: 1.2rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .banking-subtitle {
@@ -69,6 +73,8 @@
   margin: 0;
   line-height: 1.4;
   font-size: 0.75rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Tabs Container */
@@ -83,6 +89,7 @@
   scrollbar-width: none;
   width: 100%;
   position: relative;
+  white-space: nowrap;
 }
 
 .banking-tabs-container::-webkit-scrollbar {
@@ -105,6 +112,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .banking-tab-active {
@@ -124,7 +133,11 @@
   transform: translateY(-1px);
 }
 
-/* Content Area */
+.banking-tab:active {
+  transform: scale(0.98);
+}
+
+/* Content Area - CRITICAL FIX */
 .banking-content {
   min-height: 350px;
   width: 100%;
@@ -132,6 +145,14 @@
   padding: 0;
   box-sizing: border-box;
   position: relative;
+}
+
+/* Make sure all child components don't overflow */
+.banking-content > * {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden !important;
 }
 
 /* Mobile Tip */
@@ -145,6 +166,17 @@
   font-size: 0.8rem;
   color: #666;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Tab label text for better mobile handling */
+.tab-label-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Tablet Styles (768px and up) */
@@ -192,6 +224,10 @@
   .banking-title {
     font-size: 1.6rem;
   }
+  
+  .banking-content {
+    min-height: 400px;
+  }
 }
 
 /* Mobile-only adjustments (768px and down) */
@@ -201,20 +237,57 @@
   }
   
   /* Force horizontal scroll for wide tables in child components */
-  .banking-content > * {
+  .banking-content .table-responsive-container {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin-left: -8px;
+    margin-right: -8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    width: calc(100% + 16px);
   }
   
   /* Hide icons in tabs on mobile for cleaner look */
   .banking-tab::before {
     display: none;
   }
+  
+  /* Ensure no horizontal scroll on main content */
+  .banking-content {
+    overflow-x: hidden;
+  }
+  
+  /* Make sure all child containers don't overflow */
+  .banking-content > div {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Adjust header for very small screens */
+  @media (max-width: 480px) {
+    .banking-title {
+      font-size: 1.1rem;
+    }
+    
+    .banking-subtitle {
+      font-size: 0.7rem;
+    }
+    
+    .banking-tab {
+      padding: 8px 10px;
+      font-size: 0.75rem;
+      min-height: 40px;
+    }
+    
+    .enhanced-banking-container {
+      padding: 6px;
+    }
+  }
 }
 
 /* Ensure all child components have proper scrolling for tables */
-.banking-content table {
+.banking-content .table-responsive-container {
   min-width: 600px;
 }
 
@@ -223,6 +296,7 @@
   .enhanced-banking-container {
     box-shadow: none;
     padding: 0;
+    max-width: 100%;
   }
   
   .banking-tabs-container,
@@ -238,5 +312,67 @@
   .banking-content table {
     min-width: 100%;
     page-break-inside: avoid;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .banking-tab-active {
+    border: 2px solid currentColor;
+  }
+  
+  .banking-tab-inactive {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .banking-tab {
+    transition: none;
+  }
+  
+  .banking-spinner {
+    animation-duration: 0.01ms;
+  }
+}
+
+/* Ensure no horizontal scroll on body */
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Force child components to respect container width */
+.banking-content > * {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Critical fix for tables in mobile */
+@media (max-width: 768px) {
+  .banking-content .desktop-table-view {
+    width: 100%;
+    overflow-x: auto;
+    margin-left: -8px;
+    margin-right: -8px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .banking-content .table-responsive-container {
+    width: calc(100% + 16px);
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .banking-tabs-container {
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px; /* Extra space for scroll */
+  }
+  
+  .banking-tab {
+    min-height: 44px; /* Apple's minimum touch target */
   }
 }

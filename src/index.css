@@ -389,3 +389,21 @@ label {
     overflow-wrap: break-word;
   }
 }
+/* Add to your global index.css */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  position: relative;
+}
+
+/* Prevent horizontal scroll */
+* {
+  box-sizing: border-box;
+  max-width: 100vw;
+}
+
+/* Force all containers to respect viewport */
+#root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}

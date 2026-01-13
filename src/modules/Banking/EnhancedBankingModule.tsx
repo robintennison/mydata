@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSettings } from "../../contexts/SettingsContext";
 import {
   AccountsTab,
@@ -66,9 +66,9 @@ const EnhancedBankingModule: React.FC = () => {
   const chartData: ChartPoint[] = calculateChartData(history, formatCurrency);
 
   // Get window width for responsive labels
-  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -149,8 +149,10 @@ const EnhancedBankingModule: React.FC = () => {
             className={`banking-tab ${
               activeTab === tab ? "banking-tab-active" : "banking-tab-inactive"
             }`}
+            aria-label={getTabLabel(tab)}
+            title={getTabLabel(tab)}
           >
-            {getTabLabel(tab)}
+            <span className="tab-label-text">{getTabLabel(tab)}</span>
           </button>
         ))}
       </div>

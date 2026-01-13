@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import type { DepositsTabProps, Deposit } from "../../../types/banking.types";
-import { tableStyles, formStyles } from "../../../styles/components";
+import { formStyles } from "../../../styles/components";
 import "./TableStyles.css"; // Import the shared table styles
 
 const DepositsTab: React.FC<DepositsTabProps> = ({
@@ -94,12 +94,12 @@ const DepositsTab: React.FC<DepositsTabProps> = ({
   };
 
   // Get account name for display
-  const getAccountDisplay = (accountId: string) => {
-    const account = accounts.find((a) => a.id === accountId);
-    return account
-      ? `${account.acctCode} - ${account.acctDetails}`
-      : "Unknown Account";
-  };
+  //   const getAccountDisplay = (accountId: string) => {
+  //     const account = accounts.find((a) => a.id === accountId);
+  //     return account
+  //       ? `${account.acctCode} - ${account.acctDetails}`
+  //       : "Unknown Account";
+  //   };
 
   return (
     <div style={{ width: "100%", overflowX: "hidden" }}>

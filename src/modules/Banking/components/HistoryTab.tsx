@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import type { HistoryTabProps, History } from "../../../types/banking.types";
-import { tableStyles } from "../../../styles/components/tables";
 import { formStyles } from "../../../styles/components/forms";
 import { chartStyles } from "../../../styles/components/charts";
 import "./TableStyles.css"; // Import the shared table styles

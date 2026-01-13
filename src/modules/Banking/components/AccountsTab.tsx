@@ -3,7 +3,7 @@ import type {
   AccountsTabProps,
   BankAccount,
 } from "../../../types/banking.types";
-import { tableStyles, formStyles } from "../../../styles/components";
+import { formStyles } from "../../../styles/components";
 import "./TableStyles.css"; // Import the shared table styles
 
 const AccountsTab: React.FC<AccountsTabProps> = ({

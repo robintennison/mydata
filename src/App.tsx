@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
-import LoginForm from "./components/LoginForm";
-import SmartDataViewer from "./components/SmartDataViewer";
-import JewelleryViewer from "./components/JewelleryViewer";
-import PropertiesViewer from "./components/PropertiesViewer";
-import OnlineViewer from "./components/OnlineViewer";
+import LoginForm from "./components/Auth/LoginForm";
+import EnhancedBankingModule from "./modules/Banking/EnhancedBankingModule"; // Updated import
+import JewelleryViewer from "./modules/Jewellery/JewelleryViewer";
+import PropertiesViewer from "./modules/Properties/PropertiesViewer";
+import OnlineViewer from "./modules/Online/OnlineViewer";
 import FileUpload from "./components/FileUpload";
 import "./App.css";
+import { SettingsProvider } from "./contexts/SettingsContext";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -60,199 +61,204 @@ function App() {
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.app}>
-        <header style={styles.header}>
-          <div style={styles.headerContent}>
-            <h1 style={styles.logo}>
-              <span style={styles.logoIcon}>📱</span>
-              My Data Web
-            </h1>
-            {user && (
-              <div style={styles.userMenu}>
-                <span style={styles.userEmail}>{user.email}</span>
-                <button onClick={handleLogout} style={styles.logoutButton}>
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
+    <SettingsProvider>
+      <div style={styles.container}>
+        <div style={styles.app}>
+          <header style={styles.header}>
+            <div style={styles.headerContent}>
+              <h1 style={styles.logo}>
+                <span style={styles.logoIcon}>📱</span>
+                My Data Web
+              </h1>
+              {user && (
+                <div style={styles.userMenu}>
+                  <span style={styles.userEmail}>{user.email}</span>
+                  <button onClick={handleLogout} style={styles.logoutButton}>
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </header>
 
-        <main style={styles.main}>
-          {user ? (
-            <div style={styles.dashboard}>
-              <div style={styles.sidebar}>
-                <div style={styles.userCard}>
-                  <div style={styles.avatar}>
-                    {user.email?.charAt(0).toUpperCase()}
+          <main style={styles.main}>
+            {user ? (
+              <div style={styles.dashboard}>
+                <div style={styles.sidebar}>
+                  <div style={styles.userCard}>
+                    <div style={styles.avatar}>
+                      {user.email?.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={styles.userInfo}>
+                      <h3>{user.email}</h3>
+                      <p style={styles.userId}>
+                        ID: {user.uid.substring(0, 10)}...
+                      </p>
+                    </div>
                   </div>
-                  <div style={styles.userInfo}>
-                    <h3>{user.email}</h3>
-                    <p style={styles.userId}>
-                      ID: {user.uid.substring(0, 10)}...
+
+                  {/* Module Selection */}
+                  <nav style={styles.nav}>
+                    <h4
+                      style={{
+                        margin: "0 0 10px 0",
+                        color: "#666",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      Modules
+                    </h4>
+
+                    <button
+                      onClick={() => {
+                        setActiveModule("banking");
+                        setActiveTab("data");
+                      }}
+                      style={getModuleButtonStyle("banking")}
+                    >
+                      🏦 Enhanced Banking
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveModule("jewellery");
+                        setActiveTab("data");
+                      }}
+                      style={getModuleButtonStyle("jewellery")}
+                    >
+                      💎 Jewellery
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveModule("properties");
+                        setActiveTab("data");
+                      }}
+                      style={getModuleButtonStyle("properties")}
+                    >
+                      🏠 Properties
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveModule("online");
+                        setActiveTab("data");
+                      }}
+                      style={getModuleButtonStyle("online")}
+                    >
+                      🌐 Online
+                    </button>
+                  </nav>
+
+                  {/* View/Upload Tabs */}
+                  <nav style={styles.nav}>
+                    <h4
+                      style={{
+                        margin: "0 0 10px 0",
+                        color: "#666",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      Actions
+                    </h4>
+                    <button
+                      onClick={() => setActiveTab("data")}
+                      style={{
+                        ...styles.navButton,
+                        backgroundColor:
+                          activeTab === "data" ? "#4285f4" : "transparent",
+                        color: activeTab === "data" ? "white" : "#333",
+                      }}
+                    >
+                      📊 View Data
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("upload")}
+                      style={{
+                        ...styles.navButton,
+                        backgroundColor:
+                          activeTab === "upload" ? "#4285f4" : "transparent",
+                        color: activeTab === "upload" ? "white" : "#333",
+                      }}
+                    >
+                      📁 Upload Files
+                    </button>
+                  </nav>
+
+                  <div style={styles.projectInfo}>
+                    <h4>Project Info</h4>
+                    <p>
+                      <strong>Project:</strong> robintennison-mydata
+                    </p>
+                    <p>
+                      <strong>Active Module:</strong> {activeModule}
+                    </p>
+                    <p>
+                      <strong>Storage:</strong> Firebase Storage
                     </p>
                   </div>
                 </div>
 
-                {/* Module Selection */}
-                <nav style={styles.nav}>
-                  <h4
-                    style={{
-                      margin: "0 0 10px 0",
-                      color: "#666",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    Modules
-                  </h4>
-
-                  <button
-                    onClick={() => {
-                      setActiveModule("banking");
-                      setActiveTab("data");
-                    }}
-                    style={getModuleButtonStyle("banking")}
-                  >
-                    🏦 Banking
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setActiveModule("jewellery");
-                      setActiveTab("data");
-                    }}
-                    style={getModuleButtonStyle("jewellery")}
-                  >
-                    💎 Jewellery
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setActiveModule("properties");
-                      setActiveTab("data");
-                    }}
-                    style={getModuleButtonStyle("properties")}
-                  >
-                    🏠 Properties
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setActiveModule("online");
-                      setActiveTab("data");
-                    }}
-                    style={getModuleButtonStyle("online")}
-                  >
-                    🌐 Online
-                  </button>
-                </nav>
-
-                {/* View/Upload Tabs */}
-                <nav style={styles.nav}>
-                  <h4
-                    style={{
-                      margin: "0 0 10px 0",
-                      color: "#666",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    Actions
-                  </h4>
-                  <button
-                    onClick={() => setActiveTab("data")}
-                    style={{
-                      ...styles.navButton,
-                      backgroundColor:
-                        activeTab === "data" ? "#4285f4" : "transparent",
-                      color: activeTab === "data" ? "white" : "#333",
-                    }}
-                  >
-                    📊 View Data
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("upload")}
-                    style={{
-                      ...styles.navButton,
-                      backgroundColor:
-                        activeTab === "upload" ? "#4285f4" : "transparent",
-                      color: activeTab === "upload" ? "white" : "#333",
-                    }}
-                  >
-                    📁 Upload Files
-                  </button>
-                </nav>
-
-                <div style={styles.projectInfo}>
-                  <h4>Project Info</h4>
-                  <p>
-                    <strong>Project:</strong> robintennison-mydata
-                  </p>
-                  <p>
-                    <strong>Active Module:</strong> {activeModule}
-                  </p>
-                  <p>
-                    <strong>Storage:</strong> Firebase Storage
-                  </p>
+                <div style={styles.content}>
+                  {activeTab === "data" ? (
+                    // Show different viewer based on active module
+                    (() => {
+                      switch (activeModule) {
+                        case "banking":
+                          return <EnhancedBankingModule />; // Updated to use EnhancedBankingModule
+                        case "jewellery":
+                          return <JewelleryViewer userId={user.uid} />;
+                        case "properties":
+                          return <PropertiesViewer userId={user.uid} />;
+                        case "online":
+                          return <OnlineViewer userId={user.uid} />;
+                        default:
+                          return <EnhancedBankingModule />; // Updated default
+                      }
+                    })()
+                  ) : (
+                    <FileUpload userId={user.uid} />
+                  )}
                 </div>
               </div>
-
-              <div style={styles.content}>
-                {activeTab === "data" ? (
-                  // Show different viewer based on active module
-                  (() => {
-                    switch (activeModule) {
-                      case "banking":
-                        return <SmartDataViewer userId={user.uid} />;
-                      case "jewellery":
-                        return <JewelleryViewer userId={user.uid} />;
-                      case "properties":
-                        return <PropertiesViewer userId={user.uid} />;
-                      case "online":
-                        return <OnlineViewer userId={user.uid} />;
-                      default:
-                        return <SmartDataViewer userId={user.uid} />;
-                    }
-                  })()
-                ) : (
-                  <FileUpload userId={user.uid} />
-                )}
-              </div>
-            </div>
-          ) : (
-            <div style={styles.loginContainer}>
-              <div style={styles.loginCard}>
-                <div style={styles.welcome}>
-                  <h2>Welcome to My Data Web</h2>
-                  <p>Access your Android app data from any device</p>
-                </div>
-                <LoginForm />
-                <div style={styles.features}>
-                  <h3>Features:</h3>
-                  <ul style={styles.featureList}>
-                    <li>📱 Same data as Android app</li>
-                    <li>☁️ Real-time Firebase sync</li>
-                    <li>📁 File upload to Storage</li>
-                    <li>🔒 Secure authentication</li>
-                    <li>
-                      🏦 Multiple modules (Banking, Jewellery, Properties,
-                      Online)
-                    </li>
-                  </ul>
+            ) : (
+              <div style={styles.loginContainer}>
+                <div style={styles.loginCard}>
+                  <div style={styles.welcome}>
+                    <h2>Welcome to My Data Web</h2>
+                    <p>Access your Android app data from any device</p>
+                  </div>
+                  <LoginForm />
+                  <div style={styles.features}>
+                    <h3>Features:</h3>
+                    <ul style={styles.featureList}>
+                      <li>📱 Same data as Android app</li>
+                      <li>☁️ Real-time Firebase sync</li>
+                      <li>📁 File upload to Storage</li>
+                      <li>🔒 Secure authentication</li>
+                      <li>
+                        🏦 Enhanced Banking Module (Accounts, Deposits, Summary,
+                        History)
+                      </li>
+                      <li>💎 Jewellery Tracking</li>
+                      <li>🏠 Property Management</li>
+                      <li>🌐 Online Accounts</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </main>
+            )}
+          </main>
 
-        <footer style={styles.footer}>
-          <p>
-            Connected to Firebase • Same data as Android app • Personal use only
-            • Active: {activeModule}
-          </p>
-        </footer>
+          <footer style={styles.footer}>
+            <p>
+              Connected to Firebase • Same data as Android app • Personal use
+              only • Active Module: {activeModule}
+            </p>
+          </footer>
+        </div>
       </div>
-    </div>
+    </SettingsProvider>
   );
 }
 

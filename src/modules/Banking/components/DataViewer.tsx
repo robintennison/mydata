@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ref, get, set } from "firebase/database";
 
-import { database } from "../lib/firebase";
+import { database } from "../../../lib/firebase";
 
 interface DataViewerProps {
   userId: string; // Firebase Auth UID (1LxMm1m0TqThXSIflX4xBUdHecL2)

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import { auth } from "../../lib/firebase";
 
 interface LoginFormProps {
   onLoginSuccess?: () => void;

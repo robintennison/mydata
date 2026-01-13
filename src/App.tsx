@@ -4,6 +4,9 @@ import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
 import LoginForm from "./components/LoginForm";
 import SmartDataViewer from "./components/SmartDataViewer";
+import JewelleryViewer from "./components/JewelleryViewer";
+import PropertiesViewer from "./components/PropertiesViewer";
+import OnlineViewer from "./components/OnlineViewer";
 import FileUpload from "./components/FileUpload";
 import "./App.css";
 
@@ -11,6 +14,9 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"data" | "upload">("data");
+  const [activeModule, setActiveModule] = useState<
+    "banking" | "jewellery" | "properties" | "online"
+  >("banking");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -28,6 +34,21 @@ function App() {
       console.error("Logout error:", error.message);
     }
   };
+
+  // Helper function for module button styles
+  const getModuleButtonStyle = (module: string) => ({
+    width: "100%",
+    padding: "12px",
+    border: "none",
+    borderRadius: "8px",
+    marginBottom: "8px",
+    cursor: "pointer",
+    fontSize: "1rem",
+    textAlign: "left" as const,
+    transition: "background-color 0.2s",
+    backgroundColor: activeModule === module ? "#4285f4" : "transparent",
+    color: activeModule === module ? "white" : "#333",
+  });
 
   if (loading) {
     return (
@@ -74,7 +95,70 @@ function App() {
                   </div>
                 </div>
 
+                {/* Module Selection */}
                 <nav style={styles.nav}>
+                  <h4
+                    style={{
+                      margin: "0 0 10px 0",
+                      color: "#666",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Modules
+                  </h4>
+
+                  <button
+                    onClick={() => {
+                      setActiveModule("banking");
+                      setActiveTab("data");
+                    }}
+                    style={getModuleButtonStyle("banking")}
+                  >
+                    🏦 Banking
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveModule("jewellery");
+                      setActiveTab("data");
+                    }}
+                    style={getModuleButtonStyle("jewellery")}
+                  >
+                    💎 Jewellery
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveModule("properties");
+                      setActiveTab("data");
+                    }}
+                    style={getModuleButtonStyle("properties")}
+                  >
+                    🏠 Properties
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveModule("online");
+                      setActiveTab("data");
+                    }}
+                    style={getModuleButtonStyle("online")}
+                  >
+                    🌐 Online
+                  </button>
+                </nav>
+
+                {/* View/Upload Tabs */}
+                <nav style={styles.nav}>
+                  <h4
+                    style={{
+                      margin: "0 0 10px 0",
+                      color: "#666",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Actions
+                  </h4>
                   <button
                     onClick={() => setActiveTab("data")}
                     style={{
@@ -105,10 +189,8 @@ function App() {
                     <strong>Project:</strong> robintennison-mydata
                   </p>
                   <p>
-                    <strong>Database:</strong> Testing Both (Realtime &
-                    Firestore)
-                  </p>{" "}
-                  {/* Updated text */}
+                    <strong>Active Module:</strong> {activeModule}
+                  </p>
                   <p>
                     <strong>Storage:</strong> Firebase Storage
                   </p>
@@ -117,7 +199,21 @@ function App() {
 
               <div style={styles.content}>
                 {activeTab === "data" ? (
-                  <SmartDataViewer userId={user.uid} />
+                  // Show different viewer based on active module
+                  (() => {
+                    switch (activeModule) {
+                      case "banking":
+                        return <SmartDataViewer userId={user.uid} />;
+                      case "jewellery":
+                        return <JewelleryViewer userId={user.uid} />;
+                      case "properties":
+                        return <PropertiesViewer userId={user.uid} />;
+                      case "online":
+                        return <OnlineViewer userId={user.uid} />;
+                      default:
+                        return <SmartDataViewer userId={user.uid} />;
+                    }
+                  })()
                 ) : (
                   <FileUpload userId={user.uid} />
                 )}
@@ -138,7 +234,10 @@ function App() {
                     <li>☁️ Real-time Firebase sync</li>
                     <li>📁 File upload to Storage</li>
                     <li>🔒 Secure authentication</li>
-                    <li>🔍 Auto-detect database type</li> {/* Added feature */}
+                    <li>
+                      🏦 Multiple modules (Banking, Jewellery, Properties,
+                      Online)
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -149,6 +248,7 @@ function App() {
         <footer style={styles.footer}>
           <p>
             Connected to Firebase • Same data as Android app • Personal use only
+            • Active: {activeModule}
           </p>
         </footer>
       </div>
@@ -272,7 +372,7 @@ const styles = {
   nav: {
     backgroundColor: "white",
     borderRadius: "12px",
-    padding: "10px",
+    padding: "15px",
     boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
     marginBottom: "20px",
   },

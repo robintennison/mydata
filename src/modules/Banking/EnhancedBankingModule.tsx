@@ -13,7 +13,7 @@ import {
   calculateAccountSummaries,
   calculateChartData,
 } from "./utils/calculations";
-import { styles } from "./styles";
+import "./EnhancedBankingModule.css"; // Import CSS file
 import type {
   BankingTab,
   ChartPoint,
@@ -65,46 +65,75 @@ const EnhancedBankingModule: React.FC = () => {
 
   const chartData: ChartPoint[] = calculateChartData(history, formatCurrency);
 
+  // Get window width for responsive labels
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const getTabLabel = (tab: BankingTab) => {
-    switch (tab) {
-      case "accounts":
-        return `📋 Accounts (${accounts.length})`;
-      case "deposits":
-        return `💰 Deposits (${deposits.length})`;
-      case "summary":
-        return "📊 Account Summary";
-      case "history":
-        return `📈 History & Chart (${history.length})`;
-      case "settings":
-        return "⚙️ Settings";
-      default:
-        return tab;
+    if (isMobile) {
+      switch (tab) {
+        case "accounts":
+          return `Accounts (${accounts.length})`;
+        case "deposits":
+          return `Deposits (${deposits.length})`;
+        case "summary":
+          return "Summary";
+        case "history":
+          return `History (${history.length})`;
+        case "settings":
+          return "Settings";
+        default:
+          return tab;
+      }
+    } else {
+      switch (tab) {
+        case "accounts":
+          return `📋 Accounts (${accounts.length})`;
+        case "deposits":
+          return `💰 Deposits (${deposits.length})`;
+        case "summary":
+          return "📊 Account Summary";
+        case "history":
+          return `📈 History & Chart (${history.length})`;
+        case "settings":
+          return "⚙️ Settings";
+        default:
+          return tab;
+      }
     }
   };
 
   if (loading) {
     return (
-      <div style={styles.loading}>
-        <div style={styles.spinner}></div>
+      <div className="banking-loading">
+        <div className="banking-spinner"></div>
         <p>Loading banking data...</p>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <div className="enhanced-banking-container">
       {/* Header */}
-      <div style={styles.header}>
-        <h2 style={styles.title}>🏦 Enhanced Banking Module</h2>
-        <p style={styles.subtitle}>
+      <div className="banking-header">
+        <h2 className="banking-title">🏦 Enhanced Banking Module</h2>
+        <p className="banking-subtitle">
           Edit/Delete:{" "}
           {settings.enableEditDelete ? "✅ Enabled" : "❌ Disabled"} •{" "}
           {accounts.length} Accounts • {deposits.length} Deposits
         </p>
       </div>
 
-      {/* Navigation Tabs */}
-      <div style={styles.tabs}>
+      {/* Navigation Tabs - Scrollable on mobile */}
+      <div className="banking-tabs-container">
         {(
           [
             "accounts",
@@ -117,16 +146,9 @@ const EnhancedBankingModule: React.FC = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            style={{
-              padding: "12px 20px",
-              border: "none",
-              borderRadius: "8px 8px 0 0",
-              cursor: "pointer",
-              fontSize: "0.95rem",
-              transition: "all 0.2s",
-              backgroundColor: activeTab === tab ? "#4285f4" : "#f8f9fa",
-              color: activeTab === tab ? "white" : "#333",
-            }}
+            className={`banking-tab ${
+              activeTab === tab ? "banking-tab-active" : "banking-tab-inactive"
+            }`}
           >
             {getTabLabel(tab)}
           </button>
@@ -134,7 +156,7 @@ const EnhancedBankingModule: React.FC = () => {
       </div>
 
       {/* Content Area */}
-      <div style={styles.content}>
+      <div className="banking-content">
         {activeTab === "accounts" && (
           <AccountsTab
             accounts={accounts}
@@ -188,6 +210,12 @@ const EnhancedBankingModule: React.FC = () => {
         )}
 
         {activeTab === "settings" && <SettingsTab />}
+      </div>
+
+      {/* Mobile-specific instructions - using CSS class */}
+      <div className="mobile-tip">
+        💡 <strong>Tip:</strong> Scroll horizontally on tables to view all
+        columns
       </div>
     </div>
   );

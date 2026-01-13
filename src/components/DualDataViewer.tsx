@@ -13,6 +13,9 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
   const [source, setSource] = useState<"realtime" | "firestore" | null>(null);
   const [error, setError] = useState("");
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [allAccounts, setAllAccounts] = useState<Record<string, any> | null>(
+    null
+  );
 
   const addDebug = (msg: string) => {
     console.log(msg);
@@ -45,6 +48,9 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
             accountsData[doc.id] = doc.data();
           });
 
+          // Save all accounts for display
+          setAllAccounts(accountsData);
+
           // Check if our target account exists
           if (accountsData["21eDEyV9cUQdxdw1OqxT"]) {
             addDebug(`✅ Found target account: 21eDEyV9cUQdxdw1OqxT`);
@@ -58,7 +64,9 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
                 accountsData
               ).join(", ")}`
             );
-            setData(accountsData); // Show all accounts for debugging
+            // Show first account for debugging
+            const firstAccountId = Object.keys(accountsData)[0];
+            setData(accountsData[firstAccountId]);
             setSource("firestore");
             setLoading(false);
             return;
@@ -104,87 +112,30 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
           return;
         }
 
-        // Try user document
-        const userDocRef = doc(firestore, "users", userId);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (userDocSnap.exists()) {
-          addDebug(`✅ Found user document: users/${userId}`);
-          setData(userDocSnap.data());
-          setSource("firestore");
-          setLoading(false);
-          return;
-        }
-
         addDebug("❌ No data found in Firestore");
       } catch (firestoreErr: any) {
         addDebug(
           `Firestore error: ${firestoreErr.message} (code: ${firestoreErr.code})`
         );
-
-        // If permission denied, database might not exist or rules block access
-        if (firestoreErr.code === "permission-denied") {
-          addDebug(
-            "Firestore permission denied. Check Firestore rules or if database exists."
-          );
-        }
       }
 
-      // Try Realtime Database second
+      // Try Realtime Database second (for completeness)
       addDebug("2. Checking Realtime Database...");
 
       try {
-        // Try to get accounts data
         const accountsRef = ref(database, "accounts");
         const accountsSnapshot = await get(accountsRef);
 
         if (accountsSnapshot.exists()) {
           const accountsData = accountsSnapshot.val();
           addDebug(`✅ Found Realtime Database "accounts" node`);
-
-          if (accountsData["21eDEyV9cUQdxdw1OqxT"]) {
-            addDebug(`✅ Found target account in Realtime DB`);
-            setData(accountsData["21eDEyV9cUQdxdw1OqxT"]);
-            setSource("realtime");
-            setLoading(false);
-            return;
-          } else {
-            addDebug(
-              `Available accounts: ${Object.keys(accountsData).join(", ")}`
-            );
-            setData(accountsData);
-            setSource("realtime");
-            setLoading(false);
-            return;
-          }
-        }
-
-        // Try users data
-        const usersRef = ref(database, `users/${userId}`);
-        const usersSnapshot = await get(usersRef);
-
-        if (usersSnapshot.exists()) {
-          addDebug(`✅ Found user data in Realtime DB: users/${userId}`);
-          setData(usersSnapshot.val());
+          setData(accountsData);
           setSource("realtime");
           setLoading(false);
           return;
         }
 
-        // Try root to see structure
-        const rootRef = ref(database, "/");
-        const rootSnapshot = await get(rootRef);
-
-        if (rootSnapshot.exists()) {
-          const rootData = rootSnapshot.val();
-          addDebug(
-            `Realtime DB has data. Keys: ${Object.keys(rootData).join(", ")}`
-          );
-          setData(rootData);
-          setSource("realtime");
-        } else {
-          addDebug("❌ Realtime Database is completely empty");
-        }
+        addDebug("❌ Realtime Database is empty");
       } catch (realtimeErr: any) {
         addDebug(`Realtime DB error: ${realtimeErr.message}`);
       }
@@ -200,11 +151,17 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
   if (loading) {
     return (
       <div style={styles.container}>
-        <h3>🔍 Checking Firebase Databases...</h3>
-        <div style={styles.spinner}></div>
+        <div style={styles.header}>
+          <h2 style={styles.darkText}>🔍 Checking Firebase Databases...</h2>
+        </div>
+
+        <div style={styles.spinnerContainer}>
+          <div style={styles.spinner}></div>
+          <p style={styles.darkText}>Scanning for your data...</p>
+        </div>
 
         <div style={styles.debugSection}>
-          <h4>Progress Log:</h4>
+          <h4 style={styles.darkText}>Progress Log:</h4>
           <div style={styles.debugLog}>
             {debugInfo.map((msg, idx) => (
               <div key={idx} style={styles.debugLine}>
@@ -213,18 +170,6 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
               </div>
             ))}
           </div>
-        </div>
-
-        <div style={styles.instructions}>
-          <p>
-            <strong>Checking:</strong>
-          </p>
-          <ol>
-            <li>Firestore Database → "accounts" collection</li>
-            <li>Firestore Database → "users" collection</li>
-            <li>Realtime Database → "accounts" node</li>
-            <li>Realtime Database → "users" node</li>
-          </ol>
         </div>
       </div>
     );
@@ -234,29 +179,12 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
     return (
       <div style={styles.container}>
         <div style={styles.error}>
-          <h3>⚠️ No Data Found</h3>
-          <p>{error}</p>
-
-          <div style={styles.suggestions}>
-            <h4>Please check in Firebase Console:</h4>
-            <ol>
-              <li>
-                Go to <strong>Firestore Database → Data tab</strong>
-              </li>
-              <li>Do you see any collections? (accounts, users, etc.)</li>
-              <li>
-                Go to <strong>Realtime Database → Data tab</strong>
-              </li>
-              <li>Is there any data there?</li>
-            </ol>
-            <p>
-              <strong>Screenshots would be very helpful!</strong>
-            </p>
-          </div>
+          <h3 style={styles.darkText}>⚠️ No Data Found</h3>
+          <p style={styles.darkText}>{error}</p>
         </div>
 
         <div style={styles.debugSection}>
-          <h4>Debug Log:</h4>
+          <h4 style={styles.darkText}>Debug Log:</h4>
           <div style={styles.debugLog}>
             {debugInfo.map((msg, idx) => (
               <div key={idx} style={styles.debugLine}>
@@ -270,7 +198,7 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
     );
   }
 
-  // Success - display data
+  // Success - display data with better formatting
   const dataEntries = Object.entries(data || {});
 
   return (
@@ -282,29 +210,92 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
           borderLeftColor: source === "firestore" ? "#34a853" : "#4285f4",
         }}
       >
-        <h3>
+        <h3 style={styles.darkText}>
           {source === "firestore"
             ? "✅ Firestore Data Found"
             : "✅ Realtime Database Data Found"}
         </h3>
-        <p>
+        <p style={styles.darkText}>
           <strong>Source:</strong>{" "}
           {source === "firestore" ? "Cloud Firestore" : "Realtime Database"}
         </p>
-        <p>
+        <p style={styles.darkText}>
+          <strong>Account ID:</strong> 21eDEyV9cUQdxdw1OqxT
+        </p>
+        <p style={styles.darkText}>
           <strong>Items Found:</strong> {dataEntries.length}
         </p>
       </div>
 
       <div style={styles.dataSection}>
-        <h4>Your Data:</h4>
-        <pre style={styles.code}>{JSON.stringify(data, null, 2)}</pre>
+        <h3 style={styles.darkText}>Your Account Data:</h3>
+
+        <div style={styles.dataGrid}>
+          {dataEntries.map(([key, value]: [string, any]) => (
+            <div key={key} style={styles.dataCard}>
+              <div style={styles.dataHeader}>
+                <span style={styles.dataLabel}>{formatKey(key)}</span>
+                <span style={styles.dataType}>{typeof value}</span>
+              </div>
+              <div style={styles.dataValue}>
+                {typeof value === "object" ? (
+                  <pre style={styles.dataJson}>
+                    {JSON.stringify(value, null, 2)}
+                  </pre>
+                ) : (
+                  <span style={getValueStyle(value)}>
+                    {formatValue(key, value)}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
+      {allAccounts && (
+        <div style={styles.allAccounts}>
+          <h4 style={styles.darkText}>
+            All Accounts in Database ({Object.keys(allAccounts).length} total):
+          </h4>
+          <div style={styles.accountsList}>
+            {Object.entries(allAccounts).map(
+              ([accountId, accountData]: [string, any]) => (
+                <div
+                  key={accountId}
+                  style={{
+                    ...styles.accountItem,
+                    backgroundColor:
+                      accountId === "21eDEyV9cUQdxdw1OqxT"
+                        ? "#fff3e0"
+                        : "white",
+                  }}
+                >
+                  <div style={styles.accountHeader}>
+                    <span style={styles.accountId}>
+                      {accountId === "21eDEyV9cUQdxdw1OqxT" ? "⭐ " : ""}
+                      {accountId}
+                    </span>
+                    <span style={styles.accountStats}>
+                      {Object.keys(accountData).length} fields
+                    </span>
+                  </div>
+                  {accountId === "21eDEyV9cUQdxdw1OqxT" && (
+                    <div style={styles.currentAccountNote}>
+                      <small>👆 This is your current account</small>
+                    </div>
+                  )}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      )}
+
       <div style={styles.debugSection}>
-        <h4>Debug Log:</h4>
+        <h4 style={styles.darkText}>Debug Log:</h4>
         <div style={styles.debugLog}>
-          {debugInfo.slice(-10).map((msg, idx) => (
+          {debugInfo.slice(-5).map((msg, idx) => (
             <div key={idx} style={styles.debugLine}>
               {msg.includes("✅") ? "✅" : msg.includes("❌") ? "❌" : "🔍"}{" "}
               {msg}
@@ -316,65 +307,190 @@ const DualDataViewer: React.FC<DualDataViewerProps> = ({ userId }) => {
   );
 };
 
+// Helper functions for formatting
+const formatKey = (key: string): string => {
+  const formatted = key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (str) => str.toUpperCase());
+  return formatted;
+};
+
+const formatValue = (key: string, value: any): string => {
+  if (
+    key.toLowerCase().includes("amount") ||
+    key.toLowerCase().includes("balance")
+  ) {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+    }).format(Number(value));
+  }
+  return String(value);
+};
+
+const getValueStyle = (value: any) => {
+  const numValue = Number(value);
+  if (!isNaN(numValue)) {
+    return {
+      color: numValue < 0 ? "#d32f2f" : "#2e7d32",
+      fontWeight: "bold" as const,
+      fontSize: "1.1rem",
+    };
+  }
+  return { color: "#333" };
+};
+
 const styles = {
   container: {
     backgroundColor: "white",
-    padding: "20px",
+    padding: "25px",
+    borderRadius: "12px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    marginBottom: "20px",
+  },
+  header: {
+    marginBottom: "20px",
+  },
+  darkText: {
+    color: "#212529", // Dark color for readability
+    margin: 0,
+  },
+  spinnerContainer: {
+    textAlign: "center" as const,
+    padding: "30px",
+    backgroundColor: "#f8f9fa",
     borderRadius: "10px",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
     marginBottom: "20px",
   },
   spinner: {
-    width: "40px",
-    height: "40px",
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #4285f4",
+    width: "50px",
+    height: "50px",
+    border: "5px solid #f3f3f3",
+    borderTop: "5px solid #4285f4",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
-    margin: "20px auto",
+    margin: "0 auto 20px",
   },
   success: {
     padding: "20px",
-    borderRadius: "8px",
-    marginBottom: "20px",
-    borderLeft: "4px solid",
+    borderRadius: "10px",
+    marginBottom: "25px",
+    borderLeft: "5px solid",
   },
   error: {
     backgroundColor: "#ffebee",
     borderLeft: "4px solid #f44336",
     padding: "20px",
-    borderRadius: "8px",
+    borderRadius: "10px",
     marginBottom: "20px",
-  },
-  suggestions: {
-    backgroundColor: "#fff3e0",
-    padding: "15px",
-    borderRadius: "6px",
-    marginTop: "15px",
   },
   dataSection: {
+    marginBottom: "30px",
+  },
+  dataGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+    gap: "20px",
+    marginTop: "15px",
+  },
+  dataCard: {
+    backgroundColor: "#f8f9fa",
+    border: "1px solid #e0e0e0",
+    borderRadius: "10px",
+    overflow: "hidden",
+    transition: "transform 0.2s, box-shadow 0.2s",
+  },
+  dataHeader: {
+    backgroundColor: "#e9ecef",
+    padding: "15px 20px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottom: "1px solid #dee2e6",
+  },
+  dataLabel: {
+    fontWeight: "600" as const,
+    color: "#495057",
+    fontSize: "1rem",
+  },
+  dataType: {
+    backgroundColor: "#6c757d",
+    color: "white",
+    padding: "4px 10px",
+    borderRadius: "12px",
+    fontSize: "0.75rem",
+    fontWeight: "bold" as const,
+  },
+  dataValue: {
+    padding: "20px",
+    color: "#212529",
+  },
+  dataJson: {
+    margin: 0,
+    fontSize: "0.85rem",
+    backgroundColor: "white",
+    padding: "15px",
+    borderRadius: "6px",
+    overflow: "auto",
+    maxHeight: "200px",
+    border: "1px solid #e9ecef",
+    color: "#212529",
+  },
+  allAccounts: {
     backgroundColor: "#f8f9fa",
     padding: "20px",
-    borderRadius: "8px",
+    borderRadius: "10px",
     marginBottom: "20px",
-    overflow: "auto",
-    maxHeight: "500px",
   },
-  code: {
-    margin: 0,
-    fontSize: "0.9rem",
+  accountsList: {
+    marginTop: "15px",
+    maxHeight: "300px",
+    overflowY: "auto" as const,
+  },
+  accountItem: {
+    border: "1px solid #ddd",
+    borderRadius: "8px",
+    padding: "15px",
+    marginBottom: "10px",
+    transition: "background-color 0.2s",
+  },
+  accountHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "5px",
+  },
+  accountId: {
     fontFamily: "monospace",
-    whiteSpace: "pre-wrap" as const,
+    fontWeight: "600" as const,
+    color: "#333",
+    fontSize: "0.9rem",
+  },
+  accountStats: {
+    backgroundColor: "#e3f2fd",
+    color: "#1976d2",
+    padding: "4px 10px",
+    borderRadius: "12px",
+    fontSize: "0.75rem",
+    fontWeight: "bold" as const,
+  },
+  currentAccountNote: {
+    marginTop: "5px",
+    fontSize: "0.8rem",
+    color: "#ff9800",
+    fontStyle: "italic" as const,
   },
   debugSection: {
     backgroundColor: "#f5f5f5",
     padding: "15px",
     borderRadius: "8px",
+    marginTop: "20px",
   },
   debugLog: {
     fontFamily: "monospace",
     fontSize: "0.85rem",
-    maxHeight: "200px",
+    maxHeight: "150px",
     overflowY: "auto" as const,
     padding: "10px",
     backgroundColor: "#2d2d2d",
@@ -388,13 +504,6 @@ const styles = {
     whiteSpace: "nowrap" as const,
     overflow: "hidden",
     textOverflow: "ellipsis",
-  },
-  instructions: {
-    backgroundColor: "#e3f2fd",
-    padding: "15px",
-    borderRadius: "8px",
-    marginTop: "20px",
-    fontSize: "0.9rem",
   },
 };
 

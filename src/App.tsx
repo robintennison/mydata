@@ -3,7 +3,7 @@ import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
 import LoginForm from "./components/LoginForm";
-import DualDataViewer from "./components/DualDataViewer"; // Changed import
+import SmartDataViewer from "./components/SmartDataViewer";
 import FileUpload from "./components/FileUpload";
 import "./App.css";
 
@@ -117,7 +117,7 @@ function App() {
 
               <div style={styles.content}>
                 {activeTab === "data" ? (
-                  <DualDataViewer userId={user.uid} />
+                  <SmartDataViewer userId={user.uid} />
                 ) : (
                   <FileUpload userId={user.uid} />
                 )}

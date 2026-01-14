@@ -3,7 +3,7 @@ import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
 import LoginForm from "./components/Auth/LoginForm";
-import EnhancedBankingModule from "./modules/Banking/EnhancedBankingModule"; // Updated import
+import EnhancedBankingModule from "./modules/Banking/EnhancedBankingModule";
 import JewelleryViewer from "./modules/Jewellery/JewelleryViewer";
 import PropertiesViewer from "./modules/Properties/PropertiesViewer";
 import OnlineViewer from "./modules/Online/OnlineViewer";
@@ -36,7 +36,6 @@ function App() {
     }
   };
 
-  // Helper function for module button styles
   const getModuleButtonStyle = (module: string) => ({
     width: "100%",
     padding: "12px",
@@ -97,7 +96,6 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Module Selection */}
                   <nav style={styles.nav}>
                     <h4
                       style={{
@@ -150,7 +148,6 @@ function App() {
                     </button>
                   </nav>
 
-                  {/* View/Upload Tabs */}
                   <nav style={styles.nav}>
                     <h4
                       style={{
@@ -201,11 +198,10 @@ function App() {
 
                 <div style={styles.content}>
                   {activeTab === "data" ? (
-                    // Show different viewer based on active module
                     (() => {
                       switch (activeModule) {
                         case "banking":
-                          return <EnhancedBankingModule />; // Updated to use EnhancedBankingModule
+                          return <EnhancedBankingModule />;
                         case "jewellery":
                           return <JewelleryViewer userId={user.uid} />;
                         case "properties":
@@ -213,7 +209,7 @@ function App() {
                         case "online":
                           return <OnlineViewer userId={user.uid} />;
                         default:
-                          return <EnhancedBankingModule />; // Updated default
+                          return <EnhancedBankingModule />;
                       }
                     })()
                   ) : (

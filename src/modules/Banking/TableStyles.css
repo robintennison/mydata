@@ -3,7 +3,7 @@
 /* Responsive Table Container */
 .table-responsive-container {
   width: 100%;
-  overflow-x: auto;
+  overflow-x: "auto" as const;
   -webkit-overflow-scrolling: touch;
   border-radius: 8px;
   border: 1px solid #e9ecef;

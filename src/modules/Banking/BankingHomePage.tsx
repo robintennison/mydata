@@ -1,12 +1,9 @@
-//import React, { useEffect, useState } from "react";
-//import { useSettings } from "../../contexts/SettingsContext";
 import { useBankingData } from "./hooks/useBankingData";
 import { bankingStyles } from "./BankingStyles";
 import { useNavigate } from "react-router-dom";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
-  //const { settings } = useSettings();
   const { loading, accounts, deposits, history } = useBankingData();
 
   // Format currency for display
@@ -17,11 +14,6 @@ const BankingHomePage: React.FC = () => {
       minimumFractionDigits: 0,
     }).format(amount);
   };
-
-  //   // Format to lakhs
-  //   const formatLakhs = (amount: number): string => {
-  //     return (amount / 100000).toFixed(2);
-  //   };
 
   // Calculate totals
   const totalSavings = accounts.reduce(
@@ -59,10 +51,16 @@ const BankingHomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Top Navigation */}
+      {/* Top Navigation with Home Button */}
       <div style={bankingStyles.topNav}>
-        <div style={{ flex: 1 }}></div>
-        <div style={bankingStyles.navTitle}>Dashboard</div>
+        <button
+          onClick={() => navigate("/")}
+          style={bankingStyles.navButton}
+          title="Back to Home"
+        >
+          🏠
+        </button>
+        <div style={bankingStyles.navTitle}>Banking Dashboard</div>
         <button
           onClick={() => navigate("/settings")}
           style={bankingStyles.navButton}

@@ -1,0 +1,107 @@
+/* src/shared/components/Input/Input.css */
+.input-container {
+  margin-bottom: var(--spacing-md);
+}
+
+.input-container.full-width {
+  width: 100%;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
+  transition: all var(--transition-fast);
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--color-primary-600);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+
+.input-wrapper.input-error {
+  border-color: var(--color-error);
+}
+
+.input-wrapper.input-error:focus-within {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input-wrapper.input-disabled {
+  background-color: var(--color-gray-50);
+  cursor: not-allowed;
+}
+
+.input-icon {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-md);
+  color: var(--color-gray-500);
+}
+
+.start-icon {
+  border-right: 1px solid var(--color-gray-200);
+}
+
+.end-icon {
+  border-left: 1px solid var(--color-gray-200);
+}
+
+.input-field {
+  flex: 1;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-base);
+  color: var(--color-gray-900);
+  outline: none;
+}
+
+.input-field:disabled {
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+}
+
+.textarea-field {
+  flex: 1;
+  width: 100%;
+  padding: var(--spacing-md);
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-base);
+  color: var(--color-gray-900);
+  outline: none;
+  resize: vertical;
+  font-family: var(--font-family);
+  min-height: calc(var(--spacing-md) * 8);
+}
+
+.textarea-field:disabled {
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+}
+
+.input-message {
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.helper-text {
+  color: var(--color-gray-500);
+}
+
+.error-message {
+  color: var(--color-error);
+}

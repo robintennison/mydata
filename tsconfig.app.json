@@ -7,11 +7,14 @@
     "module": "ESNext",
     "types": ["vite/client"],
     "skipLibCheck": true,
+    "verbatimModuleSyntax": false,  // Change from true to false
+    "esModuleInterop": true,        // Add this
+    "baseUrl": "./src",             // Add this
+    "allowSyntheticDefaultImports": true,  // Add this
 
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",

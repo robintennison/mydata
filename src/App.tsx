@@ -1,5 +1,6 @@
 // src/App.tsx
 import { useEffect, useState } from "react";
+import { BrowserRouter } from "react-router-dom";
 import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
@@ -41,33 +42,35 @@ function App() {
 
   return (
     <SettingsProvider>
-      <div className={styles.container}>
-        <div className={styles.app}>
-          {/* Simple Header - Only show on login page */}
-          {!isAuthenticated && (
-            <header className={styles.header}>
-              <div className={styles.headerContent}>
-                <h1 className={styles.logo}>
-                  <span className={styles.logoIcon}>📱</span>
-                  My Data Web
-                </h1>
-              </div>
-            </header>
-          )}
+      <BrowserRouter>
+        <div className={styles.container}>
+          <div className={styles.app}>
+            {/* Simple Header - Only show on login page */}
+            {!isAuthenticated && (
+              <header className={styles.header}>
+                <div className={styles.headerContent}>
+                  <h1 className={styles.logo}>
+                    <span className={styles.logoIcon}>📱</span>
+                    My Data Web
+                  </h1>
+                </div>
+              </header>
+            )}
 
-          <main className={styles.main}>
-            <AppRoutes isAuthenticated={isAuthenticated} user={user} />
-          </main>
+            <main className={styles.main}>
+              <AppRoutes isAuthenticated={isAuthenticated} user={user} />
+            </main>
 
-          {/* Simple Footer */}
-          <footer className={styles.footer}>
-            <p>
-              Connected to Firebase • Same data as Android app • Personal use
-              only
-            </p>
-          </footer>
+            {/* Simple Footer */}
+            <footer className={styles.footer}>
+              <p>
+                Connected to Firebase • Same data as Android app • Personal use
+                only
+              </p>
+            </footer>
+          </div>
         </div>
-      </div>
+      </BrowserRouter>
     </SettingsProvider>
   );
 }

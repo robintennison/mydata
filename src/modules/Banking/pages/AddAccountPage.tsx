@@ -1,290 +1,310 @@
+// src/modules/Banking/pages/AddAccountPage.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSettings } from "../../../contexts/SettingsContext";
-import { useBankingData } from "../hooks/useBankingData";
-import { useBankingOperations } from "../hooks/useBankingOperations";
 import { bankingStyles } from "../styles/BankingStyles";
+import { useBankingOperations } from "../hooks/useBankingOperations";
 
-const AccountsPage: React.FC = () => {
+// Define BankAccount type matching your banking.types
+interface BankAccount {
+  id: string; // Required for TypeScript
+  acctCode: string;
+  acctDetails: string;
+  savingsAmount: number;
+  mpin: string;
+}
+
+const AddAccountPage: React.FC = () => {
   const navigate = useNavigate();
-  const { settings } = useSettings();
-  const { accounts, loading } = useBankingData();
-  const { handleDeleteAccount } = useBankingOperations();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [accountToDelete, setAccountToDelete] = useState<any>(null);
+  const { handleSaveAccount } = useBankingOperations();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    acctCode: "",
+    acctDetails: "",
+    savingsAmount: "",
+    mpin: "",
+  });
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-    }).format(amount);
+  const handleChange = (field: keyof typeof formData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setError(null);
   };
 
-  const totalSavings = accounts.reduce(
-    (sum, account) => sum + account.savingsAmount,
-    0
-  );
-
-  // Filter accounts based on search
-  const filteredAccounts = accounts.filter((account) =>
-    account.acctCode.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleDeleteClick = (account: any) => {
-    setAccountToDelete(account);
-    setShowDeleteDialog(true);
+  const validateForm = (): boolean => {
+    if (!formData.acctCode.trim()) {
+      setError("Account Code is required");
+      return false;
+    }
+    if (!formData.acctDetails.trim()) {
+      setError("Account Details are required");
+      return false;
+    }
+    const amount = parseFloat(formData.savingsAmount);
+    if (isNaN(amount) || amount < 0) {
+      setError("Please enter a valid savings amount (must be positive)");
+      return false;
+    }
+    if (formData.mpin.length !== 4) {
+      setError("MPIN must be exactly 4 digits");
+      return false;
+    }
+    if (!/^\d{4}$/.test(formData.mpin)) {
+      setError("MPIN must contain only numbers");
+      return false;
+    }
+    return true;
   };
 
-  const confirmDelete = () => {
-    if (accountToDelete) {
-      handleDeleteAccount(accountToDelete.id);
-      setShowDeleteDialog(false);
-      setAccountToDelete(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // For NEW accounts, pass an empty string as id
+      // Your handleSaveAccount function checks: if (account.id) {...} else {...}
+      // So empty string will trigger the "else" branch (addDoc)
+      const accountData: BankAccount = {
+        id: "", // Empty string for new accounts
+        acctCode: formData.acctCode.trim(),
+        acctDetails: formData.acctDetails.trim(),
+        savingsAmount: parseFloat(formData.savingsAmount) || 0,
+        mpin: formData.mpin,
+      };
+
+      console.log("Saving account data:", accountData);
+
+      // Call the save account function
+      await handleSaveAccount(accountData);
+
+      // Note: handleSaveAccount calls window.location.reload() after saving
+      // So we don't need to navigate manually
+    } catch (error) {
+      console.error("Error adding account:", error);
+      setError("Failed to add account. Please try again.");
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div style={bankingStyles.container}>
-        <div style={bankingStyles.loading}>
-          <div style={bankingStyles.spinner}></div>
-          <p>Loading accounts...</p>
-        </div>
-      </div>
+  const handleCancel = () => {
+    const hasChanges = Object.values(formData).some(
+      (value) => value.trim() !== ""
     );
-  }
+
+    if (hasChanges) {
+      const confirmLeave = window.confirm(
+        "You have unsaved changes. Are you sure you want to leave?"
+      );
+      if (!confirmLeave) return;
+    }
+
+    navigate("/banking/accounts");
+  };
 
   return (
     <div style={bankingStyles.container}>
       {/* Header */}
       <div style={bankingStyles.header}>
-        <h1 style={bankingStyles.headerTitle}>📋 Accounts</h1>
+        <h1 style={bankingStyles.headerTitle}>➕ Add Account</h1>
         <div style={bankingStyles.headerSubtitle}>
-          Manage your bank accounts
+          Create a new bank account
         </div>
       </div>
 
       {/* Top Navigation */}
       <div style={bankingStyles.topNav}>
         <button
-          onClick={() => navigate("/banking")}
+          onClick={handleCancel}
           style={bankingStyles.navButton}
-          title="Back to Banking"
+          title="Back to Accounts"
+          disabled={loading}
+          type="button"
         >
           ←
         </button>
-        <div style={bankingStyles.navTitle}>Accounts List</div>
-        <button
-          onClick={() => navigate("/banking/accounts/add")}
-          style={bankingStyles.navButton}
-          title="Add Account"
-        >
-          +
-        </button>
+        <div style={bankingStyles.navTitle}>New Account</div>
+        <div style={{ width: "40px" }}></div>
       </div>
 
-      {/* Search Bar */}
-      <div style={{ padding: "15px" }}>
-        <div style={{ position: "relative" }}>
-          <input
-            type="text"
-            placeholder="Search accounts..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              ...bankingStyles.input,
-              paddingLeft: "40px",
-              width: "100%",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#6c757d",
-            }}
-          >
-            🔍
-          </div>
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              style={{
-                position: "absolute",
-                right: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "none",
-                border: "none",
-                color: "#6c757d",
-                fontSize: "1.2rem",
-                cursor: "pointer",
-              }}
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Stats Card */}
-      <div style={bankingStyles.statsCard}>
-        <div style={bankingStyles.statsLabel}>Total Savings</div>
-        <div style={bankingStyles.statsValue}>
-          {formatCurrency(totalSavings)}
-        </div>
-        <div style={{ fontSize: "0.8rem", color: "#4285f4" }}>
-          From {accounts.length} account{accounts.length !== 1 ? "s" : ""}
-        </div>
-      </div>
-
-      {/* Accounts List */}
-      <div style={{ padding: "0 15px" }}>
-        {filteredAccounts.length === 0 ? (
-          <div style={bankingStyles.emptyState}>
-            <div style={{ fontSize: "2rem", marginBottom: "10px" }}>🏦</div>
-            <div>
-              {searchTerm ? "No matching accounts found" : "No accounts found"}
-            </div>
-            <div style={{ fontSize: "0.9rem", marginTop: "5px" }}>
-              {searchTerm
-                ? "Try adjusting your search terms"
-                : 'Tap "+" to add an account'}
-            </div>
-          </div>
-        ) : (
-          <div style={{ marginBottom: "20px" }}>
-            {/* Table Header */}
-            <div
-              style={{
-                display: "flex",
-                padding: "12px 15px",
-                backgroundColor: "#f8f9fa",
-                borderRadius: "8px 8px 0 0",
-                border: "1px solid #e9ecef",
-                borderBottom: "none",
-                fontSize: "0.9rem",
-                fontWeight: "600",
-                color: "#495057",
-              }}
-            >
-              <div style={{ flex: 2 }}>Account</div>
-              <div style={{ flex: 1, textAlign: "right" }}>Savings</div>
-              <div style={{ flex: 1 }}>MPIN</div>
-              <div style={{ width: "80px", textAlign: "center" }}>Actions</div>
-            </div>
-
-            {/* Accounts Rows */}
-            <div
-              style={{
-                maxHeight: "50vh",
-                overflowY: "auto",
-                border: "1px solid #e9ecef",
-                borderTop: "none",
-                borderRadius: "0 0 8px 8px",
-              }}
-            >
-              {filteredAccounts.map((account, index) => (
-                <div
-                  key={account.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "15px",
-                    borderBottom:
-                      index < filteredAccounts.length - 1
-                        ? "1px solid #e9ecef"
-                        : "none",
-                    backgroundColor: "#ffffff",
-                  }}
-                >
-                  <div style={{ flex: 2 }}>
-                    <div style={{ fontWeight: "500", color: "#333" }}>
-                      {account.acctCode}
-                    </div>
-                  </div>
-                  <div style={{ flex: 1, textAlign: "right" }}>
-                    <div
-                      style={{
-                        fontSize: "0.95rem",
-                        fontWeight: "600",
-                        color: "#4285f4",
-                      }}
-                    >
-                      {formatCurrency(account.savingsAmount)}
-                    </div>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        fontFamily: "'Courier New', monospace",
-                        fontSize: "0.9rem",
-                        color: "#666",
-                      }}
-                    >
-                      {account.mpin || "••••"}
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      width: "80px",
-                      display: "flex",
-                      justifyContent: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <button
-                      onClick={() =>
-                        navigate(`/banking/accounts/edit/${account.id}`)
-                      }
-                      style={{
-                        ...bankingStyles.editButton,
-                        padding: "6px 10px",
-                        fontSize: "0.8rem",
-                      }}
-                      title="Edit"
-                    >
-                      ✏️
-                    </button>
-                    {settings.enableEditDelete && (
-                      <button
-                        onClick={() => handleDeleteClick(account)}
-                        style={{
-                          ...bankingStyles.deleteButton,
-                          padding: "6px 10px",
-                          fontSize: "0.8rem",
-                        }}
-                        title="Delete"
-                      >
-                        🗑️
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Add Account Button */}
-        <button
-          onClick={() => navigate("/banking/accounts/add")}
+      {/* Error Message */}
+      {error && (
+        <div
           style={{
-            ...bankingStyles.actionButton,
-            marginTop: "20px",
+            margin: "15px",
+            padding: "12px",
+            backgroundColor: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: "8px",
+            color: "#dc2626",
+            fontSize: "14px",
           }}
         >
-          <span style={{ fontSize: "1.2rem", marginRight: "8px" }}>+</span>
-          <span>Add New Account</span>
-        </button>
+          ⚠️ {error}
+        </div>
+      )}
+
+      {/* Form */}
+      <div style={{ padding: "15px" }}>
+        <form onSubmit={handleSubmit}>
+          {/* Account Code */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={bankingStyles.label}>Account Code *</label>
+            <input
+              type="text"
+              placeholder="Enter account code (e.g., SBI1234)"
+              value={formData.acctCode}
+              onChange={(e) => handleChange("acctCode", e.target.value)}
+              style={bankingStyles.input}
+              required
+              disabled={loading}
+              maxLength={50}
+            />
+          </div>
+
+          {/* Account Details */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={bankingStyles.label}>Account Details *</label>
+            <textarea
+              placeholder="Enter bank name, branch, and other details"
+              value={formData.acctDetails}
+              onChange={(e) => handleChange("acctDetails", e.target.value)}
+              style={{
+                ...bankingStyles.input,
+                minHeight: "100px",
+                resize: "vertical",
+                lineHeight: "1.5",
+              }}
+              rows={4}
+              required
+              disabled={loading}
+              maxLength={500}
+            />
+          </div>
+
+          {/* Savings Amount */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={bankingStyles.label}>Savings Amount *</label>
+            <div style={{ position: "relative" }}>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#666",
+                  fontWeight: "500",
+                  fontSize: "16px",
+                  zIndex: 1,
+                }}
+              >
+                ₹
+              </span>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={formData.savingsAmount}
+                onChange={(e) => handleChange("savingsAmount", e.target.value)}
+                style={{
+                  ...bankingStyles.input,
+                  paddingLeft: "35px",
+                }}
+                required
+                min="0"
+                step="0.01"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {/* MPIN */}
+          <div style={{ marginBottom: "30px" }}>
+            <label style={bankingStyles.label}>MPIN (4 digits) *</label>
+            <input
+              type="password"
+              placeholder="••••"
+              value={formData.mpin}
+              onChange={(e) => handleChange("mpin", e.target.value)}
+              style={{
+                ...bankingStyles.input,
+                letterSpacing: "8px",
+                textAlign: "center",
+                fontFamily: "monospace",
+                fontSize: "18px",
+              }}
+              maxLength={4}
+              pattern="\d{4}"
+              required
+              disabled={loading}
+            />
+            <div
+              style={{
+                fontSize: "0.85rem",
+                color: "#6c757d",
+                marginTop: "6px",
+                fontStyle: "italic",
+              }}
+            >
+              Must be exactly 4 digits
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              paddingTop: "10px",
+              borderTop: "1px solid #e9ecef",
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleCancel}
+              style={{
+                flex: 1,
+                padding: "14px",
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #dee2e6",
+                borderRadius: "8px",
+                color: "#495057",
+                fontWeight: "500",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "16px",
+                opacity: loading ? 0.6 : 1,
+              }}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              style={{
+                flex: 1,
+                padding: "14px",
+                backgroundColor: loading ? "#94a3b8" : "#2563eb",
+                border: "none",
+                borderRadius: "8px",
+                color: "#ffffff",
+                fontWeight: "600",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "16px",
+                opacity: loading ? 0.7 : 1,
+              }}
+              disabled={loading}
+            >
+              {loading ? "Adding..." : "Add Account"}
+            </button>
+          </div>
+        </form>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      {showDeleteDialog && accountToDelete && (
+      {/* Loading overlay */}
+      {loading && (
         <div
           style={{
             position: "fixed",
@@ -292,91 +312,47 @@ const AccountsPage: React.FC = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "20px",
             zIndex: 1000,
           }}
         >
           <div
             style={{
-              backgroundColor: "#ffffff",
+              textAlign: "center",
+              padding: "30px",
+              backgroundColor: "white",
               borderRadius: "12px",
-              padding: "20px",
-              maxWidth: "400px",
-              width: "100%",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
             }}
           >
-            <h3
-              style={{
-                margin: "0 0 15px 0",
-                fontSize: "1.1rem",
-                fontWeight: "600",
-                color: "#333",
-              }}
-            >
-              Delete Account?
-            </h3>
-            <p
-              style={{ margin: "0 0 20px 0", color: "#666", lineHeight: "1.5" }}
-            >
-              Are you sure you want to delete account{" "}
-              <span style={{ fontWeight: "600" }}>
-                {accountToDelete.acctCode}
-              </span>
-              ? This action cannot be undone.
-            </p>
             <div
               style={{
-                display: "flex",
-                gap: "10px",
+                width: "50px",
+                height: "50px",
+                border: "3px solid #e5e7eb",
+                borderTop: "3px solid #2563eb",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite",
+                margin: "0 auto 15px",
               }}
-            >
-              <button
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setAccountToDelete(null);
-                }}
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
-                  borderRadius: "8px",
-                  color: "#495057",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: "#ea4335",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#ffffff",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
-              >
-                Delete
-              </button>
-            </div>
+            ></div>
+            <p style={{ margin: 0, color: "#374151", fontWeight: "500" }}>
+              Creating account...
+            </p>
           </div>
         </div>
       )}
 
-      {/* Bottom spacing */}
-      <div style={{ height: "20px" }}></div>
+      <style>
+        {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
+      </style>
+
+      <div style={{ height: "30px" }}></div>
     </div>
   );
 };
 
-export default AccountsPage;
+export default AddAccountPage;

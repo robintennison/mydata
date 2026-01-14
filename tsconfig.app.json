@@ -7,10 +7,10 @@
     "module": "ESNext",
     "types": ["vite/client"],
     "skipLibCheck": true,
-    "verbatimModuleSyntax": false,  // Change from true to false
-    "esModuleInterop": true,        // Add this
-    "baseUrl": "./src",             // Add this
-    "allowSyntheticDefaultImports": true,  // Add this
+    "verbatimModuleSyntax": false,
+    "esModuleInterop": true,
+    "baseUrl": "./src",
+    "allowSyntheticDefaultImports": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -25,7 +25,12 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    
+    /* Add these for better module resolution */
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

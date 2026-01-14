@@ -1,4 +1,3 @@
-export { AppRoutes } from './AppRoutes';
-export { PrivateRoute } from './PrivateRoute';
-export { allRoutes, navigationItems } from './routesConfig';
-export type { RouteConfig, NavigationItem } from './types';
+// src/routes/index.ts
+// Simple barrel file that re-exports everything
+export * from './index.tsx';

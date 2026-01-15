@@ -13,6 +13,7 @@ import {
   ChartData,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import styles from "./HistoryListPage.styles";
 
 // Register Chart.js components
@@ -24,7 +25,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  ChartDataLabels // Register datalabels plugin
 );
 
 interface HistoryChartProps {
@@ -92,6 +94,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
           pointRadius: 3,
           pointHoverRadius: 5,
           borderWidth: 2,
+          pointBackgroundColor: "#2196F3",
         },
         {
           label: "Total (Deposits + Savings)",
@@ -100,9 +103,12 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
           backgroundColor: "rgba(76, 175, 80, 0.1)",
           fill: true,
           tension: 0.3,
-          pointRadius: 3,
-          pointHoverRadius: 5,
+          pointRadius: 5,
+          pointHoverRadius: 7,
           borderWidth: 2,
+          pointBackgroundColor: "#4CAF50",
+          pointBorderColor: "#ffffff",
+          pointBorderWidth: 2,
         },
       ],
     };
@@ -146,6 +152,30 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
             return `${context.dataset.label}: ${value.toFixed(2)} L`;
           },
         },
+      },
+      datalabels: {
+        display: (context) => {
+          // Show labels only for the "Total" dataset (datasetIndex: 1)
+          return context.datasetIndex === 1;
+        },
+        color: "#4CAF50",
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
+        borderRadius: 4,
+        padding: {
+          top: 4,
+          bottom: 4,
+          left: 6,
+          right: 6,
+        },
+        font: {
+          size: 10,
+          weight: "bold",
+        },
+        formatter: (value) => {
+          return `${value.toFixed(2)} L`;
+        },
+        align: "top",
+        offset: 8,
       },
     },
     scales: {
@@ -226,7 +256,11 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
         </div>
       ) : chartData ? (
         <div style={styles.chartWrapper}>
-          <Line data={chartData} options={chartOptions} />
+          <Line
+            data={chartData}
+            options={chartOptions}
+            plugins={[ChartDataLabels]}
+          />
         </div>
       ) : null}
     </div>

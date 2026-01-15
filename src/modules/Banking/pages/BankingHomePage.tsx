@@ -325,12 +325,12 @@ const BankingHomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Summary */}
+        {/* History Chart */}
         <div
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            navigate("/banking/summary");
+            navigate("/banking/history/chart");
           }}
           style={{
             ...bankingStyles.navIcon,

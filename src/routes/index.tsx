@@ -15,6 +15,7 @@ import MyDataHomepage from "../MyDataHomepage";
 // Import History pages
 import HistoryListPage from "../modules/Banking/pages/HistoryListPage"; // Add this import
 import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage"; // Add this import
+import HistoryChartPage from "../modules/Banking/pages/HistoryChartPage";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -159,13 +160,10 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
+
   {
     path: "/banking/history/chart",
-    element: (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        Chart View Coming Soon
-      </div>
-    ),
+    element: <HistoryChartPage />,
     title: "History Chart",
     icon: "📊",
     requiresAuth: true,

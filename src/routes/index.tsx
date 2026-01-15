@@ -12,6 +12,10 @@ import SettingsPage from "../modules/SettingsPage";
 import LoginForm from "../components/Auth/LoginForm";
 import MyDataHomepage from "../MyDataHomepage";
 
+// Import History pages
+import HistoryListPage from "../modules/Banking/pages/HistoryListPage"; // Add this import
+import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage"; // Add this import
+
 // ==================== TYPES ====================
 export interface RouteConfig {
   path: string;
@@ -96,7 +100,7 @@ const allRoutes: RouteConfig[] = [
     needsUserData: true,
   },
 
-  // Deposit Routes - ADD THESE
+  // Deposit Routes
   {
     path: "/banking/deposits",
     element: <DepositsListPage />,
@@ -126,6 +130,44 @@ const allRoutes: RouteConfig[] = [
     element: <AddEditDepositPage isEdit={true} />,
     title: "Edit Deposit",
     icon: "✏️",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+
+  // History Routes - ADD THESE
+  {
+    path: "/banking/history",
+    element: <HistoryListPage />,
+    title: "History",
+    icon: "📅",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+  {
+    path: "/banking/history/add",
+    element: <EditHistoryPage />,
+    title: "Add History",
+    icon: "➕",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+  {
+    path: "/banking/history/edit/:month",
+    element: <EditHistoryPage />,
+    title: "Edit History",
+    icon: "✏️",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+  {
+    path: "/banking/history/chart",
+    element: (
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        Chart View Coming Soon
+      </div>
+    ),
+    title: "History Chart",
+    icon: "📊",
     requiresAuth: true,
     needsUserData: true,
   },

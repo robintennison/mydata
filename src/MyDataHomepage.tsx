@@ -11,8 +11,9 @@ const MyDataHomepage: React.FC = () => {
 
   const [upcomingMaturities, setUpcomingMaturities] = useState<any[]>([]);
   const [totalBalance, setTotalBalance] = useState<number>(0);
+  const [totalDeposits, setTotalDeposits] = useState<number>(0); // New state for deposits total
 
-  // Calculate total balance (savings + adjusted deposits)
+  // Calculate total balance (savings + adjusted deposits) AND total deposits
   useEffect(() => {
     if (accounts.length > 0 && deposits.length > 0) {
       // Calculate total savings from all accounts
@@ -21,22 +22,34 @@ const MyDataHomepage: React.FC = () => {
         0
       );
 
-      // Calculate total deposits
-      const totalDepositsAmount = deposits.reduce(
-        (sum, deposit) => sum + deposit.amount,
-        0
-      );
+      // Apply same filtering as BankingHomePage
+      const filteredDeposits = settings?.showInactive
+        ? deposits
+        : deposits.filter((deposit) => deposit.active !== false);
 
-      // Calculate total adjustments
-      const totalAdjustmentsAmount = adjustments.reduce(
-        (sum, adj) => sum + adj.adjustmentAmount,
-        0
-      );
+      // Calculate total deposits (matching BankingHomePage logic)
+      const calculatedTotalDeposits = accounts.reduce((total, account) => {
+        const accountId = account.id;
 
-      // Total balance = savings + deposits + adjustments
-      const calculatedTotal =
-        totalSavings + totalDepositsAmount + totalAdjustmentsAmount;
-      setTotalBalance(calculatedTotal);
+        // 1. Base deposits for this account
+        const baseDeposits = filteredDeposits
+          .filter((deposit) => deposit.accountId === accountId)
+          .reduce((sum, deposit) => sum + deposit.amount, 0);
+
+        // 2. Adjustments for this account
+        const adjustmentsTotal = adjustments
+          .filter((adj) => adj.accountId === accountId)
+          .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
+
+        // 3. Add them together (Android/BankingHomePage logic)
+        return total + baseDeposits + adjustmentsTotal;
+      }, 0);
+
+      setTotalDeposits(calculatedTotalDeposits);
+
+      // Total balance = savings + adjusted deposits
+      const calculatedTotalBalance = totalSavings + calculatedTotalDeposits;
+      setTotalBalance(calculatedTotalBalance);
 
       // Calculate upcoming maturities (next 30 days)
       const today = Date.now();
@@ -52,7 +65,7 @@ const MyDataHomepage: React.FC = () => {
 
       setUpcomingMaturities(upcoming);
     }
-  }, [accounts, deposits, adjustments]);
+  }, [accounts, deposits, adjustments, settings?.showInactive]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat("en-IN", {
@@ -78,6 +91,9 @@ const MyDataHomepage: React.FC = () => {
     const account = accounts.find((a) => a.id === accountId);
     return account ? account.acctCode : "Unknown";
   };
+
+  // Calculate active deposits count
+  const activeDepositsCount = deposits.filter((d) => d.active !== false).length;
 
   if (loading) {
     return (
@@ -122,25 +138,21 @@ const MyDataHomepage: React.FC = () => {
           <div style={styles.cardTitle}>Total Balance</div>
           <div style={styles.cardValue}>{formatLakhs(totalBalance)}</div>
           <div style={styles.cardSubtitle}>{formatCurrency(totalBalance)}</div>
-          <div style={styles.cardDetail}>Savings + Deposits + Adjustments</div>
+          <div style={styles.cardDetail}>Savings + Adjusted Deposits</div>
         </div>
 
-        {/* Card 2: Active Deposits */}
-        <div
-          style={styles.statCard}
-          onClick={() => navigate("/banking/deposits")}
-        >
+        {/* Card 2: Total Deposits (Updated to show adjusted amount) */}
+        <div style={styles.statCard} onClick={() => navigate("/banking")}>
           <div style={styles.cardIcon} className="card-icon-2">
             📈
           </div>
-          <div style={styles.cardTitle}>Active Deposits</div>
-          <div style={styles.cardValue}>
-            {deposits.filter((d) => d.active).length}
+          <div style={styles.cardTitle}>Total Deposits</div>
+          <div style={styles.cardValue}>{formatLakhs(totalDeposits)}</div>
+          <div style={styles.cardSubtitle}>{formatCurrency(totalDeposits)}</div>
+          <div style={styles.cardDetail}>
+            {activeDepositsCount} active deposit
+            {activeDepositsCount !== 1 ? "s" : ""}
           </div>
-          <div style={styles.cardSubtitle}>
-            {deposits.filter((d) => d.active).length} running
-          </div>
-          <div style={styles.cardDetail}>Click for details →</div>
         </div>
 
         {/* Card 3: Total Accounts */}

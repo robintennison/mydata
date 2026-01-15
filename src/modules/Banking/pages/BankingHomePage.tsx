@@ -1,11 +1,11 @@
-//import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { bankingStyles } from "../styles";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { loading, accounts, deposits, history } = useBankingData();
+  const { loading, accounts, deposits, history, adjustments, settings } =
+    useBankingData();
 
   // Format currency for display
   const formatCurrency = (amount: number): string => {
@@ -21,10 +21,53 @@ const BankingHomePage: React.FC = () => {
     (sum, account) => sum + account.savingsAmount,
     0
   );
-  const totalDeposits = deposits.reduce(
+
+  // Apply filtering based on settings (same as Android)
+  const filteredDeposits = settings.showInactive
+    ? deposits
+    : deposits.filter((deposit) => deposit.active !== false);
+
+  // MATCH ANDROID CALCULATION EXACTLY:
+  // For each account: baseDeposits + adjustmentsTotal
+  const totalDeposits = accounts.reduce((total, account) => {
+    const accountId = account.id;
+
+    // 1. Base deposits for this account
+    const baseDeposits = filteredDeposits
+      .filter((deposit) => deposit.accountId === accountId)
+      .reduce((sum, deposit) => sum + deposit.amount, 0);
+
+    // 2. Adjustments for this account
+    const adjustmentsTotal = adjustments
+      .filter((adj) => adj.accountId === accountId)
+      .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
+
+    // 3. Add them together (Android logic)
+    return total + baseDeposits + adjustmentsTotal;
+  }, 0);
+
+  // Calculate for comparison
+  const totalBaseDeposits = filteredDeposits.reduce(
     (sum, deposit) => sum + deposit.amount,
     0
   );
+
+  const totalAdjustments = adjustments.reduce(
+    (sum, adj) => sum + (adj.adjustmentAmount || 0),
+    0
+  );
+
+  // DEBUG
+  console.log("=== ANDROID-STYLE CALCULATION ===");
+  console.log("Total base deposits:", totalBaseDeposits);
+  console.log("Total adjustments:", totalAdjustments);
+  console.log(
+    "Total (base + adjustments):",
+    totalBaseDeposits + totalAdjustments
+  );
+  console.log("Our calculation:", totalDeposits);
+
+  const hasAdjustments = adjustments.length > 0;
 
   // Get last 6 months history
   const last6Months = [...history]
@@ -98,8 +141,64 @@ const BankingHomePage: React.FC = () => {
             {formatCurrency(totalDeposits)}
           </div>
           <div style={{ fontSize: "0.8rem", color: "#4285f4" }}>
-            {deposits.length} active deposit{deposits.length !== 1 ? "s" : ""}
+            {filteredDeposits.length} deposit
+            {filteredDeposits.length !== 1 ? "s" : ""}
+            {hasAdjustments && (
+              <span
+                style={{
+                  fontSize: "0.7rem",
+                  color: "#666",
+                  marginLeft: "4px",
+                  fontStyle: "italic",
+                }}
+              >
+                (with adjustments)
+              </span>
+            )}
           </div>
+
+          {/* Show adjustment breakdown */}
+          {hasAdjustments && (
+            <div
+              style={{
+                marginTop: "8px",
+                padding: "6px",
+                backgroundColor: "#f8f9fa",
+                borderRadius: "6px",
+                fontSize: "0.75rem",
+                color: "#495057",
+                borderLeft: "3px solid #4285f4",
+              }}
+            >
+              <div style={{ marginBottom: "4px" }}>
+                <strong>Breakdown (Android calculation):</strong>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Principal (base deposits):</span>
+                <span>{formatCurrency(totalBaseDeposits)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Adjustments (interest):</span>
+                <span>
+                  {totalAdjustments >= 0 ? "+" : ""}
+                  {formatCurrency(totalAdjustments)}
+                </span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: "4px",
+                  paddingTop: "4px",
+                  borderTop: "1px dashed #ddd",
+                  fontWeight: "500",
+                }}
+              >
+                <span>Total (principal + interest):</span>
+                <span>{formatCurrency(totalDeposits)}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -164,7 +263,7 @@ const BankingHomePage: React.FC = () => {
         )}
       </div>
 
-      {/* Navigation Icons - UPDATED WITH WORKING onClick */}
+      {/* Navigation Icons */}
       <div style={bankingStyles.navGrid}>
         {/* Accounts */}
         <div

@@ -8,12 +8,24 @@ import type {
   DepositAdjustment,
 } from "../../../types/banking.types";
 
-export const useBankingData = () => {
+export interface BankingData {
+  loading: boolean;
+  accounts: BankAccount[];
+  deposits: Deposit[];
+  history: History[];
+  adjustments: DepositAdjustment[];
+  settings: { showInactive: boolean };
+}
+
+export const useBankingData = (): BankingData => {
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [history, setHistory] = useState<History[]>([]);
   const [adjustments, setAdjustments] = useState<DepositAdjustment[]>([]);
+  const [settings, setSettings] = useState<{ showInactive: boolean }>({
+    showInactive: false, // Default value
+  });
 
   useEffect(() => {
     const loadAllData = async () => {
@@ -64,6 +76,22 @@ export const useBankingData = () => {
             } as DepositAdjustment)
         );
         setAdjustments(adjustmentsData);
+
+        // Load settings from Firestore if you have a settings collection
+        // Or keep the default value if no settings collection exists
+        try {
+          const settingsSnapshot = await getDocs(collection(firestore, "settings"));
+          if (!settingsSnapshot.empty) {
+            const settingsData = settingsSnapshot.docs[0].data();
+            setSettings({
+              showInactive: settingsData.showInactive || false,
+            });
+          }
+        } catch (error) {
+          console.log("No settings found, using defaults");
+          // Keep default settings
+        }
+
       } catch (error) {
         console.error("Error loading banking data:", error);
       } finally {
@@ -80,5 +108,6 @@ export const useBankingData = () => {
     deposits,
     history,
     adjustments,
+    settings,
   };
 };

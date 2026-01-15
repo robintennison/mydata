@@ -330,7 +330,7 @@ const BankingHomePage: React.FC = () => {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            navigate("/banking/history/chart");
+            navigate("/banking/summary");
           }}
           style={{
             ...bankingStyles.navIcon,

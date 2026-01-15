@@ -8,6 +8,7 @@ import BankingHomePage from "../modules/Banking/pages/BankingHomePage";
 import AccountsPage from "../modules/Banking/pages/AccountsPage";
 import AddAccountPage from "../modules/Banking/pages/AddAccountPage";
 import EditAccountPage from "../modules/Banking/pages/EditAccountPage";
+import DepositSummaryPage from "../modules/Banking/pages/DepositSummaryPage";
 import SettingsPage from "../modules/SettingsPage";
 import LoginForm from "../components/Auth/LoginForm";
 import MyDataHomepage from "../MyDataHomepage";
@@ -165,6 +166,15 @@ const allRoutes: RouteConfig[] = [
     path: "/banking/history/chart",
     element: <HistoryChartPage />,
     title: "History Chart",
+    icon: "📊",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+
+  {
+    path: "/banking/summary",
+    element: <DepositSummaryPage />,
+    title: "Summary",
     icon: "📊",
     requiresAuth: true,
     needsUserData: true,

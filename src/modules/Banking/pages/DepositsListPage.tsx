@@ -1,50 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { useBankingData } from "../hooks/useBankingData";
+import { useBankingOperations } from "../hooks/useBankingOperations";
 import { Deposit, BankAccount } from "../../../types/banking.types";
 import { formatCurrency, formatDate } from "../../../utils/formatters";
 import { bankingStyles } from "../styles";
-
-// Mock data - replace with actual API calls
-const mockDeposits: Deposit[] = [
-  {
-    id: "1",
-    accountId: "acc1",
-    amount: 500000,
-    startDate: Date.now() - 30 * 24 * 60 * 60 * 1000,
-    endDate: Date.now() + 60 * 24 * 60 * 60 * 1000,
-    comments: "Fixed Deposit for future planning",
-    active: true,
-  },
-  {
-    id: "2",
-    accountId: "acc2",
-    amount: 300000,
-    startDate: Date.now() - 15 * 24 * 60 * 60 * 1000,
-    endDate: Date.now() + 45 * 24 * 60 * 60 * 1000,
-    comments: "Emergency fund",
-    active: true,
-  },
-];
-
-const mockAccounts: BankAccount[] = [
-  {
-    id: "acc1",
-    acctCode: "SB1234",
-    savingsAmount: 1000000,
-    acctDetails: "Savings Account",
-    mpin: "1234",
-    isActive: true,
-  },
-  {
-    id: "acc2",
-    acctCode: "CB5678",
-    savingsAmount: 2000000,
-    acctDetails: "Current Account",
-    mpin: "5678",
-    isActive: true,
-  },
-];
 
 // Custom formatter for Lakhs like Android version
 const formatInLakhs = (amount: number): string => {
@@ -57,27 +18,23 @@ const formatInLakhs = (amount: number): string => {
 const DepositsListPage: React.FC = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
-  const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const { loading, accounts, deposits } = useBankingData();
+  const { handleDeleteDeposit } = useBankingOperations();
+
   const [filterAccount, setFilterAccount] = useState("All");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [localDeposits, setLocalDeposits] = useState<Deposit[]>([]);
 
-  // Load data
+  // Update local deposits when data loads
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      // Replace with actual API calls
-      setDeposits(mockDeposits);
-      setAccounts(mockAccounts);
-      setLoading(false);
-    };
-    loadData();
-  }, []);
+    if (deposits.length > 0) {
+      setLocalDeposits(deposits);
+    }
+  }, [deposits]);
 
-  // Filter deposits
-  const filteredDeposits = deposits
+  // Filter deposits exactly like Android app
+  const filteredDeposits = localDeposits
     .filter((dep) => {
       if (filterAccount === "All") return true;
       const account = accounts.find((acc) => acc.id === dep.accountId);
@@ -87,23 +44,33 @@ const DepositsListPage: React.FC = () => {
       if (settings?.showInactive) return true;
       return dep.active;
     })
-    .sort((a, b) => a.endDate - b.endDate);
+    .sort((a, b) => a.endDate - b.endDate); // ascending by endDate like Android
 
-  // Calculate total
+  // Calculate total amount like Android
   const totalAmount = filteredDeposits.reduce(
     (sum, dep) => sum + dep.amount,
     0
   );
 
   const handleDelete = async (id: string) => {
-    // Replace with actual API call
-    setDeposits((prev) => prev.filter((dep) => dep.id !== id));
-    setDepositToDelete(null);
+    try {
+      await handleDeleteDeposit(id);
+      setLocalDeposits((prev) => prev.filter((dep) => dep.id !== id));
+      setDepositToDelete(null);
+    } catch (error) {
+      console.error("Error deleting deposit:", error);
+      alert("Failed to delete deposit. Please try again.");
+    }
   };
 
   const getAccountName = (accountId: string): string => {
     const account = accounts.find((acc) => acc.id === accountId);
     return account?.acctCode || "?";
+  };
+
+  // Helper to check if account is active (safely)
+  const isAccountActive = (account: BankAccount): boolean => {
+    return account.isActive === undefined ? true : account.isActive;
   };
 
   if (loading) {
@@ -119,143 +86,211 @@ const DepositsListPage: React.FC = () => {
 
   return (
     <div style={bankingStyles.container}>
-      {/* Header */}
-      <div style={bankingStyles.header}>
-        <h1 style={bankingStyles.headerTitle}>💰 Deposits</h1>
-        <div style={bankingStyles.headerSubtitle}>Manage your deposits</div>
-      </div>
-
-      {/* Top Navigation */}
-      <div style={bankingStyles.topNav}>
-        <button
-          onClick={() => navigate("/banking")}
-          style={bankingStyles.navButton}
-          title="Back to Banking"
-        >
-          ←
-        </button>
-        <div style={bankingStyles.navTitle}>Deposits List</div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          {/* Filter Button */}
-          <button
-            onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-            style={bankingStyles.navButton}
-            title="Filter"
-          >
-            🔍
-          </button>
-          {/* Settings Button */}
-          <button
-            onClick={() => navigate("/settings")}
-            style={{
-              ...bankingStyles.navButton,
-              padding: "6px 10px",
-              fontSize: "1.2rem",
-            }}
-            title="Settings"
-          >
-            ⚙️
-          </button>
-          {/* Add Deposit Button */}
-          <button
-            onClick={() => navigate("/banking/deposits/add")}
-            style={bankingStyles.navButton}
-            title="Add Deposit"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
-      {/* Filter Dropdown */}
-      {showFilterDropdown && (
+      {/* Header - Exactly like Android TopAppBar */}
+      <div
+        style={{
+          backgroundColor: "#ffffff",
+          padding: "16px 16px 8px 16px",
+          borderBottom: "1px solid #e0e0e0",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+        }}
+      >
         <div
           style={{
-            position: "absolute",
-            top: "120px",
-            right: "20px",
-            backgroundColor: "#fff",
-            border: "1px solid #e9ecef",
-            borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            zIndex: 1000,
-            minWidth: "200px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "8px",
           }}
         >
-          <div
-            style={{
-              padding: "12px",
-              fontSize: "0.9rem",
-              color: "#6c757d",
-              borderBottom: "1px solid #e9ecef",
-            }}
-          >
-            Current: {filterAccount}
-          </div>
-          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <button
-              onClick={() => {
-                setFilterAccount("All");
-                setShowFilterDropdown(false);
-              }}
+              onClick={() => navigate(-1)}
               style={{
-                width: "100%",
-                padding: "12px",
-                textAlign: "left",
                 background: "none",
                 border: "none",
+                fontSize: "1.5rem",
                 cursor: "pointer",
-                fontSize: "0.95rem",
-                color: filterAccount === "All" ? "#4285f4" : "#333",
-                backgroundColor:
-                  filterAccount === "All" ? "#f0f7ff" : "transparent",
+                padding: "4px",
+                color: "#333",
+              }}
+              title="Back"
+            >
+              ←
+            </button>
+            <h1
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: "600",
+                color: "#333",
+                margin: 0,
               }}
             >
-              All Accounts
+              Deposits
+            </h1>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {/* Filter Button */}
+            <button
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "1.2rem",
+                cursor: "pointer",
+                padding: "8px",
+                color: "#666",
+              }}
+              title="Filter"
+            >
+              🔍
             </button>
-            {accounts
-              .filter((acc) => acc.isActive !== false)
-              .sort((a, b) => a.acctCode.localeCompare(b.acctCode))
-              .map((account) => (
-                <button
-                  key={account.id}
-                  onClick={() => {
-                    setFilterAccount(account.acctCode);
-                    setShowFilterDropdown(false);
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    textAlign: "left",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "0.95rem",
-                    color:
-                      filterAccount === account.acctCode ? "#4285f4" : "#333",
-                    backgroundColor:
-                      filterAccount === account.acctCode
-                        ? "#f0f7ff"
-                        : "transparent",
-                    borderBottom: "1px solid #f1f3f4",
-                  }}
-                >
-                  {account.acctCode}
-                </button>
-              ))}
+
+            {/* Settings Button */}
+            <button
+              onClick={() => navigate("/settings")}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "1.2rem",
+                cursor: "pointer",
+                padding: "8px",
+                color: "#666",
+              }}
+              title="Settings"
+            >
+              ⚙️
+            </button>
+
+            {/* Add Deposit Button */}
+            <button
+              onClick={() => navigate("/banking/deposits/add")}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "1.2rem",
+                cursor: "pointer",
+                padding: "8px",
+                color: "#666",
+              }}
+              title="Add Deposit"
+            >
+              +
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Filter Dropdown - Like Android DropdownMenu */}
+        {showFilterDropdown && (
+          <div
+            style={{
+              position: "absolute",
+              top: "70px",
+              right: "16px",
+              backgroundColor: "#ffffff",
+              border: "1px solid #e0e0e0",
+              borderRadius: "8px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              zIndex: 1000,
+              minWidth: "180px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                padding: "12px 16px",
+                fontSize: "0.875rem",
+                color: "#666",
+                borderBottom: "1px solid #f0f0f0",
+              }}
+            >
+              Current: {filterAccount}
+            </div>
+
+            <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+              <button
+                onClick={() => {
+                  setFilterAccount("All");
+                  setShowFilterDropdown(false);
+                }}
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  textAlign: "left",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "0.95rem",
+                  color: filterAccount === "All" ? "#1976d2" : "#333",
+                  backgroundColor:
+                    filterAccount === "All" ? "#e3f2fd" : "transparent",
+                  borderBottom: "1px solid #f0f0f0",
+                }}
+              >
+                All Accounts
+              </button>
+
+              {accounts
+                .filter((acc) => isAccountActive(acc))
+                .sort((a, b) => a.acctCode.localeCompare(b.acctCode))
+                .map((account) => (
+                  <button
+                    key={account.id}
+                    onClick={() => {
+                      setFilterAccount(account.acctCode);
+                      setShowFilterDropdown(false);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      textAlign: "left",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "0.95rem",
+                      color:
+                        filterAccount === account.acctCode ? "#1976d2" : "#333",
+                      backgroundColor:
+                        filterAccount === account.acctCode
+                          ? "#e3f2fd"
+                          : "transparent",
+                      borderBottom: "1px solid #f0f0f0",
+                    }}
+                  >
+                    {account.acctCode}
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Main Content */}
-      <div style={{ padding: "15px" }}>
+      <div style={{ padding: "16px" }}>
         {filteredDeposits.length === 0 ? (
-          <div style={bankingStyles.emptyState}>
-            <div style={{ fontSize: "2rem", marginBottom: "10px" }}>💰</div>
-            <div>No deposits available</div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "60px 20px",
+              textAlign: "center",
+              color: "#666",
+            }}
+          >
             <div
-              style={{ fontSize: "0.9rem", marginTop: "5px", color: "#6c757d" }}
+              style={{ fontSize: "3rem", marginBottom: "16px", opacity: 0.3 }}
             >
+              💰
+            </div>
+            <div style={{ fontSize: "1.1rem", marginBottom: "8px" }}>
+              No deposits available
+            </div>
+            <div style={{ fontSize: "0.95rem", color: "#888" }}>
               {filterAccount !== "All"
                 ? `No deposits for ${filterAccount}`
                 : 'Tap "+" to add a deposit'}
@@ -263,16 +298,16 @@ const DepositsListPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Table Header */}
+            {/* Table Header - Exactly like Android */}
             <div
               style={{
                 display: "flex",
-                padding: "12px 8px",
+                padding: "12px 0",
                 marginBottom: "8px",
-                fontSize: "0.9rem",
+                fontSize: "0.875rem",
                 fontWeight: 600,
-                color: "#495057",
-                borderBottom: "2px solid #e9ecef",
+                color: "#666",
+                borderBottom: "2px solid #e0e0e0",
               }}
             >
               <div style={{ flex: 1 }}>Account</div>
@@ -281,9 +316,11 @@ const DepositsListPage: React.FC = () => {
               <div style={{ width: "56px" }}></div>
             </div>
 
-            {/* Deposits List */}
-            <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
-              {filteredDeposits.map((deposit) => {
+            {/* Deposits List - Matching Android Card styling */}
+            <div
+              style={{ maxHeight: "calc(100vh - 250px)", overflowY: "auto" }}
+            >
+              {filteredDeposits.map((deposit, _index) => {
                 const accountName = getAccountName(deposit.accountId);
 
                 return (
@@ -294,12 +331,14 @@ const DepositsListPage: React.FC = () => {
                       borderRadius: "8px",
                       marginBottom: "8px",
                       padding: "12px",
-                      minHeight: "48px",
+                      minHeight: "40px",
                       display: "flex",
                       alignItems: "center",
                       opacity: deposit.active ? 1 : 0.7,
+                      border: "1px solid #e0e0e0",
                     }}
                   >
+                    {/* Account */}
                     <div style={{ flex: 1 }}>
                       <div
                         style={{
@@ -315,6 +354,7 @@ const DepositsListPage: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Amount + Comments - Single row like Android */}
                     <div
                       style={{
                         flex: 1.2,
@@ -326,7 +366,7 @@ const DepositsListPage: React.FC = () => {
                         style={{
                           fontSize: "0.85rem",
                           fontWeight: 600,
-                          color: "#4285f4",
+                          color: "#1976d2",
                           flex: "0.6",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -351,6 +391,7 @@ const DepositsListPage: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* End Date - Right aligned */}
                     <div style={{ flex: 0.8, textAlign: "right" }}>
                       <div
                         style={{
@@ -369,14 +410,17 @@ const DepositsListPage: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Actions - Exactly like Android spacing */}
                     <div
                       style={{
                         width: "56px",
                         display: "flex",
                         gap: "4px",
                         justifyContent: "flex-end",
+                        paddingLeft: "8px",
                       }}
                     >
+                      {/* Edit Button - Always visible */}
                       <button
                         onClick={() =>
                           navigate(`/banking/deposits/edit/${deposit.id}`)
@@ -386,13 +430,18 @@ const DepositsListPage: React.FC = () => {
                           background: "none",
                           border: "none",
                           cursor: "pointer",
-                          color: "#6c757d",
-                          fontSize: "1rem",
+                          color: "#666",
+                          fontSize: "1.1rem",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                         title="Edit"
                       >
                         ✏️
                       </button>
+
+                      {/* Delete Button - Only if showDelete is enabled */}
                       {settings?.showDelete && (
                         <button
                           onClick={() => setDepositToDelete(deposit.id)}
@@ -401,8 +450,11 @@ const DepositsListPage: React.FC = () => {
                             background: "none",
                             border: "none",
                             cursor: "pointer",
-                            color: "#dc2626",
-                            fontSize: "1rem",
+                            color: "#d32f2f",
+                            fontSize: "1.1rem",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                           }}
                           title="Delete"
                         >
@@ -415,16 +467,18 @@ const DepositsListPage: React.FC = () => {
               })}
             </div>
 
-            {/* Total Summary */}
-            <div style={{ marginTop: "20px" }}>
+            {/* Total Summary Card - Matching Android exactly */}
+            <div style={{ marginTop: "16px" }}>
               <div
                 style={{
                   backgroundColor: "#f8f9fa",
                   borderRadius: "12px",
                   padding: "16px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  border: "1px solid #e0e0e0",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                 }}
               >
+                {/* Header */}
                 <div
                   style={{
                     display: "flex",
@@ -445,7 +499,7 @@ const DepositsListPage: React.FC = () => {
                   <div
                     style={{
                       fontSize: "0.95rem",
-                      color: "#6c757d",
+                      color: "#666",
                     }}
                   >
                     {filteredDeposits.length} deposit
@@ -453,6 +507,7 @@ const DepositsListPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Total Amount */}
                 <div
                   style={{
                     display: "flex",
@@ -474,33 +529,36 @@ const DepositsListPage: React.FC = () => {
                     style={{
                       fontSize: "1.3rem",
                       fontWeight: 700,
-                      color: "#4285f4",
+                      color: "#1976d2",
                     }}
                   >
                     {formatInLakhs(totalAmount)}
                   </div>
                 </div>
 
+                {/* Filter Info */}
                 {filterAccount !== "All" && (
                   <div
                     style={{
                       fontSize: "0.85rem",
-                      color: "#6c757d",
+                      color: "#666",
                       fontStyle: "italic",
                       marginTop: "8px",
+                      padding: "4px 0",
                     }}
                   >
                     Filtered by: {filterAccount}
                   </div>
                 )}
 
+                {/* Show Inactive Info */}
                 {!settings?.showInactive && (
                   <div
                     style={{
                       fontSize: "0.85rem",
-                      color: "#6c757d",
+                      color: "#666",
                       fontStyle: "italic",
-                      marginTop: "4px",
+                      padding: "4px 0",
                     }}
                   >
                     Showing active deposits only
@@ -508,12 +566,15 @@ const DepositsListPage: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Bottom spacer like Android */}
+            <div style={{ height: "32px" }}></div>
           </>
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      {depositToDelete && (
+      {/* Delete Confirmation Dialog - Matching Android AlertDialog */}
+      {settings?.showDelete && depositToDelete && (
         <div
           style={{
             position: "fixed",
@@ -525,7 +586,7 @@ const DepositsListPage: React.FC = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            zIndex: 1000,
+            zIndex: 2000,
             padding: "20px",
           }}
         >
@@ -533,56 +594,67 @@ const DepositsListPage: React.FC = () => {
             style={{
               backgroundColor: "#fff",
               borderRadius: "12px",
-              padding: "20px",
+              padding: "24px",
               maxWidth: "400px",
               width: "100%",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
             }}
           >
             <h3
               style={{
-                margin: "0 0 15px 0",
-                fontSize: "1.1rem",
+                margin: "0 0 12px 0",
+                fontSize: "1.25rem",
                 fontWeight: 600,
                 color: "#333",
               }}
             >
-              Delete Deposit?
+              Delete deposit
             </h3>
             <p
-              style={{ margin: "0 0 20px 0", color: "#666", lineHeight: "1.5" }}
+              style={{
+                margin: "0 0 24px 0",
+                color: "#666",
+                lineHeight: "1.5",
+                fontSize: "0.95rem",
+              }}
             >
               Delete this deposit? This action cannot be undone.
             </p>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+              }}
+            >
               <button
                 onClick={() => setDepositToDelete(null)}
                 style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
+                  padding: "10px 20px",
+                  backgroundColor: "transparent",
+                  border: "1px solid #e0e0e0",
                   borderRadius: "8px",
-                  color: "#495057",
+                  color: "#666",
                   fontWeight: 500,
                   cursor: "pointer",
                   fontSize: "0.95rem",
+                  minWidth: "80px",
                 }}
               >
                 Cancel
               </button>
               <button
-                onClick={() => handleDelete(depositToDelete)}
+                onClick={() => depositToDelete && handleDelete(depositToDelete)}
                 style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: "#ea4335",
+                  padding: "10px 20px",
+                  backgroundColor: "#d32f2f",
                   border: "none",
                   borderRadius: "8px",
                   color: "#fff",
                   fontWeight: 500,
                   cursor: "pointer",
                   fontSize: "0.95rem",
+                  minWidth: "80px",
                 }}
               >
                 Delete

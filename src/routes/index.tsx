@@ -2,7 +2,6 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // Import all page components
-import DepositsPage from "../modules/Banking/pages/DepositsPage";
 import DepositsListPage from "../modules/Banking/pages/DepositsListPage";
 import AddEditDepositPage from "../modules/Banking/pages/AddEditDepositPage";
 import BankingHomePage from "../modules/Banking/pages/BankingHomePage";
@@ -100,7 +99,7 @@ const allRoutes: RouteConfig[] = [
   // Deposit Routes - ADD THESE
   {
     path: "/banking/deposits",
-    element: <DepositsPage />,
+    element: <DepositsListPage />,
     title: "Deposits",
     icon: "💰",
     requiresAuth: true,

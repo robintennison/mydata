@@ -1,13 +1,15 @@
-// src/routes/index.tsx
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // Import all page components
+import DepositsPage from "../modules/Banking/pages/DepositsPage";
+import DepositsListPage from "../modules/Banking/pages/DepositsListPage";
+import AddEditDepositPage from "../modules/Banking/pages/AddEditDepositPage";
 import BankingHomePage from "../modules/Banking/pages/BankingHomePage";
 import AccountsPage from "../modules/Banking/pages/AccountsPage";
 import AddAccountPage from "../modules/Banking/pages/AddAccountPage";
 import EditAccountPage from "../modules/Banking/pages/EditAccountPage";
-import SettingsPage from "../modules/SettingsPage"; // Updated import
+import SettingsPage from "../modules/SettingsPage";
 import LoginForm from "../components/Auth/LoginForm";
 import MyDataHomepage from "../MyDataHomepage";
 
@@ -56,7 +58,7 @@ const allRoutes: RouteConfig[] = [
   },
   {
     path: "/settings",
-    element: <SettingsPage />, // Updated: Using actual SettingsPage
+    element: <SettingsPage />,
     title: "Settings",
     icon: "⚙️",
     requiresAuth: true,
@@ -91,6 +93,40 @@ const allRoutes: RouteConfig[] = [
     path: "/banking/accounts/edit/:id",
     element: <EditAccountPage />,
     title: "Edit Account",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+
+  // Deposit Routes - ADD THESE
+  {
+    path: "/banking/deposits",
+    element: <DepositsPage />,
+    title: "Deposits",
+    icon: "💰",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+  {
+    path: "/banking/deposits/list",
+    element: <DepositsListPage />,
+    title: "Deposits List",
+    icon: "📋",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+  {
+    path: "/banking/deposits/add",
+    element: <AddEditDepositPage />,
+    title: "Add Deposit",
+    icon: "➕",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+  {
+    path: "/banking/deposits/edit/:depositId",
+    element: <AddEditDepositPage isEdit={true} />,
+    title: "Edit Deposit",
+    icon: "✏️",
     requiresAuth: true,
     needsUserData: true,
   },
@@ -171,7 +207,6 @@ const AppRoutes: React.FC<AppRoutesProps> = ({ isAuthenticated }) => {
 };
 
 // ==================== EXPORTS ====================
-// Export everything at the end (ONCE)
 export {
   AppRoutes,
   PrivateRoute,

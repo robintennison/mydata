@@ -7,6 +7,7 @@ export interface BankAccount {
   savingsAmount: number;
   acctDetails: string;
   mpin: string;
+  isActive?: boolean; // Add this property for active/inactive filtering
   createdAt?: Timestamp | number;
   updatedAt?: Timestamp | number;
 }
@@ -49,6 +50,7 @@ export interface AccountSummary {
   deposits: number;
   adjustments: number;
   netBalance: number;
+  isActive?: boolean; // Optional, can inherit from BankAccount
 }
 
 export interface ChartPoint {
@@ -65,6 +67,7 @@ export interface AccountFormData {
   savingsAmount: number;
   acctDetails: string;
   mpin: string;
+  isActive?: boolean; // Add to form data as well
 }
 
 export interface DepositFormData {
@@ -96,7 +99,6 @@ export interface AccountsTabProps {
   formatCurrency: (amount: number) => string;
 }
 
-
 export interface DepositsTabProps {
   deposits: Deposit[];
   accounts: BankAccount[];
@@ -105,7 +107,7 @@ export interface DepositsTabProps {
   onSaveDeposit: (deposit: Deposit) => Promise<void>;
   onDeleteDeposit: (depositId: string) => Promise<void>;
   enableEditDelete: boolean;
-  formatCurrency: (amount: number) => string; // This expects (amount: number) => string
+  formatCurrency: (amount: number) => string;
   formatDate: (timestamp: number) => string;
 }
 
@@ -120,7 +122,6 @@ export interface SummaryTabProps {
   formatDate: (timestamp: number) => string;
 }
 
-
 export interface HistoryTabProps {
   history: History[];
   chartData: ChartPoint[];
@@ -129,7 +130,7 @@ export interface HistoryTabProps {
   onSaveHistory: (history: History) => void;
   onDeleteHistory: (month: string) => void;
   enableEditDelete: boolean;
-  formatCurrency: (amount: number) => string; // This must be here
+  formatCurrency: (amount: number) => string;
 }
 
 export interface SettingsTabProps {
@@ -177,3 +178,8 @@ export interface BankingSortOptions {
   field: keyof BankAccount | keyof Deposit | keyof History;
   direction: 'asc' | 'desc';
 }
+
+// Helper type for safe property access
+export type WithOptionalIsActive<T> = T & {
+  isActive?: boolean;
+};

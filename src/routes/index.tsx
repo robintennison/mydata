@@ -3,10 +3,11 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // Import all page components
-import BankingHomePage from "../modules/Banking/BankingHomePage";
+import BankingHomePage from "../modules/Banking/pages/BankingHomePage";
 import AccountsPage from "../modules/Banking/pages/AccountsPage";
 import AddAccountPage from "../modules/Banking/pages/AddAccountPage";
 import EditAccountPage from "../modules/Banking/pages/EditAccountPage";
+import SettingsPage from "../modules/SettingsPage"; // Updated import
 import LoginForm from "../components/Auth/LoginForm";
 import MyDataHomepage from "../MyDataHomepage";
 
@@ -55,7 +56,7 @@ const allRoutes: RouteConfig[] = [
   },
   {
     path: "/settings",
-    element: <div>Settings Page</div>, // Replace with actual component
+    element: <SettingsPage />, // Updated: Using actual SettingsPage
     title: "Settings",
     icon: "⚙️",
     requiresAuth: true,

@@ -16,7 +16,7 @@ import MyDataHomepage from "../MyDataHomepage";
 // Import History pages
 import HistoryListPage from "../modules/Banking/pages/HistoryListPage"; // Add this import
 import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage"; // Add this import
-import HistoryChartPage from "../modules/Banking/pages/HistoryChartPage";
+//import HistoryChartPage from "../modules/Banking/HistoryChartPage";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -162,14 +162,14 @@ const allRoutes: RouteConfig[] = [
     needsUserData: true,
   },
 
-  {
-    path: "/banking/history/chart",
-    element: <HistoryChartPage />,
-    title: "History Chart",
-    icon: "📊",
-    requiresAuth: true,
-    needsUserData: true,
-  },
+  //   {
+  //     path: "/banking/history/chart",
+  //     element: <HistoryChartPage />,
+  //     title: "History Chart",
+  //     icon: "📊",
+  //     requiresAuth: true,
+  //     needsUserData: true,
+  //   },
 
   {
     path: "/banking/summary",

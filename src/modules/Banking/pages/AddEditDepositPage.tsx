@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useBankingData } from "../hooks/useBankingData";
+import { useBankingOperations } from "../hooks/useBankingOperations";
 import {
   Deposit,
   BankAccount,
@@ -7,38 +9,6 @@ import {
 } from "../../../types/banking.types";
 import { formatDate } from "../../../utils/formatters";
 import { bankingStyles } from "../styles";
-
-// Mock data
-const mockAccounts: BankAccount[] = [
-  {
-    id: "acc1",
-    acctCode: "SB1234",
-    savingsAmount: 1000000,
-    acctDetails: "Savings Account",
-    mpin: "1234",
-    isActive: true,
-  },
-  {
-    id: "acc2",
-    acctCode: "CB5678",
-    savingsAmount: 2000000,
-    acctDetails: "Current Account",
-    mpin: "5678",
-    isActive: true,
-  },
-];
-
-const mockDeposits: Deposit[] = [
-  {
-    id: "1",
-    accountId: "acc1",
-    amount: 500000,
-    startDate: Date.now() - 30 * 24 * 60 * 60 * 1000,
-    endDate: Date.now() + 60 * 24 * 60 * 60 * 1000,
-    comments: "Fixed Deposit for future planning",
-    active: true,
-  },
-];
 
 interface AddEditDepositPageProps {
   isEdit?: boolean;
@@ -49,6 +19,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 }) => {
   const { depositId } = useParams();
   const navigate = useNavigate();
+  const { accounts, deposits, loading: dataLoading } = useBankingData();
+  const { handleSaveDeposit } = useBankingOperations();
 
   const [formData, setFormData] = useState<DepositFormData>({
     id: "",
@@ -61,16 +33,14 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   });
   const [selectedAccountCode, setSelectedAccountCode] = useState("");
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Load deposit data if editing
+  // Load deposit data if editing - using actual data from Firebase
   useEffect(() => {
-    if (isEdit && depositId) {
-      const deposit = mockDeposits.find((d) => d.id === depositId);
+    if (isEdit && depositId && deposits.length > 0) {
+      const deposit = deposits.find((d) => d.id === depositId);
       if (deposit) {
-        const account = mockAccounts.find(
-          (acc) => acc.id === deposit.accountId
-        );
+        const account = accounts.find((acc) => acc.id === deposit.accountId);
         setFormData({
           id: deposit.id,
           accountId: deposit.accountId,
@@ -83,7 +53,12 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         setSelectedAccountCode(account?.acctCode || "");
       }
     }
-  }, [isEdit, depositId]);
+  }, [isEdit, depositId, deposits, accounts]);
+
+  // Helper to check if account is active (safely)
+  const isAccountActive = (account: BankAccount): boolean => {
+    return account.isActive === undefined ? true : account.isActive;
+  };
 
   const handleInputChange = (field: keyof DepositFormData, value: any) => {
     setFormData((prev) => ({
@@ -130,28 +105,33 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
 
     try {
       const depositToSave: Deposit = {
         ...formData,
-        id: isEdit && depositId ? depositId : Date.now().toString(),
+        id: isEdit && depositId ? depositId : `deposit_${Date.now()}`,
       };
 
-      console.log("Saving deposit:", depositToSave);
-      // TODO: Replace with actual API call
-      // await yourApi.saveDeposit(depositToSave);
-
-      setTimeout(() => {
-        setLoading(false);
-        navigate("/banking/deposits/list");
-      }, 500);
+      await handleSaveDeposit(depositToSave);
+      navigate("/banking/deposits");
     } catch (error) {
       console.error("Error saving deposit:", error);
       alert("Failed to save deposit. Please try again.");
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (dataLoading && isEdit) {
+    return (
+      <div style={bankingStyles.container}>
+        <div style={bankingStyles.loading}>
+          <div style={bankingStyles.spinner}></div>
+          <p>Loading deposit details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={bankingStyles.container}>
@@ -171,7 +151,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           onClick={() => navigate(-1)}
           style={bankingStyles.navButton}
           title="Back"
-          disabled={loading}
+          disabled={saving}
         >
           ←
         </button>
@@ -181,17 +161,17 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         <div style={{ display: "flex", gap: "8px" }}>
           <button
             onClick={handleSave}
-            disabled={loading}
+            disabled={saving}
             style={{
               ...bankingStyles.navButton,
-              backgroundColor: loading ? "#94a3b8" : "#10b981",
+              backgroundColor: saving ? "#94a3b8" : "#10b981",
               color: "#fff",
               border: "none",
-              opacity: loading ? 0.7 : 1,
+              opacity: saving ? 0.7 : 1,
             }}
             title="Save"
           >
-            {loading ? "⏳" : "✓"}
+            {saving ? "⏳" : "✓"}
           </button>
         </div>
       </div>
@@ -257,8 +237,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   marginTop: "4px",
                 }}
               >
-                {mockAccounts
-                  .filter((acc) => acc.isActive !== false)
+                {accounts
+                  .filter((acc) => isAccountActive(acc))
                   .sort((a, b) => a.acctCode.localeCompare(b.acctCode))
                   .map((account) => (
                     <button
@@ -497,10 +477,10 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         <div style={{ marginTop: "24px" }}>
           <button
             onClick={handleSave}
-            disabled={loading || !formData.accountId || formData.amount <= 0}
+            disabled={saving || !formData.accountId || formData.amount <= 0}
             style={{
               ...bankingStyles.actionButton,
-              backgroundColor: loading
+              backgroundColor: saving
                 ? "#94a3b8"
                 : !formData.accountId || formData.amount <= 0
                 ? "#cbd5e1"
@@ -509,16 +489,14 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
               fontSize: "1rem",
               fontWeight: 600,
               opacity:
-                loading || !formData.accountId || formData.amount <= 0
-                  ? 0.7
-                  : 1,
+                saving || !formData.accountId || formData.amount <= 0 ? 0.7 : 1,
               cursor:
-                loading || !formData.accountId || formData.amount <= 0
+                saving || !formData.accountId || formData.amount <= 0
                   ? "not-allowed"
                   : "pointer",
             }}
           >
-            {loading ? (
+            {saving ? (
               <>
                 <span style={{ marginRight: "8px" }}>⏳</span>
                 Saving...

@@ -1,6 +1,7 @@
-import { useBankingData } from "../hooks/useBankingData";
-import { bankingStyles } from "../styles/BankingStyles";
+//import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useBankingData } from "../hooks/useBankingData";
+import { bankingStyles } from "../styles";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -163,11 +164,15 @@ const BankingHomePage: React.FC = () => {
         )}
       </div>
 
-      {/* Navigation Icons */}
+      {/* Navigation Icons - UPDATED WITH WORKING onClick */}
       <div style={bankingStyles.navGrid}>
         {/* Accounts */}
         <div
-          onClick={() => navigate("/banking/accounts")}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate("/banking/accounts");
+          }}
           style={{
             ...bankingStyles.navIcon,
             borderColor: "#4285f4",
@@ -183,7 +188,11 @@ const BankingHomePage: React.FC = () => {
 
         {/* Deposits */}
         <div
-          onClick={() => navigate("/banking/deposits")}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate("/banking/deposits");
+          }}
           style={{
             ...bankingStyles.navIcon,
             borderColor: "#34a853",
@@ -199,7 +208,11 @@ const BankingHomePage: React.FC = () => {
 
         {/* History */}
         <div
-          onClick={() => navigate("/banking/history")}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate("/banking/history");
+          }}
           style={{
             ...bankingStyles.navIcon,
             borderColor: "#fbbc04",
@@ -215,7 +228,11 @@ const BankingHomePage: React.FC = () => {
 
         {/* Summary */}
         <div
-          onClick={() => navigate("/banking/summary")}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate("/banking/summary");
+          }}
           style={{
             ...bankingStyles.navIcon,
             borderColor: "#9c27b0",

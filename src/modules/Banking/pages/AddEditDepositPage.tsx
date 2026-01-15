@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
-import {
-  Deposit,
-  BankAccount,
-  DepositFormData,
-} from "../../../types/banking.types";
+import { Deposit, DepositFormData } from "../../../types/banking.types";
 import { formatDate } from "../../../utils/formatters";
 import { bankingStyles } from "../styles";
 
@@ -34,8 +30,21 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   const [selectedAccountCode, setSelectedAccountCode] = useState("");
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [localAccounts, setLocalAccounts] = useState<any[]>([]);
 
-  // Load deposit data if editing - using actual data from Firebase
+  // Refs for dropdown positioning
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Sync accounts when they load
+  useEffect(() => {
+    if (accounts.length > 0) {
+      setLocalAccounts(accounts);
+    }
+  }, [accounts]);
+
+  // Load deposit data if editing
   useEffect(() => {
     if (isEdit && depositId && deposits.length > 0) {
       const deposit = deposits.find((d) => d.id === depositId);
@@ -55,10 +64,24 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
     }
   }, [isEdit, depositId, deposits, accounts]);
 
-  // Helper to check if account is active (safely)
-  const isAccountActive = (account: BankAccount): boolean => {
-    return account.isActive === undefined ? true : account.isActive;
-  };
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setShowAccountDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleInputChange = (field: keyof DepositFormData, value: any) => {
     setFormData((prev) => ({
@@ -134,7 +157,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   }
 
   return (
-    <div style={bankingStyles.container}>
+    <div ref={containerRef} style={bankingStyles.container}>
       {/* Header */}
       <div style={bankingStyles.header}>
         <h1 style={bankingStyles.headerTitle}>
@@ -177,10 +200,10 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
       </div>
 
       {/* Form */}
-      <div style={{ padding: "15px" }}>
+      <div style={{ padding: "15px", position: "relative" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {/* Account Dropdown */}
-          <div style={{ position: "relative" }}>
+          {/* Account Dropdown - FIXED WIDTH to match container */}
+          <div style={{ position: "relative", width: "100%" }}>
             <label
               style={{
                 fontSize: "0.9rem",
@@ -192,79 +215,204 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
             >
               Account *
             </label>
-            <div style={{ position: "relative" }}>
+            <div style={{ position: "relative", width: "100%" }}>
               <input
+                ref={inputRef}
                 type="text"
                 value={selectedAccountCode}
                 readOnly
-                onClick={() => setShowAccountDropdown(!showAccountDropdown)}
-                placeholder="Select account"
+                onClick={() => {
+                  if (localAccounts.length > 0) {
+                    setShowAccountDropdown(!showAccountDropdown);
+                  } else {
+                    alert("Accounts are still loading. Please wait a moment.");
+                  }
+                }}
+                placeholder={
+                  dataLoading
+                    ? "Loading accounts..."
+                    : localAccounts.length > 0
+                    ? "Select account"
+                    : "No accounts available"
+                }
                 style={{
                   ...bankingStyles.input,
-                  cursor: "pointer",
+                  cursor: localAccounts.length > 0 ? "pointer" : "not-allowed",
                   paddingRight: "40px",
                   backgroundColor: "#fff",
+                  opacity: localAccounts.length > 0 ? 1 : 0.7,
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
+                disabled={localAccounts.length === 0}
               />
-              <div
-                style={{
-                  position: "absolute",
-                  right: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "#6c757d",
-                  pointerEvents: "none",
-                }}
-              >
-                ▼
-              </div>
+              {localAccounts.length > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#6c757d",
+                    pointerEvents: "none",
+                  }}
+                >
+                  ▼
+                </div>
+              )}
             </div>
 
-            {showAccountDropdown && (
+            {/* DROPDOWN - FIXED WIDTH to match container */}
+            {showAccountDropdown && localAccounts.length > 0 && (
               <div
+                ref={dropdownRef}
                 style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  right: 0,
+                  position: "fixed",
+                  top: inputRef.current
+                    ? inputRef.current.getBoundingClientRect().bottom +
+                      window.scrollY +
+                      4
+                    : "200px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "calc(100% - 30px)", // Match container padding
+                  maxWidth: "600px", // Match your container max-width
                   backgroundColor: "#fff",
                   border: "1px solid #e9ecef",
                   borderRadius: "8px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  zIndex: 100,
-                  maxHeight: "200px",
-                  overflowY: "auto",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  zIndex: 9999,
+                  maxHeight: "60vh",
+                  overflow: "hidden",
                   marginTop: "4px",
                 }}
               >
-                {accounts
-                  .filter((acc) => isAccountActive(acc))
-                  .sort((a, b) => a.acctCode.localeCompare(b.acctCode))
-                  .map((account) => (
-                    <button
-                      key={account.id}
-                      onClick={() =>
-                        handleAccountSelect(account.id, account.acctCode)
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "12px",
-                        textAlign: "left",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: "0.95rem",
-                        color: "#333",
-                        borderBottom: "1px solid #f1f3f4",
-                        backgroundColor:
-                          formData.accountId === account.id
-                            ? "#f0f7ff"
-                            : "transparent",
-                      }}
-                    >
-                      {account.acctCode}
-                    </button>
-                  ))}
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    borderBottom: "1px solid #f0f0f0",
+                    backgroundColor: "#f8f9fa",
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
+                    color: "#495057",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1,
+                  }}
+                >
+                  Select Account ({localAccounts.length} available)
+                  <button
+                    onClick={() => setShowAccountDropdown(false)}
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      fontSize: "1.2rem",
+                      cursor: "pointer",
+                      color: "#666",
+                      padding: "4px",
+                    }}
+                    title="Close"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    maxHeight: "calc(60vh - 60px)",
+                    overflowY: "auto",
+                    padding: "4px 0",
+                  }}
+                >
+                  {localAccounts
+                    .sort((a, b) => a.acctCode.localeCompare(b.acctCode))
+                    .map((account) => (
+                      <button
+                        key={account.id}
+                        onClick={() =>
+                          handleAccountSelect(account.id, account.acctCode)
+                        }
+                        style={{
+                          width: "100%",
+                          padding: "12px 16px",
+                          textAlign: "left",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          fontSize: "0.95rem",
+                          color: "#333",
+                          borderBottom: "1px solid #f5f5f5",
+                          backgroundColor:
+                            formData.accountId === account.id
+                              ? "#e8f0fe"
+                              : "transparent",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          transition: "background-color 0.2s",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (formData.accountId !== account.id) {
+                            e.currentTarget.style.backgroundColor = "#f8f9fa";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (formData.accountId !== account.id) {
+                            e.currentTarget.style.backgroundColor =
+                              "transparent";
+                          }
+                        }}
+                      >
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontWeight: 500,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {account.acctCode}
+                          </div>
+                          {account.acctDetails && (
+                            <div
+                              style={{
+                                fontSize: "0.8rem",
+                                color: "#666",
+                                marginTop: "2px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {account.acctDetails.split("\n")[0]}
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "0.85rem",
+                            fontWeight: 600,
+                            color:
+                              account.savingsAmount >= 0
+                                ? "#10b981"
+                                : "#dc2626",
+                            whiteSpace: "nowrap",
+                            marginLeft: "12px",
+                            textAlign: "right",
+                            minWidth: "80px",
+                          }}
+                        >
+                          ₹
+                          {(account.savingsAmount || 0).toLocaleString("en-IN")}
+                        </div>
+                      </button>
+                    ))}
+                </div>
               </div>
             )}
           </div>
@@ -289,7 +437,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 handleInputChange("amount", parseFloat(e.target.value) || 0)
               }
               placeholder="Enter amount"
-              style={bankingStyles.input}
+              style={{
+                ...bankingStyles.input,
+                width: "100%",
+                boxSizing: "border-box",
+              }}
               min="0"
               step="1000"
             />
@@ -323,6 +475,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   cursor: "pointer",
                   paddingRight: "40px",
                   backgroundColor: "#fff",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               />
               <button
@@ -375,6 +529,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   cursor: "pointer",
                   paddingRight: "40px",
                   backgroundColor: "#fff",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               />
               <button
@@ -422,6 +578,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 resize: "vertical",
                 fontFamily: "inherit",
                 lineHeight: "1.5",
+                width: "100%",
+                boxSizing: "border-box",
               }}
               maxLength={500}
             />
@@ -494,6 +652,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 saving || !formData.accountId || formData.amount <= 0
                   ? "not-allowed"
                   : "pointer",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           >
             {saving ? (

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBankingData } from "./modules/Banking/hooks/useBankingData";
 import { useSettings } from "./contexts/SettingsContext";
-import { bankingStyles } from "./modules/Banking/BankingStyles";
+import { bankingStyles } from "./modules/Banking/styles/BankingStyles";
 
 const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
@@ -79,62 +79,6 @@ const MyDataHomepage: React.FC = () => {
     return account ? account.acctCode : "Unknown";
   };
 
-  //   // Module navigation data - Use consistent approach
-  //   const modules = [
-  //     {
-  //       id: "banking",
-  //       name: "Banking",
-  //       icon: "🏦",
-  //       description: "Accounts, Deposits, Summary",
-  //       path: "/banking", // Add path for banking too
-  //       color: "#4285f4",
-  //     },
-  //     {
-  //       id: "jewellery",
-  //       name: "Jewellery",
-  //       icon: "💎",
-  //       description: "Gold & Diamond Tracking",
-  //       path: "/jewellery",
-  //       color: "#FFD700",
-  //     },
-  //     {
-  //       id: "properties",
-  //       name: "Properties",
-  //       icon: "🏠",
-  //       description: "Real Estate Assets",
-  //       path: "/properties",
-  //       color: "#34a853",
-  //     },
-  //     {
-  //       id: "online",
-  //       name: "Online",
-  //       icon: "🌐",
-  //       description: "Digital Accounts & Subscriptions",
-  //       path: "/online",
-  //       color: "#ea4335",
-  //     },
-  //   ];
-
-  // Handle module click - simple approach
-  //   const handleModuleClick = (moduleId: string) => {
-  //     switch (moduleId) {
-  //       case "banking":
-  //         navigate("/banking");
-  //         break;
-  //       case "jewellery":
-  //         navigate("/jewellery");
-  //         break;
-  //       case "properties":
-  //         navigate("/properties");
-  //         break;
-  //       case "online":
-  //         navigate("/online");
-  //         break;
-  //       default:
-  //         console.log("Unknown module:", moduleId);
-  //     }
-  //   };
-
   if (loading) {
     return (
       <div style={bankingStyles.container}>
@@ -161,7 +105,7 @@ const MyDataHomepage: React.FC = () => {
             title="Settings"
           >
             ⚙️
-            {settings.enableEditDelete && (
+            {settings?.showDelete && ( // Changed from settings.enableEditDelete
               <span style={styles.editBadge}>✏️</span>
             )}
           </button>
@@ -688,7 +632,7 @@ const cardIconsStyle = `
   
   .navItem:hover {
     transform: translateY(-2px);
-    boxShadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     border-color: #4285f4;
   }
   

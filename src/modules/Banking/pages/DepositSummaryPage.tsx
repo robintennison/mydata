@@ -2,6 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { bankingStyles } from "../styles";
 import { useBankingData } from "../hooks/useBankingData";
+import {
+  collection,
+  doc,
+  updateDoc,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { firestore } from "../../../lib/firebase";
+import styles from "./DepositSummaryPage.styles"; // This should work now
 
 interface AccountSummary {
   accountId: string;
@@ -14,13 +23,14 @@ interface AccountSummary {
 
 const DepositSummaryPage: React.FC = () => {
   const navigate = useNavigate();
-  const { loading, accounts, deposits, adjustments, settings } =
-    useBankingData();
+  const { loading, accounts, deposits, adjustments } = useBankingData(); // Removed unused settings
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [editedSavings, setEditedSavings] = useState("");
   const [editedDeposits, setEditedDeposits] = useState("");
   const [summaries, setSummaries] = useState<AccountSummary[]>([]);
   const [showInactive, setShowInactive] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Convert rupees to lakhs
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
@@ -32,10 +42,10 @@ const DepositSummaryPage: React.FC = () => {
   };
 
   // Prepare summary data
-  useEffect(() => {
-    if (!accounts.length || !deposits.length) return;
+  const prepareSummaries = () => {
+    if (!accounts.length || !deposits.length) return [];
 
-    const filteredDeposits = settings?.showInactive
+    const filteredDeposits = showInactive
       ? deposits
       : deposits.filter((deposit) => deposit.active !== false);
 
@@ -50,7 +60,7 @@ const DepositSummaryPage: React.FC = () => {
         .filter((adj) => adj.accountId === account.id)
         .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
 
-      // Total deposits = base deposits + adjustments
+      // Total deposits = base deposits + adjustments (SAME AS KOTLIN)
       const totalDeposits = baseDeposits + adjustmentsTotal;
 
       // Convert to lakhs for display
@@ -68,9 +78,16 @@ const DepositSummaryPage: React.FC = () => {
     });
 
     // Sort by account code
-    newSummaries.sort((a, b) => a.accountCode.localeCompare(b.accountCode));
+    return newSummaries.sort((a, b) =>
+      a.accountCode.localeCompare(b.accountCode)
+    );
+  };
+
+  // Update summaries when data changes
+  useEffect(() => {
+    const newSummaries = prepareSummaries();
     setSummaries(newSummaries);
-  }, [accounts, deposits, adjustments, settings?.showInactive]);
+  }, [accounts, deposits, adjustments, showInactive]);
 
   // Start editing a row
   const startEditing = (
@@ -79,6 +96,7 @@ const DepositSummaryPage: React.FC = () => {
     deposits: number
   ) => {
     setEditingAccountId(accountId);
+    setSaveError(null);
     const savingsLakhs = rupeesToLakhs(savings);
     const depositsLakhs = rupeesToLakhs(deposits);
     setEditedSavings(savingsLakhs.toFixed(2));
@@ -90,30 +108,86 @@ const DepositSummaryPage: React.FC = () => {
     setEditingAccountId(null);
     setEditedSavings("");
     setEditedDeposits("");
+    setSaveError(null);
   };
 
-  // Save edits
-  const saveEdits = (accountId: string) => {
+  // FIREBASE: Update account savings in 'accounts' collection
+  const updateAccountSavings = async (
+    accountId: string,
+    savingsRupees: number
+  ) => {
     try {
+      console.log("Updating account savings:", accountId, savingsRupees);
+      const accountRef = doc(firestore, "accounts", accountId);
+      await updateDoc(accountRef, {
+        savingsAmount: savingsRupees,
+        updatedAt: serverTimestamp(),
+      });
+      console.log("Account savings updated successfully");
+      return true;
+    } catch (error: any) {
+      console.error("Firestore update error:", error);
+      throw new Error(
+        `Failed to update savings: ${error.message || "Unknown error"}`
+      );
+    }
+  };
+
+  // FIREBASE: Add adjustment to 'deposit_adjustments' collection
+  const addDepositAdjustment = async (adjustment: {
+    accountId: string;
+    adjustmentAmount: number;
+    note: string;
+  }) => {
+    try {
+      console.log("Adding deposit adjustment:", adjustment);
+      const adjustmentsRef = collection(firestore, "deposit_adjustments");
+      await addDoc(adjustmentsRef, {
+        ...adjustment,
+        createdAt: serverTimestamp(),
+      });
+      console.log("Deposit adjustment added successfully");
+      return true;
+    } catch (error: any) {
+      console.error("Firestore add adjustment error:", error);
+      throw new Error(
+        `Failed to add adjustment: ${error.message || "Unknown error"}`
+      );
+    }
+  };
+
+  // Simple refresh function if hook doesn't have it
+  const refreshData = () => {
+    // Reload the page as fallback
+    window.location.reload();
+  };
+
+  // Save edits - FIXED VERSION WITH REAL FIREBASE CALLS
+  const saveEdits = async (accountId: string) => {
+    try {
+      setIsSaving(true);
+      setSaveError(null);
+
       const savingsLakhs = parseFloat(editedSavings);
       const depositsLakhs = parseFloat(editedDeposits);
 
       if (isNaN(savingsLakhs) || isNaN(depositsLakhs)) {
-        alert("Please enter valid numbers");
+        setSaveError("Please enter valid numbers");
+        setIsSaving(false);
         return;
       }
 
-      // Update savings (this would typically be an API call)
+      console.log("Saving edits for account:", accountId, {
+        savingsLakhs,
+        depositsLakhs,
+      });
+
+      // 1. Update savings in accounts collection (SAME AS KOTLIN)
       const savingsRupees = lakhsToRupees(savingsLakhs);
-      console.log(
-        `Update savings for account ${accountId}: ${savingsRupees} rupees`
-      );
+      await updateAccountSavings(accountId, savingsRupees);
 
-      // Calculate current deposits for this account
-      const account = accounts.find((a) => a.id === accountId);
-      if (!account) return;
-
-      const filteredDepositsList = settings?.showInactive
+      // 2. Calculate current deposits for this account (SAME LOGIC AS KOTLIN)
+      const filteredDepositsList = showInactive
         ? deposits
         : deposits.filter((d) => d.active !== false);
 
@@ -130,30 +204,38 @@ const DepositSummaryPage: React.FC = () => {
       const targetRupees = lakhsToRupees(depositsLakhs);
       const adjustmentNeeded = targetRupees - currentTotalWithAdjustments;
 
-      // Only create adjustment if there's a meaningful difference
+      console.log("Deposit calculation:", {
+        currentBaseDeposits,
+        currentAdjustments,
+        currentTotalWithAdjustments,
+        targetRupees,
+        adjustmentNeeded,
+      });
+
+      // 3. Create adjustment if needed (EXACTLY LIKE KOTLIN)
       if (Math.abs(adjustmentNeeded) > 0.01) {
-        const adjustment = {
+        await addDepositAdjustment({
           accountId,
           adjustmentAmount: adjustmentNeeded,
-          note: "Summary screen adjustment",
-          id: Date.now().toString(), // Temporary ID
-        };
-        console.log("Create adjustment:", adjustment);
-        // TODO: Call API to save adjustment
+          note: "Web summary screen adjustment",
+        });
       }
 
-      alert("Changes saved successfully!");
+      // 4. Refresh data (using fallback)
+      refreshData();
 
-      // Reset editing state
+      // 5. Cancel editing mode
       cancelEditing();
 
-      // Refresh data (in a real app, this would reload from API)
-      setTimeout(() => {
-        window.location.reload(); // Simple refresh for demo
-      }, 500);
-    } catch (error) {
+      // Show success message
+      alert("✓ Changes saved successfully! Totals updated.");
+    } catch (error: any) {
       console.error("Error saving edits:", error);
-      alert("Error saving changes. Please try again.");
+      setSaveError(
+        error.message || "Failed to save changes. Please try again."
+      );
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -210,6 +292,20 @@ const DepositSummaryPage: React.FC = () => {
           </label>
         </div>
 
+        {/* Error Message */}
+        {saveError && (
+          <div style={styles.errorContainer}>
+            <div style={styles.errorIcon}>⚠️</div>
+            <div style={styles.errorText}>{saveError}</div>
+            <button
+              onClick={() => setSaveError(null)}
+              style={styles.errorClose}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {accounts.length === 0 ? (
           <div style={styles.emptyState}>
             <div style={styles.emptyIcon}>📊</div>
@@ -233,16 +329,23 @@ const DepositSummaryPage: React.FC = () => {
                 <div style={{ ...styles.headerCell, flex: 1.5 }}>Account</div>
                 <div style={{ ...styles.headerCell, flex: 1 }}>Savings</div>
                 <div style={{ ...styles.headerCell, flex: 1 }}>Deposits</div>
-                <div style={{ ...styles.headerCell, flex: 0.5 }}></div>
+                <div style={{ ...styles.headerCell, flex: 0.8 }}>Actions</div>
               </div>
 
               {/* Table Rows */}
               <div style={styles.tableBody}>
-                {summaries.map((summary, _index) => {
+                {summaries.map((summary, index) => {
                   const isEditing = editingAccountId === summary.accountId;
 
                   return (
-                    <div key={summary.accountId} style={styles.tableRow}>
+                    <div
+                      key={summary.accountId}
+                      style={{
+                        ...styles.tableRow,
+                        backgroundColor:
+                          index % 2 === 0 ? "#fafafa" : "#ffffff",
+                      }}
+                    >
                       {/* Account Code */}
                       <div style={{ ...styles.cell, flex: 1.5 }}>
                         <div style={styles.accountCode}>
@@ -253,15 +356,19 @@ const DepositSummaryPage: React.FC = () => {
                       {/* Savings Amount */}
                       <div style={{ ...styles.cell, flex: 1 }}>
                         {isEditing ? (
-                          <input
-                            type="number"
-                            value={editedSavings}
-                            onChange={(e) => setEditedSavings(e.target.value)}
-                            style={styles.editInput}
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                          />
+                          <div style={styles.editInputContainer}>
+                            <input
+                              type="number"
+                              value={editedSavings}
+                              onChange={(e) => setEditedSavings(e.target.value)}
+                              style={styles.editInput}
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              disabled={isSaving}
+                            />
+                            <span style={styles.lakhSuffix}>L</span>
+                          </div>
                         ) : (
                           <div style={styles.amountDisplay}>
                             {summary.savingsInLakhs}
@@ -272,15 +379,21 @@ const DepositSummaryPage: React.FC = () => {
                       {/* Deposits Amount */}
                       <div style={{ ...styles.cell, flex: 1 }}>
                         {isEditing ? (
-                          <input
-                            type="number"
-                            value={editedDeposits}
-                            onChange={(e) => setEditedDeposits(e.target.value)}
-                            style={styles.editInput}
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                          />
+                          <div style={styles.editInputContainer}>
+                            <input
+                              type="number"
+                              value={editedDeposits}
+                              onChange={(e) =>
+                                setEditedDeposits(e.target.value)
+                              }
+                              style={styles.editInput}
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              disabled={isSaving}
+                            />
+                            <span style={styles.lakhSuffix}>L</span>
+                          </div>
                         ) : (
                           <div style={styles.amountDisplay}>
                             {summary.depositsInLakhs}
@@ -292,23 +405,29 @@ const DepositSummaryPage: React.FC = () => {
                       <div
                         style={{
                           ...styles.cell,
-                          flex: 0.5,
+                          flex: 0.8,
                           justifyContent: "center",
                         }}
                       >
                         {isEditing ? (
-                          <div style={styles.editButtons}>
+                          <div style={styles.actionButtons}>
                             <button
                               onClick={() => saveEdits(summary.accountId)}
                               style={styles.saveButton}
                               title="Save"
+                              disabled={isSaving}
                             >
-                              ✓
+                              {isSaving ? (
+                                <div style={styles.spinnerSmall}></div>
+                              ) : (
+                                "✓"
+                              )}
                             </button>
                             <button
                               onClick={cancelEditing}
                               style={styles.cancelButton}
                               title="Cancel"
+                              disabled={isSaving}
                             >
                               ✕
                             </button>
@@ -324,6 +443,7 @@ const DepositSummaryPage: React.FC = () => {
                             }
                             style={styles.editButton}
                             title="Edit"
+                            disabled={editingAccountId !== null}
                           >
                             ✏️
                           </button>
@@ -345,25 +465,11 @@ const DepositSummaryPage: React.FC = () => {
                 <div style={{ ...styles.totalsCell, flex: 1 }}>
                   <strong>{formatLakhs(rupeesToLakhs(totalDeposits))}</strong>
                 </div>
-                <div style={{ ...styles.totalsCell, flex: 0.5 }}></div>
-              </div>
-            </div>
-
-            {/* Instructions */}
-            <div style={styles.instructions}>
-              <div style={styles.instructionItem}>
-                <span style={styles.instructionIcon}>✏️</span>
-                <span>Tap edit icon to modify values</span>
-              </div>
-              <div style={styles.instructionItem}>
-                <span style={styles.instructionIcon}>💾</span>
-                <span>
-                  Deposit changes create adjustments in adjustment table
-                </span>
-              </div>
-              <div style={styles.instructionItem}>
-                <span style={styles.instructionIcon}>⚠️</span>
-                <span>Savings changes update account directly</span>
+                <div style={{ ...styles.totalsCell, flex: 0.8 }}>
+                  <span style={styles.totalChangeIndicator}>
+                    {adjustments.length > 0 ? `${adjustments.length} adj` : ""}
+                  </span>
+                </div>
               </div>
             </div>
           </>
@@ -375,234 +481,5 @@ const DepositSummaryPage: React.FC = () => {
     </div>
   );
 };
-
-// Styles
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    width: "100%",
-    maxWidth: "500px",
-    margin: "0 auto",
-    backgroundColor: "#f5f7fa",
-    minHeight: "100vh",
-  },
-  backButton: {
-    background: "none",
-    border: "none",
-    fontSize: "1.5rem",
-    color: "white",
-    cursor: "pointer",
-    marginRight: "10px",
-    padding: "5px",
-  },
-  content: {
-    padding: "15px",
-  },
-  toggleContainer: {
-    backgroundColor: "white",
-    borderRadius: "8px",
-    padding: "12px 15px",
-    marginBottom: "15px",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-    border: "1px solid #e9ecef",
-  },
-  toggleLabel: {
-    display: "flex",
-    alignItems: "center",
-    cursor: "pointer",
-  },
-  toggleInput: {
-    marginRight: "10px",
-    width: "18px",
-    height: "18px",
-  },
-  toggleText: {
-    fontSize: "0.9rem",
-    color: "#666",
-  },
-  tableContainer: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    overflow: "hidden",
-    marginBottom: "15px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    border: "1px solid #e9ecef",
-  },
-  tableHeader: {
-    display: "flex",
-    backgroundColor: "#f8f9fa",
-    padding: "15px",
-    borderBottom: "2px solid #e9ecef",
-    fontSize: "0.9rem",
-    fontWeight: 600,
-    color: "#495057",
-  },
-  headerCell: {
-    padding: "0 8px",
-  },
-  tableBody: {
-    maxHeight: "400px",
-    overflowY: "auto",
-  },
-  tableRow: {
-    display: "flex",
-    alignItems: "center",
-    padding: "12px 15px",
-    borderBottom: "1px solid #f0f0f0",
-    minHeight: "60px",
-  },
-  cell: {
-    padding: "0 8px",
-    display: "flex",
-    alignItems: "center",
-  },
-  accountCode: {
-    fontSize: "0.95rem",
-    fontWeight: 500,
-    color: "#333",
-  },
-  amountDisplay: {
-    fontSize: "0.95rem",
-    color: "#333",
-    fontWeight: 500,
-  },
-  editInput: {
-    width: "100%",
-    padding: "8px",
-    border: "1px solid #ddd",
-    borderRadius: "6px",
-    fontSize: "0.9rem",
-    textAlign: "right",
-  },
-  editButtons: {
-    display: "flex",
-    gap: "6px",
-  },
-  saveButton: {
-    background: "none",
-    border: "none",
-    fontSize: "1.1rem",
-    color: "#34a853",
-    cursor: "pointer",
-    padding: "5px",
-    borderRadius: "4px",
-  },
-  cancelButton: {
-    background: "none",
-    border: "none",
-    fontSize: "1.1rem",
-    color: "#ea4335",
-    cursor: "pointer",
-    padding: "5px",
-    borderRadius: "4px",
-  },
-  editButton: {
-    background: "none",
-    border: "none",
-    fontSize: "1rem",
-    color: "#666",
-    cursor: "pointer",
-    padding: "5px",
-    borderRadius: "4px",
-    opacity: 0.7,
-  },
-  totalsRow: {
-    display: "flex",
-    alignItems: "center",
-    padding: "15px",
-    backgroundColor: "#f8f9fa",
-    borderTop: "2px solid #e9ecef",
-    fontSize: "0.95rem",
-  },
-  totalsCell: {
-    padding: "0 8px",
-  },
-  instructions: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: "15px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    border: "1px solid #e9ecef",
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  instructionItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    fontSize: "0.85rem",
-    color: "#666",
-  },
-  instructionIcon: {
-    fontSize: "1rem",
-    width: "24px",
-    textAlign: "center" as const,
-  },
-  emptyState: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: "40px 20px",
-    textAlign: "center" as const,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    border: "1px solid #e9ecef",
-    marginTop: "20px",
-  },
-  emptyIcon: {
-    fontSize: "3rem",
-    marginBottom: "15px",
-    opacity: 0.5,
-  },
-  emptyText: {
-    fontSize: "1.1rem",
-    fontWeight: 500,
-    marginBottom: "5px",
-    color: "#333",
-  },
-  emptySubtext: {
-    fontSize: "0.9rem",
-    color: "#666",
-    marginBottom: "20px",
-  },
-  addButton: {
-    padding: "12px 24px",
-    border: "none",
-    borderRadius: "8px",
-    backgroundColor: "#4285f4",
-    color: "white",
-    fontSize: "0.95rem",
-    fontWeight: 500,
-    cursor: "pointer",
-  },
-};
-
-// Add hover effects
-const hoverStyles = `
-  .table-row:hover {
-    background-color: #f8f9fa;
-  }
-  
-  .edit-button:hover {
-    opacity: 1;
-    background-color: #f0f0f0;
-  }
-  
-  .save-button:hover {
-    background-color: rgba(52, 168, 83, 0.1);
-  }
-  
-  .cancel-button:hover {
-    background-color: rgba(234, 67, 53, 0.1);
-  }
-  
-  .add-button:hover {
-    background-color: #3367d6;
-  }
-`;
-
-if (typeof document !== "undefined") {
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = hoverStyles;
-  document.head.appendChild(styleSheet);
-}
 
 export default DepositSummaryPage;

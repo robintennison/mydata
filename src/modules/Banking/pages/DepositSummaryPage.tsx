@@ -8,9 +8,11 @@ import {
   updateDoc,
   addDoc,
   serverTimestamp,
+  setDoc,
+  getDoc,
 } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
-import styles from "./DepositSummaryPage.styles"; // This should work now
+import styles from "./DepositSummaryPage.styles";
 
 interface AccountSummary {
   accountId: string;
@@ -23,7 +25,7 @@ interface AccountSummary {
 
 const DepositSummaryPage: React.FC = () => {
   const navigate = useNavigate();
-  const { loading, accounts, deposits, adjustments } = useBankingData(); // Removed unused settings
+  const { loading, accounts, deposits, adjustments } = useBankingData();
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [editedSavings, setEditedSavings] = useState("");
   const [editedDeposits, setEditedDeposits] = useState("");
@@ -31,6 +33,9 @@ const DepositSummaryPage: React.FC = () => {
   const [showInactive, setShowInactive] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isUpdatingHistory, setIsUpdatingHistory] = useState(false);
+  const [historyButtonText, setHistoryButtonText] = useState("");
+  const [currentMonth, setCurrentMonth] = useState("");
 
   // Convert rupees to lakhs
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
@@ -40,6 +45,41 @@ const DepositSummaryPage: React.FC = () => {
   const formatLakhs = (lakhs: number): string => {
     return `${lakhs.toFixed(2)} L`;
   };
+
+  // Get current month in "YYYY-MM" format
+  useEffect(() => {
+    const now = new Date();
+    const month = now.getMonth() + 1; // Months are 0-indexed
+    const year = now.getFullYear();
+    const monthStr = month < 10 ? `0${month}` : `${month}`;
+    setCurrentMonth(`${year}-${monthStr}`); // e.g., "2026-01"
+  }, []);
+
+  // Check if current month exists in history
+  const checkCurrentMonthHistory = async () => {
+    if (!currentMonth) return;
+
+    try {
+      const historyRef = doc(firestore, "history", currentMonth);
+      const historyDoc = await getDoc(historyRef);
+
+      if (historyDoc.exists()) {
+        setHistoryButtonText("Update History for Current Month");
+      } else {
+        setHistoryButtonText("Insert History for Current Month");
+      }
+    } catch (error) {
+      console.error("Error checking history:", error);
+      // Default to Insert if there's an error
+      setHistoryButtonText("Insert History for Current Month");
+    }
+  };
+
+  useEffect(() => {
+    if (currentMonth) {
+      checkCurrentMonthHistory();
+    }
+  }, [currentMonth]);
 
   // Prepare summary data
   const prepareSummaries = () => {
@@ -156,13 +196,12 @@ const DepositSummaryPage: React.FC = () => {
     }
   };
 
-  // Simple refresh function if hook doesn't have it
+  // Simple refresh function
   const refreshData = () => {
-    // Reload the page as fallback
     window.location.reload();
   };
 
-  // Save edits - FIXED VERSION WITH REAL FIREBASE CALLS
+  // Save edits
   const saveEdits = async (accountId: string) => {
     try {
       setIsSaving(true);
@@ -221,7 +260,7 @@ const DepositSummaryPage: React.FC = () => {
         });
       }
 
-      // 4. Refresh data (using fallback)
+      // 4. Refresh data
       refreshData();
 
       // 5. Cancel editing mode
@@ -236,6 +275,58 @@ const DepositSummaryPage: React.FC = () => {
       );
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Update or insert history for current month
+  const handleHistoryUpdate = async () => {
+    try {
+      setIsUpdatingHistory(true);
+
+      if (!currentMonth) {
+        alert("Unable to determine current month");
+        return;
+      }
+
+      // Use the totals calculated from summaries
+      const historyData = {
+        month: currentMonth,
+        savings: totalSavings, // From your totals calculation
+        totalDeposits: totalDeposits, // From your totals calculation
+      };
+
+      console.log("Saving history for month:", currentMonth, historyData);
+
+      const historyRef = doc(firestore, "history", currentMonth);
+
+      // Check if document exists
+      const historyDoc = await getDoc(historyRef);
+
+      if (historyDoc.exists()) {
+        // Update existing
+        await updateDoc(historyRef, historyData);
+        alert(
+          `✓ History updated for ${currentMonth}!\nSavings: ${formatLakhs(
+            rupeesToLakhs(totalSavings)
+          )}\nDeposits: ${formatLakhs(rupeesToLakhs(totalDeposits))}`
+        );
+      } else {
+        // Insert new
+        await setDoc(historyRef, historyData);
+        alert(
+          `✓ History created for ${currentMonth}!\nSavings: ${formatLakhs(
+            rupeesToLakhs(totalSavings)
+          )}\nDeposits: ${formatLakhs(rupeesToLakhs(totalDeposits))}`
+        );
+      }
+
+      // Update button text
+      await checkCurrentMonthHistory();
+    } catch (error: any) {
+      console.error("Error updating history:", error);
+      alert(`❌ Failed to update history: ${error.message || "Unknown error"}`);
+    } finally {
+      setIsUpdatingHistory(false);
     }
   };
 
@@ -470,6 +561,70 @@ const DepositSummaryPage: React.FC = () => {
                     {adjustments.length > 0 ? `${adjustments.length} adj` : ""}
                   </span>
                 </div>
+              </div>
+            </div>
+
+            {/* History Update Button - Separate section below table */}
+            <div style={styles.historySection}>
+              <div style={styles.historyHeader}>
+                <span style={styles.historyIcon}>📅</span>
+                <span style={styles.historyTitle}>Monthly History</span>
+              </div>
+              <div style={styles.historyInfo}>
+                <div style={styles.historyRow}>
+                  <span style={styles.historyLabel}>Current Month:</span>
+                  <span style={styles.historyValue}>{currentMonth}</span>
+                </div>
+                <div style={styles.historyRow}>
+                  <span style={styles.historyLabel}>Total Savings:</span>
+                  <span style={styles.historyValue}>
+                    {formatLakhs(rupeesToLakhs(totalSavings))}
+                  </span>
+                </div>
+                <div style={styles.historyRow}>
+                  <span style={styles.historyLabel}>Total Deposits:</span>
+                  <span style={styles.historyValue}>
+                    {formatLakhs(rupeesToLakhs(totalDeposits))}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={handleHistoryUpdate}
+                style={styles.historyButton}
+                disabled={isUpdatingHistory || !currentMonth}
+              >
+                {isUpdatingHistory ? (
+                  <>
+                    <div style={styles.spinnerSmall}></div>
+                    <span style={{ marginLeft: "8px" }}>Processing...</span>
+                  </>
+                ) : (
+                  historyButtonText || "Loading..."
+                )}
+              </button>
+              <div style={styles.historyNote}>
+                This will{" "}
+                {historyButtonText?.includes("Update") ? "update" : "create"} a
+                record in the history table for {currentMonth}
+              </div>
+            </div>
+
+            {/* Instructions */}
+            <div style={styles.instructions}>
+              <div style={styles.instructionItem}>
+                <span style={styles.instructionIcon}>✏️</span>
+                <span>Click edit icon to modify values</span>
+              </div>
+              <div style={styles.instructionItem}>
+                <span style={styles.instructionIcon}>📊</span>
+                <span>Total = Base Deposits + Adjustments</span>
+              </div>
+              <div style={styles.instructionItem}>
+                <span style={styles.instructionIcon}>💾</span>
+                <span>
+                  Savings update "accounts", deposits create
+                  "deposit_adjustments"
+                </span>
               </div>
             </div>
           </>

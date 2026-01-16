@@ -289,6 +289,75 @@ const styles: { [key: string]: CSSProperties } = {
     fontWeight: 500,
     cursor: "pointer",
   },
+
+  // Add these to your existing styles object
+historySection: {
+  backgroundColor: "white",
+  borderRadius: "12px",
+  padding: "20px",
+  marginBottom: "15px",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+  border: "1px solid #e9ecef",
+  textAlign: "center" as const,
+},
+historyHeader: {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "10px",
+  marginBottom: "15px",
+},
+historyIcon: {
+  fontSize: "1.5rem",
+},
+historyTitle: {
+  fontSize: "1.1rem",
+  fontWeight: 600,
+  color: "#333",
+},
+historyInfo: {
+  backgroundColor: "#f8f9fa",
+  borderRadius: "8px",
+  padding: "15px",
+  marginBottom: "15px",
+  textAlign: "left" as const,
+},
+historyRow: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "6px 0",
+  borderBottom: "1px solid #eee",
+},
+historyLabel: {
+  fontSize: "0.9rem",
+  color: "#666",
+},
+historyValue: {
+  fontSize: "0.9rem",
+  fontWeight: 500,
+  color: "#333",
+},
+historyButton: {
+  padding: "12px 24px",
+  border: "none",
+  borderRadius: "8px",
+  backgroundColor: "#4285f4",
+  color: "white",
+  fontSize: "0.95rem",
+  fontWeight: 500,
+  cursor: "pointer",
+  width: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: "10px",
+},
+historyNote: {
+  fontSize: "0.8rem",
+  color: "#666",
+  fontStyle: "italic",
+},
 };
 
 export default styles;

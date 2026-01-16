@@ -1,14 +1,19 @@
-// src/modules/SettingsPage/styles.ts
+// src/modules/SettingsPageStyles.ts
 export const settingsStyles = {
   container: {
     minHeight: "100vh",
     backgroundColor: "#f8fafc",
+    maxWidth: "500px",
+    margin: "0 auto",
+    boxShadow: "0 0 20px rgba(0,0,0,0.1)",
   } as React.CSSProperties,
 
   header: {
     backgroundColor: "#ffffff",
     padding: "24px 20px",
     borderBottom: "1px solid #e2e8f0",
+    borderTopLeftRadius: "8px",
+    borderTopRightRadius: "8px",
   } as React.CSSProperties,
 
   headerTitle: {
@@ -58,10 +63,13 @@ export const settingsStyles = {
 
   content: {
     padding: "15px",
+    backgroundColor: "#ffffff",
+    minHeight: "calc(100vh - 160px)",
   } as React.CSSProperties,
 
   section: {
-    marginBottom: "30px",
+    marginBottom: "25px",
+    padding: "0 5px",
   } as React.CSSProperties,
 
   sectionTitle: {
@@ -69,6 +77,9 @@ export const settingsStyles = {
     fontSize: "18px",
     fontWeight: "600",
     color: "#1e293b",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
   } as React.CSSProperties,
 
   fieldContainer: {
@@ -110,17 +121,20 @@ export const settingsStyles = {
   editHint: {
     color: "#6b7280",
     fontSize: "14px",
+    fontWeight: "500",
   } as React.CSSProperties,
 
   currencySymbol: {
     color: "#666",
     fontWeight: "500",
+    fontSize: "16px",
   } as React.CSSProperties,
 
   editControls: {
     display: "flex",
     gap: "10px",
     alignItems: "center",
+    marginTop: "5px",
   } as React.CSSProperties,
 
   editInputContainer: {
@@ -167,8 +181,11 @@ export const settingsStyles = {
     fontSize: "14px",
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
     gap: "5px",
     transition: "all 0.2s",
+    minWidth: "40px",
+    height: "40px",
   } as React.CSSProperties,
 
   saveButton: {
@@ -185,21 +202,26 @@ export const settingsStyles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    padding: "12px 0",
+    borderBottom: "1px solid #f1f5f9",
   } as React.CSSProperties,
 
   toggleLabel: {
     flex: 1,
+    paddingRight: "15px",
   } as React.CSSProperties,
 
   toggleTitle: {
     fontWeight: "500",
     color: "#1e293b",
     marginBottom: "4px",
+    fontSize: "15px",
   } as React.CSSProperties,
 
   toggleDescription: {
-    fontSize: "0.9rem",
+    fontSize: "0.85rem",
     color: "#64748b",
+    lineHeight: "1.4",
   } as React.CSSProperties,
 
   toggleSwitch: {
@@ -210,6 +232,7 @@ export const settingsStyles = {
     position: "relative",
     cursor: "pointer",
     transition: "background-color 0.3s",
+    flexShrink: 0,
   } as React.CSSProperties,
 
   toggleSwitchOn: {
@@ -232,7 +255,8 @@ export const settingsStyles = {
   } as React.CSSProperties,
 
   listSection: {
-    marginBottom: "30px",
+    marginBottom: "25px",
+    padding: "0 5px",
   } as React.CSSProperties,
 
   listHeader: {
@@ -273,6 +297,7 @@ export const settingsStyles = {
     cursor: "pointer",
     fontSize: "14px",
     transition: "all 0.2s",
+    minWidth: "60px",
   } as React.CSSProperties,
 
   listButtonHover: {
@@ -291,6 +316,7 @@ export const settingsStyles = {
     alignItems: "center",
     justifyContent: "center",
     width: "40px",
+    height: "40px",
     transition: "all 0.2s",
   } as React.CSSProperties,
 
@@ -298,6 +324,7 @@ export const settingsStyles = {
     border: "1px solid #e5e7eb",
     borderRadius: "8px",
     overflow: "hidden",
+    marginTop: "10px",
   } as React.CSSProperties,
 
   listItem: {
@@ -307,6 +334,7 @@ export const settingsStyles = {
     padding: "12px 15px",
     borderBottom: "1px solid #f3f4f6",
     backgroundColor: "#ffffff",
+    transition: "background-color 0.2s",
   } as React.CSSProperties,
 
   listItemEven: {
@@ -316,11 +344,14 @@ export const settingsStyles = {
   listItemText: {
     fontSize: "16px",
     color: "#1e293b",
+    flex: 1,
+    paddingRight: "10px",
   } as React.CSSProperties,
 
   listItemActions: {
     display: "flex",
     gap: "8px",
+    flexShrink: 0,
   } as React.CSSProperties,
 
   iconActionButton: {
@@ -353,6 +384,7 @@ export const settingsStyles = {
     padding: "20px",
     textAlign: "center",
     color: "#6b7280",
+    fontStyle: "italic",
   } as React.CSSProperties,
 
   loadingContainer: {
@@ -361,18 +393,23 @@ export const settingsStyles = {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "60vh",
+    backgroundColor: "#f8fafc",
   } as React.CSSProperties,
 
   loadingSpinner: {
-    width: "100%",
-    height: "2px",
-    backgroundColor: "#3b82f6",
-    marginBottom: "10px",
+    width: "40px",
+    height: "40px",
+    border: "3px solid #f3f3f3",
+    borderTop: "3px solid #3b82f6",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    marginBottom: "15px",
   } as React.CSSProperties,
 
   loadingText: {
     color: "#6b7280",
     fontSize: "14px",
+    fontWeight: "500",
   } as React.CSSProperties,
 
   dialogOverlay: {
@@ -386,6 +423,7 @@ export const settingsStyles = {
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1000,
+    padding: "20px",
   } as React.CSSProperties,
 
   dialog: {
@@ -393,7 +431,7 @@ export const settingsStyles = {
     borderRadius: "12px",
     padding: "24px",
     maxWidth: "400px",
-    width: "90%",
+    width: "100%",
     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
   } as React.CSSProperties,
 
@@ -408,12 +446,14 @@ export const settingsStyles = {
     margin: "0 0 24px 0",
     color: "#6b7280",
     lineHeight: "1.5",
+    fontSize: "14px",
   } as React.CSSProperties,
 
   dialogActions: {
     display: "flex",
     gap: "12px",
     justifyContent: "flex-end",
+    marginTop: "20px",
   } as React.CSSProperties,
 
   dialogButton: {
@@ -423,6 +463,8 @@ export const settingsStyles = {
     cursor: "pointer",
     border: "none",
     transition: "all 0.2s",
+    fontSize: "14px",
+    minWidth: "80px",
   } as React.CSSProperties,
 
   cancelDialogButton: {
@@ -444,5 +486,6 @@ export const settingsStyles = {
   disabledButton: {
     backgroundColor: "#9ca3af",
     cursor: "not-allowed",
+    opacity: 0.6,
   } as React.CSSProperties,
 };

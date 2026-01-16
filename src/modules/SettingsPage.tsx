@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../contexts/SettingsContext";
-import { bankingStyles } from "./Banking/styles/BankingStyles";
+import { settingsStyles } from "./SettingsPageStyles";
 
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -164,40 +164,62 @@ const SettingsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={bankingStyles.loadingContainer}>
-        <div style={bankingStyles.spinner}></div>
-        <p>Loading settings...</p>
+      <div style={settingsStyles.loadingContainer}>
+        <div style={settingsStyles.loadingSpinner}></div>
+        <p style={settingsStyles.loadingText}>Loading settings...</p>
       </div>
     );
   }
 
+  // Simplified helper functions that don't cause TypeScript errors
+  const getToggleSwitchStyle = (isOn: boolean): React.CSSProperties => ({
+    ...settingsStyles.toggleSwitch,
+    backgroundColor: isOn ? "#2563eb" : "#ccc",
+  });
+
+  const getToggleKnobStyle = (isOn: boolean): React.CSSProperties => ({
+    ...settingsStyles.toggleKnob,
+    left: isOn ? "27px" : "3px",
+  });
+
+  const getListItemStyle = (index: number): React.CSSProperties => ({
+    ...settingsStyles.listItem,
+    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
+  });
+
   return (
-    <div style={bankingStyles.container}>
+    <div style={settingsStyles.container}>
       {/* Header */}
-      <div style={bankingStyles.header}>
-        <h1 style={bankingStyles.headerTitle}>⚙️ Settings</h1>
-        <div style={bankingStyles.headerSubtitle}>
+      <div style={settingsStyles.header}>
+        <h1 style={settingsStyles.headerTitle}>⚙️ Settings</h1>
+        <div style={settingsStyles.headerSubtitle}>
           Configure app preferences and defaults
         </div>
       </div>
 
       {/* Top Navigation */}
-      <div style={bankingStyles.topNav}>
+      <div style={settingsStyles.topNav}>
         <button
           onClick={() => navigate(-1)}
-          style={bankingStyles.navButton}
+          style={settingsStyles.navButton}
           title="Go Back"
         >
           ←
         </button>
-        <div style={bankingStyles.navTitle}>Settings</div>
+        <div style={settingsStyles.navTitle}>Settings</div>
         <div style={{ width: "40px" }}></div>
       </div>
 
-      <div style={{ padding: "15px", maxWidth: "500px", margin: "0 auto" }}>
+      <div
+        style={{
+          ...settingsStyles.content,
+          maxWidth: "500px",
+          margin: "0 auto",
+        }}
+      >
         {/* Financial Settings */}
-        <div style={{ marginBottom: "25px" }}>
-          <h3 style={bankingStyles.sectionTitle}>
+        <div style={settingsStyles.section}>
+          <h3 style={settingsStyles.sectionTitle}>
             Financial Settings
             <span
               style={{ fontSize: "0.9rem", color: "#666", marginLeft: "10px" }}
@@ -210,53 +232,30 @@ const SettingsPage: React.FC = () => {
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
           >
             {/* Gold Rate */}
-            <div>
-              <label style={bankingStyles.label}>Gold Rate (₹/gram)</label>
+            <div style={settingsStyles.fieldContainer}>
+              <label style={settingsStyles.label}>Gold Rate (₹/gram)</label>
               {editingField === "goldRate" ? (
-                <div
-                  style={{ display: "flex", gap: "10px", alignItems: "center" }}
-                >
-                  <div style={{ position: "relative", flex: 1 }}>
-                    <span
-                      style={{
-                        position: "absolute",
-                        left: "12px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "#666",
-                        fontWeight: "500",
-                        fontSize: "16px",
-                        zIndex: 1,
-                      }}
-                    >
-                      ₹
-                    </span>
+                <div style={settingsStyles.editControls}>
+                  <div style={settingsStyles.editInputContainer}>
+                    <span style={settingsStyles.currencyPrefix}>₹</span>
                     <input
                       type="text"
                       value={editValue}
                       onChange={(e) => handleEditValueChange(e.target.value)}
                       style={{
-                        ...bankingStyles.input,
-                        paddingLeft: "35px",
+                        ...settingsStyles.input,
+                        ...settingsStyles.inputWithPrefix,
                       }}
                       autoFocus
                       onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
                     />
                   </div>
-                  <div style={{ display: "flex", gap: "5px" }}>
+                  <div style={settingsStyles.buttonGroup}>
                     <button
                       onClick={handleSaveEdit}
                       style={{
-                        padding: "8px 12px",
-                        backgroundColor: "#10b981",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.saveButton,
                       }}
                       title="Save"
                     >
@@ -265,16 +264,8 @@ const SettingsPage: React.FC = () => {
                     <button
                       onClick={handleCancelEdit}
                       style={{
-                        padding: "8px 12px",
-                        backgroundColor: "#ef4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.cancelButton,
                       }}
                       title="Cancel"
                     >
@@ -287,17 +278,7 @@ const SettingsPage: React.FC = () => {
                   onClick={() =>
                     handleStartEdit("goldRate", financialSettings.goldRate)
                   }
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "12px 15px",
-                    backgroundColor: "#f8f9fa",
-                    border: "1px solid #e9ecef",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    transition: "background-color 0.2s",
-                  }}
+                  style={settingsStyles.editableField}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "#f1f5f9";
                   }}
@@ -305,54 +286,34 @@ const SettingsPage: React.FC = () => {
                     e.currentTarget.style.backgroundColor = "#f8f9fa";
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <span style={{ color: "#666", fontWeight: "500" }}>₹</span>
-                    <span style={{ fontSize: "16px", color: "#333" }}>
-                      {formatNumber(financialSettings.goldRate)}
-                    </span>
+                  <div style={settingsStyles.editableValue}>
+                    <span style={settingsStyles.currencySymbol}>₹</span>
+                    <span>{formatNumber(financialSettings.goldRate)}</span>
                   </div>
-                  <span style={{ color: "#6b7280", fontSize: "14px" }}>
-                    ✏️ Click to edit
-                  </span>
+                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
                 </div>
               )}
             </div>
 
             {/* Making Tax */}
-            <div>
-              <label style={bankingStyles.label}>Making Tax (%)</label>
+            <div style={settingsStyles.fieldContainer}>
+              <label style={settingsStyles.label}>Making Tax (%)</label>
               {editingField === "makingTax" ? (
-                <div
-                  style={{ display: "flex", gap: "10px", alignItems: "center" }}
-                >
+                <div style={settingsStyles.editControls}>
                   <input
                     type="text"
                     value={editValue}
                     onChange={(e) => handleEditValueChange(e.target.value)}
-                    style={{ ...bankingStyles.input, flex: 1 }}
+                    style={{ ...settingsStyles.input, flex: 1 }}
                     autoFocus
                     onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
                   />
-                  <div style={{ display: "flex", gap: "5px" }}>
+                  <div style={settingsStyles.buttonGroup}>
                     <button
                       onClick={handleSaveEdit}
                       style={{
-                        padding: "8px 12px",
-                        backgroundColor: "#10b981",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.saveButton,
                       }}
                       title="Save"
                     >
@@ -361,16 +322,8 @@ const SettingsPage: React.FC = () => {
                     <button
                       onClick={handleCancelEdit}
                       style={{
-                        padding: "8px 12px",
-                        backgroundColor: "#ef4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.cancelButton,
                       }}
                       title="Cancel"
                     >
@@ -383,17 +336,7 @@ const SettingsPage: React.FC = () => {
                   onClick={() =>
                     handleStartEdit("makingTax", financialSettings.makingTax)
                   }
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "12px 15px",
-                    backgroundColor: "#f8f9fa",
-                    border: "1px solid #e9ecef",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    transition: "background-color 0.2s",
-                  }}
+                  style={settingsStyles.editableField}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "#f1f5f9";
                   }}
@@ -404,42 +347,30 @@ const SettingsPage: React.FC = () => {
                   <span style={{ fontSize: "16px", color: "#333" }}>
                     {formatNumber(financialSettings.makingTax)}%
                   </span>
-                  <span style={{ color: "#6b7280", fontSize: "14px" }}>
-                    ✏️ Click to edit
-                  </span>
+                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
                 </div>
               )}
             </div>
 
             {/* Resale Discount */}
-            <div>
-              <label style={bankingStyles.label}>Resale Discount (%)</label>
+            <div style={settingsStyles.fieldContainer}>
+              <label style={settingsStyles.label}>Resale Discount (%)</label>
               {editingField === "resaleDiscount" ? (
-                <div
-                  style={{ display: "flex", gap: "10px", alignItems: "center" }}
-                >
+                <div style={settingsStyles.editControls}>
                   <input
                     type="text"
                     value={editValue}
                     onChange={(e) => handleEditValueChange(e.target.value)}
-                    style={{ ...bankingStyles.input, flex: 1 }}
+                    style={{ ...settingsStyles.input, flex: 1 }}
                     autoFocus
                     onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
                   />
-                  <div style={{ display: "flex", gap: "5px" }}>
+                  <div style={settingsStyles.buttonGroup}>
                     <button
                       onClick={handleSaveEdit}
                       style={{
-                        padding: "8px 12px",
-                        backgroundColor: "#10b981",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.saveButton,
                       }}
                       title="Save"
                     >
@@ -448,16 +379,8 @@ const SettingsPage: React.FC = () => {
                     <button
                       onClick={handleCancelEdit}
                       style={{
-                        padding: "8px 12px",
-                        backgroundColor: "#ef4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.cancelButton,
                       }}
                       title="Cancel"
                     >
@@ -473,17 +396,7 @@ const SettingsPage: React.FC = () => {
                       financialSettings.resaleDiscount
                     )
                   }
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "12px 15px",
-                    backgroundColor: "#f8f9fa",
-                    border: "1px solid #e9ecef",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    transition: "background-color 0.2s",
-                  }}
+                  style={settingsStyles.editableField}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "#f1f5f9";
                   }}
@@ -494,61 +407,36 @@ const SettingsPage: React.FC = () => {
                   <span style={{ fontSize: "16px", color: "#333" }}>
                     {formatNumber(financialSettings.resaleDiscount)}%
                   </span>
-                  <span style={{ color: "#6b7280", fontSize: "14px" }}>
-                    ✏️ Click to edit
-                  </span>
+                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
                 </div>
               )}
             </div>
 
             {/* Liabilities */}
-            <div>
-              <label style={bankingStyles.label}>Liabilities (₹)</label>
+            <div style={settingsStyles.fieldContainer}>
+              <label style={settingsStyles.label}>Liabilities (₹)</label>
               {editingField === "liabilities" ? (
-                <div
-                  style={{ display: "flex", gap: "10px", alignItems: "center" }}
-                >
-                  <div style={{ position: "relative", flex: 1 }}>
-                    <span
-                      style={{
-                        position: "absolute",
-                        left: "12px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "#666",
-                        fontWeight: "500",
-                        fontSize: "16px",
-                        zIndex: 1,
-                      }}
-                    >
-                      ₹
-                    </span>
+                <div style={settingsStyles.editControls}>
+                  <div style={settingsStyles.editInputContainer}>
+                    <span style={settingsStyles.currencyPrefix}>₹</span>
                     <input
                       type="text"
                       value={editValue}
                       onChange={(e) => handleEditValueChange(e.target.value)}
                       style={{
-                        ...bankingStyles.input,
-                        paddingLeft: "35px",
+                        ...settingsStyles.input,
+                        ...settingsStyles.inputWithPrefix,
                       }}
                       autoFocus
                       onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
                     />
                   </div>
-                  <div style={{ display: "flex", gap: "5px" }}>
+                  <div style={settingsStyles.buttonGroup}>
                     <button
                       onClick={handleSaveEdit}
                       style={{
-                        padding: "8px 12px",
-                        backgroundColor: "#10b981",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.saveButton,
                       }}
                       title="Save"
                     >
@@ -557,16 +445,8 @@ const SettingsPage: React.FC = () => {
                     <button
                       onClick={handleCancelEdit}
                       style={{
-                        padding: "8px 12px",
-                        backgroundColor: "#ef4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.cancelButton,
                       }}
                       title="Cancel"
                     >
@@ -582,17 +462,7 @@ const SettingsPage: React.FC = () => {
                       financialSettings.liabilities
                     )
                   }
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "12px 15px",
-                    backgroundColor: "#f8f9fa",
-                    border: "1px solid #e9ecef",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    transition: "background-color 0.2s",
-                  }}
+                  style={settingsStyles.editableField}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "#f1f5f9";
                   }}
@@ -600,21 +470,11 @@ const SettingsPage: React.FC = () => {
                     e.currentTarget.style.backgroundColor = "#f8f9fa";
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <span style={{ color: "#666", fontWeight: "500" }}>₹</span>
-                    <span style={{ fontSize: "16px", color: "#333" }}>
-                      {formatNumber(financialSettings.liabilities)}
-                    </span>
+                  <div style={settingsStyles.editableValue}>
+                    <span style={settingsStyles.currencySymbol}>₹</span>
+                    <span>{formatNumber(financialSettings.liabilities)}</span>
                   </div>
-                  <span style={{ color: "#6b7280", fontSize: "14px" }}>
-                    ✏️ Click to edit
-                  </span>
+                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
                 </div>
               )}
             </div>
@@ -622,31 +482,19 @@ const SettingsPage: React.FC = () => {
         </div>
 
         {/* Toggle Settings */}
-        <div style={{ marginBottom: "25px" }}>
-          <h3 style={bankingStyles.sectionTitle}>Display Settings</h3>
+        <div style={settingsStyles.section}>
+          <h3 style={settingsStyles.sectionTitle}>Display Settings</h3>
 
           <div
             style={{ display: "flex", flexDirection: "column", gap: "15px" }}
           >
             {/* Show Inactive */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontWeight: "500",
-                    color: "#333",
-                    marginBottom: "4px",
-                  }}
-                >
+            <div style={settingsStyles.toggleContainer}>
+              <div style={settingsStyles.toggleLabel}>
+                <div style={settingsStyles.toggleTitle}>
                   Show Inactive Items
                 </div>
-                <div style={{ fontSize: "0.9rem", color: "#666" }}>
+                <div style={settingsStyles.toggleDescription}>
                   Show inactive jewellery in lists and gallery
                 </div>
               </div>
@@ -654,50 +502,19 @@ const SettingsPage: React.FC = () => {
                 onClick={() =>
                   handleToggle("showInactive", !settings?.showInactive)
                 }
-                style={{
-                  width: "50px",
-                  height: "26px",
-                  backgroundColor: settings?.showInactive ? "#2563eb" : "#ccc",
-                  borderRadius: "13px",
-                  position: "relative",
-                  cursor: "pointer",
-                  transition: "background-color 0.3s",
-                }}
+                style={getToggleSwitchStyle(settings?.showInactive || false)}
               >
                 <div
-                  style={{
-                    position: "absolute",
-                    top: "3px",
-                    left: settings?.showInactive ? "27px" : "3px",
-                    width: "20px",
-                    height: "20px",
-                    backgroundColor: "white",
-                    borderRadius: "10px",
-                    transition: "left 0.3s",
-                  }}
+                  style={getToggleKnobStyle(settings?.showInactive || false)}
                 />
               </div>
             </div>
 
             {/* Show Delete */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontWeight: "500",
-                    color: "#333",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Show Delete Action
-                </div>
-                <div style={{ fontSize: "0.9rem", color: "#666" }}>
+            <div style={settingsStyles.toggleContainer}>
+              <div style={settingsStyles.toggleLabel}>
+                <div style={settingsStyles.toggleTitle}>Show Delete Action</div>
+                <div style={settingsStyles.toggleDescription}>
                   Display the delete control on Edit screen
                 </div>
               </div>
@@ -705,27 +522,10 @@ const SettingsPage: React.FC = () => {
                 onClick={() =>
                   handleToggle("showDelete", !settings?.showDelete)
                 }
-                style={{
-                  width: "50px",
-                  height: "26px",
-                  backgroundColor: settings?.showDelete ? "#2563eb" : "#ccc",
-                  borderRadius: "13px",
-                  position: "relative",
-                  cursor: "pointer",
-                  transition: "background-color 0.3s",
-                }}
+                style={getToggleSwitchStyle(settings?.showDelete || false)}
               >
                 <div
-                  style={{
-                    position: "absolute",
-                    top: "3px",
-                    left: settings?.showDelete ? "27px" : "3px",
-                    width: "20px",
-                    height: "20px",
-                    backgroundColor: "white",
-                    borderRadius: "10px",
-                    transition: "left 0.3s",
-                  }}
+                  style={getToggleKnobStyle(settings?.showDelete || false)}
                 />
               </div>
             </div>
@@ -733,52 +533,36 @@ const SettingsPage: React.FC = () => {
         </div>
 
         {/* Locations Management */}
-        <div style={{ marginBottom: "25px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "15px",
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              <h3 style={bankingStyles.sectionTitle}>Locations</h3>
-              <div style={{ fontSize: "0.9rem", color: "#666" }}>
+        <div style={settingsStyles.listSection}>
+          <div style={settingsStyles.listHeader}>
+            <div style={settingsStyles.listTitleContainer}>
+              <h3 style={settingsStyles.listTitle}>Locations</h3>
+              <div style={settingsStyles.listCount}>
                 {settings?.locations?.length || 0} item
                 {settings?.locations?.length !== 1 ? "s" : ""}
               </div>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div style={settingsStyles.listActions}>
               <button
                 onClick={() => setShowAddLoc(true)}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#e0e7ff",
-                  border: "1px solid #c7d2fe",
-                  borderRadius: "6px",
-                  color: "#4f46e5",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                  fontSize: "14px",
+                style={settingsStyles.listButton}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#c7d2fe";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#e0e7ff";
                 }}
               >
                 Add
               </button>
               <button
                 onClick={() => setLocExpanded(!locExpanded)}
-                style={{
-                  padding: "8px",
-                  backgroundColor: "#e0e7ff",
-                  border: "1px solid #c7d2fe",
-                  borderRadius: "6px",
-                  color: "#4f46e5",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "40px",
+                style={settingsStyles.expandButton}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#c7d2fe";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#e0e7ff";
                 }}
               >
                 {locExpanded ? "↑" : "↓"}
@@ -787,58 +571,19 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {locExpanded && (
-            <div
-              style={{
-                border: "1px solid #e5e7eb",
-                borderRadius: "8px",
-                overflow: "hidden",
-              }}
-            >
+            <div style={settingsStyles.listContainer}>
               {!settings?.locations || settings.locations.length === 0 ? (
-                <div
-                  style={{
-                    padding: "20px",
-                    textAlign: "center",
-                    color: "#6b7280",
-                  }}
-                >
-                  No locations yet.
-                </div>
+                <div style={settingsStyles.emptyList}>No locations yet.</div>
               ) : (
                 settings.locations.map((location, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "12px 15px",
-                      borderBottom:
-                        index < settings.locations.length - 1
-                          ? "1px solid #f3f4f6"
-                          : "none",
-                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
-                    }}
-                  >
-                    <span style={{ fontSize: "16px", color: "#333" }}>
-                      {location}
-                    </span>
-                    <div style={{ display: "flex", gap: "8px" }}>
+                  <div key={index} style={getListItemStyle(index)}>
+                    <span style={settingsStyles.listItemText}>{location}</span>
+                    <div style={settingsStyles.listItemActions}>
                       <button
                         onClick={() => handleEditListItem("location", location)}
                         style={{
-                          padding: "6px",
-                          backgroundColor: "#f0f9ff",
-                          border: "1px solid #bae6fd",
-                          borderRadius: "4px",
-                          color: "#0369a1",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "32px",
-                          height: "32px",
+                          ...settingsStyles.iconActionButton,
+                          ...settingsStyles.editButton,
                         }}
                         title="Edit"
                       >
@@ -847,18 +592,8 @@ const SettingsPage: React.FC = () => {
                       <button
                         onClick={() => handleDelete("location", location)}
                         style={{
-                          padding: "6px",
-                          backgroundColor: "#fef2f2",
-                          border: "1px solid #fecaca",
-                          borderRadius: "4px",
-                          color: "#dc2626",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "32px",
-                          height: "32px",
+                          ...settingsStyles.iconActionButton,
+                          ...settingsStyles.deleteButton,
                         }}
                         title="Delete"
                       >
@@ -873,52 +608,36 @@ const SettingsPage: React.FC = () => {
         </div>
 
         {/* Bought For Management */}
-        <div style={{ marginBottom: "25px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "15px",
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              <h3 style={bankingStyles.sectionTitle}>Bought For</h3>
-              <div style={{ fontSize: "0.9rem", color: "#666" }}>
+        <div style={settingsStyles.listSection}>
+          <div style={settingsStyles.listHeader}>
+            <div style={settingsStyles.listTitleContainer}>
+              <h3 style={settingsStyles.listTitle}>Bought For</h3>
+              <div style={settingsStyles.listCount}>
                 {settings?.boughtFor?.length || 0} item
                 {settings?.boughtFor?.length !== 1 ? "s" : ""}
               </div>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div style={settingsStyles.listActions}>
               <button
                 onClick={() => setShowAddBf(true)}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#e0e7ff",
-                  border: "1px solid #c7d2fe",
-                  borderRadius: "6px",
-                  color: "#4f46e5",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                  fontSize: "14px",
+                style={settingsStyles.listButton}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#c7d2fe";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#e0e7ff";
                 }}
               >
                 Add
               </button>
               <button
                 onClick={() => setBfExpanded(!bfExpanded)}
-                style={{
-                  padding: "8px",
-                  backgroundColor: "#e0e7ff",
-                  border: "1px solid #c7d2fe",
-                  borderRadius: "6px",
-                  color: "#4f46e5",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "40px",
+                style={settingsStyles.expandButton}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#c7d2fe";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#e0e7ff";
                 }}
               >
                 {bfExpanded ? "↑" : "↓"}
@@ -927,60 +646,21 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {bfExpanded && (
-            <div
-              style={{
-                border: "1px solid #e5e7eb",
-                borderRadius: "8px",
-                overflow: "hidden",
-              }}
-            >
+            <div style={settingsStyles.listContainer}>
               {!settings?.boughtFor || settings.boughtFor.length === 0 ? (
-                <div
-                  style={{
-                    padding: "20px",
-                    textAlign: "center",
-                    color: "#6b7280",
-                  }}
-                >
-                  No entries yet.
-                </div>
+                <div style={settingsStyles.emptyList}>No entries yet.</div>
               ) : (
                 settings.boughtFor.map((boughtFor, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "12px 15px",
-                      borderBottom:
-                        index < settings.boughtFor.length - 1
-                          ? "1px solid #f3f4f6"
-                          : "none",
-                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
-                    }}
-                  >
-                    <span style={{ fontSize: "16px", color: "#333" }}>
-                      {boughtFor}
-                    </span>
-                    <div style={{ display: "flex", gap: "8px" }}>
+                  <div key={index} style={getListItemStyle(index)}>
+                    <span style={settingsStyles.listItemText}>{boughtFor}</span>
+                    <div style={settingsStyles.listItemActions}>
                       <button
                         onClick={() =>
                           handleEditListItem("boughtFor", boughtFor)
                         }
                         style={{
-                          padding: "6px",
-                          backgroundColor: "#f0f9ff",
-                          border: "1px solid #bae6fd",
-                          borderRadius: "4px",
-                          color: "#0369a1",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "32px",
-                          height: "32px",
+                          ...settingsStyles.iconActionButton,
+                          ...settingsStyles.editButton,
                         }}
                         title="Edit"
                       >
@@ -989,18 +669,8 @@ const SettingsPage: React.FC = () => {
                       <button
                         onClick={() => handleDelete("boughtFor", boughtFor)}
                         style={{
-                          padding: "6px",
-                          backgroundColor: "#fef2f2",
-                          border: "1px solid #fecaca",
-                          borderRadius: "4px",
-                          color: "#dc2626",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "32px",
-                          height: "32px",
+                          ...settingsStyles.iconActionButton,
+                          ...settingsStyles.deleteButton,
                         }}
                         title="Delete"
                       >
@@ -1017,63 +687,24 @@ const SettingsPage: React.FC = () => {
 
       {/* Add Location Dialog */}
       {showAddLoc && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              maxWidth: "400px",
-              width: "90%",
-              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-            }}
-          >
-            <h3 style={{ margin: "0 0 16px 0", color: "#1f2937" }}>
-              Add Location
-            </h3>
+        <div style={settingsStyles.dialogOverlay}>
+          <div style={settingsStyles.dialog}>
+            <h3 style={settingsStyles.dialogTitle}>Add Location</h3>
             <input
               type="text"
               value={newLocation}
               onChange={(e) => setNewLocation(e.target.value)}
               placeholder="Enter location name"
-              style={{
-                ...bankingStyles.input,
-                width: "100%",
-                marginBottom: "20px",
-              }}
+              style={settingsStyles.input}
               autoFocus
               onKeyPress={(e) => e.key === "Enter" && handleAddLocation()}
             />
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "flex-end",
-              }}
-            >
+            <div style={settingsStyles.dialogActions}>
               <button
                 onClick={() => setShowAddLoc(false)}
                 style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#f3f4f6",
-                  border: "1px solid #d1d5db",
-                  borderRadius: "6px",
-                  color: "#374151",
-                  fontWeight: "500",
-                  cursor: "pointer",
+                  ...settingsStyles.dialogButton,
+                  ...settingsStyles.cancelDialogButton,
                 }}
               >
                 Cancel
@@ -1082,13 +713,12 @@ const SettingsPage: React.FC = () => {
                 onClick={handleAddLocation}
                 disabled={!newLocation.trim()}
                 style={{
-                  padding: "10px 20px",
-                  backgroundColor: newLocation.trim() ? "#10b981" : "#9ca3af",
-                  border: "none",
-                  borderRadius: "6px",
-                  color: "white",
-                  fontWeight: "500",
-                  cursor: newLocation.trim() ? "pointer" : "not-allowed",
+                  ...settingsStyles.dialogButton,
+                  ...settingsStyles.confirmDialogButton,
+                  ...(!newLocation.trim() && {
+                    backgroundColor: "#9ca3af",
+                    cursor: "not-allowed",
+                  }),
                 }}
               >
                 Save
@@ -1100,63 +730,24 @@ const SettingsPage: React.FC = () => {
 
       {/* Add Bought For Dialog */}
       {showAddBf && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              maxWidth: "400px",
-              width: "90%",
-              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-            }}
-          >
-            <h3 style={{ margin: "0 0 16px 0", color: "#1f2937" }}>
-              Add "Bought For"
-            </h3>
+        <div style={settingsStyles.dialogOverlay}>
+          <div style={settingsStyles.dialog}>
+            <h3 style={settingsStyles.dialogTitle}>Add "Bought For"</h3>
             <input
               type="text"
               value={newBoughtFor}
               onChange={(e) => setNewBoughtFor(e.target.value)}
               placeholder="Enter purpose"
-              style={{
-                ...bankingStyles.input,
-                width: "100%",
-                marginBottom: "20px",
-              }}
+              style={settingsStyles.input}
               autoFocus
               onKeyPress={(e) => e.key === "Enter" && handleAddBoughtFor()}
             />
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "flex-end",
-              }}
-            >
+            <div style={settingsStyles.dialogActions}>
               <button
                 onClick={() => setShowAddBf(false)}
                 style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#f3f4f6",
-                  border: "1px solid #d1d5db",
-                  borderRadius: "6px",
-                  color: "#374151",
-                  fontWeight: "500",
-                  cursor: "pointer",
+                  ...settingsStyles.dialogButton,
+                  ...settingsStyles.cancelDialogButton,
                 }}
               >
                 Cancel
@@ -1165,13 +756,12 @@ const SettingsPage: React.FC = () => {
                 onClick={handleAddBoughtFor}
                 disabled={!newBoughtFor.trim()}
                 style={{
-                  padding: "10px 20px",
-                  backgroundColor: newBoughtFor.trim() ? "#10b981" : "#9ca3af",
-                  border: "none",
-                  borderRadius: "6px",
-                  color: "white",
-                  fontWeight: "500",
-                  cursor: newBoughtFor.trim() ? "pointer" : "not-allowed",
+                  ...settingsStyles.dialogButton,
+                  ...settingsStyles.confirmDialogButton,
+                  ...(!newBoughtFor.trim() && {
+                    backgroundColor: "#9ca3af",
+                    cursor: "not-allowed",
+                  }),
                 }}
               >
                 Save
@@ -1183,31 +773,9 @@ const SettingsPage: React.FC = () => {
 
       {/* Rename Dialog */}
       {renameDialog && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              maxWidth: "400px",
-              width: "90%",
-              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-            }}
-          >
-            <h3 style={{ margin: "0 0 16px 0", color: "#1f2937" }}>
+        <div style={settingsStyles.dialogOverlay}>
+          <div style={settingsStyles.dialog}>
+            <h3 style={settingsStyles.dialogTitle}>
               {renameDialog.type === "location"
                 ? "Rename Location"
                 : 'Rename "Bought For"'}
@@ -1217,34 +785,19 @@ const SettingsPage: React.FC = () => {
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
               placeholder="Enter new value"
-              style={{
-                ...bankingStyles.input,
-                width: "100%",
-                marginBottom: "20px",
-              }}
+              style={settingsStyles.input}
               autoFocus
               onKeyPress={(e) => e.key === "Enter" && handleSaveListItemEdit()}
             />
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "flex-end",
-              }}
-            >
+            <div style={settingsStyles.dialogActions}>
               <button
                 onClick={() => {
                   setRenameDialog(null);
                   setRenameValue("");
                 }}
                 style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#f3f4f6",
-                  border: "1px solid #d1d5db",
-                  borderRadius: "6px",
-                  color: "#374151",
-                  fontWeight: "500",
-                  cursor: "pointer",
+                  ...settingsStyles.dialogButton,
+                  ...settingsStyles.cancelDialogButton,
                 }}
               >
                 Cancel
@@ -1253,13 +806,12 @@ const SettingsPage: React.FC = () => {
                 onClick={handleSaveListItemEdit}
                 disabled={!renameValue.trim()}
                 style={{
-                  padding: "10px 20px",
-                  backgroundColor: renameValue.trim() ? "#10b981" : "#9ca3af",
-                  border: "none",
-                  borderRadius: "6px",
-                  color: "white",
-                  fontWeight: "500",
-                  cursor: renameValue.trim() ? "pointer" : "not-allowed",
+                  ...settingsStyles.dialogButton,
+                  ...settingsStyles.confirmDialogButton,
+                  ...(!renameValue.trim() && {
+                    backgroundColor: "#9ca3af",
+                    cursor: "not-allowed",
+                  }),
                 }}
               >
                 Save

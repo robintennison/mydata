@@ -3,8 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { useBankingData } from "./modules/Banking/hooks/useBankingData";
 import { useSettings } from "./contexts/SettingsContext";
 import { bankingStyles } from "./modules/Banking/styles/BankingStyles";
+import {
+  myDataHomepageStyles,
+  getSectionStyle,
+  getSectionHeaderStyle,
+  injectMyDataHomepageStyles,
+} from "./styles/MyDataHomepageStyles";
 
 const MyDataHomepage: React.FC = () => {
+  // Inject global styles
+  React.useEffect(() => {
+    injectMyDataHomepageStyles();
+  }, []);
+
   const navigate = useNavigate();
   const { settings } = useSettings();
   const { accounts, deposits, adjustments, loading } = useBankingData();
@@ -61,7 +72,7 @@ const MyDataHomepage: React.FC = () => {
             deposit.endDate > today && deposit.endDate <= thirtyDaysFromNow
         )
         .sort((a, b) => a.endDate - b.endDate)
-        .slice(0, 5); // Show only next 5 maturities
+        .slice(0, 5);
 
       setUpcomingMaturities(upcoming);
     }
@@ -106,274 +117,84 @@ const MyDataHomepage: React.FC = () => {
     );
   }
 
-  // Create styles dynamically based on the data
-  const getStyles = (hasMaturities: boolean) => ({
-    container: {
-      width: "100%",
-      maxWidth: "500px",
-      margin: "0 auto",
-      backgroundColor: "#f5f7fa",
-      minHeight: "calc(100vh - 80px)",
-      paddingBottom: "100px",
-    },
-    header: {
-      background: "linear-gradient(135deg, #4285f4 0%, #5c9cff 100%)",
-      color: "white",
-      padding: "20px 15px 25px 15px",
-      borderRadius: "0 0 20px 20px",
-      marginBottom: "15px",
-      boxShadow: "0 4px 12px rgba(66, 133, 244, 0.3)",
-    },
-    headerTopRow: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-    },
-    headerLeft: {
-      flex: 1,
-    },
-    title: {
-      fontSize: "1.5rem",
-      fontWeight: 700,
-      margin: "0 0 6px 0",
-    },
-    subtitle: {
-      fontSize: "0.85rem",
-      opacity: 0.9,
-      margin: 0,
-    },
-    settingsButton: {
-      backgroundColor: "rgba(255, 255, 255, 0.2)",
-      border: "none",
-      borderRadius: "50%",
-      width: "40px",
-      height: "40px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "1.2rem",
-      color: "white",
-      cursor: "pointer",
-      position: "relative" as "relative",
-      transition: "all 0.2s",
-      marginLeft: "10px",
-    },
-    editBadge: {
-      position: "absolute" as "absolute",
-      top: "-2px",
-      right: "-2px",
-      fontSize: "0.7rem",
-      backgroundColor: "#34a853",
-      borderRadius: "50%",
-      width: "16px",
-      height: "16px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    statsRow: {
-      display: "grid",
-      gridTemplateColumns: "repeat(3, 1fr)",
-      gap: "10px",
-      padding: "0 12px",
-      marginBottom: "20px",
-    },
-    statCard: {
-      backgroundColor: "white",
-      borderRadius: "12px",
-      padding: "12px 10px",
-      textAlign: "center" as "center",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-      border: "1px solid #e9ecef",
-      transition: "transform 0.2s",
-      cursor: "pointer",
-      display: "flex",
-      flexDirection: "column" as "column",
-      justifyContent: "center",
-      minHeight: "80px",
-    },
-    cardTitle: {
-      fontSize: "0.75rem",
-      fontWeight: 600,
-      color: "#666",
-      marginBottom: "6px",
-    },
-    cardValue: {
-      fontSize: "1.1rem",
-      fontWeight: 700,
-      color: "#333",
-      marginBottom: "3px",
-    },
-    cardSubtitle: {
-      fontSize: "0.7rem",
-      color: "#888",
-    },
-    section: {
-      backgroundColor: "white",
-      borderRadius: "12px",
-      margin: "12px",
-      padding: "15px",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-      border: "1px solid #e9ecef",
-      marginBottom: "15px",
-      minHeight: hasMaturities ? "auto" : "80px",
-    },
-    sectionHeader: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: hasMaturities ? "15px" : "0",
-    },
-    sectionTitle: {
-      fontSize: "1rem",
-      fontWeight: 600,
-      color: "#333",
-    },
-    viewAllButton: {
-      backgroundColor: "transparent",
-      color: "#4285f4",
-      border: "1px solid #4285f4",
-      borderRadius: "6px",
-      padding: "4px 10px",
-      fontSize: "0.75rem",
-      fontWeight: 500,
-      cursor: "pointer",
-    },
-    maturitiesList: {
-      display: "flex",
-      flexDirection: "column" as "column",
-      gap: "10px",
-    },
-    maturityCard: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "12px",
-      backgroundColor: "#f8f9fa",
-      borderRadius: "10px",
-      borderLeft: "3px solid #4285f4",
-      cursor: "pointer",
-      transition: "all 0.2s",
-    },
-    maturityLeft: {
-      flex: 1,
-    },
-    maturityDate: {
-      fontSize: "0.85rem",
-      fontWeight: 600,
-      color: "#333",
-      marginBottom: "3px",
-    },
-    maturityAccount: {
-      fontSize: "0.75rem",
-      color: "#666",
-    },
-    maturityRight: {
-      textAlign: "right" as "right",
-      display: "flex",
-      flexDirection: "column" as "column",
-      alignItems: "flex-end",
-      gap: "3px",
-    },
-    maturityAmount: {
-      fontSize: "0.9rem",
-      fontWeight: 700,
-      color: "#34a853",
-    },
-    maturityStatus: {
-      fontSize: "0.7rem",
-      fontWeight: 500,
-    },
-    emptyState: {
-      textAlign: "center" as "center",
-      padding: "15px 10px",
-      color: "#6c757d",
-    },
-    emptyText: {
-      fontSize: "0.9rem",
-      fontWeight: 500,
-      marginBottom: "3px",
-    },
-    emptySubtext: {
-      fontSize: "0.75rem",
-    },
-    placeholderCard: {
-      backgroundColor: "#f0f7ff",
-      borderRadius: "10px",
-      padding: "15px",
-      textAlign: "center" as "center",
-      border: "2px dashed #c2e0ff",
-    },
-    placeholderTitle: {
-      fontSize: "1rem",
-      fontWeight: 600,
-      color: "#4285f4",
-      marginBottom: "8px",
-    },
-    placeholderText: {
-      fontSize: "0.8rem",
-      color: "#666",
-      lineHeight: 1.4,
-    },
-  });
-
   const hasMaturities = upcomingMaturities.length > 0;
-  const styles = getStyles(hasMaturities);
 
   return (
-    <div style={styles.container}>
+    <div style={myDataHomepageStyles.container}>
       {/* Header with Settings Button */}
-      <div style={styles.header}>
-        <div style={styles.headerTopRow}>
-          <div style={styles.headerLeft}>
-            <h1 style={styles.title}>MyData Dashboard</h1>
-            <p style={styles.subtitle}>Personal Finance & Assets Overview</p>
+      <div style={myDataHomepageStyles.header}>
+        <div style={myDataHomepageStyles.headerTopRow}>
+          <div style={myDataHomepageStyles.headerLeft}>
+            <h1 style={myDataHomepageStyles.title}>MyData Dashboard</h1>
+            <p style={myDataHomepageStyles.subtitle}>
+              Personal Finance & Assets Overview
+            </p>
           </div>
           <button
-            style={styles.settingsButton}
+            style={myDataHomepageStyles.settingsButton}
             onClick={() => navigate("/settings")}
             title="Settings"
           >
             ⚙️
-            {settings?.showDelete && <span style={styles.editBadge}>✏️</span>}
+            {settings?.showDelete && (
+              <span style={myDataHomepageStyles.editBadge}>✏️</span>
+            )}
           </button>
         </div>
       </div>
 
       {/* Compact Top Stats Cards */}
-      <div style={styles.statsRow}>
+      <div style={myDataHomepageStyles.statsRow}>
         {/* Card 1: Total Balance */}
-        <div style={styles.statCard} onClick={() => navigate("/banking")}>
-          <div style={styles.cardTitle}>Total Balance</div>
-          <div style={styles.cardValue}>{formatLakhs(totalBalance)}</div>
-          <div style={styles.cardSubtitle}>{formatCurrency(totalBalance)}</div>
+        <div
+          style={myDataHomepageStyles.statCard}
+          onClick={() => navigate("/banking")}
+        >
+          <div style={myDataHomepageStyles.cardTitle}>Total Balance</div>
+          <div style={myDataHomepageStyles.cardValue}>
+            {formatLakhs(totalBalance)}
+          </div>
+          <div style={myDataHomepageStyles.cardSubtitle}>
+            {formatCurrency(totalBalance)}
+          </div>
         </div>
 
         {/* Card 2: Total Deposits */}
-        <div style={styles.statCard} onClick={() => navigate("/banking")}>
-          <div style={styles.cardTitle}>Total Deposits</div>
-          <div style={styles.cardValue}>{formatLakhs(totalDeposits)}</div>
-          <div style={styles.cardSubtitle}>{formatCurrency(totalDeposits)}</div>
+        <div
+          style={myDataHomepageStyles.statCard}
+          onClick={() => navigate("/banking")}
+        >
+          <div style={myDataHomepageStyles.cardTitle}>Total Deposits</div>
+          <div style={myDataHomepageStyles.cardValue}>
+            {formatLakhs(totalDeposits)}
+          </div>
+          <div style={myDataHomepageStyles.cardSubtitle}>
+            {formatCurrency(totalDeposits)}
+          </div>
         </div>
 
         {/* Card 3: Total Accounts */}
         <div
-          style={styles.statCard}
+          style={myDataHomepageStyles.statCard}
           onClick={() => navigate("/banking/accounts")}
         >
-          <div style={styles.cardTitle}>Accounts</div>
-          <div style={styles.cardValue}>{accounts.length}</div>
-          <div style={styles.cardSubtitle}>{activeDepositsCount} deposits</div>
+          <div style={myDataHomepageStyles.cardTitle}>Accounts</div>
+          <div style={myDataHomepageStyles.cardValue}>{accounts.length}</div>
+          <div style={myDataHomepageStyles.cardSubtitle}>
+            {activeDepositsCount} deposits
+          </div>
         </div>
       </div>
 
       {/* Upcoming Maturities Section - Compact */}
-      <div style={styles.section}>
-        <div style={styles.sectionHeader}>
-          <div style={styles.sectionTitle}>Upcoming Maturities</div>
+      <div style={getSectionStyle(hasMaturities)}>
+        <div style={getSectionHeaderStyle(hasMaturities)}>
+          <div style={myDataHomepageStyles.sectionTitle}>
+            Upcoming Maturities
+          </div>
           {hasMaturities && (
             <button
-              style={styles.viewAllButton}
+              style={myDataHomepageStyles.viewAllButton}
               onClick={() => navigate("/banking/deposits")}
             >
               View All
@@ -382,34 +203,38 @@ const MyDataHomepage: React.FC = () => {
         </div>
 
         {!hasMaturities ? (
-          <div style={styles.emptyState}>
-            <div style={styles.emptyText}>No upcoming maturities</div>
-            <div style={styles.emptySubtext}>Next 30 days are clear</div>
+          <div style={myDataHomepageStyles.emptyState}>
+            <div style={myDataHomepageStyles.emptyText}>
+              No upcoming maturities
+            </div>
+            <div style={myDataHomepageStyles.emptySubtext}>
+              Next 30 days are clear
+            </div>
           </div>
         ) : (
-          <div style={styles.maturitiesList}>
+          <div style={myDataHomepageStyles.maturitiesList}>
             {upcomingMaturities.map((deposit) => (
               <div
                 key={deposit.id}
-                style={styles.maturityCard}
+                style={myDataHomepageStyles.maturityCard}
                 onClick={() => navigate(`/banking/deposits/edit/${deposit.id}`)}
               >
-                <div style={styles.maturityLeft}>
-                  <div style={styles.maturityDate}>
+                <div style={myDataHomepageStyles.maturityLeft}>
+                  <div style={myDataHomepageStyles.maturityDate}>
                     {formatDate(deposit.endDate)}
                   </div>
-                  <div style={styles.maturityAccount}>
+                  <div style={myDataHomepageStyles.maturityAccount}>
                     {getAccountName(deposit.accountId)}
                   </div>
                 </div>
-                <div style={styles.maturityRight}>
-                  <div style={styles.maturityAmount}>
+                <div style={myDataHomepageStyles.maturityRight}>
+                  <div style={myDataHomepageStyles.maturityAmount}>
                     {formatCurrency(deposit.amount)}
                   </div>
                   <div
                     style={
                       {
-                        ...styles.maturityStatus,
+                        ...myDataHomepageStyles.maturityStatus,
                         color: deposit.active ? "#34a853" : "#ea4335",
                       } as React.CSSProperties
                     }
@@ -424,13 +249,15 @@ const MyDataHomepage: React.FC = () => {
       </div>
 
       {/* Placeholder Section for Future Features - Compact */}
-      <div style={styles.section}>
-        <div style={styles.sectionHeader}>
-          <div style={styles.sectionTitle}>Coming Soon</div>
+      <div style={getSectionStyle(true)}>
+        <div style={getSectionHeaderStyle(true)}>
+          <div style={myDataHomepageStyles.sectionTitle}>Coming Soon</div>
         </div>
-        <div style={styles.placeholderCard}>
-          <div style={styles.placeholderTitle}>Advanced Analytics</div>
-          <div style={styles.placeholderText}>
+        <div style={myDataHomepageStyles.placeholderCard}>
+          <div style={myDataHomepageStyles.placeholderTitle}>
+            Advanced Analytics
+          </div>
+          <div style={myDataHomepageStyles.placeholderText}>
             Investment insights, growth projections, and performance reports
             coming soon.
           </div>

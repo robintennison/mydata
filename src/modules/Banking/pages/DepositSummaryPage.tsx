@@ -1,3 +1,4 @@
+// src/modules/banking/DepositSummaryPage.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { bankingStyles } from "../styles";
@@ -12,9 +13,9 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
-import styles from "../styles/DepositSummaryPage.styles";
 import BankingNavigation from "./BankingNavigation";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { depositSummaryStyles as styles } from "../styles/DepositSummaryPage.styles";
 
 interface AccountSummary {
   accountId: string;
@@ -28,7 +29,7 @@ interface AccountSummary {
 const DepositSummaryPage: React.FC = () => {
   const navigate = useNavigate();
   const { loading, accounts, deposits, adjustments } = useBankingData();
-  const { settings } = useSettings(); // Get settings for edit permissions
+  const { settings } = useSettings();
 
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [editedSavings, setEditedSavings] = useState("");
@@ -44,7 +45,7 @@ const DepositSummaryPage: React.FC = () => {
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
   const lakhsToRupees = (lakhs: number): number => lakhs * 100000;
 
-  // Format lakhs for display (removed "L" suffix as requested)
+  // Format lakhs for display
   const formatLakhs = (lakhs: number): string => {
     return lakhs.toFixed(2);
   };
@@ -83,17 +84,17 @@ const DepositSummaryPage: React.FC = () => {
     }
   }, [currentMonth]);
 
-  // Prepare summary data - ONLY ACTIVE ITEMS (removed showInactive)
+  // Prepare summary data - ONLY ACTIVE ITEMS
   const prepareSummaries = () => {
     if (!accounts.length || !deposits.length) return [];
 
-    // Filter out inactive deposits - ALWAYS hide inactive
+    // Filter out inactive deposits
     const filteredDeposits = deposits.filter(
       (deposit) => deposit.active !== false
     );
 
     const newSummaries = accounts.map((account) => {
-      // Calculate base deposits for this account (only active)
+      // Calculate base deposits for this account
       const baseDeposits = filteredDeposits
         .filter((deposit) => deposit.accountId === account.id)
         .reduce((sum, deposit) => sum + deposit.amount, 0);
@@ -219,7 +220,7 @@ const DepositSummaryPage: React.FC = () => {
       const savingsRupees = lakhsToRupees(savingsLakhs);
       await updateAccountSavings(accountId, savingsRupees);
 
-      // Calculate current deposits for this account (only active)
+      // Calculate current deposits for this account
       const filteredDepositsList = deposits.filter((d) => d.active !== false);
       const currentBaseDeposits = filteredDepositsList
         .filter((d) => d.accountId === accountId)
@@ -325,43 +326,12 @@ const DepositSummaryPage: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header - Single row with back arrow, title, and settings icon */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "12px 16px",
-          backgroundColor: "#ffffff",
-          borderBottom: "1px solid #e2e8f0",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-          }}
-        >
+      {/* Header */}
+      <div style={styles.header}>
+        <div style={styles.headerLeft}>
           <button
             onClick={() => navigate(-1)}
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              border: "1px solid #e2e8f0",
-              backgroundColor: "#ffffff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "20px",
-              color: "#1e293b",
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
+            style={styles.backButton}
             onMouseEnter={(e) =>
               (e.currentTarget.style.backgroundColor = "#f1f5f9")
             }
@@ -372,34 +342,12 @@ const DepositSummaryPage: React.FC = () => {
           >
             ←
           </button>
-          <h1
-            style={{
-              fontSize: "18px",
-              fontWeight: "600",
-              color: "#1e293b",
-              margin: 0,
-            }}
-          >
-            Deposit Summary
-          </h1>
+          <h1 style={styles.headerTitle}>Deposit Summary</h1>
         </div>
 
         <button
           onClick={() => navigate("/settings")}
-          style={{
-            width: "40px",
-            height: "40px",
-            borderRadius: "8px",
-            border: "1px solid #e2e8f0",
-            backgroundColor: "#ffffff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "18px",
-            color: "#1e293b",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
+          style={styles.settingsButton}
           onMouseEnter={(e) =>
             (e.currentTarget.style.backgroundColor = "#f1f5f9")
           }
@@ -412,12 +360,7 @@ const DepositSummaryPage: React.FC = () => {
         </button>
       </div>
 
-      <div
-        style={{
-          ...styles.content,
-          padding: "12px",
-        }}
-      >
+      <div style={styles.content}>
         {/* Error Message */}
         {saveError && (
           <div style={styles.errorContainer}>
@@ -448,68 +391,51 @@ const DepositSummaryPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Summary Table - Fixed alignment */}
-            <div
-              style={{
-                marginBottom: "16px",
-                border: "1px solid #e5e7eb",
-                borderRadius: "8px",
-                overflow: "hidden",
-              }}
-            >
-              {/* Table Header - Fixed alignment */}
-              <div
-                style={{
-                  display: "flex",
-                  padding: "10px 12px",
-                  backgroundColor: "#f9fafb",
-                  borderBottom: "1px solid #e5e7eb",
-                  fontWeight: "600",
-                  fontSize: "13px",
-                  color: "#374151",
-                }}
-              >
+            {/* Summary Table */}
+            <div style={styles.tableContainer}>
+              {/* Table Header */}
+              <div style={styles.tableHeader}>
                 <div
                   style={{
-                    flex: "1.5",
+                    ...styles.headerCell,
+                    flex: 1.5,
                     paddingLeft: "8px",
-                    minWidth: "0",
                   }}
                 >
                   Account
                 </div>
                 <div
                   style={{
-                    flex: "1",
+                    ...styles.headerCell,
+                    flex: 1,
                     textAlign: "right",
                     paddingRight: "12px",
-                    minWidth: "0",
                   }}
                 >
                   Savings
                 </div>
                 <div
                   style={{
-                    flex: "1",
+                    ...styles.headerCell,
+                    flex: 1,
                     textAlign: "right",
                     paddingRight: "12px",
-                    minWidth: "0",
                   }}
                 >
                   Deposits
                 </div>
                 <div
                   style={{
-                    flex: "0.5",
+                    ...styles.headerCell,
+                    flex: 0.5,
                     textAlign: "center",
-                    minWidth: "0",
                   }}
                 >
                   {/* Empty for action column header */}
                 </div>
               </div>
 
-              {/* Table Rows - Fixed alignment */}
+              {/* Table Rows */}
               <div>
                 {summaries.map((summary, index) => {
                   const isEditing = editingAccountId === summary.accountId;
@@ -519,70 +445,45 @@ const DepositSummaryPage: React.FC = () => {
                     <div
                       key={summary.accountId}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "10px 12px",
+                        ...styles.tableRow,
                         backgroundColor:
                           index % 2 === 0 ? "#ffffff" : "#f9fafb",
                         borderBottom:
                           index < summaries.length - 1
                             ? "1px solid #f3f4f6"
                             : "none",
-                        minHeight: "48px",
                       }}
                     >
                       {/* Account Code */}
                       <div
                         style={{
-                          flex: "1.5",
+                          ...styles.tableCell,
+                          flex: 1.5,
                           paddingLeft: "8px",
-                          minWidth: "0",
                           overflow: "hidden",
                         }}
                       >
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            color: "#1e293b",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
+                        <div style={styles.accountCode}>
                           {summary.accountCode}
                         </div>
                       </div>
 
-                      {/* Savings Amount - Aligned right */}
+                      {/* Savings Amount */}
                       <div
                         style={{
-                          flex: "1",
+                          ...styles.tableCell,
+                          flex: 1,
                           textAlign: "right",
                           paddingRight: "12px",
-                          minWidth: "0",
                         }}
                       >
                         {isEditing ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "flex-end",
-                            }}
-                          >
+                          <div style={styles.editInputContainer}>
                             <input
                               type="number"
                               value={editedSavings}
                               onChange={(e) => setEditedSavings(e.target.value)}
-                              style={{
-                                width: "90px",
-                                padding: "6px 8px",
-                                border: "1px solid #d1d5db",
-                                borderRadius: "4px",
-                                fontSize: "13px",
-                                textAlign: "right",
-                              }}
+                              style={styles.editInput}
                               step="0.01"
                               min="0"
                               placeholder="0.00"
@@ -590,49 +491,30 @@ const DepositSummaryPage: React.FC = () => {
                             />
                           </div>
                         ) : (
-                          <div
-                            style={{
-                              fontSize: "14px",
-                              fontWeight: "600",
-                              color: "#333",
-                            }}
-                          >
+                          <div style={styles.amountDisplay}>
                             {summary.savingsInLakhs}
                           </div>
                         )}
                       </div>
 
-                      {/* Deposits Amount - Aligned right */}
+                      {/* Deposits Amount */}
                       <div
                         style={{
-                          flex: "1",
+                          ...styles.tableCell,
+                          flex: 1,
                           textAlign: "right",
                           paddingRight: "12px",
-                          minWidth: "0",
                         }}
                       >
                         {isEditing ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "flex-end",
-                            }}
-                          >
+                          <div style={styles.editInputContainer}>
                             <input
                               type="number"
                               value={editedDeposits}
                               onChange={(e) =>
                                 setEditedDeposits(e.target.value)
                               }
-                              style={{
-                                width: "90px",
-                                padding: "6px 8px",
-                                border: "1px solid #d1d5db",
-                                borderRadius: "4px",
-                                fontSize: "13px",
-                                textAlign: "right",
-                              }}
+                              style={styles.editInput}
                               step="0.01"
                               min="0"
                               placeholder="0.00"
@@ -640,78 +522,43 @@ const DepositSummaryPage: React.FC = () => {
                             />
                           </div>
                         ) : (
-                          <div
-                            style={{
-                              fontSize: "14px",
-                              fontWeight: "600",
-                              color: "#333",
-                            }}
-                          >
+                          <div style={styles.amountDisplay}>
                             {summary.depositsInLakhs}
                           </div>
                         )}
                       </div>
 
-                      {/* Action Column - Fixed width */}
+                      {/* Action Column */}
                       <div
                         style={{
-                          flex: "0.5",
+                          ...styles.tableCell,
+                          flex: 0.5,
                           display: "flex",
                           justifyContent: "center",
                           minWidth: "60px",
                         }}
                       >
                         {isEditing ? (
-                          <div style={{ display: "flex", gap: "6px" }}>
+                          <div style={styles.actionButtons}>
                             <button
                               onClick={() => saveEdits(summary.accountId)}
                               style={{
-                                width: "32px",
-                                height: "32px",
-                                backgroundColor: "#10b981",
-                                border: "none",
-                                borderRadius: "4px",
-                                color: "white",
-                                fontSize: "14px",
+                                ...styles.saveButton,
                                 cursor: isSaving ? "not-allowed" : "pointer",
                                 opacity: isSaving ? 0.6 : 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
                               }}
                               title="Save"
                               disabled={isSaving}
                             >
                               {isSaving ? (
-                                <div
-                                  style={{
-                                    width: "14px",
-                                    height: "14px",
-                                    border: "2px solid #ffffff",
-                                    borderTop: "2px solid transparent",
-                                    borderRadius: "50%",
-                                    animation: "spin 1s linear infinite",
-                                  }}
-                                ></div>
+                                <div style={styles.spinnerSmall}></div>
                               ) : (
                                 "✓"
                               )}
                             </button>
                             <button
                               onClick={cancelEditing}
-                              style={{
-                                width: "32px",
-                                height: "32px",
-                                backgroundColor: "#ef4444",
-                                border: "none",
-                                borderRadius: "4px",
-                                color: "white",
-                                fontSize: "14px",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
+                              style={styles.cancelButton}
                               title="Cancel"
                               disabled={isSaving}
                             >
@@ -728,20 +575,12 @@ const DepositSummaryPage: React.FC = () => {
                               )
                             }
                             style={{
-                              width: "32px",
-                              height: "32px",
-                              backgroundColor: "transparent",
-                              border: "none",
-                              fontSize: "16px",
+                              ...styles.editButton,
                               cursor:
                                 editingAccountId !== null
                                   ? "not-allowed"
                                   : "pointer",
-                              color: "#6b7280",
                               opacity: editingAccountId !== null ? 0.5 : 1,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
                             }}
                             title="Edit"
                             disabled={editingAccountId !== null}
@@ -757,119 +596,74 @@ const DepositSummaryPage: React.FC = () => {
                 })}
               </div>
 
-              {/* Totals Row - Perfect alignment with headers, NO adjustments text */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "12px 12px",
-                  backgroundColor: "#f3f4f6",
-                  borderTop: "2px solid #e5e7eb",
-                  fontWeight: "600",
-                  fontSize: "14px",
-                  color: "#1f2937",
-                }}
-              >
+              {/* Totals Row */}
+              <div style={styles.totalsRow}>
                 <div
                   style={{
-                    flex: "1.5",
+                    ...styles.totalsCell,
+                    flex: 1.5,
                     paddingLeft: "8px",
-                    minWidth: "0",
                   }}
                 >
                   TOTAL
                 </div>
                 <div
                   style={{
-                    flex: "1",
+                    ...styles.totalsCell,
+                    flex: 1,
                     textAlign: "right",
                     paddingRight: "12px",
-                    minWidth: "0",
                   }}
                 >
                   {formatLakhs(rupeesToLakhs(totalSavings))}
                 </div>
                 <div
                   style={{
-                    flex: "1",
+                    ...styles.totalsCell,
+                    flex: 1,
                     textAlign: "right",
                     paddingRight: "12px",
-                    minWidth: "0",
                   }}
                 >
                   {formatLakhs(rupeesToLakhs(totalDeposits))}
                 </div>
                 <div
                   style={{
-                    flex: "0.5",
+                    ...styles.totalsCell,
+                    flex: 0.5,
                     textAlign: "center",
                     minWidth: "60px",
                   }}
                 >
-                  {/* REMOVED: No adjustments count text here */}
+                  {/* Empty for consistency */}
                 </div>
               </div>
             </div>
 
-            {/* Simplified History Update Section - Only button and text */}
-            <div
-              style={{
-                backgroundColor: "#f8fafc",
-                borderRadius: "8px",
-                padding: "16px",
-                marginBottom: "16px",
-                border: "1px solid #e2e8f0",
-                textAlign: "center",
-              }}
-            >
+            {/* History Update Section */}
+            <div style={styles.historySection}>
               <button
                 onClick={handleHistoryUpdate}
                 style={{
-                  width: "100%",
-                  padding: "12px",
-                  backgroundColor: "#3b82f6",
-                  border: "none",
-                  borderRadius: "6px",
-                  color: "white",
-                  fontSize: "14px",
-                  fontWeight: "500",
+                  ...styles.historyButton,
                   cursor:
                     isUpdatingHistory || !currentMonth
                       ? "not-allowed"
                       : "pointer",
                   opacity: isUpdatingHistory || !currentMonth ? 0.6 : 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: "8px",
                 }}
                 disabled={isUpdatingHistory || !currentMonth}
               >
                 {isUpdatingHistory ? (
                   <>
-                    <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        border: "2px solid #ffffff",
-                        borderTop: "2px solid transparent",
-                        borderRadius: "50%",
-                        animation: "spin 1s linear infinite",
-                        marginRight: "8px",
-                      }}
-                    ></div>
-                    Processing...
+                    <div style={styles.spinnerSmall}></div>
+                    <span style={{ marginLeft: "8px" }}>Processing...</span>
                   </>
                 ) : (
                   historyButtonText || "Loading..."
                 )}
               </button>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                }}
-              >
+              <div style={styles.historyNote}>
                 {historyButtonText?.includes("Update") ? "Updates" : "Creates"}{" "}
                 record in history table for {currentMonth}
               </div>

@@ -16,7 +16,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   const { depositId } = useParams();
   const navigate = useNavigate();
   const { accounts, deposits, loading: dataLoading } = useBankingData();
-  const { handleSaveDeposit } = useBankingOperations();
+  const { handleSaveDeposit, handleDeleteDeposit } = useBankingOperations();
 
   const [formData, setFormData] = useState<DepositFormData>({
     id: "",
@@ -30,6 +30,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   const [selectedAccountCode, setSelectedAccountCode] = useState("");
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [localAccounts, setLocalAccounts] = useState<any[]>([]);
 
   // Refs for dropdown positioning
@@ -145,6 +147,21 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
     }
   };
 
+  const handleDelete = async () => {
+    if (!depositId) return;
+
+    setDeleting(true);
+    try {
+      await handleDeleteDeposit(depositId);
+      navigate("/banking/deposits");
+    } catch (error) {
+      console.error("Error deleting deposit:", error);
+      alert("Failed to delete deposit. Please try again.");
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   if (dataLoading && isEdit) {
     return (
       <div style={bankingStyles.container}>
@@ -174,7 +191,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           onClick={() => navigate(-1)}
           style={bankingStyles.navButton}
           title="Back"
-          disabled={saving}
+          disabled={saving || deleting}
         >
           ←
         </button>
@@ -182,15 +199,31 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           {isEdit ? "Edit Deposit" : "Add Deposit"}
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
+          {isEdit && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={saving || deleting}
+              style={{
+                ...bankingStyles.navButton,
+                backgroundColor: "#dc2626",
+                color: "#fff",
+                border: "none",
+                opacity: saving || deleting ? 0.7 : 1,
+              }}
+              title="Delete"
+            >
+              🗑️
+            </button>
+          )}
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || deleting}
             style={{
               ...bankingStyles.navButton,
-              backgroundColor: saving ? "#94a3b8" : "#10b981",
+              backgroundColor: saving || deleting ? "#94a3b8" : "#10b981",
               color: "#fff",
               border: "none",
-              opacity: saving ? 0.7 : 1,
+              opacity: saving || deleting ? 0.7 : 1,
             }}
             title="Save"
           >
@@ -635,21 +668,32 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         <div style={{ marginTop: "24px" }}>
           <button
             onClick={handleSave}
-            disabled={saving || !formData.accountId || formData.amount <= 0}
+            disabled={
+              saving || deleting || !formData.accountId || formData.amount <= 0
+            }
             style={{
               ...bankingStyles.actionButton,
-              backgroundColor: saving
-                ? "#94a3b8"
-                : !formData.accountId || formData.amount <= 0
-                ? "#cbd5e1"
-                : "#10b981",
+              backgroundColor:
+                saving || deleting
+                  ? "#94a3b8"
+                  : !formData.accountId || formData.amount <= 0
+                  ? "#cbd5e1"
+                  : "#10b981",
               color: "#fff",
               fontSize: "1rem",
               fontWeight: 600,
               opacity:
-                saving || !formData.accountId || formData.amount <= 0 ? 0.7 : 1,
+                saving ||
+                deleting ||
+                !formData.accountId ||
+                formData.amount <= 0
+                  ? 0.7
+                  : 1,
               cursor:
-                saving || !formData.accountId || formData.amount <= 0
+                saving ||
+                deleting ||
+                !formData.accountId ||
+                formData.amount <= 0
                   ? "not-allowed"
                   : "pointer",
               width: "100%",
@@ -667,6 +711,30 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           </button>
         </div>
 
+        {/* Delete Button - Only show in edit mode */}
+        {isEdit && (
+          <div style={{ marginTop: "16px" }}>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={saving || deleting}
+              style={{
+                ...bankingStyles.actionButton,
+                backgroundColor: saving || deleting ? "#9ca3af" : "#dc2626",
+                color: "#fff",
+                fontSize: "1rem",
+                fontWeight: 600,
+                opacity: saving || deleting ? 0.7 : 1,
+                cursor: saving || deleting ? "not-allowed" : "pointer",
+                width: "100%",
+                boxSizing: "border-box",
+                border: "none",
+              }}
+            >
+              🗑️ Delete Deposit
+            </button>
+          </div>
+        )}
+
         {/* Required Fields Note */}
         <div
           style={{
@@ -679,6 +747,102 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           * Required fields
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10000,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "12px",
+              padding: "24px",
+              maxWidth: "400px",
+              width: "100%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            }}
+          >
+            <h3
+              style={{
+                margin: "0 0 12px 0",
+                fontSize: "1.25rem",
+                fontWeight: 600,
+                color: "#333",
+              }}
+            >
+              Delete Deposit
+            </h3>
+            <p
+              style={{
+                margin: "0 0 24px 0",
+                color: "#666",
+                lineHeight: "1.5",
+                fontSize: "0.95rem",
+              }}
+            >
+              Are you sure you want to delete this deposit? This action cannot
+              be undone.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "transparent",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "8px",
+                  color: "#666",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontSize: "0.95rem",
+                  minWidth: "80px",
+                  opacity: deleting ? 0.7 : 1,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: deleting ? "#9ca3af" : "#dc2626",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#fff",
+                  fontWeight: 500,
+                  cursor: deleting ? "not-allowed" : "pointer",
+                  fontSize: "0.95rem",
+                  minWidth: "80px",
+                  opacity: deleting ? 0.7 : 1,
+                }}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

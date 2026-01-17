@@ -74,6 +74,56 @@ const BankingHomePage: React.FC = () => {
     .sort((a, b) => b.month.localeCompare(a.month))
     .slice(0, 6);
 
+  // EMW Calculation
+  const calculateEMW = (
+    currentBalance: number,
+    targetDate: Date,
+    annualInterestRate: number = 5
+  ): number => {
+    if (currentBalance <= 0) return 0;
+
+    const today = new Date();
+    if (targetDate <= today) return 0;
+
+    // Calculate number of months until target date
+    const monthsDiff =
+      (targetDate.getFullYear() - today.getFullYear()) * 12 +
+      (targetDate.getMonth() - today.getMonth());
+
+    if (monthsDiff <= 0) return currentBalance;
+
+    // Convert annual interest rate to monthly rate
+    const monthlyInterestRate = annualInterestRate / 12 / 100;
+
+    // Calculate EMW using the formula: PMT = PV × r / [1 - (1 + r)^-n]
+    const numerator = currentBalance * monthlyInterestRate;
+    const denominator = 1 - Math.pow(1 + monthlyInterestRate, -monthsDiff);
+
+    if (denominator <= 0) {
+      return currentBalance / monthsDiff; // Simple division without interest
+    }
+
+    const emw = numerator / denominator;
+
+    // Round to 2 decimal places
+    return Math.round(emw * 100) / 100;
+  };
+
+  // Calculate total bank balance (savings + deposits)
+  const totalBankBalance = totalSavings + totalDeposits;
+
+  // Hardcoded target date: November 2044
+  const targetDate = new Date(2044, 10, 1); // November 2044 (month is 0-indexed)
+
+  // Calculate EMW
+  const emwAmount = calculateEMW(totalBankBalance, targetDate, 5);
+
+  // Format target date for display
+  const formattedTargetDate = targetDate.toLocaleDateString("en-IN", {
+    year: "numeric",
+    month: "long",
+  });
+
   if (loading) {
     return (
       <div style={bankingStyles.container}>
@@ -199,6 +249,222 @@ const BankingHomePage: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Total Bank Balance Card */}
+        <div
+          style={{
+            ...bankingStyles.statsCard,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            border: "none",
+          }}
+        >
+          <div
+            style={{
+              ...bankingStyles.statsLabel,
+              color: "rgba(255, 255, 255, 0.9)",
+              fontSize: "0.9rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+            }}
+          >
+            Total Bank Balance
+          </div>
+          <div
+            style={{
+              ...bankingStyles.statsValue,
+              fontSize: "1.8rem",
+              fontWeight: "700",
+              margin: "8px 0",
+            }}
+          >
+            {formatCurrency(totalBankBalance)}
+          </div>
+          <div
+            style={{
+              fontSize: "0.8rem",
+              color: "rgba(255, 255, 255, 0.8)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: "4px",
+            }}
+          >
+            <span>Savings: {formatCurrency(totalSavings)}</span>
+            <span style={{ margin: "0 8px" }}>•</span>
+            <span>Deposits: {formatCurrency(totalDeposits)}</span>
+          </div>
+        </div>
+
+        {/* EMW Calculation Card */}
+        <div
+          style={{
+            ...bankingStyles.statsCard,
+            backgroundColor: "#f8f9fa",
+            border: "2px solid #e9ecef",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Decorative corner */}
+          <div
+            style={{
+              position: "absolute",
+              top: "0",
+              right: "0",
+              width: "0",
+              height: "0",
+              borderTop: "60px solid #f0f9ff",
+              borderLeft: "60px solid transparent",
+              zIndex: 0,
+            }}
+          ></div>
+
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "10px",
+              }}
+            >
+              <div
+                style={{
+                  ...bankingStyles.statsLabel,
+                  color: "#1e40af",
+                  fontSize: "0.95rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <span
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "white",
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.8rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  EMW
+                </span>
+                Equated Monthly Withdrawal
+              </div>
+              <div
+                style={{
+                  fontSize: "0.7rem",
+                  backgroundColor: "#dbeafe",
+                  color: "#1e40af",
+                  padding: "4px 8px",
+                  borderRadius: "12px",
+                  fontWeight: "500",
+                }}
+              >
+                5% interest
+              </div>
+            </div>
+
+            <div
+              style={{
+                fontSize: "1.4rem",
+                fontWeight: "700",
+                color: "#1e40af",
+                margin: "12px 0",
+                textAlign: "center",
+              }}
+            >
+              {formatCurrency(emwAmount)}
+            </div>
+
+            <div
+              style={{
+                fontSize: "0.85rem",
+                color: "#4b5563",
+                textAlign: "center",
+                marginBottom: "8px",
+              }}
+            >
+              per month to empty account by
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                backgroundColor: "white",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+                marginBottom: "12px",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                  Target Date
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.9rem",
+                    fontWeight: "600",
+                    color: "#111827",
+                  }}
+                >
+                  {formattedTargetDate}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                  Total Balance
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.9rem",
+                    fontWeight: "600",
+                    color: "#111827",
+                  }}
+                >
+                  {formatCurrency(totalBankBalance)}
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                fontSize: "0.75rem",
+                color: "#6b7280",
+                lineHeight: "1.4",
+                backgroundColor: "#f3f4f6",
+                padding: "8px 10px",
+                borderRadius: "6px",
+                borderLeft: "3px solid #3b82f6",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  marginBottom: "4px",
+                }}
+              >
+                <span style={{ color: "#3b82f6" }}>💡</span>
+                <span style={{ fontWeight: "500" }}>What is EMW?</span>
+              </div>
+              <div>
+                The monthly amount you can withdraw to completely empty your
+                account by the target date, assuming 5% annual interest.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -3,7 +3,7 @@ import { CSSProperties } from "react";
 const HistoryListPageStyles: { [key: string]: CSSProperties } = {
   container: {
     width: "100%",
-    maxWidth: "500px",
+    maxWidth: "600px",
     margin: "0 auto",
     backgroundColor: "#f5f7fa",
     minHeight: "100vh",

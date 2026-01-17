@@ -5,7 +5,7 @@ export const bankingStyles: Record<string, CSSProperties> = {
   // Container styles
   container: {
     width: "100%",
-    maxWidth: "500px",
+    maxWidth: "600px",
     margin: "0 auto",
     backgroundColor: "#ffffff",
     minHeight: "100vh",

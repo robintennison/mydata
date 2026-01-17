@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 export const myDataHomepageStyles: Record<string, CSSProperties> = {
   container: {
     width: "100%",
-    maxWidth: "500px",
+    maxWidth: "600px",
     margin: "0 auto",
     backgroundColor: "#f5f7fa",
     minHeight: "calc(100vh - 80px)",

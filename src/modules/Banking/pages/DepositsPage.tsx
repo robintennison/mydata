@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { bankingStyles } from "../styles";
+import BankingNavigation from "./BankingNavigation"; //
 
 const DepositsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -68,6 +69,7 @@ const DepositsPage: React.FC = () => {
           </button>
         </div>
       </div>
+      <BankingNavigation />
     </div>
   );
 };

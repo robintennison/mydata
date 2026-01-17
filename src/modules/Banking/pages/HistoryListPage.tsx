@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import HistoryChart from "./HistoryChart.tsx";
 import styles from "../styles/HistoryListPage.styles.ts";
+import BankingNavigation from "./BankingNavigation"; //
 
 // Register Chart.js components
 ChartJS.register(
@@ -372,7 +373,7 @@ const HistoryListPage: React.FC = () => {
           </div>
         </div>
       )}
-
+      <BankingNavigation />
       {/* Bottom spacing */}
       <div style={{ height: "20px" }}></div>
     </div>

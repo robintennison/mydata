@@ -6,6 +6,7 @@ import { useBankingOperations } from "../hooks/useBankingOperations";
 import { Deposit, BankAccount } from "../../../types/banking.types";
 import { formatCurrency, formatDate } from "../../../utils/formatters";
 import { bankingStyles } from "../styles";
+import BankingNavigation from "./BankingNavigation";
 
 // Custom formatter for Lakhs like Android version
 const formatInLakhs = (amount: number): string => {
@@ -566,7 +567,8 @@ const DepositsListPage: React.FC = () => {
                 )}
               </div>
             </div>
-
+            {/* Use the extracted BankingNavigation component */}
+            <BankingNavigation />
             {/* Bottom spacer like Android */}
             <div style={{ height: "32px" }}></div>
           </>

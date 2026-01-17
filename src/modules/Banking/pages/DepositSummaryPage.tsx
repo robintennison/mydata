@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import styles from "../styles/DepositSummaryPage.styles";
+import BankingNavigation from "./BankingNavigation";
 
 interface AccountSummary {
   accountId: string;
@@ -630,7 +631,7 @@ const DepositSummaryPage: React.FC = () => {
           </>
         )}
       </div>
-
+      <BankingNavigation />
       {/* Bottom spacing */}
       <div style={{ height: "20px" }}></div>
     </div>

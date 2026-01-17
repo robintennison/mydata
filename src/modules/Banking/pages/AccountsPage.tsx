@@ -4,6 +4,7 @@ import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
 import { bankingStyles } from "../styles/BankingStyles";
+import BankingNavigation from "./BankingNavigation"; 
 
 const AccountsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -638,7 +639,8 @@ const AccountsPage: React.FC = () => {
           </div>
         </div>
       )}
-
+      {/* Use the extracted BankingNavigation component */}
+      <BankingNavigation />
       {/* Bottom spacing */}
       <div style={{ height: "20px" }}></div>
     </div>

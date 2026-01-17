@@ -14,12 +14,16 @@ const AccountsPage: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<any>(null);
 
+  // Format currency without rupee symbol, in lakhs without 'L' suffix
   const formatCurrency = (amount: number): string => {
+    // Convert to lakhs (divide by 100,000)
+    const amountInLakhs = amount / 100000;
+
+    // Format with Indian number grouping (lakhs and crores)
     return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
       minimumFractionDigits: 0,
-    }).format(amount);
+      maximumFractionDigits: 2,
+    }).format(amountInLakhs);
   };
 
   // Helper function to check if account is active
@@ -42,8 +46,13 @@ const AccountsPage: React.FC = () => {
     return isAccountActive(account);
   });
 
+  // Sort accounts by acctCode in ascending order
+  const sortedAccounts = [...filteredAccounts].sort((a, b) => {
+    return a.acctCode.localeCompare(b.acctCode);
+  });
+
   // Calculate total savings for filtered accounts
-  const totalSavings = filteredAccounts.reduce((sum, account) => {
+  const totalSavings = sortedAccounts.reduce((sum, account) => {
     return sum + account.savingsAmount;
   }, 0);
 
@@ -112,9 +121,9 @@ const AccountsPage: React.FC = () => {
 
       {/* ALL CONTENT INSIDE THIS DIV - This ensures centering */}
       <div style={{ width: "100%" }}>
-        {/* Accounts List */}
-        <div style={{ padding: "0 15px" }}>
-          {filteredAccounts.length === 0 ? (
+        {/* Accounts List - No padding to take full width */}
+        <div style={{ width: "100%" }}>
+          {sortedAccounts.length === 0 ? (
             <div style={bankingStyles.emptyState}>
               <div style={{ fontSize: "2rem", marginBottom: "10px" }}>🏦</div>
               <div>
@@ -129,12 +138,12 @@ const AccountsPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div style={bankingStyles.card}>
+            <div style={{ ...bankingStyles.card, margin: 0, borderRadius: 0 }}>
               {/* Table Header */}
               <div
                 style={{
                   display: "flex",
-                  padding: "12px 0",
+                  padding: "12px 16px",
                   marginBottom: "8px",
                   fontSize: "0.9rem",
                   fontWeight: "600",
@@ -159,7 +168,7 @@ const AccountsPage: React.FC = () => {
                   overflowY: "auto",
                 }}
               >
-                {filteredAccounts.map((account, index) => {
+                {sortedAccounts.map((account, index) => {
                   const isActive = isAccountActive(account);
                   return (
                     <div
@@ -167,9 +176,9 @@ const AccountsPage: React.FC = () => {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        padding: "12px 0",
+                        padding: "12px 16px",
                         borderBottom:
-                          index < filteredAccounts.length - 1
+                          index < sortedAccounts.length - 1
                             ? "1px solid #e9ecef"
                             : "none",
                         opacity: isActive ? 1 : 0.7,
@@ -261,7 +270,7 @@ const AccountsPage: React.FC = () => {
               <div
                 style={{
                   marginTop: "15px",
-                  paddingTop: "15px",
+                  padding: "16px",
                   borderTop: "2px solid #e9ecef",
                   display: "flex",
                   justifyContent: "space-between",
@@ -271,8 +280,8 @@ const AccountsPage: React.FC = () => {
                 <div>
                   <div style={{ fontSize: "0.8rem", color: "#6c757d" }}>
                     {settings?.showInactive
-                      ? `Showing ${filteredAccounts.length} of ${accounts.length} accounts`
-                      : `Showing ${filteredAccounts.length} active accounts`}
+                      ? `Showing ${sortedAccounts.length} of ${accounts.length} accounts`
+                      : `Showing ${sortedAccounts.length} active accounts`}
                   </div>
                   <div
                     style={{

@@ -287,12 +287,12 @@ const SettingsPage: React.FC = () => {
       <div
         style={{
           ...settingsStyles.content,
-          maxWidth: "500px",
+          maxWidth: "600px", // Changed from 500px to 600px
           margin: "0 auto",
           padding: "16px",
         }}
       >
-        {/* EMW Settings - Compact */}
+        {/* Display Settings at TOP - Compact */}
         <div
           style={{
             ...settingsStyles.section,
@@ -309,10 +309,10 @@ const SettingsPage: React.FC = () => {
               fontWeight: "600",
             }}
           >
-            EMW (Equated Monthly Withdrawal) Settings
+            Display Settings
           </h3>
 
-          {/* EMW Interest Rate - Single row */}
+          {/* Show Inactive Items - Single row */}
           <div
             style={{
               display: "flex",
@@ -323,104 +323,55 @@ const SettingsPage: React.FC = () => {
               borderBottom: "1px solid #f0f0f0",
             }}
           >
+            <div>
+              <div
+                style={{
+                  fontSize: "0.95rem",
+                  fontWeight: "500",
+                  color: "#495057",
+                }}
+              >
+                Show Inactive Items
+              </div>
+              <div
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#6b7280",
+                  marginTop: "2px",
+                }}
+              >
+                Show inactive jewellery in lists and gallery
+              </div>
+            </div>
             <div
+              onClick={() =>
+                handleToggle("showInactive", !settings?.showInactive)
+              }
               style={{
-                fontSize: "0.95rem",
-                fontWeight: "500",
-                color: "#495057",
+                position: "relative",
+                width: "44px",
+                height: "24px",
+                backgroundColor: settings?.showInactive ? "#10b981" : "#d1d5db",
+                borderRadius: "12px",
+                cursor: "pointer",
               }}
             >
-              EMW Interest Rate
+              <div
+                style={{
+                  position: "absolute",
+                  top: "2px",
+                  left: settings?.showInactive ? "22px" : "2px",
+                  width: "20px",
+                  height: "20px",
+                  backgroundColor: "white",
+                  borderRadius: "50%",
+                  transition: "left 0.2s",
+                }}
+              />
             </div>
-            {editingField === "emwInterest" ? (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <input
-                  type="text"
-                  value={editValue}
-                  onChange={(e) => handleEditValueChange(e.target.value)}
-                  style={{
-                    width: "70px",
-                    padding: "6px 8px",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "4px",
-                    fontSize: "0.95rem",
-                    textAlign: "right",
-                  }}
-                  autoFocus
-                  onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-                />
-                <div style={{ display: "flex", gap: "4px" }}>
-                  <button
-                    onClick={handleSaveEdit}
-                    style={{
-                      background: "#10b981",
-                      border: "none",
-                      borderRadius: "4px",
-                      color: "white",
-                      padding: "6px 8px",
-                      fontSize: "0.9rem",
-                      cursor: "pointer",
-                    }}
-                    title="Save"
-                  >
-                    ✓
-                  </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    style={{
-                      background: "#ef4444",
-                      border: "none",
-                      borderRadius: "4px",
-                      color: "white",
-                      padding: "6px 8px",
-                      fontSize: "0.9rem",
-                      cursor: "pointer",
-                    }}
-                    title="Cancel"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <div
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: "600",
-                    color: "#333",
-                  }}
-                >
-                  {formatNumber(financialSettings.emwInterest)}%
-                </div>
-                <button
-                  onClick={() =>
-                    handleStartEdit(
-                      "emwInterest",
-                      financialSettings.emwInterest
-                    )
-                  }
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "1rem",
-                    cursor: "pointer",
-                    color: "#6b7280",
-                    padding: "2px",
-                  }}
-                  title="Edit"
-                >
-                  ✏️
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* EMW Target Date - Single row */}
+          {/* Show Delete Action - Single row */}
           <div
             style={{
               display: "flex",
@@ -430,108 +381,50 @@ const SettingsPage: React.FC = () => {
               borderBottom: "1px solid #f0f0f0",
             }}
           >
+            <div>
+              <div
+                style={{
+                  fontSize: "0.95rem",
+                  fontWeight: "500",
+                  color: "#495057",
+                }}
+              >
+                Show Delete Action
+              </div>
+              <div
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#6b7280",
+                  marginTop: "2px",
+                }}
+              >
+                Display the delete control on Edit screen
+              </div>
+            </div>
             <div
+              onClick={() => handleToggle("showDelete", !settings?.showDelete)}
               style={{
-                fontSize: "0.95rem",
-                fontWeight: "500",
-                color: "#495057",
+                position: "relative",
+                width: "44px",
+                height: "24px",
+                backgroundColor: settings?.showDelete ? "#10b981" : "#d1d5db",
+                borderRadius: "12px",
+                cursor: "pointer",
               }}
             >
-              EMW Target Date
+              <div
+                style={{
+                  position: "absolute",
+                  top: "2px",
+                  left: settings?.showDelete ? "22px" : "2px",
+                  width: "20px",
+                  height: "20px",
+                  backgroundColor: "white",
+                  borderRadius: "50%",
+                  transition: "left 0.2s",
+                }}
+              />
             </div>
-            {editingEmwDate ? (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <input
-                  type="text"
-                  value={emwDateValue}
-                  onChange={(e) => setEmwDateValue(e.target.value)}
-                  placeholder="YYYY-MM"
-                  style={{
-                    width: "90px",
-                    padding: "6px 8px",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "4px",
-                    fontSize: "0.95rem",
-                  }}
-                  autoFocus
-                  onKeyPress={(e) =>
-                    e.key === "Enter" && handleSaveEmwDateEdit()
-                  }
-                />
-                <div style={{ display: "flex", gap: "4px" }}>
-                  <button
-                    onClick={handleSaveEmwDateEdit}
-                    style={{
-                      background: "#10b981",
-                      border: "none",
-                      borderRadius: "4px",
-                      color: "white",
-                      padding: "6px 8px",
-                      fontSize: "0.9rem",
-                      cursor: "pointer",
-                    }}
-                    title="Save"
-                  >
-                    ✓
-                  </button>
-                  <button
-                    onClick={handleCancelEmwDateEdit}
-                    style={{
-                      background: "#ef4444",
-                      border: "none",
-                      borderRadius: "4px",
-                      color: "white",
-                      padding: "6px 8px",
-                      fontSize: "0.9rem",
-                      cursor: "pointer",
-                    }}
-                    title="Cancel"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <div
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: "600",
-                    color: "#333",
-                    textAlign: "right",
-                  }}
-                >
-                  <div>{formatEmwDate(emwDate)}</div>
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "#6b7280",
-                      fontWeight: "normal",
-                    }}
-                  >
-                    ({emwDate})
-                  </div>
-                </div>
-                <button
-                  onClick={handleStartEmwDateEdit}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "1rem",
-                    cursor: "pointer",
-                    color: "#6b7280",
-                    padding: "2px",
-                  }}
-                  title="Edit"
-                >
-                  ✏️
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -1015,142 +908,6 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Display Settings - Compact */}
-        <div
-          style={{
-            ...settingsStyles.section,
-            padding: "12px 0",
-            marginBottom: "16px",
-          }}
-        >
-          <h3
-            style={{
-              ...settingsStyles.sectionTitle,
-              fontSize: "1rem",
-              marginBottom: "16px",
-              color: "#333",
-              fontWeight: "600",
-            }}
-          >
-            Display Settings
-          </h3>
-
-          {/* Show Inactive Items - Single row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "12px",
-              padding: "8px 0",
-              borderBottom: "1px solid #f0f0f0",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: "0.95rem",
-                  fontWeight: "500",
-                  color: "#495057",
-                }}
-              >
-                Show Inactive Items
-              </div>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#6b7280",
-                  marginTop: "2px",
-                }}
-              >
-                Show inactive jewellery in lists and gallery
-              </div>
-            </div>
-            <div
-              onClick={() =>
-                handleToggle("showInactive", !settings?.showInactive)
-              }
-              style={{
-                position: "relative",
-                width: "44px",
-                height: "24px",
-                backgroundColor: settings?.showInactive ? "#10b981" : "#d1d5db",
-                borderRadius: "12px",
-                cursor: "pointer",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  top: "2px",
-                  left: settings?.showInactive ? "22px" : "2px",
-                  width: "20px",
-                  height: "20px",
-                  backgroundColor: "white",
-                  borderRadius: "50%",
-                  transition: "left 0.2s",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Show Delete Action - Single row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "8px 0",
-              borderBottom: "1px solid #f0f0f0",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: "0.95rem",
-                  fontWeight: "500",
-                  color: "#495057",
-                }}
-              >
-                Show Delete Action
-              </div>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#6b7280",
-                  marginTop: "2px",
-                }}
-              >
-                Display the delete control on Edit screen
-              </div>
-            </div>
-            <div
-              onClick={() => handleToggle("showDelete", !settings?.showDelete)}
-              style={{
-                position: "relative",
-                width: "44px",
-                height: "24px",
-                backgroundColor: settings?.showDelete ? "#10b981" : "#d1d5db",
-                borderRadius: "12px",
-                cursor: "pointer",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  top: "2px",
-                  left: settings?.showDelete ? "22px" : "2px",
-                  width: "20px",
-                  height: "20px",
-                  backgroundColor: "white",
-                  borderRadius: "50%",
-                  transition: "left 0.2s",
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
         {/* Locations Management - Compact */}
         <div
           style={{
@@ -1294,7 +1051,7 @@ const SettingsPage: React.FC = () => {
           style={{
             ...settingsStyles.section,
             padding: "12px 0",
-            paddingBottom: "80px", // Extra padding at bottom for navigation
+            marginBottom: "16px",
           }}
         >
           <div
@@ -1427,6 +1184,249 @@ const SettingsPage: React.FC = () => {
               )}
             </div>
           )}
+        </div>
+
+        {/* EMW Settings at BOTTOM - Compact */}
+        <div
+          style={{
+            ...settingsStyles.section,
+            padding: "12px 0",
+            paddingBottom: "80px", // Extra padding at bottom for navigation
+          }}
+        >
+          <h3
+            style={{
+              ...settingsStyles.sectionTitle,
+              fontSize: "1rem",
+              marginBottom: "16px",
+              color: "#333",
+              fontWeight: "600",
+            }}
+          >
+            EMW (Equated Monthly Withdrawal) Settings
+          </h3>
+
+          {/* EMW Interest Rate - Single row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "12px",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#495057",
+              }}
+            >
+              EMW Interest Rate
+            </div>
+            {editingField === "emwInterest" ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <input
+                  type="text"
+                  value={editValue}
+                  onChange={(e) => handleEditValueChange(e.target.value)}
+                  style={{
+                    width: "70px",
+                    padding: "6px 8px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "4px",
+                    fontSize: "0.95rem",
+                    textAlign: "right",
+                  }}
+                  autoFocus
+                  onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                />
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <button
+                    onClick={handleSaveEdit}
+                    style={{
+                      background: "#10b981",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Save"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    style={{
+                      background: "#ef4444",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.95rem",
+                    fontWeight: "600",
+                    color: "#333",
+                  }}
+                >
+                  {formatNumber(financialSettings.emwInterest)}%
+                </div>
+                <button
+                  onClick={() =>
+                    handleStartEdit(
+                      "emwInterest",
+                      financialSettings.emwInterest
+                    )
+                  }
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                    color: "#6b7280",
+                    padding: "2px",
+                  }}
+                  title="Edit"
+                >
+                  ✏️
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* EMW Target Date - Single row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#495057",
+              }}
+            >
+              EMW Target Date
+            </div>
+            {editingEmwDate ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <input
+                  type="text"
+                  value={emwDateValue}
+                  onChange={(e) => setEmwDateValue(e.target.value)}
+                  placeholder="YYYY-MM"
+                  style={{
+                    width: "90px",
+                    padding: "6px 8px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "4px",
+                    fontSize: "0.95rem",
+                  }}
+                  autoFocus
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && handleSaveEmwDateEdit()
+                  }
+                />
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <button
+                    onClick={handleSaveEmwDateEdit}
+                    style={{
+                      background: "#10b981",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Save"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={handleCancelEmwDateEdit}
+                    style={{
+                      background: "#ef4444",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.95rem",
+                    fontWeight: "600",
+                    color: "#333",
+                    textAlign: "right",
+                  }}
+                >
+                  <div>{formatEmwDate(emwDate)}</div>
+                  <div
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "#6b7280",
+                      fontWeight: "normal",
+                    }}
+                  >
+                    ({emwDate})
+                  </div>
+                </div>
+                <button
+                  onClick={handleStartEmwDateEdit}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                    color: "#6b7280",
+                    padding: "2px",
+                  }}
+                  title="Edit"
+                >
+                  ✏️
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

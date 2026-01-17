@@ -25,6 +25,9 @@ interface Settings {
   liabilities: number;
   showInactive: boolean;
   showDelete: boolean;
+  // Add EMW fields
+  EMW_interest: number;
+  EMW_Date: string;
 }
 
 interface SettingsContextType {
@@ -46,6 +49,9 @@ const defaultSettings: Settings = {
   liabilities: 0,
   showInactive: false,
   showDelete: false,
+  // Default EMW values
+  EMW_interest: 5, // 5% default interest rate
+  EMW_Date: "2044-10", // November 2044
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(
@@ -84,6 +90,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
           liabilities: data.liabilities || 0,
           showInactive: data.showInactive || false,
           showDelete: data.showDelete || false,
+          // Add EMW fields with defaults
+          EMW_interest: data.EMW_Interest !== undefined ? data.EMW_Interest : 5,
+          EMW_Date: data.EMW_Date || "2044-10",
         });
       } else {
         // Create default document if it doesn't exist

@@ -35,10 +35,15 @@ const SettingsPage: React.FC = () => {
     makingTax: 0,
     resaleDiscount: 0,
     liabilities: 0,
+    emwInterest: 5, // Default EMW interest rate
   });
+
+  const [emwDate, setEmwDate] = useState("2044-10"); // Default EMW date (Nov 2044)
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [editingEmwDate, setEditingEmwDate] = useState(false);
+  const [emwDateValue, setEmwDateValue] = useState("");
 
   useEffect(() => {
     if (settings) {
@@ -47,7 +52,15 @@ const SettingsPage: React.FC = () => {
         makingTax: settings.makingTaxPercent || 0,
         resaleDiscount: settings.resaleDiscountPercent || 0,
         liabilities: settings.liabilities || 0,
+        // Use correct field names with fallback defaults
+        emwInterest:
+          settings.EMW_interest !== undefined ? settings.EMW_interest : 5,
       });
+
+      // Set EMW date from settings or default
+      if (settings.EMW_Date) {
+        setEmwDate(settings.EMW_Date);
+      }
     }
   }, [settings]);
 
@@ -80,10 +93,13 @@ const SettingsPage: React.FC = () => {
       case "liabilities":
         settingsField = "liabilities";
         break;
+      case "emwInterest":
+        settingsField = "EMW_Interest"; // Capital 'I' for Firebase
+        break;
     }
 
     if (settingsField) {
-      updateSettings({ [settingsField]: numValue });
+      updateSettings({ [settingsField]: numValue } as any);
     }
 
     setEditingField(null);
@@ -93,6 +109,32 @@ const SettingsPage: React.FC = () => {
   const handleCancelEdit = () => {
     setEditingField(null);
     setEditValue("");
+  };
+
+  const handleStartEmwDateEdit = () => {
+    setEditingEmwDate(true);
+    setEmwDateValue(emwDate);
+  };
+
+  const handleSaveEmwDateEdit = () => {
+    if (!emwDateValue.trim()) return;
+
+    // Validate date format (YYYY-MM)
+    const dateRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
+    if (!dateRegex.test(emwDateValue)) {
+      alert("Please enter date in YYYY-MM format (e.g., 2039-10)");
+      return;
+    }
+
+    // Update local state and Firebase
+    setEmwDate(emwDateValue);
+    updateSettings({ EMW_Date: emwDateValue } as any);
+    setEditingEmwDate(false);
+  };
+
+  const handleCancelEmwDateEdit = () => {
+    setEditingEmwDate(false);
+    setEmwDateValue("");
   };
 
   const handleEditValueChange = (value: string) => {
@@ -105,7 +147,7 @@ const SettingsPage: React.FC = () => {
     field: "showInactive" | "showDelete",
     value: boolean
   ) => {
-    updateSettings({ [field]: value });
+    updateSettings({ [field]: value } as any);
   };
 
   const handleAddLocation = () => {
@@ -160,6 +202,19 @@ const SettingsPage: React.FC = () => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+  };
+
+  const formatEmwDate = (dateStr: string) => {
+    try {
+      const [year, month] = dateStr.split("-");
+      const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+      return date.toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "long",
+      });
+    } catch (e) {
+      return dateStr;
+    }
   };
 
   if (loading) {
@@ -217,6 +272,176 @@ const SettingsPage: React.FC = () => {
           margin: "0 auto",
         }}
       >
+        {/* EMW Settings */}
+        <div style={settingsStyles.section}>
+          <h3 style={settingsStyles.sectionTitle}>
+            EMW (Equated Monthly Withdrawal) Settings
+            <span
+              style={{ fontSize: "0.9rem", color: "#666", marginLeft: "10px" }}
+            >
+              Used in Banking calculations
+            </span>
+          </h3>
+
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
+            {/* EMW Interest Rate */}
+            <div style={settingsStyles.fieldContainer}>
+              <label style={settingsStyles.label}>EMW Interest Rate (%)</label>
+              {editingField === "emwInterest" ? (
+                <div style={settingsStyles.editControls}>
+                  <div style={settingsStyles.editInputContainer}>
+                    <input
+                      type="text"
+                      value={editValue}
+                      onChange={(e) => handleEditValueChange(e.target.value)}
+                      style={{
+                        ...settingsStyles.input,
+                        flex: 1,
+                      }}
+                      autoFocus
+                      onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                    />
+                    <span
+                      style={{
+                        ...settingsStyles.currencyPrefix,
+                        backgroundColor: "#f3f4f6",
+                        borderLeft: "1px solid #d1d5db",
+                      }}
+                    >
+                      %
+                    </span>
+                  </div>
+                  <div style={settingsStyles.buttonGroup}>
+                    <button
+                      onClick={handleSaveEdit}
+                      style={{
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.saveButton,
+                      }}
+                      title="Save"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      style={{
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.cancelButton,
+                      }}
+                      title="Cancel"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() =>
+                    handleStartEdit(
+                      "emwInterest",
+                      financialSettings.emwInterest
+                    )
+                  }
+                  style={settingsStyles.editableField}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f1f5f9";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f8f9fa";
+                  }}
+                >
+                  <span style={{ fontSize: "16px", color: "#333" }}>
+                    {formatNumber(financialSettings.emwInterest)}%
+                  </span>
+                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
+                </div>
+              )}
+            </div>
+
+            {/* EMW Target Date */}
+            <div style={settingsStyles.fieldContainer}>
+              <label style={settingsStyles.label}>EMW Target Date</label>
+              {editingEmwDate ? (
+                <div style={settingsStyles.editControls}>
+                  <input
+                    type="text"
+                    value={emwDateValue}
+                    onChange={(e) => setEmwDateValue(e.target.value)}
+                    placeholder="YYYY-MM (e.g., 2039-10)"
+                    style={{ ...settingsStyles.input, flex: 1 }}
+                    autoFocus
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleSaveEmwDateEdit()
+                    }
+                  />
+                  <div style={settingsStyles.buttonGroup}>
+                    <button
+                      onClick={handleSaveEmwDateEdit}
+                      style={{
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.saveButton,
+                      }}
+                      title="Save"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={handleCancelEmwDateEdit}
+                      style={{
+                        ...settingsStyles.iconButton,
+                        ...settingsStyles.cancelButton,
+                      }}
+                      title="Cancel"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={handleStartEmwDateEdit}
+                  style={settingsStyles.editableField}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f1f5f9";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f8f9fa";
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: "16px",
+                        color: "#333",
+                        fontWeight: "500",
+                      }}
+                    >
+                      {formatEmwDate(emwDate)}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#6b7280",
+                        marginTop: "2px",
+                      }}
+                    >
+                      ({emwDate})
+                    </div>
+                  </div>
+                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
+                </div>
+              )}
+              <div
+                style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}
+              >
+                Format: YYYY-MM (Year-Month)
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Financial Settings */}
         <div style={settingsStyles.section}>
           <h3 style={settingsStyles.sectionTitle}>

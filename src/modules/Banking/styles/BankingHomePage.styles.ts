@@ -1,161 +1,118 @@
-// src/modules/BankingHomePage/styles.ts
 export const bankingHomeStyles = {
-  container: {
+  // Container and layout
+  centeredContainer: {
     minHeight: "100vh",
     backgroundColor: "#f8fafc",
+    maxWidth: "600px",
+    margin: "0 auto",
+    width: "100%",
   } as React.CSSProperties,
 
+  loading: {
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100vh",
+    color: "#6c757d",
+  } as React.CSSProperties,
+
+  spinner: {
+    border: "4px solid rgba(0, 0, 0, 0.1)",
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    borderLeftColor: "#4285f4",
+    animation: "spin 1s linear infinite",
+  } as React.CSSProperties,
+
+  // Header
   header: {
+    padding: "20px 15px 10px",
     backgroundColor: "#ffffff",
-    padding: "24px 20px",
-    borderBottom: "1px solid #e2e8f0",
+    borderBottom: "1px solid #e9ecef",
   } as React.CSSProperties,
 
   headerTitle: {
-    margin: "0 0 8px 0",
-    fontSize: "28px",
-    fontWeight: "700",
-    color: "#1e293b",
+    fontSize: "1.8rem",
+    fontWeight: "700" as const,
+    color: "#333",
+    margin: "0 0 4px 0",
     display: "flex",
     alignItems: "center",
     gap: "10px",
   } as React.CSSProperties,
 
   headerSubtitle: {
-    margin: "0",
-    fontSize: "14px",
-    color: "#64748b",
+    fontSize: "0.9rem",
+    color: "#6c757d",
   } as React.CSSProperties,
 
+  // Top Navigation
   topNav: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "12px 20px",
+    padding: "10px 15px",
     backgroundColor: "#ffffff",
-    borderBottom: "1px solid #e2e8f0",
-  } as React.CSSProperties,
-
-  navButton: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "8px",
-    border: "1px solid #e2e8f0",
-    backgroundColor: "#ffffff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "18px",
-    cursor: "pointer",
-    transition: "all 0.2s",
+    borderBottom: "1px solid #e9ecef",
   } as React.CSSProperties,
 
   navTitle: {
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#1e293b",
+    fontSize: "1rem",
+    fontWeight: "600" as const,
+    color: "#333",
   } as React.CSSProperties,
 
+  navButton: {
+    background: "none",
+    border: "none",
+    fontSize: "1.2rem",
+    color: "#4285f4",
+    cursor: "pointer",
+    padding: "8px",
+    borderRadius: "8px",
+    minWidth: "40px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  } as React.CSSProperties,
+
+  // Cards
   statsCard: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
     padding: "16px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
     border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
   } as React.CSSProperties,
 
   statsLabel: {
     fontSize: "0.875rem",
-    fontWeight: "500",
+    fontWeight: "500" as const,
     color: "#6b7280",
     marginBottom: "8px",
-    textTransform: "uppercase",
+    textTransform: "uppercase" as const,
     letterSpacing: "0.5px",
   } as React.CSSProperties,
 
   statsValue: {
     fontSize: "1.5rem",
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: "#1f2937",
     marginBottom: "4px",
-  } as React.CSSProperties,
-
-  card: {
-    backgroundColor: "#ffffff",
-    borderRadius: "12px",
-    padding: "16px",
-    margin: "15px",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-  } as React.CSSProperties,
-
-  cardTitle: {
-    fontSize: "1rem",
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: "16px",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  } as React.CSSProperties,
-
-  navGrid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "15px",
-    padding: "15px",
-  } as React.CSSProperties,
-
-  navIcon: {
-    backgroundColor: "#ffffff",
-    borderRadius: "12px",
-    padding: "20px",
-    border: "2px solid",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    transition: "all 0.2s",
-    textAlign: "center",
-  } as React.CSSProperties,
-
-  navIconText: {
-    fontSize: "0.875rem",
-    fontWeight: "600",
-    color: "#374151",
-    marginTop: "8px",
-    marginBottom: "4px",
-  } as React.CSSProperties,
-
-  loading: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "60vh",
-  } as React.CSSProperties,
-
-  spinner: {
-    width: "40px",
-    height: "40px",
-    border: "3px solid #f3f3f3",
-    borderTop: "3px solid #3b82f6",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-    marginBottom: "16px",
   } as React.CSSProperties,
 
   // EMW Card Specific Styles
   emwCard: {
     backgroundColor: "#f8f9fa",
     border: "2px solid #e9ecef",
-    position: "relative",
-    overflow: "hidden",
+    position: "relative" as const,
+    overflow: "hidden" as const,
   } as React.CSSProperties,
 
   emwDecorativeCorner: {
-    position: "absolute",
+    position: "absolute" as const,
     top: "0",
     right: "0",
     width: "0",
@@ -163,6 +120,14 @@ export const bankingHomeStyles = {
     borderTop: "60px solid #f0f9ff",
     borderLeft: "60px solid transparent",
     zIndex: 0,
+  } as React.CSSProperties,
+
+  emwTitle: {
+    fontSize: "0.95rem",
+    color: "#1e40af",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
   } as React.CSSProperties,
 
   emwBadge: {
@@ -175,15 +140,7 @@ export const bankingHomeStyles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "0.8rem",
-    fontWeight: "600",
-  } as React.CSSProperties,
-
-  emwTitle: {
-    fontSize: "0.95rem",
-    color: "#1e40af",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
+    fontWeight: "600" as const,
   } as React.CSSProperties,
 
   interestBadge: {
@@ -192,7 +149,7 @@ export const bankingHomeStyles = {
     color: "#1e40af",
     padding: "4px 8px",
     borderRadius: "12px",
-    fontWeight: "500",
+    fontWeight: "500" as const,
   } as React.CSSProperties,
 
   emwGrid: {
@@ -207,7 +164,7 @@ export const bankingHomeStyles = {
     padding: "12px",
     borderRadius: "8px",
     border: "1px solid #e5e7eb",
-    textAlign: "center",
+    textAlign: "center" as const,
   } as React.CSSProperties,
 
   emwBoxLabel: {
@@ -218,7 +175,7 @@ export const bankingHomeStyles = {
 
   emwBoxValue: {
     fontSize: "1.2rem",
-    fontWeight: "700",
+    fontWeight: "700" as const,
   } as React.CSSProperties,
 
   emwBoxSubtext: {
@@ -235,6 +192,7 @@ export const bankingHomeStyles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: "12px",
   } as React.CSSProperties,
 
   lastMonthLabel: {
@@ -244,14 +202,14 @@ export const bankingHomeStyles = {
 
   lastMonthValue: {
     fontSize: "0.9rem",
-    fontWeight: "600",
+    fontWeight: "600" as const,
   } as React.CSSProperties,
 
   trendBadge: {
     padding: "4px 8px",
     borderRadius: "12px",
     fontSize: "0.7rem",
-    fontWeight: "500",
+    fontWeight: "500" as const,
   } as React.CSSProperties,
 
   infoBox: {
@@ -262,6 +220,7 @@ export const bankingHomeStyles = {
     padding: "8px 10px",
     borderRadius: "6px",
     borderLeft: "3px solid #3b82f6",
+    marginBottom: "8px",
   } as React.CSSProperties,
 
   infoBoxTitle: {
@@ -269,7 +228,7 @@ export const bankingHomeStyles = {
     alignItems: "center",
     gap: "6px",
     marginBottom: "4px",
-    fontWeight: "500",
+    fontWeight: "500" as const,
   } as React.CSSProperties,
 
   // Total Balance Card Styles
@@ -282,13 +241,13 @@ export const bankingHomeStyles = {
   totalBalanceLabel: {
     color: "rgba(255, 255, 255, 0.9)",
     fontSize: "0.9rem",
-    textTransform: "uppercase",
+    textTransform: "uppercase" as const,
     letterSpacing: "0.5px",
   } as React.CSSProperties,
 
   totalBalanceValue: {
     fontSize: "1.8rem",
-    fontWeight: "700",
+    fontWeight: "700" as const,
     margin: "8px 0",
   } as React.CSSProperties,
 
@@ -301,52 +260,20 @@ export const bankingHomeStyles = {
     marginTop: "4px",
   } as React.CSSProperties,
 
-  // History item styles
-  historyItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "12px 0",
-    borderBottom: "1px solid #eee",
-  } as React.CSSProperties,
-
-  historyMonth: {
-    fontWeight: "500",
-    color: "#333",
-  } as React.CSSProperties,
-
-  historyBalance: {
-    fontSize: "0.9rem",
-    color: "#4285f4",
-    fontWeight: "600",
-  } as React.CSSProperties,
-
-  historyDetails: {
-    fontSize: "0.8rem",
-    color: "#666",
-    display: "flex",
-    gap: "8px",
-  } as React.CSSProperties,
-
-  monthlyChange: {
-    fontSize: "0.7rem",
-    marginTop: "2px",
-  } as React.CSSProperties,
-
   // Adjustment breakdown styles
   adjustmentBreakdown: {
     marginTop: "8px",
-    padding: "6px",
+    padding: "8px",
     backgroundColor: "#f8f9fa",
     borderRadius: "6px",
-    fontSize: "0.75rem",
-    color: "#495057",
-    borderLeft: "3px solid #4285f4",
+    border: "1px solid #e9ecef",
   } as React.CSSProperties,
 
   breakdownItem: {
     display: "flex",
     justifyContent: "space-between",
+    fontSize: "11px",
+    marginBottom: "2px",
   } as React.CSSProperties,
 
   breakdownTotal: {
@@ -355,6 +282,96 @@ export const bankingHomeStyles = {
     marginTop: "4px",
     paddingTop: "4px",
     borderTop: "1px dashed #ddd",
-    fontWeight: "500",
+    fontWeight: "500" as const,
+    fontSize: "12px",
+  } as React.CSSProperties,
+
+  // History Card Styles
+  card: {
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
+    padding: "16px",
+    border: "1px solid #e5e7eb",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+  } as React.CSSProperties,
+
+  cardTitle: {
+    fontSize: "1rem",
+    fontWeight: "600" as const,
+    color: "#374151",
+    marginBottom: "16px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  } as React.CSSProperties,
+
+  historyItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px 0",
+  } as React.CSSProperties,
+
+  historyMonth: {
+    fontWeight: "500" as const,
+    fontSize: "0.95rem",
+    color: "#333",
+  } as React.CSSProperties,
+
+  historyBalance: {
+    fontSize: "1rem",
+    fontWeight: "600" as const,
+    color: "#333",
+  } as React.CSSProperties,
+
+  historyDetails: {
+    fontSize: "0.75rem",
+    color: "#6c757d",
+    display: "flex",
+    gap: "8px",
+    marginTop: "2px",
+  } as React.CSSProperties,
+
+  monthlyChange: {
+    fontSize: "0.75rem",
+    marginTop: "2px",
+  } as React.CSSProperties,
+
+  // Navigation Icons
+  navGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "12px",
+  } as React.CSSProperties,
+
+  navIcon: {
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
+    padding: "15px",
+    border: "1px solid",
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    transition: "all 0.2s",
+    textAlign: "center" as const,
+  } as React.CSSProperties,
+
+  navIconText: {
+    fontSize: "0.875rem",
+    fontWeight: "600" as const,
+    color: "#374151",
+    marginTop: "8px",
+    marginBottom: "4px",
+  } as React.CSSProperties,
+
+  // Global styles
+  contentWrapper: {
+    width: "100%",
+  } as React.CSSProperties,
+
+  sectionPadding: {
+    padding: "15px",
   } as React.CSSProperties,
 };

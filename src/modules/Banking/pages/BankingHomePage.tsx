@@ -1,8 +1,7 @@
-// src/modules/BankingHomePage/index.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
-import { bankingStyles } from "../styles/BankingStyles"; // CHANGED: Use same styles as AccountsPage
+import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -180,24 +179,24 @@ const BankingHomePage: React.FC = () => {
 
   const lastMonthWithdrawal = calculateLastMonthWithdrawal();
 
-  // // Get month names for display
-  // const getMonthName = (monthString: string) => {
-  //   try {
-  //     const date = new Date(monthString + "-01");
-  //     return date.toLocaleDateString("en-IN", {
-  //       month: "short",
-  //       year: "2-digit",
-  //     });
-  //   } catch (e) {
-  //     return monthString;
-  //   }
-  // };
+  // Get month names for display
+  const getMonthName = (monthString: string) => {
+    try {
+      const date = new Date(monthString + "-01");
+      return date.toLocaleDateString("en-IN", {
+        month: "short",
+        year: "2-digit",
+      });
+    } catch (e) {
+      return monthString;
+    }
+  };
 
   if (loading) {
     return (
-      <div style={bankingStyles.container}>
-        <div style={bankingStyles.loading}>
-          <div style={bankingStyles.spinner}></div>
+      <div style={bankingHomeStyles.centeredContainer}>
+        <div style={bankingHomeStyles.loading}>
+          <div style={bankingHomeStyles.spinner}></div>
           <p>Loading banking data...</p>
         </div>
       </div>
@@ -205,28 +204,31 @@ const BankingHomePage: React.FC = () => {
   }
 
   return (
-    <div style={bankingStyles.container}>
+    <div style={bankingHomeStyles.centeredContainer}>
       {/* Header */}
-      <div style={bankingStyles.header}>
-        <h1 style={bankingStyles.headerTitle}>🏦 Banking</h1>
-        <div style={bankingStyles.headerSubtitle}>
+      <div style={bankingHomeStyles.header}>
+        <h1 style={bankingHomeStyles.headerTitle}>
+          <span>🏦</span>
+          <span>Banking</span>
+        </h1>
+        <div style={bankingHomeStyles.headerSubtitle}>
           Manage your accounts and deposits
         </div>
       </div>
 
       {/* Top Navigation */}
-      <div style={bankingStyles.topNav}>
+      <div style={bankingHomeStyles.topNav}>
         <button
           onClick={() => navigate("/")}
-          style={bankingStyles.navButton}
+          style={bankingHomeStyles.navButton}
           title="Back to Home"
         >
           🏠
         </button>
-        <div style={bankingStyles.navTitle}>Banking Dashboard</div>
+        <div style={bankingHomeStyles.navTitle}>Banking Dashboard</div>
         <button
           onClick={() => navigate("/settings")}
-          style={bankingStyles.navButton}
+          style={bankingHomeStyles.navButton}
           title="Settings"
         >
           ⚙️
@@ -234,9 +236,9 @@ const BankingHomePage: React.FC = () => {
       </div>
 
       {/* ALL CONTENT INSIDE THIS DIV - This ensures centering */}
-      <div style={{ width: "100%" }}>
+      <div style={bankingHomeStyles.contentWrapper}>
         {/* Stats Cards */}
-        <div style={{ padding: "15px" }}>
+        <div style={bankingHomeStyles.sectionPadding}>
           <div
             style={{
               display: "flex",
@@ -245,9 +247,9 @@ const BankingHomePage: React.FC = () => {
             }}
           >
             {/* Total Savings Card */}
-            <div style={bankingStyles.statsCard}>
-              <div style={bankingStyles.statsLabel}>Total Savings</div>
-              <div style={bankingStyles.statsValue}>
+            <div style={bankingHomeStyles.statsCard}>
+              <div style={bankingHomeStyles.statsLabel}>Total Savings</div>
+              <div style={bankingHomeStyles.statsValue}>
                 {formatCurrency(totalSavings)}
               </div>
               <div style={{ fontSize: "12px", color: "#34a853" }}>
@@ -256,9 +258,9 @@ const BankingHomePage: React.FC = () => {
             </div>
 
             {/* Total Deposits Card */}
-            <div style={bankingStyles.statsCard}>
-              <div style={bankingStyles.statsLabel}>Total Deposits</div>
-              <div style={bankingStyles.statsValue}>
+            <div style={bankingHomeStyles.statsCard}>
+              <div style={bankingHomeStyles.statsLabel}>Total Deposits</div>
+              <div style={bankingHomeStyles.statsValue}>
                 {formatCurrency(totalDeposits)}
               </div>
               <div style={{ fontSize: "12px", color: "#4285f4" }}>
@@ -280,54 +282,22 @@ const BankingHomePage: React.FC = () => {
 
               {/* Show adjustment breakdown */}
               {hasAdjustments && (
-                <div
-                  style={{
-                    marginTop: "8px",
-                    padding: "8px",
-                    backgroundColor: "#f8f9fa",
-                    borderRadius: "6px",
-                    border: "1px solid #e9ecef",
-                  }}
-                >
+                <div style={bankingHomeStyles.adjustmentBreakdown}>
                   <div style={{ marginBottom: "3px", fontWeight: "500" }}>
                     Breakdown:
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "11px",
-                      marginBottom: "2px",
-                    }}
-                  >
+                  <div style={bankingHomeStyles.breakdownItem}>
                     <span>Principal (base deposits):</span>
                     <span>{formatCurrency(totalBaseDeposits)}</span>
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "11px",
-                      marginBottom: "2px",
-                    }}
-                  >
+                  <div style={bankingHomeStyles.breakdownItem}>
                     <span>Adjustments (interest):</span>
                     <span>
                       {totalAdjustments >= 0 ? "+" : ""}
                       {formatCurrency(totalAdjustments)}
                     </span>
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      marginTop: "4px",
-                      paddingTop: "4px",
-                      borderTop: "1px solid #dee2e6",
-                    }}
-                  >
+                  <div style={bankingHomeStyles.breakdownTotal}>
                     <span>Total:</span>
                     <span>{formatCurrency(totalDeposits)}</span>
                   </div>
@@ -338,245 +308,183 @@ const BankingHomePage: React.FC = () => {
             {/* Total Bank Balance Card */}
             <div
               style={{
-                ...bankingStyles.statsCard,
-                backgroundColor: "#1e40af",
-                border: "none",
-                color: "white",
+                ...bankingHomeStyles.statsCard,
+                ...bankingHomeStyles.totalBalanceCard,
               }}
             >
-              <div
-                style={{
-                  fontSize: "0.9rem",
-                  opacity: 0.9,
-                  marginBottom: "4px",
-                }}
-              >
+              <div style={bankingHomeStyles.totalBalanceLabel}>
                 Total Bank Balance
               </div>
-              <div
-                style={{
-                  fontSize: "1.8rem",
-                  fontWeight: "700",
-                  marginBottom: "8px",
-                }}
-              >
+              <div style={bankingHomeStyles.totalBalanceValue}>
                 {formatCurrency(totalBankBalance)}
               </div>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  opacity: 0.8,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
+              <div style={bankingHomeStyles.totalBalanceSubtext}>
                 <span>Savings: {formatCurrency(totalSavings)}</span>
+                <span style={{ margin: "0 6px" }}>•</span>
                 <span>Deposits: {formatCurrency(totalDeposits)}</span>
               </div>
             </div>
 
             {/* EMW Calculation Card */}
-            <div style={bankingStyles.statsCard}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "12px",
-                }}
-              >
+            <div
+              style={{
+                ...bankingHomeStyles.statsCard,
+                ...bankingHomeStyles.emwCard,
+              }}
+            >
+              {/* Decorative corner */}
+              <div style={bankingHomeStyles.emwDecorativeCorner}></div>
+
+              <div style={{ position: "relative", zIndex: 1 }}>
                 <div
                   style={{
-                    fontSize: "1rem",
-                    fontWeight: "600",
                     display: "flex",
                     alignItems: "center",
-                    gap: "6px",
+                    justifyContent: "space-between",
+                    marginBottom: "8px",
                   }}
                 >
-                  <span
-                    style={{
-                      backgroundColor: "#3b82f6",
-                      color: "white",
-                      padding: "2px 6px",
-                      borderRadius: "4px",
-                      fontSize: "0.7rem",
-                    }}
-                  >
-                    EMW
-                  </span>
-                  Monthly Withdrawal
+                  <div style={bankingHomeStyles.emwTitle}>
+                    <span style={bankingHomeStyles.emwBadge}>EMW</span>
+                    Monthly Withdrawal
+                  </div>
+                  <div style={bankingHomeStyles.interestBadge}>5% interest</div>
                 </div>
-                <div
-                  style={{
-                    fontSize: "0.7rem",
-                    backgroundColor: "#dbeafe",
-                    color: "#1e40af",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    fontWeight: "600",
-                  }}
-                >
-                  5% interest
-                </div>
-              </div>
 
-              {/* EMW Calculation */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "10px",
-                  marginBottom: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    backgroundColor: "#f0f9ff",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    border: "1px solid #e0f2fe",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      color: "#64748b",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Calculated EMW
+                {/* EMW Calculation */}
+                <div style={bankingHomeStyles.emwGrid}>
+                  <div style={bankingHomeStyles.emwBox}>
+                    <div style={bankingHomeStyles.emwBoxLabel}>
+                      Calculated EMW
+                    </div>
+                    <div
+                      style={{
+                        ...bankingHomeStyles.emwBoxValue,
+                        color: "#1e40af",
+                      }}
+                    >
+                      {formatCurrency(emwAmount)}
+                    </div>
+                    <div style={bankingHomeStyles.emwBoxSubtext}>per month</div>
                   </div>
-                  <div
-                    style={{
-                      fontSize: "1.2rem",
-                      fontWeight: "700",
-                      color: "#1e40af",
-                      marginBottom: "2px",
-                    }}
-                  >
-                    {formatCurrency(emwAmount)}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      color: "#64748b",
-                    }}
-                  >
-                    per month
+
+                  <div style={bankingHomeStyles.emwBox}>
+                    <div style={bankingHomeStyles.emwBoxLabel}>
+                      Actual Rate (6m)
+                    </div>
+                    <div
+                      style={{
+                        ...bankingHomeStyles.emwBoxValue,
+                        color:
+                          actualWithdrawalData.monthlyRate >= emwAmount
+                            ? "#dc2626"
+                            : "#059669",
+                      }}
+                    >
+                      {formatCurrency(actualWithdrawalData.monthlyRate)}
+                    </div>
+                    <div style={bankingHomeStyles.emwBoxSubtext}>avg/month</div>
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    backgroundColor: "#f0fdf4",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    border: "1px solid #dcfce7",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      color: "#64748b",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Actual Rate (6m)
+                {/* Last Month Withdrawal */}
+                <div style={bankingHomeStyles.lastMonthBox}>
+                  <div>
+                    <div style={bankingHomeStyles.lastMonthLabel}>
+                      Last Month
+                    </div>
+                    <div
+                      style={{
+                        ...bankingHomeStyles.lastMonthValue,
+                        color: lastMonthWithdrawal >= 0 ? "#dc2626" : "#059669",
+                      }}
+                    >
+                      {lastMonthWithdrawal >= 0 ? "Withdrawal: " : "Deposit: "}
+                      {formatCurrency(Math.abs(lastMonthWithdrawal))}
+                    </div>
                   </div>
                   <div
                     style={{
-                      fontSize: "1.2rem",
-                      fontWeight: "700",
-                      color:
-                        actualWithdrawalData.monthlyRate >= emwAmount
-                          ? "#dc2626"
-                          : "#059669",
-                      marginBottom: "2px",
-                    }}
-                  >
-                    {formatCurrency(actualWithdrawalData.monthlyRate)}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      color: "#64748b",
-                    }}
-                  >
-                    avg/month
-                  </div>
-                </div>
-              </div>
-
-              {/* Last Month Withdrawal */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "8px",
-                  backgroundColor: "#f8fafc",
-                  borderRadius: "8px",
-                  marginBottom: "12px",
-                  border: "1px solid #e2e8f0",
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      color: "#64748b",
-                      marginBottom: "2px",
-                    }}
-                  >
-                    Last Month
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.9rem",
-                      fontWeight: "600",
+                      ...bankingHomeStyles.trendBadge,
+                      backgroundColor:
+                        lastMonthWithdrawal >= 0 ? "#fee2e2" : "#d1fae5",
                       color: lastMonthWithdrawal >= 0 ? "#dc2626" : "#059669",
                     }}
                   >
-                    {lastMonthWithdrawal >= 0 ? "Withdrawal: " : "Deposit: "}
-                    {formatCurrency(Math.abs(lastMonthWithdrawal))}
+                    {lastMonthWithdrawal >= 0 ? "🔼" : "🔽"}
                   </div>
                 </div>
-                <div
-                  style={{
-                    backgroundColor:
-                      lastMonthWithdrawal >= 0 ? "#fee2e2" : "#d1fae5",
-                    color: lastMonthWithdrawal >= 0 ? "#dc2626" : "#059669",
-                    padding: "4px 8px",
-                    borderRadius: "6px",
-                    fontSize: "0.8rem",
-                    fontWeight: "600",
-                  }}
-                >
-                  {lastMonthWithdrawal >= 0 ? "🔼" : "🔽"}
-                </div>
-              </div>
 
-              {/* EMW Info */}
-              <div
-                style={{
-                  backgroundColor: "#eff6ff",
-                  padding: "8px",
-                  borderRadius: "6px",
-                  fontSize: "0.8rem",
-                  border: "1px solid #dbeafe",
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: "600",
-                    marginBottom: "4px",
-                    color: "#1e40af",
-                  }}
-                >
-                  {actualWithdrawalData.monthlyRate >= emwAmount
-                    ? `⚠️ Faster than needed for ${formattedTargetDate}`
-                    : `✓ Sustainable until ${formattedTargetDate}`}
+                {/* Actual Withdrawal Details */}
+                {actualWithdrawalData.monthsCount > 0 && (
+                  <div style={bankingHomeStyles.infoBox}>
+                    <div style={bankingHomeStyles.infoBoxTitle}>
+                      <span style={{ color: "#3b82f6" }}>📊</span>
+                      <span>
+                        Last {actualWithdrawalData.monthsCount + 1} months
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginTop: "3px",
+                      }}
+                    >
+                      <span>{getMonthName(last6Months[0]?.month || "")}:</span>
+                      <span style={{ fontWeight: "500" }}>
+                        {formatCurrency(actualWithdrawalData.firstMonth)}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginTop: "2px",
+                      }}
+                    >
+                      <span>
+                        {getMonthName(
+                          last6Months[last6Months.length - 1]?.month || ""
+                        )}
+                        :
+                      </span>
+                      <span style={{ fontWeight: "500" }}>
+                        {formatCurrency(actualWithdrawalData.lastMonth)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* EMW Info */}
+                <div style={bankingHomeStyles.infoBox}>
+                  <div style={bankingHomeStyles.infoBoxTitle}>
+                    <span style={{ color: "#3b82f6" }}>💡</span>
+                    <span>Analysis</span>
+                  </div>
+                  <div>
+                    {actualWithdrawalData.monthlyRate >= emwAmount ? (
+                      <span
+                        style={{
+                          color: "#dc2626",
+                          fontWeight: "500",
+                          fontSize: "11px",
+                        }}
+                      >
+                        ⚠️ Faster than needed for {formattedTargetDate}
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          color: "#059669",
+                          fontWeight: "500",
+                          fontSize: "11px",
+                        }}
+                      >
+                        ✓ Sustainable until {formattedTargetDate}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -584,19 +492,13 @@ const BankingHomePage: React.FC = () => {
         </div>
 
         {/* Recent History */}
-        <div style={{ padding: "0 15px 15px 15px" }}>
-          <div style={bankingStyles.card}>
-            <div
-              style={{
-                fontSize: "1rem",
-                fontWeight: "600",
-                marginBottom: "12px",
-                color: "#333",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
+        <div
+          style={{
+            padding: "0 15px 15px 15px",
+          }}
+        >
+          <div style={bankingHomeStyles.card}>
+            <div style={bankingHomeStyles.cardTitle}>
               <span>📅</span>
               <span>Recent History (Last 6 Months)</span>
             </div>
@@ -634,10 +536,7 @@ const BankingHomePage: React.FC = () => {
                     <div
                       key={record.month}
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "10px 0",
+                        ...bankingHomeStyles.historyItem,
                         borderBottom:
                           index < last6Months.length - 1
                             ? "1px solid #eee"
@@ -645,21 +544,14 @@ const BankingHomePage: React.FC = () => {
                       }}
                     >
                       <div>
-                        <div
-                          style={{
-                            fontWeight: "500",
-                            fontSize: "0.95rem",
-                            color: "#333",
-                          }}
-                        >
+                        <div style={bankingHomeStyles.historyMonth}>
                           {monthName}
                         </div>
                         {monthlyChange !== 0 && (
                           <div
                             style={{
-                              fontSize: "0.75rem",
+                              ...bankingHomeStyles.monthlyChange,
                               color: monthlyChange > 0 ? "#dc2626" : "#059669",
-                              marginTop: "2px",
                             }}
                           >
                             {monthlyChange > 0 ? "▼" : "▲"}{" "}
@@ -668,24 +560,10 @@ const BankingHomePage: React.FC = () => {
                         )}
                       </div>
                       <div style={{ textAlign: "right" }}>
-                        <div
-                          style={{
-                            fontSize: "1rem",
-                            fontWeight: "600",
-                            color: "#333",
-                          }}
-                        >
+                        <div style={bankingHomeStyles.historyBalance}>
                           {formatCurrency(totalBalance)}
                         </div>
-                        <div
-                          style={{
-                            fontSize: "0.75rem",
-                            color: "#6c757d",
-                            display: "flex",
-                            gap: "8px",
-                            marginTop: "2px",
-                          }}
-                        >
+                        <div style={bankingHomeStyles.historyDetails}>
                           <span>S: {formatCurrency(record.savings)}</span>
                           <span>D: {formatCurrency(record.totalDeposits)}</span>
                         </div>
@@ -699,14 +577,12 @@ const BankingHomePage: React.FC = () => {
         </div>
 
         {/* Navigation Icons */}
-        <div style={{ padding: "0 15px 15px 15px" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "12px",
-            }}
-          >
+        <div
+          style={{
+            padding: "0 15px 15px 15px",
+          }}
+        >
+          <div style={bankingHomeStyles.navGrid}>
             {/* Accounts */}
             <div
               onClick={(e) => {
@@ -715,13 +591,9 @@ const BankingHomePage: React.FC = () => {
                 navigate("/banking/accounts");
               }}
               style={{
+                ...bankingHomeStyles.navIcon,
+                borderColor: "#4285f4",
                 backgroundColor: "#e8f0fe",
-                border: "1px solid #4285f4",
-                borderRadius: "12px",
-                padding: "15px",
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "all 0.2s",
               }}
               onMouseOver={(e) => {
                 e.currentTarget.style.transform = "translateY(-2px)";
@@ -733,18 +605,9 @@ const BankingHomePage: React.FC = () => {
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              <div style={{ fontSize: "1.8rem", marginBottom: "8px" }}>🏦</div>
-              <div
-                style={{
-                  fontWeight: "600",
-                  fontSize: "0.95rem",
-                  color: "#333",
-                  marginBottom: "4px",
-                }}
-              >
-                Accounts
-              </div>
-              <div style={{ fontSize: "0.8rem", color: "#666" }}>
+              <div style={{ fontSize: "1.5rem" }}>🏦</div>
+              <div style={bankingHomeStyles.navIconText}>Accounts</div>
+              <div style={{ fontSize: "11px", color: "#666" }}>
                 {accounts.length} account{accounts.length !== 1 ? "s" : ""}
               </div>
             </div>
@@ -757,13 +620,9 @@ const BankingHomePage: React.FC = () => {
                 navigate("/banking/deposits");
               }}
               style={{
+                ...bankingHomeStyles.navIcon,
+                borderColor: "#34a853",
                 backgroundColor: "#e8f5e9",
-                border: "1px solid #34a853",
-                borderRadius: "12px",
-                padding: "15px",
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "all 0.2s",
               }}
               onMouseOver={(e) => {
                 e.currentTarget.style.transform = "translateY(-2px)";
@@ -775,18 +634,9 @@ const BankingHomePage: React.FC = () => {
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              <div style={{ fontSize: "1.8rem", marginBottom: "8px" }}>💰</div>
-              <div
-                style={{
-                  fontWeight: "600",
-                  fontSize: "0.95rem",
-                  color: "#333",
-                  marginBottom: "4px",
-                }}
-              >
-                Deposits
-              </div>
-              <div style={{ fontSize: "0.8rem", color: "#666" }}>
+              <div style={{ fontSize: "1.5rem" }}>💰</div>
+              <div style={bankingHomeStyles.navIconText}>Deposits</div>
+              <div style={{ fontSize: "11px", color: "#666" }}>
                 {deposits.length} deposit{deposits.length !== 1 ? "s" : ""}
               </div>
             </div>
@@ -799,13 +649,9 @@ const BankingHomePage: React.FC = () => {
                 navigate("/banking/history");
               }}
               style={{
+                ...bankingHomeStyles.navIcon,
+                borderColor: "#fbbc04",
                 backgroundColor: "#fff8e1",
-                border: "1px solid #fbbc04",
-                borderRadius: "12px",
-                padding: "15px",
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "all 0.2s",
               }}
               onMouseOver={(e) => {
                 e.currentTarget.style.transform = "translateY(-2px)";
@@ -817,23 +663,14 @@ const BankingHomePage: React.FC = () => {
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              <div style={{ fontSize: "1.8rem", marginBottom: "8px" }}>📈</div>
-              <div
-                style={{
-                  fontWeight: "600",
-                  fontSize: "0.95rem",
-                  color: "#333",
-                  marginBottom: "4px",
-                }}
-              >
-                History
-              </div>
-              <div style={{ fontSize: "0.8rem", color: "#666" }}>
+              <div style={{ fontSize: "1.5rem" }}>📈</div>
+              <div style={bankingHomeStyles.navIconText}>History</div>
+              <div style={{ fontSize: "11px", color: "#666" }}>
                 {history.length} record{history.length !== 1 ? "s" : ""}
               </div>
             </div>
 
-            {/* History Chart */}
+            {/* Summary */}
             <div
               onClick={(e) => {
                 e.preventDefault();
@@ -841,13 +678,9 @@ const BankingHomePage: React.FC = () => {
                 navigate("/banking/summary");
               }}
               style={{
+                ...bankingHomeStyles.navIcon,
+                borderColor: "#9c27b0",
                 backgroundColor: "#f3e5f5",
-                border: "1px solid #9c27b0",
-                borderRadius: "12px",
-                padding: "15px",
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "all 0.2s",
               }}
               onMouseOver={(e) => {
                 e.currentTarget.style.transform = "translateY(-2px)";
@@ -859,18 +692,9 @@ const BankingHomePage: React.FC = () => {
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              <div style={{ fontSize: "1.8rem", marginBottom: "8px" }}>📊</div>
-              <div
-                style={{
-                  fontWeight: "600",
-                  fontSize: "0.95rem",
-                  color: "#333",
-                  marginBottom: "4px",
-                }}
-              >
-                Summary
-              </div>
-              <div style={{ fontSize: "0.8rem", color: "#666" }}>
+              <div style={{ fontSize: "1.5rem" }}>📊</div>
+              <div style={bankingHomeStyles.navIconText}>Summary</div>
+              <div style={{ fontSize: "11px", color: "#666" }}>
                 View reports
               </div>
             </div>

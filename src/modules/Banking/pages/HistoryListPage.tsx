@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingStyles } from "../styles";
 import { useBankingData } from "../hooks/useBankingData";
 import {
@@ -31,6 +32,7 @@ ChartJS.register(
 
 const HistoryListPage: React.FC = () => {
   const navigate = useNavigate();
+  const { settings } = useSettings();
   const { loading, history } = useBankingData(); // Only need 'history' and 'loading'
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [monthToDelete, setMonthToDelete] = useState<string | null>(null);
@@ -44,21 +46,19 @@ const HistoryListPage: React.FC = () => {
     b.month.localeCompare(a.month)
   );
 
-  // Format to lakhs
+  // Format to lakhs without 'L' suffix
   const formatLakhs = (amount: number): string => {
-    return (amount / 100000).toFixed(2) + " L";
+    return (amount / 100000).toFixed(2);
   };
 
-  // Format month for table display
+  // Format month for table display - only show short month and 2-digit year
   const formatMonthForTable = (month: string): string => {
     try {
       const date = new Date(month + "-01");
-      const monthName = date.toLocaleDateString("en-IN", {
+      return date.toLocaleDateString("en-IN", {
         month: "short",
-        year: "numeric",
+        year: "2-digit",
       });
-      // Extract just the last 2 digits of year
-      return monthName.replace(/\d{4}/, (year) => year.slice(2));
     } catch {
       return month;
     }
@@ -130,28 +130,66 @@ const HistoryListPage: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
-      <div style={bankingStyles.header}>
-        <div style={bankingStyles.headerTopRow}>
-          <div style={bankingStyles.headerLeft}>
-            <button
-              onClick={() => navigate(-1)}
-              style={styles.backButton}
-              title="Go Back"
-            >
-              ←
-            </button>
-            <h1 style={bankingStyles.headerTitle}>History</h1>
-          </div>
-          <div style={styles.headerActions}>
-            <button
-              onClick={() => navigate("/settings")}
-              style={styles.iconButton}
-              title="Settings"
-            >
-              ⚙️
-            </button>
-          </div>
+      {/* Header - Compact single row */}
+      <div
+        style={{
+          backgroundColor: "#f8f9fa",
+          padding: "12px 16px",
+          borderBottom: "1px solid #e9ecef",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <button
+            onClick={() => navigate("/banking")}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "1.5rem",
+              cursor: "pointer",
+              color: "#495057",
+              padding: "0",
+              lineHeight: "1",
+            }}
+            title="Back to Banking"
+          >
+            ←
+          </button>
+          <h1
+            style={{
+              margin: "0",
+              fontSize: "1.2rem",
+              fontWeight: "600",
+              color: "#333",
+            }}
+          >
+            History
+          </h1>
+        </div>
+        <div>
+          <button
+            onClick={() => navigate("/settings")}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "1.2rem",
+              cursor: "pointer",
+              color: "#495057",
+              padding: "6px",
+              lineHeight: "1",
+            }}
+            title="Settings"
+          >
+            ⚙️
+          </button>
         </div>
       </div>
 
@@ -179,9 +217,23 @@ const HistoryListPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div style={styles.tableContainer}>
+          <div
+            style={{
+              ...styles.tableContainer,
+              margin: 0,
+              padding: 0,
+              borderRadius: 0,
+              width: "100%",
+            }}
+          >
             {/* Table Header - Compact */}
-            <div style={styles.tableHeader}>
+            <div
+              style={{
+                ...styles.tableHeader,
+                padding: "12px 16px",
+                margin: 0,
+              }}
+            >
               <div style={{ ...styles.headerCell, flex: 1.2 }}>Month</div>
               <div
                 style={{
@@ -201,7 +253,9 @@ const HistoryListPage: React.FC = () => {
               >
                 Total
               </div>
-              <div style={{ ...styles.headerCell, flex: 0.4 }}></div>
+              {settings?.showDelete && (
+                <div style={{ ...styles.headerCell, flex: 0.4 }}></div>
+              )}
             </div>
 
             {/* Table Body - Compact */}
@@ -220,6 +274,8 @@ const HistoryListPage: React.FC = () => {
                     style={{
                       ...styles.tableRow,
                       backgroundColor: index % 2 === 0 ? "white" : "#fafafa",
+                      padding: "12px 16px",
+                      margin: 0,
                     }}
                   >
                     {isEditing ? (
@@ -257,30 +313,32 @@ const HistoryListPage: React.FC = () => {
                             step="0.01"
                           />
                         </div>
-                        <div
-                          style={{
-                            flex: 0.4,
-                            display: "flex",
-                            gap: "4px",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <button
-                            onClick={saveEdit}
-                            style={styles.saveButton}
-                            title="Save"
+                        {settings?.showDelete && (
+                          <div
+                            style={{
+                              flex: 0.4,
+                              display: "flex",
+                              gap: "4px",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
                           >
-                            ✓
-                          </button>
-                          <button
-                            onClick={cancelEditing}
-                            style={styles.cancelButton}
-                            title="Cancel"
-                          >
-                            ✕
-                          </button>
-                        </div>
+                            <button
+                              onClick={saveEdit}
+                              style={styles.saveButton}
+                              title="Save"
+                            >
+                              ✓
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              style={styles.cancelButton}
+                              title="Cancel"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       // Display mode for this row - Compact
@@ -288,7 +346,6 @@ const HistoryListPage: React.FC = () => {
                         <div style={{ ...styles.cell, flex: 1.2 }}>
                           <div style={styles.monthDisplay}>
                             <div style={styles.monthName}>{monthDisplay}</div>
-                            <div style={styles.monthId}>{record.month}</div>
                           </div>
                         </div>
                         <div
@@ -316,30 +373,33 @@ const HistoryListPage: React.FC = () => {
                             {formatLakhs(record.savings)}
                           </div>
                         </div>
-                        <div
-                          style={{
-                            ...styles.cell,
-                            flex: 0.4,
-                            justifyContent: "center",
-                          }}
-                        >
-                          <div style={styles.actionButtons}>
-                            <button
-                              onClick={() => handleEdit(record)}
-                              style={styles.editButton}
-                              title="Edit"
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              onClick={() => handleDelete(record.month)}
-                              style={styles.deleteButton}
-                              title="Delete"
-                            >
-                              🗑️
-                            </button>
+                        {/* Edit/Delete buttons only if showDelete is enabled */}
+                        {settings?.showDelete && (
+                          <div
+                            style={{
+                              ...styles.cell,
+                              flex: 0.4,
+                              justifyContent: "center",
+                            }}
+                          >
+                            <div style={styles.actionButtons}>
+                              <button
+                                onClick={() => handleEdit(record)}
+                                style={styles.editButton}
+                                title="Edit"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() => handleDelete(record.month)}
+                                style={styles.deleteButton}
+                                title="Delete"
+                              >
+                                🗑️
+                              </button>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </>
                     )}
                   </div>

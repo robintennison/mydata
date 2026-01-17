@@ -4,14 +4,13 @@ import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
 import { bankingStyles } from "../styles/BankingStyles";
-import BankingNavigation from "./BankingNavigation"; 
+import BankingNavigation from "./BankingNavigation";
 
 const AccountsPage: React.FC = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
   const { accounts, loading } = useBankingData();
   const { handleDeleteAccount } = useBankingOperations();
-  const [searchTerm, setSearchTerm] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<any>(null);
 
@@ -33,35 +32,20 @@ const AccountsPage: React.FC = () => {
     return true;
   };
 
-  // Calculate total savings for active accounts only (for stats display)
-  const totalSavings = accounts.reduce((sum, account) => {
-    if (settings?.showInactive) {
-      return sum + account.savingsAmount;
-    }
-    return sum + (isAccountActive(account) ? account.savingsAmount : 0);
-  }, 0);
-
-  // Filter accounts based on search and showInactive setting
+  // Filter accounts based on showInactive setting
   const filteredAccounts = accounts.filter((account) => {
-    // First check if it matches search term
-    const matchesSearch = account.acctCode
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    // Filter by active/inactive based on settings
-    if (settings?.showInactive !== undefined) {
-      if (settings.showInactive) {
-        // Only show inactive accounts when showInactive is true
-        return matchesSearch && !isAccountActive(account);
-      } else {
-        // Only show active accounts when showInactive is false or undefined
-        return matchesSearch && isAccountActive(account);
-      }
+    // If showInactive is true, show all accounts (both active and inactive)
+    if (settings?.showInactive) {
+      return true;
     }
-
-    // Default: show all accounts if setting doesn't exist
-    return matchesSearch;
+    // If showInactive is false or undefined, show only active accounts
+    return isAccountActive(account);
   });
+
+  // Calculate total savings for filtered accounts
+  const totalSavings = filteredAccounts.reduce((sum, account) => {
+    return sum + account.savingsAmount;
+  }, 0);
 
   // Count active and inactive accounts for stats
   const activeAccountsCount = accounts.filter((account) =>
@@ -70,11 +54,6 @@ const AccountsPage: React.FC = () => {
   const inactiveAccountsCount = accounts.filter(
     (account) => !isAccountActive(account)
   ).length;
-
-  const handleDeleteClick = (account: any) => {
-    setAccountToDelete(account);
-    setShowDeleteDialog(true);
-  };
 
   const confirmDelete = () => {
     if (accountToDelete) {
@@ -97,14 +76,6 @@ const AccountsPage: React.FC = () => {
 
   return (
     <div style={bankingStyles.container}>
-      {/* Header - This will be full width inside the container */}
-      <div style={bankingStyles.header}>
-        <h1 style={bankingStyles.headerTitle}>📋 Accounts</h1>
-        <div style={bankingStyles.headerSubtitle}>
-          Manage your bank accounts
-        </div>
-      </div>
-
       {/* Top Navigation - Full width inside container */}
       <div style={bankingStyles.topNav}>
         <button
@@ -114,9 +85,7 @@ const AccountsPage: React.FC = () => {
         >
           ←
         </button>
-        <div style={bankingStyles.navTitle}>
-          {settings?.showInactive ? "Inactive Accounts" : "Active Accounts"}
-        </div>
+        <div style={bankingStyles.navTitle}>Accounts</div>
         <div style={{ display: "flex", gap: "8px" }}>
           {/* Settings Button */}
           <button
@@ -143,143 +112,19 @@ const AccountsPage: React.FC = () => {
 
       {/* ALL CONTENT INSIDE THIS DIV - This ensures centering */}
       <div style={{ width: "100%" }}>
-        {/* Search Bar */}
-        <div style={{ padding: "15px" }}>
-          <div style={{ position: "relative" }}>
-            <input
-              type="text"
-              placeholder={`Search ${
-                settings?.showInactive ? "inactive" : "active"
-              } accounts...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                ...bankingStyles.input,
-                paddingLeft: "40px",
-                width: "100%",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#6c757d",
-              }}
-            >
-              🔍
-            </div>
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm("")}
-                style={{
-                  position: "absolute",
-                  right: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  color: "#6c757d",
-                  fontSize: "1.2rem",
-                  cursor: "pointer",
-                }}
-              >
-                ×
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Stats Card - This will be centered because parent is centered */}
-        <div style={{ padding: "0 15px", marginBottom: "15px" }}>
-          <div style={bankingStyles.statsCard}>
-            <div style={bankingStyles.statsLabel}>Total Savings</div>
-            <div style={bankingStyles.statsValue}>
-              {formatCurrency(totalSavings)}
-            </div>
-            <div style={{ fontSize: "0.8rem", color: "#4285f4" }}>
-              Showing {filteredAccounts.length} of {accounts.length} accounts
-              {settings?.showInactive !== undefined && (
-                <div style={{ fontSize: "0.7rem", marginTop: "4px" }}>
-                  ({activeAccountsCount} active, {inactiveAccountsCount}{" "}
-                  inactive)
-                </div>
-              )}
-            </div>
-            {/* Status Indicators */}
-            <div
-              style={{
-                marginTop: "8px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "4px",
-              }}
-            >
-              {/* Edit/Delete Status Indicator */}
-              <div
-                style={{
-                  fontSize: "0.7rem",
-                  color: settings?.showDelete ? "#10b981" : "#6c757d",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "4px",
-                }}
-              >
-                <span>Edit/Delete:</span>
-                <span
-                  style={{
-                    fontWeight: "600",
-                    color: settings?.showDelete ? "#10b981" : "#dc2626",
-                  }}
-                >
-                  {settings?.showDelete ? "ENABLED" : "DISABLED"}
-                </span>
-              </div>
-
-              {/* Active/Inactive Status Indicator */}
-              <div
-                style={{
-                  fontSize: "0.7rem",
-                  color: settings?.showInactive ? "#f59e0b" : "#10b981",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "4px",
-                }}
-              >
-                <span>Showing:</span>
-                <span
-                  style={{
-                    fontWeight: "600",
-                    color: settings?.showInactive ? "#f59e0b" : "#10b981",
-                  }}
-                >
-                  {settings?.showInactive ? "INACTIVE" : "ACTIVE"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Accounts List */}
         <div style={{ padding: "0 15px" }}>
           {filteredAccounts.length === 0 ? (
             <div style={bankingStyles.emptyState}>
               <div style={{ fontSize: "2rem", marginBottom: "10px" }}>🏦</div>
               <div>
-                {searchTerm
-                  ? "No matching accounts found"
-                  : `No ${
-                      settings?.showInactive ? "inactive" : "active"
-                    } accounts found`}
+                {settings?.showInactive
+                  ? "No accounts found"
+                  : "No active accounts found"}
               </div>
               <div style={{ fontSize: "0.9rem", marginTop: "5px" }}>
-                {searchTerm
-                  ? "Try adjusting your search terms"
-                  : settings?.showInactive
-                  ? "All accounts are currently active"
+                {settings?.showInactive
+                  ? "Add your first account"
                   : 'Tap "+" to add an account'}
               </div>
             </div>
@@ -297,29 +142,20 @@ const AccountsPage: React.FC = () => {
                   borderBottom: "2px solid #e9ecef",
                 }}
               >
-                <div style={{ flex: 2, padding: "0 8px" }}>Account</div>
-                <div style={{ flex: 1, padding: "0 8px", textAlign: "right" }}>
+                <div style={{ flex: 4, padding: "0 8px" }}>Account</div>
+                <div style={{ flex: 3, padding: "0 8px", textAlign: "right" }}>
                   Savings
                 </div>
-                <div style={{ flex: 1, padding: "0 8px" }}>MPIN</div>
-                <div style={{ flex: 1, padding: "0 8px", textAlign: "center" }}>
-                  Status
-                </div>
-                <div
-                  style={{
-                    width: "80px",
-                    padding: "0 8px",
-                    textAlign: "center",
-                  }}
-                >
-                  Actions
-                </div>
+                <div style={{ flex: 3, padding: "0 8px" }}>MPIN</div>
+                {settings?.showDelete && (
+                  <div style={{ width: "60px", padding: "0 8px" }}></div>
+                )}
               </div>
 
               {/* Accounts Rows */}
               <div
                 style={{
-                  maxHeight: "50vh",
+                  maxHeight: "60vh",
                   overflowY: "auto",
                 }}
               >
@@ -339,7 +175,7 @@ const AccountsPage: React.FC = () => {
                         opacity: isActive ? 1 : 0.7,
                       }}
                     >
-                      <div style={{ flex: 2, padding: "0 8px" }}>
+                      <div style={{ flex: 4, padding: "0 8px" }}>
                         <div
                           style={{
                             fontWeight: "500",
@@ -364,7 +200,7 @@ const AccountsPage: React.FC = () => {
                       </div>
                       <div
                         style={{
-                          flex: 1,
+                          flex: 3,
                           padding: "0 8px",
                           textAlign: "right",
                         }}
@@ -379,7 +215,7 @@ const AccountsPage: React.FC = () => {
                           {formatCurrency(account.savingsAmount)}
                         </div>
                       </div>
-                      <div style={{ flex: 1, padding: "0 8px" }}>
+                      <div style={{ flex: 3, padding: "0 8px" }}>
                         <div
                           style={{
                             fontFamily: "'Courier New', monospace",
@@ -390,159 +226,78 @@ const AccountsPage: React.FC = () => {
                           {account.mpin || "••••"}
                         </div>
                       </div>
-                      <div
-                        style={{
-                          flex: 1,
-                          padding: "0 8px",
-                          textAlign: "center",
-                        }}
-                      >
+                      {/* Edit icon only if showDelete is enabled */}
+                      {settings?.showDelete && (
                         <div
                           style={{
-                            fontSize: "0.8rem",
-                            fontWeight: "600",
-                            color: isActive ? "#10b981" : "#dc2626",
-                            backgroundColor: isActive ? "#f0fdf4" : "#fef2f2",
-                            padding: "4px 8px",
-                            borderRadius: "12px",
-                            display: "inline-block",
+                            width: "60px",
+                            display: "flex",
+                            justifyContent: "center",
+                            padding: "0 8px",
                           }}
                         >
-                          {isActive ? "ACTIVE" : "INACTIVE"}
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          width: "80px",
-                          display: "flex",
-                          justifyContent: "center",
-                          gap: "6px",
-                          padding: "0 8px",
-                        }}
-                      >
-                        {/* Always show edit icon */}
-                        <button
-                          onClick={() =>
-                            navigate(`/banking/accounts/edit/${account.id}`)
-                          }
-                          style={{
-                            ...bankingStyles.editButton,
-                            padding: "6px 10px",
-                            fontSize: "0.8rem",
-                            minWidth: "auto",
-                            opacity: settings?.showDelete ? 1 : 0.6,
-                            cursor: settings?.showDelete
-                              ? "pointer"
-                              : "not-allowed",
-                          }}
-                          title={
-                            settings?.showDelete
-                              ? "Edit Account"
-                              : "Edit disabled in settings"
-                          }
-                          disabled={!settings?.showDelete}
-                        >
-                          ✏️
-                        </button>
-
-                        {/* Only show delete icon if showDelete setting is enabled */}
-                        {settings?.showDelete && (
                           <button
-                            onClick={() => handleDeleteClick(account)}
+                            onClick={() =>
+                              navigate(`/banking/accounts/edit/${account.id}`)
+                            }
                             style={{
-                              ...bankingStyles.deleteButton,
+                              ...bankingStyles.editButton,
                               padding: "6px 10px",
                               fontSize: "0.8rem",
                               minWidth: "auto",
                             }}
-                            title="Delete Account"
+                            title="Edit Account"
                           >
-                            🗑️
+                            ✏️
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
-            </div>
-          )}
 
-          {/* Add Account Button - Only show when viewing active accounts */}
-          {!settings?.showInactive && (
-            <div style={{ marginTop: "20px" }}>
-              <button
-                onClick={() => navigate("/banking/accounts/add")}
-                style={bankingStyles.actionButton}
+              {/* Total Savings at the bottom of the list */}
+              <div
+                style={{
+                  marginTop: "15px",
+                  paddingTop: "15px",
+                  borderTop: "2px solid #e9ecef",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
-                <span style={{ fontSize: "1.2rem", marginRight: "8px" }}>
-                  +
-                </span>
-                <span>Add New Account</span>
-              </button>
-            </div>
-          )}
-
-          {/* View Toggle Button */}
-          <div style={{ marginTop: "15px" }}>
-            <button
-              onClick={() => {
-                // This would need to update the settings context
-                // For now, we'll navigate to settings page
-                navigate("/settings");
-              }}
-              style={{
-                ...bankingStyles.actionButton,
-                backgroundColor: settings?.showInactive ? "#10b981" : "#f59e0b",
-              }}
-            >
-              <span style={{ fontSize: "1.2rem", marginRight: "8px" }}>
-                {settings?.showInactive ? "✅" : "👁️"}
-              </span>
-              <span>
-                {settings?.showInactive
-                  ? "View Active Accounts"
-                  : "View Inactive Accounts"}
-              </span>
-            </button>
-          </div>
-
-          {/* Settings Info Box */}
-          {!settings?.showDelete && (
-            <div
-              style={{
-                marginTop: "15px",
-                padding: "12px",
-                backgroundColor: "#fef3c7",
-                border: "1px solid #fbbf24",
-                borderRadius: "8px",
-                fontSize: "0.85rem",
-                color: "#92400e",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <span style={{ fontSize: "1rem" }}>ℹ️</span>
-              <div>
-                <div style={{ fontWeight: "600" }}>Edit/Delete Disabled</div>
                 <div>
-                  Go to{" "}
-                  <button
-                    onClick={() => navigate("/settings")}
+                  <div style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                    {settings?.showInactive
+                      ? `Showing ${filteredAccounts.length} of ${accounts.length} accounts`
+                      : `Showing ${filteredAccounts.length} active accounts`}
+                  </div>
+                  <div
                     style={{
-                      background: "none",
-                      border: "none",
-                      color: "#2563eb",
-                      textDecoration: "underline",
-                      cursor: "pointer",
-                      padding: "0",
-                      fontSize: "0.85rem",
+                      fontSize: "0.7rem",
+                      color: "#4285f4",
+                      marginTop: "2px",
                     }}
                   >
-                    Settings
-                  </button>{" "}
-                  to enable edit/delete functionality
+                    ({activeAccountsCount} active, {inactiveAccountsCount}{" "}
+                    inactive)
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                    Total Savings
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "1.1rem",
+                      fontWeight: "600",
+                      color: "#4285f4",
+                    }}
+                  >
+                    {formatCurrency(totalSavings)}
+                  </div>
                 </div>
               </div>
             </div>

@@ -78,12 +78,9 @@ const MyDataHomepage: React.FC = () => {
     }
   }, [accounts, deposits, adjustments, settings?.showInactive]);
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-    }).format(amount);
+  // Format lakhs for display - REMOVED "L" suffix
+  const formatLakhs = (amount: number): string => {
+    return (amount / 100000).toFixed(2); // Just the number, no "L"
   };
 
   const formatDate = (timestamp: number): string => {
@@ -92,10 +89,6 @@ const MyDataHomepage: React.FC = () => {
       month: "short",
       year: "numeric",
     });
-  };
-
-  const formatLakhs = (amount: number): string => {
-    return (amount / 100000).toFixed(2) + " L";
   };
 
   const getAccountName = (accountId: string) => {
@@ -154,9 +147,7 @@ const MyDataHomepage: React.FC = () => {
           <div style={myDataHomepageStyles.cardValue}>
             {formatLakhs(totalBalance)}
           </div>
-          <div style={myDataHomepageStyles.cardSubtitle}>
-            {formatCurrency(totalBalance)}
-          </div>
+          {/* REMOVED rupee value subtitle */}
         </div>
 
         {/* Card 2: Total Deposits */}
@@ -168,9 +159,7 @@ const MyDataHomepage: React.FC = () => {
           <div style={myDataHomepageStyles.cardValue}>
             {formatLakhs(totalDeposits)}
           </div>
-          <div style={myDataHomepageStyles.cardSubtitle}>
-            {formatCurrency(totalDeposits)}
-          </div>
+          {/* REMOVED rupee value subtitle */}
         </div>
 
         {/* Card 3: Total Accounts */}
@@ -229,7 +218,8 @@ const MyDataHomepage: React.FC = () => {
                 </div>
                 <div style={myDataHomepageStyles.maturityRight}>
                   <div style={myDataHomepageStyles.maturityAmount}>
-                    {formatCurrency(deposit.amount)}
+                    {/* Format deposit amount in lakhs without "L" */}
+                    {formatLakhs(deposit.amount)}
                   </div>
                   <div
                     style={

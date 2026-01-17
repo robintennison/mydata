@@ -1,20 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
 import { Deposit, BankAccount } from "../../../types/banking.types";
-import { formatCurrency, formatDate } from "../../../utils/formatters";
 import { bankingStyles } from "../styles";
 import BankingNavigation from "./BankingNavigation";
 
-// Custom formatter for Lakhs like Android version
+// Custom formatter for Lakhs - REMOVED "L" suffix
 const formatInLakhs = (amount: number): string => {
-  if (amount >= 100000) {
-    return `₹${(amount / 100000).toFixed(2)}L`;
-  }
-  return formatCurrency(amount);
+  return (amount / 100000).toFixed(2); // Just the number with 2 decimals
 };
+
+// Date formatter function for dd-mm-yy format
+const formatDate = (timestamp: number): string => {
+  const date = new Date(timestamp);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear().toString().slice(-2);
+  return `${day}-${month}-${year}`;
+};
+
+type SortOption = "account" | "date";
 
 const DepositsListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,8 +31,16 @@ const DepositsListPage: React.FC = () => {
 
   const [filterAccount, setFilterAccount] = useState("All");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("account");
   const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
   const [localDeposits, setLocalDeposits] = useState<Deposit[]>([]);
+
+  // Refs for dropdowns
+  const filterDropdownRef = useRef<HTMLDivElement>(null);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
 
   // Update local deposits when data loads
   useEffect(() => {
@@ -34,18 +49,66 @@ const DepositsListPage: React.FC = () => {
     }
   }, [deposits]);
 
-  // Filter deposits exactly like Android app
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target as Node) &&
+        filterButtonRef.current &&
+        !filterButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowFilterDropdown(false);
+      }
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(event.target as Node) &&
+        sortButtonRef.current &&
+        !sortButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowSortDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Filter deposits exactly like Android app with proper account filtering and sorting
   const filteredDeposits = localDeposits
     .filter((dep) => {
       if (filterAccount === "All") return true;
+      // Get account name for filtering
       const account = accounts.find((acc) => acc.id === dep.accountId);
       return account?.acctCode === filterAccount;
     })
     .filter((dep) => {
+      // Display active deposits by default, show all if showInactive is true
       if (settings?.showInactive) return true;
       return dep.active;
     })
-    .sort((a, b) => a.endDate - b.endDate); // ascending by endDate like Android
+    .sort((a, b) => {
+      const accountA = accounts.find((acc) => acc.id === a.accountId);
+      const accountB = accounts.find((acc) => acc.id === b.accountId);
+      const codeA = accountA?.acctCode || "";
+      const codeB = accountB?.acctCode || "";
+
+      if (sortBy === "account") {
+        // Sort by account code
+        if (codeA < codeB) return -1;
+        if (codeA > codeB) return 1;
+        // If same account, then sort by endDate ascending
+        return a.endDate - b.endDate;
+      } else {
+        // Sort by date
+        if (a.endDate < b.endDate) return -1;
+        if (a.endDate > b.endDate) return 1;
+        // If same date, then sort by account code
+        if (codeA < codeB) return -1;
+        if (codeA > codeB) return 1;
+        return 0;
+      }
+    });
 
   // Calculate total amount like Android
   const totalAmount = filteredDeposits.reduce(
@@ -133,10 +196,41 @@ const DepositsListPage: React.FC = () => {
             </h1>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              position: "relative",
+            }}
+          >
+            {/* Sort Button */}
+            <button
+              ref={sortButtonRef}
+              onClick={() => {
+                setShowSortDropdown(!showSortDropdown);
+                setShowFilterDropdown(false);
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "1.2rem",
+                cursor: "pointer",
+                padding: "8px",
+                color: "#666",
+              }}
+              title="Sort"
+            >
+              {sortBy === "account" ? "🔢" : "📅"}
+            </button>
+
             {/* Filter Button */}
             <button
-              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              ref={filterButtonRef}
+              onClick={() => {
+                setShowFilterDropdown(!showFilterDropdown);
+                setShowSortDropdown(false);
+              }}
               style={{
                 background: "none",
                 border: "none",
@@ -183,91 +277,179 @@ const DepositsListPage: React.FC = () => {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Filter Dropdown - Like Android DropdownMenu */}
-        {showFilterDropdown && (
+      {/* Sort Dropdown - Positioned outside the header */}
+      {showSortDropdown && (
+        <div
+          ref={sortDropdownRef}
+          style={{
+            position: "absolute",
+            top: "70px",
+            right: "16px",
+            backgroundColor: "#ffffff",
+            border: "1px solid #e0e0e0",
+            borderRadius: "8px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            zIndex: 1001,
+            minWidth: "180px",
+            maxHeight: "400px",
+            overflow: "hidden",
+          }}
+        >
           <div
             style={{
-              position: "absolute",
-              top: "70px",
-              right: "16px",
-              backgroundColor: "#ffffff",
-              border: "1px solid #e0e0e0",
-              borderRadius: "8px",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-              zIndex: 1000,
-              minWidth: "180px",
-              overflow: "hidden",
+              padding: "12px 16px",
+              fontSize: "0.875rem",
+              color: "#666",
+              borderBottom: "1px solid #f0f0f0",
             }}
           >
-            <div
+            Sort By
+          </div>
+
+          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+            <button
+              onClick={() => {
+                setSortBy("account");
+                setShowSortDropdown(false);
+              }}
               style={{
+                width: "100%",
                 padding: "12px 16px",
-                fontSize: "0.875rem",
-                color: "#666",
+                textAlign: "left",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "0.95rem",
+                color: sortBy === "account" ? "#1976d2" : "#333",
+                backgroundColor:
+                  sortBy === "account" ? "#e3f2fd" : "transparent",
                 borderBottom: "1px solid #f0f0f0",
               }}
             >
-              Current: {filterAccount}
-            </div>
-
-            <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-              <button
-                onClick={() => {
-                  setFilterAccount("All");
-                  setShowFilterDropdown(false);
-                }}
-                style={{
-                  width: "100%",
-                  padding: "12px 16px",
-                  textAlign: "left",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "0.95rem",
-                  color: filterAccount === "All" ? "#1976d2" : "#333",
-                  backgroundColor:
-                    filterAccount === "All" ? "#e3f2fd" : "transparent",
-                  borderBottom: "1px solid #f0f0f0",
-                }}
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
               >
-                All Accounts
-              </button>
+                <span>🔢</span>
+                <span>Account Code</span>
+              </div>
+            </button>
 
-              {accounts
-                .filter((acc) => isAccountActive(acc))
-                .sort((a, b) => a.acctCode.localeCompare(b.acctCode))
-                .map((account) => (
-                  <button
-                    key={account.id}
-                    onClick={() => {
-                      setFilterAccount(account.acctCode);
-                      setShowFilterDropdown(false);
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "12px 16px",
-                      textAlign: "left",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "0.95rem",
-                      color:
-                        filterAccount === account.acctCode ? "#1976d2" : "#333",
-                      backgroundColor:
-                        filterAccount === account.acctCode
-                          ? "#e3f2fd"
-                          : "transparent",
-                      borderBottom: "1px solid #f0f0f0",
-                    }}
-                  >
-                    {account.acctCode}
-                  </button>
-                ))}
-            </div>
+            <button
+              onClick={() => {
+                setSortBy("date");
+                setShowSortDropdown(false);
+              }}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                textAlign: "left",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "0.95rem",
+                color: sortBy === "date" ? "#1976d2" : "#333",
+                backgroundColor: sortBy === "date" ? "#e3f2fd" : "transparent",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span>📅</span>
+                <span>End Date</span>
+              </div>
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Filter Dropdown - Positioned outside the header */}
+      {showFilterDropdown && (
+        <div
+          ref={filterDropdownRef}
+          style={{
+            position: "absolute",
+            top: "70px",
+            right: "60px",
+            backgroundColor: "#ffffff",
+            border: "1px solid #e0e0e0",
+            borderRadius: "8px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            zIndex: 1001,
+            minWidth: "180px",
+            maxHeight: "400px",
+            overflowY: "auto",
+          }}
+        >
+          <div
+            style={{
+              padding: "12px 16px",
+              fontSize: "0.875rem",
+              color: "#666",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            Filter by Account
+          </div>
+
+          <div>
+            <button
+              onClick={() => {
+                setFilterAccount("All");
+                setShowFilterDropdown(false);
+              }}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                textAlign: "left",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "0.95rem",
+                color: filterAccount === "All" ? "#1976d2" : "#333",
+                backgroundColor:
+                  filterAccount === "All" ? "#e3f2fd" : "transparent",
+                borderBottom: "1px solid #f0f0f0",
+              }}
+            >
+              All Accounts
+            </button>
+
+            {/* Sort accounts by acctCode */}
+            {accounts
+              .filter((acc) => isAccountActive(acc))
+              .sort((a, b) => a.acctCode.localeCompare(b.acctCode))
+              .map((account) => (
+                <button
+                  key={account.id}
+                  onClick={() => {
+                    setFilterAccount(account.acctCode);
+                    setShowFilterDropdown(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    textAlign: "left",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "0.95rem",
+                    color:
+                      filterAccount === account.acctCode ? "#1976d2" : "#333",
+                    backgroundColor:
+                      filterAccount === account.acctCode
+                        ? "#e3f2fd"
+                        : "transparent",
+                    borderBottom: "1px solid #f0f0f0",
+                  }}
+                >
+                  {account.acctCode}
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div style={{ padding: "16px" }}>
@@ -314,7 +496,7 @@ const DepositsListPage: React.FC = () => {
               <div style={{ flex: 1 }}>Account</div>
               <div style={{ flex: 1.2 }}>Amount / Notes</div>
               <div style={{ flex: 0.8, textAlign: "right" }}>End Date</div>
-              <div style={{ width: "56px" }}></div>
+              <div style={{ width: "80px" }}></div> {/* Increased width */}
             </div>
 
             {/* Deposits List - Matching Android Card styling */}
@@ -374,7 +556,8 @@ const DepositsListPage: React.FC = () => {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {formatInLakhs(deposit.amount)}
+                        {formatInLakhs(deposit.amount)}{" "}
+                        {/* REMOVED "L" suffix */}
                       </div>
                       <div style={{ width: "6px" }}></div>
                       <div
@@ -396,66 +579,67 @@ const DepositsListPage: React.FC = () => {
                     <div style={{ flex: 0.8, textAlign: "right" }}>
                       <div
                         style={{
-                          fontSize: "0.95rem",
+                          fontSize: "0.9rem",
                           color: "#495057",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
+                          fontFamily: "monospace",
                         }}
                       >
-                        {formatDate(deposit.endDate, "en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {formatDate(deposit.endDate)}
                       </div>
                     </div>
 
                     {/* Actions - Exactly like Android spacing */}
                     <div
                       style={{
-                        width: "56px",
+                        width: "80px", // Increased width
                         display: "flex",
-                        gap: "4px",
+                        gap: "2px", // Reduced gap
                         justifyContent: "flex-end",
-                        paddingLeft: "8px",
+                        paddingLeft: "4px", // Reduced padding
                       }}
                     >
-                      {/* Edit Button - Always visible */}
-                      <button
-                        onClick={() =>
-                          navigate(`/banking/deposits/edit/${deposit.id}`)
-                        }
-                        style={{
-                          padding: "6px",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          color: "#666",
-                          fontSize: "1.1rem",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                        title="Edit"
-                      >
-                        ✏️
-                      </button>
+                      {/* Edit Button - Only if showDelete is enabled */}
+                      {settings?.showDelete && (
+                        <button
+                          onClick={() =>
+                            navigate(`/banking/deposits/edit/${deposit.id}`)
+                          }
+                          style={{
+                            padding: "4px", // Reduced padding
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#666",
+                            fontSize: "0.9rem", // Reduced font size
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            minWidth: "28px", // Minimum width
+                          }}
+                          title="Edit"
+                        >
+                          ✏️
+                        </button>
+                      )}
 
                       {/* Delete Button - Only if showDelete is enabled */}
                       {settings?.showDelete && (
                         <button
                           onClick={() => setDepositToDelete(deposit.id)}
                           style={{
-                            padding: "6px",
+                            padding: "4px", // Reduced padding
                             background: "none",
                             border: "none",
                             cursor: "pointer",
                             color: "#d32f2f",
-                            fontSize: "1.1rem",
+                            fontSize: "0.9rem", // Reduced font size
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
+                            minWidth: "28px", // Minimum width
                           }}
                           title="Delete"
                         >
@@ -505,6 +689,9 @@ const DepositsListPage: React.FC = () => {
                   >
                     {filteredDeposits.length} deposit
                     {filteredDeposits.length !== 1 ? "s" : ""}
+                    {sortBy === "account"
+                      ? " (Sorted by Account)"
+                      : " (Sorted by Date)"}
                   </div>
                 </div>
 
@@ -552,19 +739,7 @@ const DepositsListPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Show Inactive Info */}
-                {!settings?.showInactive && (
-                  <div
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "#666",
-                      fontStyle: "italic",
-                      padding: "4px 0",
-                    }}
-                  >
-                    Showing active deposits only
-                  </div>
-                )}
+                {/* REMOVED: "Showing active deposits only" message */}
               </div>
             </div>
             {/* Use the extracted BankingNavigation component */}

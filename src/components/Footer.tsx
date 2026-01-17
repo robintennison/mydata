@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
       borderTop: "1px solid #e9ecef",
       padding: "10px 15px",
       zIndex: 100,
-      maxWidth: "500px",
+      maxWidth: "600px",
       margin: "0 auto",
       boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
     },

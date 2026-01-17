@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
-import { useBankingOperations } from "../hooks/useBankingOperations";
+//import { useBankingOperations } from "../hooks/useBankingOperations";
 import { Deposit, BankAccount } from "../../../types/banking.types";
 import { bankingStyles } from "../styles";
 import BankingNavigation from "./BankingNavigation";
@@ -27,13 +27,13 @@ const DepositsListPage: React.FC = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
   const { loading, accounts, deposits } = useBankingData();
-  const { handleDeleteDeposit } = useBankingOperations();
+  //const { handleDeleteDeposit } = useBankingOperations();
 
   const [filterAccount, setFilterAccount] = useState("All");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("account");
-  const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
+  //const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
   const [localDeposits, setLocalDeposits] = useState<Deposit[]>([]);
 
   // Refs for dropdowns
@@ -116,16 +116,16 @@ const DepositsListPage: React.FC = () => {
     0
   );
 
-  const handleDelete = async (id: string) => {
-    try {
-      await handleDeleteDeposit(id);
-      setLocalDeposits((prev) => prev.filter((dep) => dep.id !== id));
-      setDepositToDelete(null);
-    } catch (error) {
-      console.error("Error deleting deposit:", error);
-      alert("Failed to delete deposit. Please try again.");
-    }
-  };
+  // const handleDelete = async (id: string) => {
+  //   try {
+  //     await handleDeleteDeposit(id);
+  //     setLocalDeposits((prev) => prev.filter((dep) => dep.id !== id));
+  //     setDepositToDelete(null);
+  //   } catch (error) {
+  //     console.error("Error deleting deposit:", error);
+  //     alert("Failed to delete deposit. Please try again.");
+  //   }
+  // };
 
   const getAccountName = (accountId: string): string => {
     const account = accounts.find((acc) => acc.id === accountId);
@@ -364,20 +364,20 @@ const DepositsListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Filter Dropdown - Positioned outside the header */}
+      {/* Filter Dropdown - Positioned outside the header - FIXED width */}
       {showFilterDropdown && (
         <div
           ref={filterDropdownRef}
           style={{
             position: "absolute",
             top: "70px",
-            right: "60px",
+            right: "60px", // Adjusted for filter button position
             backgroundColor: "#ffffff",
             border: "1px solid #e0e0e0",
             borderRadius: "8px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
             zIndex: 1001,
-            minWidth: "180px",
+            width: "180px", // Fixed width same as sort dropdown
             maxHeight: "400px",
             overflowY: "auto",
           }}
@@ -496,7 +496,12 @@ const DepositsListPage: React.FC = () => {
               <div style={{ flex: 1 }}>Account</div>
               <div style={{ flex: 1.2 }}>Amount / Notes</div>
               <div style={{ flex: 0.8, textAlign: "right" }}>End Date</div>
-              <div style={{ width: "80px" }}></div> {/* Increased width */}
+              <div
+                style={{
+                  width: settings?.showDelete ? "40px" : "0px", // Dynamic width based on settings
+                  transition: "width 0.2s ease",
+                }}
+              ></div>
             </div>
 
             {/* Deposits List - Matching Android Card styling */}
@@ -513,8 +518,8 @@ const DepositsListPage: React.FC = () => {
                       backgroundColor: "#f8f9fa",
                       borderRadius: "8px",
                       marginBottom: "8px",
-                      padding: "12px",
-                      minHeight: "40px",
+                      padding: "10px 12px", // Reduced padding
+                      minHeight: "36px", // Reduced height
                       display: "flex",
                       alignItems: "center",
                       opacity: deposit.active ? 1 : 0.7,
@@ -525,7 +530,7 @@ const DepositsListPage: React.FC = () => {
                     <div style={{ flex: 1 }}>
                       <div
                         style={{
-                          fontSize: "0.95rem",
+                          fontSize: "0.9rem", // Reduced font size
                           fontWeight: 500,
                           color: "#333",
                           overflow: "hidden",
@@ -547,7 +552,7 @@ const DepositsListPage: React.FC = () => {
                     >
                       <div
                         style={{
-                          fontSize: "0.85rem",
+                          fontSize: "0.8rem", // Reduced font size
                           fontWeight: 600,
                           color: "#1976d2",
                           flex: "0.6",
@@ -559,10 +564,11 @@ const DepositsListPage: React.FC = () => {
                         {formatInLakhs(deposit.amount)}{" "}
                         {/* REMOVED "L" suffix */}
                       </div>
-                      <div style={{ width: "6px" }}></div>
+                      <div style={{ width: "4px" }}></div>{" "}
+                      {/* Reduced spacing */}
                       <div
                         style={{
-                          fontSize: "0.85rem",
+                          fontSize: "0.8rem", // Reduced font size
                           color: "#666",
                           flex: "1",
                           overflow: "hidden",
@@ -570,83 +576,67 @@ const DepositsListPage: React.FC = () => {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {deposit.comments.substring(0, 30)}
-                        {deposit.comments.length > 30 && "..."}
+                        {deposit.comments.substring(0, 25)}{" "}
+                        {/* Reduced length */}
+                        {deposit.comments.length > 25 && "..."}
                       </div>
                     </div>
 
                     {/* End Date - Right aligned */}
-                    <div style={{ flex: 0.8, textAlign: "right" }}>
+                    <div
+                      style={{
+                        flex: 0.8,
+                        textAlign: "right",
+                        paddingRight: settings?.showDelete ? "8px" : "0px", // Dynamic padding
+                      }}
+                    >
                       <div
                         style={{
-                          fontSize: "0.9rem",
+                          fontSize: "0.85rem", // Reduced font size
                           color: "#495057",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
                           fontFamily: "monospace",
+                          letterSpacing: "-0.5px", // Tighter letter spacing for date
                         }}
                       >
                         {formatDate(deposit.endDate)}
                       </div>
                     </div>
 
-                    {/* Actions - Exactly like Android spacing */}
-                    <div
-                      style={{
-                        width: "80px", // Increased width
-                        display: "flex",
-                        gap: "2px", // Reduced gap
-                        justifyContent: "flex-end",
-                        paddingLeft: "4px", // Reduced padding
-                      }}
-                    >
-                      {/* Edit Button - Only if showDelete is enabled */}
-                      {settings?.showDelete && (
+                    {/* Actions - Only show edit icon */}
+                    {settings?.showDelete && (
+                      <div
+                        style={{
+                          width: "40px", // Fixed width for edit icon only
+                          display: "flex",
+                          justifyContent: "flex-end",
+                        }}
+                      >
                         <button
                           onClick={() =>
                             navigate(`/banking/deposits/edit/${deposit.id}`)
                           }
                           style={{
-                            padding: "4px", // Reduced padding
+                            padding: "4px",
                             background: "none",
                             border: "none",
                             cursor: "pointer",
                             color: "#666",
-                            fontSize: "0.9rem", // Reduced font size
+                            fontSize: "0.9rem",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            minWidth: "28px", // Minimum width
+                            width: "32px",
+                            height: "32px",
                           }}
                           title="Edit"
                         >
                           ✏️
                         </button>
-                      )}
-
-                      {/* Delete Button - Only if showDelete is enabled */}
-                      {settings?.showDelete && (
-                        <button
-                          onClick={() => setDepositToDelete(deposit.id)}
-                          style={{
-                            padding: "4px", // Reduced padding
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            color: "#d32f2f",
-                            fontSize: "0.9rem", // Reduced font size
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            minWidth: "28px", // Minimum width
-                          }}
-                          title="Delete"
-                        >
-                          🗑️
-                        </button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -750,96 +740,7 @@ const DepositsListPage: React.FC = () => {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog - Matching Android AlertDialog */}
-      {settings?.showDelete && depositToDelete && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 2000,
-            padding: "20px",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "12px",
-              padding: "24px",
-              maxWidth: "400px",
-              width: "100%",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 12px 0",
-                fontSize: "1.25rem",
-                fontWeight: 600,
-                color: "#333",
-              }}
-            >
-              Delete deposit
-            </h3>
-            <p
-              style={{
-                margin: "0 0 24px 0",
-                color: "#666",
-                lineHeight: "1.5",
-                fontSize: "0.95rem",
-              }}
-            >
-              Delete this deposit? This action cannot be undone.
-            </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "flex-end",
-              }}
-            >
-              <button
-                onClick={() => setDepositToDelete(null)}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "transparent",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
-                  color: "#666",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  fontSize: "0.95rem",
-                  minWidth: "80px",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => depositToDelete && handleDelete(depositToDelete)}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#d32f2f",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#fff",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  fontSize: "0.95rem",
-                  minWidth: "80px",
-                }}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog - REMOVED since delete will be in edit screen */}
     </div>
   );
 };

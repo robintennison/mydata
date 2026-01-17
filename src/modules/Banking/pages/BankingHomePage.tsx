@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
-import BankingNavigation from "./BankingNavigation"; // Import the new component
+import BankingNavigation from "./BankingNavigation";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,13 +12,9 @@ const BankingHomePage: React.FC = () => {
     useBankingData();
   const { settings: appSettings } = useSettings();
 
-  // Format currency for display
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-    }).format(amount);
+  // Format numbers in lakhs with 2 decimals (no currency symbol or "L" label)
+  const formatLakhs = (amount: number): string => {
+    return (amount / 100000).toFixed(2);
   };
 
   // Calculate totals
@@ -242,31 +238,40 @@ const BankingHomePage: React.FC = () => {
             {/* Total Savings Card */}
             <div style={bankingHomeStyles.statsCard}>
               <div style={bankingHomeStyles.statsLabel}>Savings</div>
-              <div style={bankingHomeStyles.statsValue}>
-                {formatCurrency(totalSavings)}
+              <div
+                style={{
+                  ...bankingHomeStyles.statsValue,
+                  fontSize: "0.95rem", // Reduced font size
+                }}
+              >
+                {formatLakhs(totalSavings)}
               </div>
             </div>
 
             {/* Total Deposits Card */}
             <div style={bankingHomeStyles.statsCard}>
               <div style={bankingHomeStyles.statsLabel}>Deposits</div>
-              <div style={bankingHomeStyles.statsValue}>
-                {formatCurrency(totalDeposits)}
+              <div
+                style={{
+                  ...bankingHomeStyles.statsValue,
+                  fontSize: "0.95rem", // Reduced font size
+                }}
+              >
+                {formatLakhs(totalDeposits)}
               </div>
             </div>
 
-            {/* Total Bank Balance Card */}
-            <div
-              style={{
-                ...bankingHomeStyles.statsCard,
-                backgroundColor: "#1e40af",
-                color: "white",
-                border: "none",
-              }}
-            >
-              <div style={bankingHomeStyles.statsLabel}>Total Balance</div>
-              <div style={bankingHomeStyles.statsValue}>
-                {formatCurrency(totalBankBalance)}
+            {/* Total Bank Balance Card - Changed to match other cards */}
+            <div style={bankingHomeStyles.statsCard}>
+              <div style={bankingHomeStyles.statsLabel}>Total</div>{" "}
+              {/* Changed from "Total Balance" */}
+              <div
+                style={{
+                  ...bankingHomeStyles.statsValue,
+                  fontSize: "0.95rem", // Reduced font size
+                }}
+              >
+                {formatLakhs(totalBankBalance)}
               </div>
             </div>
           </div>
@@ -315,7 +320,7 @@ const BankingHomePage: React.FC = () => {
                   color: "#1e40af",
                 }}
               >
-                {formatCurrency(emwAmount)}
+                {formatLakhs(emwAmount)}
               </div>
               <div
                 style={{
@@ -350,7 +355,7 @@ const BankingHomePage: React.FC = () => {
                       : "#059669",
                 }}
               >
-                {formatCurrency(actualWithdrawalData.monthlyRate)}
+                {formatLakhs(actualWithdrawalData.monthlyRate)}
               </div>
               <div
                 style={{
@@ -383,7 +388,7 @@ const BankingHomePage: React.FC = () => {
                 }}
               >
                 {lastMonthWithdrawal >= 0 ? "-" : "+"}
-                {formatCurrency(Math.abs(lastMonthWithdrawal))}
+                {formatLakhs(Math.abs(lastMonthWithdrawal))}
               </div>
               <div
                 style={{
@@ -398,7 +403,7 @@ const BankingHomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Recent History - Sorted newest first */}
+        {/* Recent History - Already sorted newest first */}
         <div
           style={{
             padding: "0 15px 15px 15px",
@@ -462,17 +467,17 @@ const BankingHomePage: React.FC = () => {
                             }}
                           >
                             {monthlyChange > 0 ? "▼" : "▲"}{" "}
-                            {formatCurrency(Math.abs(monthlyChange))}
+                            {formatLakhs(Math.abs(monthlyChange))}
                           </div>
                         )}
                       </div>
                       <div style={{ textAlign: "right" }}>
                         <div style={bankingHomeStyles.historyBalance}>
-                          {formatCurrency(totalBalance)}
+                          {formatLakhs(totalBalance)}
                         </div>
                         <div style={bankingHomeStyles.historyDetails}>
-                          <span>S: {formatCurrency(record.savings)}</span>
-                          <span>D: {formatCurrency(record.totalDeposits)}</span>
+                          <span>S: {formatLakhs(record.savings)}</span>
+                          <span>D: {formatLakhs(record.totalDeposits)}</span>
                         </div>
                       </div>
                     </div>

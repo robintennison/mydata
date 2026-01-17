@@ -1,4 +1,3 @@
-// src/modules/SettingsPage.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../contexts/SettingsContext";
@@ -35,10 +34,10 @@ const SettingsPage: React.FC = () => {
     makingTax: 0,
     resaleDiscount: 0,
     liabilities: 0,
-    emwInterest: 5, // Default EMW interest rate
+    emwInterest: 5,
   });
 
-  const [emwDate, setEmwDate] = useState("2044-10"); // Default EMW date (Nov 2044)
+  const [emwDate, setEmwDate] = useState("2044-10");
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -52,12 +51,10 @@ const SettingsPage: React.FC = () => {
         makingTax: settings.makingTaxPercent || 0,
         resaleDiscount: settings.resaleDiscountPercent || 0,
         liabilities: settings.liabilities || 0,
-        // Use correct field names with fallback defaults
         emwInterest:
           settings.EMW_interest !== undefined ? settings.EMW_interest : 5,
       });
 
-      // Set EMW date from settings or default
       if (settings.EMW_Date) {
         setEmwDate(settings.EMW_Date);
       }
@@ -94,7 +91,7 @@ const SettingsPage: React.FC = () => {
         settingsField = "liabilities";
         break;
       case "emwInterest":
-        settingsField = "EMW_Interest"; // Capital 'I' for Firebase
+        settingsField = "EMW_Interest";
         break;
     }
 
@@ -119,14 +116,12 @@ const SettingsPage: React.FC = () => {
   const handleSaveEmwDateEdit = () => {
     if (!emwDateValue.trim()) return;
 
-    // Validate date format (YYYY-MM)
     const dateRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
     if (!dateRegex.test(emwDateValue)) {
       alert("Please enter date in YYYY-MM format (e.g., 2039-10)");
       return;
     }
 
-    // Update local state and Firebase
     setEmwDate(emwDateValue);
     updateSettings({ EMW_Date: emwDateValue } as any);
     setEditingEmwDate(false);
@@ -199,7 +194,7 @@ const SettingsPage: React.FC = () => {
 
   const formatNumber = (num: number) => {
     return num.toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     });
   };
@@ -226,43 +221,67 @@ const SettingsPage: React.FC = () => {
     );
   }
 
-  // Simplified helper functions that don't cause TypeScript errors
-  const getToggleSwitchStyle = (isOn: boolean): React.CSSProperties => ({
-    ...settingsStyles.toggleSwitch,
-    backgroundColor: isOn ? "#2563eb" : "#ccc",
-  });
-
-  const getToggleKnobStyle = (isOn: boolean): React.CSSProperties => ({
-    ...settingsStyles.toggleKnob,
-    left: isOn ? "27px" : "3px",
-  });
-
-  const getListItemStyle = (index: number): React.CSSProperties => ({
-    ...settingsStyles.listItem,
-    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
-  });
-
   return (
     <div style={settingsStyles.container}>
-      {/* Header */}
-      <div style={settingsStyles.header}>
-        <h1 style={settingsStyles.headerTitle}>⚙️ Settings</h1>
-        <div style={settingsStyles.headerSubtitle}>
-          Configure app preferences and defaults
-        </div>
-      </div>
-
-      {/* Top Navigation */}
-      <div style={settingsStyles.topNav}>
-        <button
-          onClick={() => navigate(-1)}
-          style={settingsStyles.navButton}
-          title="Go Back"
+      {/* Compact Header - Single row */}
+      <div
+        style={{
+          backgroundColor: "#f8f9fa",
+          padding: "12px 16px",
+          borderBottom: "1px solid #e9ecef",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
         >
-          ←
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "1.5rem",
+              cursor: "pointer",
+              color: "#495057",
+              padding: "0",
+              lineHeight: "1",
+            }}
+            title="Go Back"
+          >
+            ←
+          </button>
+          <h1
+            style={{
+              margin: "0",
+              fontSize: "1.2rem",
+              fontWeight: "600",
+              color: "#333",
+            }}
+          >
+            Settings
+          </h1>
+        </div>
+        <button
+          onClick={() => navigate("/banking")}
+          style={{
+            background: "none",
+            border: "none",
+            fontSize: "1.2rem",
+            cursor: "pointer",
+            color: "#495057",
+            padding: "6px",
+            lineHeight: "1",
+          }}
+          title="Home"
+        >
+          🏠
         </button>
-        <div style={settingsStyles.navTitle}>Settings</div>
-        <div style={{ width: "40px" }}></div>
       </div>
 
       <div
@@ -270,545 +289,979 @@ const SettingsPage: React.FC = () => {
           ...settingsStyles.content,
           maxWidth: "500px",
           margin: "0 auto",
+          padding: "16px",
         }}
       >
-        {/* EMW Settings */}
-        <div style={settingsStyles.section}>
-          <h3 style={settingsStyles.sectionTitle}>
+        {/* EMW Settings - Compact */}
+        <div
+          style={{
+            ...settingsStyles.section,
+            padding: "12px 0",
+            marginBottom: "16px",
+          }}
+        >
+          <h3
+            style={{
+              ...settingsStyles.sectionTitle,
+              fontSize: "1rem",
+              marginBottom: "16px",
+              color: "#333",
+              fontWeight: "600",
+            }}
+          >
             EMW (Equated Monthly Withdrawal) Settings
-            <span
-              style={{ fontSize: "0.9rem", color: "#666", marginLeft: "10px" }}
-            >
-              Used in Banking calculations
-            </span>
           </h3>
 
+          {/* EMW Interest Rate - Single row */}
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "12px",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
           >
-            {/* EMW Interest Rate */}
-            <div style={settingsStyles.fieldContainer}>
-              <label style={settingsStyles.label}>EMW Interest Rate (%)</label>
-              {editingField === "emwInterest" ? (
-                <div style={settingsStyles.editControls}>
-                  <div style={settingsStyles.editInputContainer}>
-                    <input
-                      type="text"
-                      value={editValue}
-                      onChange={(e) => handleEditValueChange(e.target.value)}
-                      style={{
-                        ...settingsStyles.input,
-                        flex: 1,
-                      }}
-                      autoFocus
-                      onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-                    />
-                    <span
-                      style={{
-                        ...settingsStyles.currencyPrefix,
-                        backgroundColor: "#f3f4f6",
-                        borderLeft: "1px solid #d1d5db",
-                      }}
-                    >
-                      %
-                    </span>
-                  </div>
-                  <div style={settingsStyles.buttonGroup}>
-                    <button
-                      onClick={handleSaveEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.saveButton,
-                      }}
-                      title="Save"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.cancelButton,
-                      }}
-                      title="Cancel"
-                    >
-                      ✕
-                    </button>
-                  </div>
+            <div
+              style={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#495057",
+              }}
+            >
+              EMW Interest Rate
+            </div>
+            {editingField === "emwInterest" ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <input
+                  type="text"
+                  value={editValue}
+                  onChange={(e) => handleEditValueChange(e.target.value)}
+                  style={{
+                    width: "70px",
+                    padding: "6px 8px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "4px",
+                    fontSize: "0.95rem",
+                    textAlign: "right",
+                  }}
+                  autoFocus
+                  onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                />
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <button
+                    onClick={handleSaveEdit}
+                    style={{
+                      background: "#10b981",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Save"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    style={{
+                      background: "#ef4444",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
                 </div>
-              ) : (
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
                 <div
+                  style={{
+                    fontSize: "0.95rem",
+                    fontWeight: "600",
+                    color: "#333",
+                  }}
+                >
+                  {formatNumber(financialSettings.emwInterest)}%
+                </div>
+                <button
                   onClick={() =>
                     handleStartEdit(
                       "emwInterest",
                       financialSettings.emwInterest
                     )
                   }
-                  style={settingsStyles.editableField}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f1f5f9";
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                    color: "#6b7280",
+                    padding: "2px",
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f8f9fa";
-                  }}
+                  title="Edit"
                 >
-                  <span style={{ fontSize: "16px", color: "#333" }}>
-                    {formatNumber(financialSettings.emwInterest)}%
-                  </span>
-                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
-                </div>
-              )}
-            </div>
-
-            {/* EMW Target Date */}
-            <div style={settingsStyles.fieldContainer}>
-              <label style={settingsStyles.label}>EMW Target Date</label>
-              {editingEmwDate ? (
-                <div style={settingsStyles.editControls}>
-                  <input
-                    type="text"
-                    value={emwDateValue}
-                    onChange={(e) => setEmwDateValue(e.target.value)}
-                    placeholder="YYYY-MM (e.g., 2039-10)"
-                    style={{ ...settingsStyles.input, flex: 1 }}
-                    autoFocus
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && handleSaveEmwDateEdit()
-                    }
-                  />
-                  <div style={settingsStyles.buttonGroup}>
-                    <button
-                      onClick={handleSaveEmwDateEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.saveButton,
-                      }}
-                      title="Save"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={handleCancelEmwDateEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.cancelButton,
-                      }}
-                      title="Cancel"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  onClick={handleStartEmwDateEdit}
-                  style={settingsStyles.editableField}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f1f5f9";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f8f9fa";
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "16px",
-                        color: "#333",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {formatEmwDate(emwDate)}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#6b7280",
-                        marginTop: "2px",
-                      }}
-                    >
-                      ({emwDate})
-                    </div>
-                  </div>
-                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
-                </div>
-              )}
-              <div
-                style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}
-              >
-                Format: YYYY-MM (Year-Month)
+                  ✏️
+                </button>
               </div>
+            )}
+          </div>
+
+          {/* EMW Target Date - Single row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#495057",
+              }}
+            >
+              EMW Target Date
             </div>
+            {editingEmwDate ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <input
+                  type="text"
+                  value={emwDateValue}
+                  onChange={(e) => setEmwDateValue(e.target.value)}
+                  placeholder="YYYY-MM"
+                  style={{
+                    width: "90px",
+                    padding: "6px 8px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "4px",
+                    fontSize: "0.95rem",
+                  }}
+                  autoFocus
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && handleSaveEmwDateEdit()
+                  }
+                />
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <button
+                    onClick={handleSaveEmwDateEdit}
+                    style={{
+                      background: "#10b981",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Save"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={handleCancelEmwDateEdit}
+                    style={{
+                      background: "#ef4444",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.95rem",
+                    fontWeight: "600",
+                    color: "#333",
+                    textAlign: "right",
+                  }}
+                >
+                  <div>{formatEmwDate(emwDate)}</div>
+                  <div
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "#6b7280",
+                      fontWeight: "normal",
+                    }}
+                  >
+                    ({emwDate})
+                  </div>
+                </div>
+                <button
+                  onClick={handleStartEmwDateEdit}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                    color: "#6b7280",
+                    padding: "2px",
+                  }}
+                  title="Edit"
+                >
+                  ✏️
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Financial Settings */}
-        <div style={settingsStyles.section}>
-          <h3 style={settingsStyles.sectionTitle}>
+        {/* Financial Settings - Compact */}
+        <div
+          style={{
+            ...settingsStyles.section,
+            padding: "12px 0",
+            marginBottom: "16px",
+          }}
+        >
+          <h3
+            style={{
+              ...settingsStyles.sectionTitle,
+              fontSize: "1rem",
+              marginBottom: "16px",
+              color: "#333",
+              fontWeight: "600",
+            }}
+          >
             Financial Settings
-            <span
-              style={{ fontSize: "0.9rem", color: "#666", marginLeft: "10px" }}
-            >
-              Click value to edit
-            </span>
           </h3>
 
+          {/* Gold Rate - Single row */}
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "12px",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
           >
-            {/* Gold Rate */}
-            <div style={settingsStyles.fieldContainer}>
-              <label style={settingsStyles.label}>Gold Rate (₹/gram)</label>
-              {editingField === "goldRate" ? (
-                <div style={settingsStyles.editControls}>
-                  <div style={settingsStyles.editInputContainer}>
-                    <span style={settingsStyles.currencyPrefix}>₹</span>
-                    <input
-                      type="text"
-                      value={editValue}
-                      onChange={(e) => handleEditValueChange(e.target.value)}
-                      style={{
-                        ...settingsStyles.input,
-                        ...settingsStyles.inputWithPrefix,
-                      }}
-                      autoFocus
-                      onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-                    />
-                  </div>
-                  <div style={settingsStyles.buttonGroup}>
-                    <button
-                      onClick={handleSaveEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.saveButton,
-                      }}
-                      title="Save"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.cancelButton,
-                      }}
-                      title="Cancel"
-                    >
-                      ✕
-                    </button>
-                  </div>
+            <div
+              style={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#495057",
+              }}
+            >
+              Gold Rate per gram
+            </div>
+            {editingField === "goldRate" ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <span
+                    style={{
+                      padding: "6px 0 6px 8px",
+                      backgroundColor: "#f3f4f6",
+                      border: "1px solid #d1d5db",
+                      borderRight: "none",
+                      borderTopLeftRadius: "4px",
+                      borderBottomLeftRadius: "4px",
+                      fontSize: "0.95rem",
+                    }}
+                  >
+                    ₹
+                  </span>
+                  <input
+                    type="text"
+                    value={editValue}
+                    onChange={(e) => handleEditValueChange(e.target.value)}
+                    style={{
+                      width: "70px",
+                      padding: "6px 8px",
+                      border: "1px solid #d1d5db",
+                      borderLeft: "none",
+                      borderTopRightRadius: "4px",
+                      borderBottomRightRadius: "4px",
+                      fontSize: "0.95rem",
+                      textAlign: "right",
+                    }}
+                    autoFocus
+                    onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                  />
                 </div>
-              ) : (
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <button
+                    onClick={handleSaveEdit}
+                    style={{
+                      background: "#10b981",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Save"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    style={{
+                      background: "#ef4444",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
                 <div
+                  style={{
+                    fontSize: "0.95rem",
+                    fontWeight: "600",
+                    color: "#333",
+                  }}
+                >
+                  ₹{formatNumber(financialSettings.goldRate)}
+                </div>
+                <button
                   onClick={() =>
                     handleStartEdit("goldRate", financialSettings.goldRate)
                   }
-                  style={settingsStyles.editableField}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f1f5f9";
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                    color: "#6b7280",
+                    padding: "2px",
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f8f9fa";
+                  title="Edit"
+                >
+                  ✏️
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Making Tax - Single row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "12px",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#495057",
+              }}
+            >
+              Making Tax
+            </div>
+            {editingField === "makingTax" ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <input
+                  type="text"
+                  value={editValue}
+                  onChange={(e) => handleEditValueChange(e.target.value)}
+                  style={{
+                    width: "70px",
+                    padding: "6px 8px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "4px",
+                    fontSize: "0.95rem",
+                    textAlign: "right",
+                  }}
+                  autoFocus
+                  onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                />
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <button
+                    onClick={handleSaveEdit}
+                    style={{
+                      background: "#10b981",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Save"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    style={{
+                      background: "#ef4444",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.95rem",
+                    fontWeight: "600",
+                    color: "#333",
                   }}
                 >
-                  <div style={settingsStyles.editableValue}>
-                    <span style={settingsStyles.currencySymbol}>₹</span>
-                    <span>{formatNumber(financialSettings.goldRate)}</span>
-                  </div>
-                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
+                  {formatNumber(financialSettings.makingTax)}%
                 </div>
-              )}
-            </div>
-
-            {/* Making Tax */}
-            <div style={settingsStyles.fieldContainer}>
-              <label style={settingsStyles.label}>Making Tax (%)</label>
-              {editingField === "makingTax" ? (
-                <div style={settingsStyles.editControls}>
-                  <input
-                    type="text"
-                    value={editValue}
-                    onChange={(e) => handleEditValueChange(e.target.value)}
-                    style={{ ...settingsStyles.input, flex: 1 }}
-                    autoFocus
-                    onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-                  />
-                  <div style={settingsStyles.buttonGroup}>
-                    <button
-                      onClick={handleSaveEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.saveButton,
-                      }}
-                      title="Save"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.cancelButton,
-                      }}
-                      title="Cancel"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
+                <button
                   onClick={() =>
                     handleStartEdit("makingTax", financialSettings.makingTax)
                   }
-                  style={settingsStyles.editableField}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f1f5f9";
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                    color: "#6b7280",
+                    padding: "2px",
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f8f9fa";
+                  title="Edit"
+                >
+                  ✏️
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Resale Discount - Single row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "12px",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#495057",
+              }}
+            >
+              Resale Discount
+            </div>
+            {editingField === "resaleDiscount" ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <input
+                  type="text"
+                  value={editValue}
+                  onChange={(e) => handleEditValueChange(e.target.value)}
+                  style={{
+                    width: "70px",
+                    padding: "6px 8px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "4px",
+                    fontSize: "0.95rem",
+                    textAlign: "right",
+                  }}
+                  autoFocus
+                  onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                />
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <button
+                    onClick={handleSaveEdit}
+                    style={{
+                      background: "#10b981",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Save"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    style={{
+                      background: "#ef4444",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.95rem",
+                    fontWeight: "600",
+                    color: "#333",
                   }}
                 >
-                  <span style={{ fontSize: "16px", color: "#333" }}>
-                    {formatNumber(financialSettings.makingTax)}%
-                  </span>
-                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
+                  {formatNumber(financialSettings.resaleDiscount)}%
                 </div>
-              )}
-            </div>
-
-            {/* Resale Discount */}
-            <div style={settingsStyles.fieldContainer}>
-              <label style={settingsStyles.label}>Resale Discount (%)</label>
-              {editingField === "resaleDiscount" ? (
-                <div style={settingsStyles.editControls}>
-                  <input
-                    type="text"
-                    value={editValue}
-                    onChange={(e) => handleEditValueChange(e.target.value)}
-                    style={{ ...settingsStyles.input, flex: 1 }}
-                    autoFocus
-                    onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-                  />
-                  <div style={settingsStyles.buttonGroup}>
-                    <button
-                      onClick={handleSaveEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.saveButton,
-                      }}
-                      title="Save"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.cancelButton,
-                      }}
-                      title="Cancel"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
+                <button
                   onClick={() =>
                     handleStartEdit(
                       "resaleDiscount",
                       financialSettings.resaleDiscount
                     )
                   }
-                  style={settingsStyles.editableField}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f1f5f9";
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                    color: "#6b7280",
+                    padding: "2px",
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f8f9fa";
+                  title="Edit"
+                >
+                  ✏️
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Liabilities - Single row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#495057",
+              }}
+            >
+              Liabilities
+            </div>
+            {editingField === "liabilities" ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <span
+                    style={{
+                      padding: "6px 0 6px 8px",
+                      backgroundColor: "#f3f4f6",
+                      border: "1px solid #d1d5db",
+                      borderRight: "none",
+                      borderTopLeftRadius: "4px",
+                      borderBottomLeftRadius: "4px",
+                      fontSize: "0.95rem",
+                    }}
+                  >
+                    ₹
+                  </span>
+                  <input
+                    type="text"
+                    value={editValue}
+                    onChange={(e) => handleEditValueChange(e.target.value)}
+                    style={{
+                      width: "70px",
+                      padding: "6px 8px",
+                      border: "1px solid #d1d5db",
+                      borderLeft: "none",
+                      borderTopRightRadius: "4px",
+                      borderBottomRightRadius: "4px",
+                      fontSize: "0.95rem",
+                      textAlign: "right",
+                    }}
+                    autoFocus
+                    onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                  />
+                </div>
+                <div style={{ display: "flex", gap: "4px" }}>
+                  <button
+                    onClick={handleSaveEdit}
+                    style={{
+                      background: "#10b981",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Save"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    style={{
+                      background: "#ef4444",
+                      border: "none",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "6px 8px",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                    }}
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.95rem",
+                    fontWeight: "600",
+                    color: "#333",
                   }}
                 >
-                  <span style={{ fontSize: "16px", color: "#333" }}>
-                    {formatNumber(financialSettings.resaleDiscount)}%
-                  </span>
-                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
+                  ₹{formatNumber(financialSettings.liabilities)}
                 </div>
-              )}
-            </div>
-
-            {/* Liabilities */}
-            <div style={settingsStyles.fieldContainer}>
-              <label style={settingsStyles.label}>Liabilities (₹)</label>
-              {editingField === "liabilities" ? (
-                <div style={settingsStyles.editControls}>
-                  <div style={settingsStyles.editInputContainer}>
-                    <span style={settingsStyles.currencyPrefix}>₹</span>
-                    <input
-                      type="text"
-                      value={editValue}
-                      onChange={(e) => handleEditValueChange(e.target.value)}
-                      style={{
-                        ...settingsStyles.input,
-                        ...settingsStyles.inputWithPrefix,
-                      }}
-                      autoFocus
-                      onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-                    />
-                  </div>
-                  <div style={settingsStyles.buttonGroup}>
-                    <button
-                      onClick={handleSaveEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.saveButton,
-                      }}
-                      title="Save"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      style={{
-                        ...settingsStyles.iconButton,
-                        ...settingsStyles.cancelButton,
-                      }}
-                      title="Cancel"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
+                <button
                   onClick={() =>
                     handleStartEdit(
                       "liabilities",
                       financialSettings.liabilities
                     )
                   }
-                  style={settingsStyles.editableField}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f1f5f9";
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                    color: "#6b7280",
+                    padding: "2px",
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f8f9fa";
-                  }}
+                  title="Edit"
                 >
-                  <div style={settingsStyles.editableValue}>
-                    <span style={settingsStyles.currencySymbol}>₹</span>
-                    <span>{formatNumber(financialSettings.liabilities)}</span>
-                  </div>
-                  <span style={settingsStyles.editHint}>✏️ Click to edit</span>
-                </div>
-              )}
-            </div>
+                  ✏️
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Toggle Settings */}
-        <div style={settingsStyles.section}>
-          <h3 style={settingsStyles.sectionTitle}>Display Settings</h3>
-
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "15px" }}
+        {/* Display Settings - Compact */}
+        <div
+          style={{
+            ...settingsStyles.section,
+            padding: "12px 0",
+            marginBottom: "16px",
+          }}
+        >
+          <h3
+            style={{
+              ...settingsStyles.sectionTitle,
+              fontSize: "1rem",
+              marginBottom: "16px",
+              color: "#333",
+              fontWeight: "600",
+            }}
           >
-            {/* Show Inactive */}
-            <div style={settingsStyles.toggleContainer}>
-              <div style={settingsStyles.toggleLabel}>
-                <div style={settingsStyles.toggleTitle}>
-                  Show Inactive Items
-                </div>
-                <div style={settingsStyles.toggleDescription}>
-                  Show inactive jewellery in lists and gallery
-                </div>
+            Display Settings
+          </h3>
+
+          {/* Show Inactive Items - Single row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "12px",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: "0.95rem",
+                  fontWeight: "500",
+                  color: "#495057",
+                }}
+              >
+                Show Inactive Items
               </div>
               <div
-                onClick={() =>
-                  handleToggle("showInactive", !settings?.showInactive)
-                }
-                style={getToggleSwitchStyle(settings?.showInactive || false)}
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#6b7280",
+                  marginTop: "2px",
+                }}
               >
-                <div
-                  style={getToggleKnobStyle(settings?.showInactive || false)}
-                />
+                Show inactive jewellery in lists and gallery
               </div>
             </div>
+            <div
+              onClick={() =>
+                handleToggle("showInactive", !settings?.showInactive)
+              }
+              style={{
+                position: "relative",
+                width: "44px",
+                height: "24px",
+                backgroundColor: settings?.showInactive ? "#10b981" : "#d1d5db",
+                borderRadius: "12px",
+                cursor: "pointer",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: "2px",
+                  left: settings?.showInactive ? "22px" : "2px",
+                  width: "20px",
+                  height: "20px",
+                  backgroundColor: "white",
+                  borderRadius: "50%",
+                  transition: "left 0.2s",
+                }}
+              />
+            </div>
+          </div>
 
-            {/* Show Delete */}
-            <div style={settingsStyles.toggleContainer}>
-              <div style={settingsStyles.toggleLabel}>
-                <div style={settingsStyles.toggleTitle}>Show Delete Action</div>
-                <div style={settingsStyles.toggleDescription}>
-                  Display the delete control on Edit screen
-                </div>
+          {/* Show Delete Action - Single row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "8px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: "0.95rem",
+                  fontWeight: "500",
+                  color: "#495057",
+                }}
+              >
+                Show Delete Action
               </div>
               <div
-                onClick={() =>
-                  handleToggle("showDelete", !settings?.showDelete)
-                }
-                style={getToggleSwitchStyle(settings?.showDelete || false)}
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#6b7280",
+                  marginTop: "2px",
+                }}
               >
-                <div
-                  style={getToggleKnobStyle(settings?.showDelete || false)}
-                />
+                Display the delete control on Edit screen
               </div>
+            </div>
+            <div
+              onClick={() => handleToggle("showDelete", !settings?.showDelete)}
+              style={{
+                position: "relative",
+                width: "44px",
+                height: "24px",
+                backgroundColor: settings?.showDelete ? "#10b981" : "#d1d5db",
+                borderRadius: "12px",
+                cursor: "pointer",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: "2px",
+                  left: settings?.showDelete ? "22px" : "2px",
+                  width: "20px",
+                  height: "20px",
+                  backgroundColor: "white",
+                  borderRadius: "50%",
+                  transition: "left 0.2s",
+                }}
+              />
             </div>
           </div>
         </div>
 
-        {/* Locations Management */}
-        <div style={settingsStyles.listSection}>
-          <div style={settingsStyles.listHeader}>
-            <div style={settingsStyles.listTitleContainer}>
-              <h3 style={settingsStyles.listTitle}>Locations</h3>
-              <div style={settingsStyles.listCount}>
-                {settings?.locations?.length || 0} item
-                {settings?.locations?.length !== 1 ? "s" : ""}
-              </div>
-            </div>
-            <div style={settingsStyles.listActions}>
+        {/* Locations Management - Compact */}
+        <div
+          style={{
+            ...settingsStyles.section,
+            padding: "12px 0",
+            marginBottom: "16px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: locExpanded ? "12px" : "0",
+            }}
+          >
+            <h3
+              style={{
+                fontSize: "1rem",
+                color: "#333",
+                fontWeight: "600",
+                margin: "0",
+              }}
+            >
+              Locations ({settings?.locations?.length || 0})
+            </h3>
+            <div style={{ display: "flex", gap: "8px" }}>
               <button
                 onClick={() => setShowAddLoc(true)}
-                style={settingsStyles.listButton}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#c7d2fe";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#e0e7ff";
+                style={{
+                  background: "#e0e7ff",
+                  border: "none",
+                  borderRadius: "4px",
+                  color: "#4f46e5",
+                  padding: "6px 12px",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
                 }}
               >
                 Add
               </button>
               <button
                 onClick={() => setLocExpanded(!locExpanded)}
-                style={settingsStyles.expandButton}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#c7d2fe";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#e0e7ff";
+                style={{
+                  background: "#e0e7ff",
+                  border: "none",
+                  borderRadius: "4px",
+                  color: "#4f46e5",
+                  padding: "6px 12px",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
                 }}
               >
-                {locExpanded ? "↑" : "↓"}
+                {locExpanded ? "Hide" : "Show"}
               </button>
             </div>
           </div>
 
           {locExpanded && (
-            <div style={settingsStyles.listContainer}>
+            <div
+              style={{
+                border: "1px solid #e9ecef",
+                borderRadius: "8px",
+                overflow: "hidden",
+              }}
+            >
               {!settings?.locations || settings.locations.length === 0 ? (
-                <div style={settingsStyles.emptyList}>No locations yet.</div>
+                <div
+                  style={{
+                    padding: "16px",
+                    textAlign: "center",
+                    color: "#6b7280",
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  No locations yet.
+                </div>
               ) : (
                 settings.locations.map((location, index) => (
-                  <div key={index} style={getListItemStyle(index)}>
-                    <span style={settingsStyles.listItemText}>{location}</span>
-                    <div style={settingsStyles.listItemActions}>
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 12px",
+                      backgroundColor: index % 2 === 0 ? "white" : "#f9fafb",
+                      borderBottom:
+                        index < (settings.locations?.length || 0) - 1
+                          ? "1px solid #f0f0f0"
+                          : "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.95rem",
+                        color: "#333",
+                      }}
+                    >
+                      {location}
+                    </span>
+                    <div style={{ display: "flex", gap: "8px" }}>
                       <button
                         onClick={() => handleEditListItem("location", location)}
                         style={{
-                          ...settingsStyles.iconActionButton,
-                          ...settingsStyles.editButton,
+                          background: "none",
+                          border: "none",
+                          fontSize: "1rem",
+                          cursor: "pointer",
+                          color: "#6b7280",
+                          padding: "4px",
                         }}
                         title="Edit"
                       >
@@ -817,8 +1270,12 @@ const SettingsPage: React.FC = () => {
                       <button
                         onClick={() => handleDelete("location", location)}
                         style={{
-                          ...settingsStyles.iconActionButton,
-                          ...settingsStyles.deleteButton,
+                          background: "none",
+                          border: "none",
+                          fontSize: "1rem",
+                          cursor: "pointer",
+                          color: "#ef4444",
+                          padding: "4px",
                         }}
                         title="Delete"
                       >
@@ -832,60 +1289,119 @@ const SettingsPage: React.FC = () => {
           )}
         </div>
 
-        {/* Bought For Management */}
-        <div style={settingsStyles.listSection}>
-          <div style={settingsStyles.listHeader}>
-            <div style={settingsStyles.listTitleContainer}>
-              <h3 style={settingsStyles.listTitle}>Bought For</h3>
-              <div style={settingsStyles.listCount}>
-                {settings?.boughtFor?.length || 0} item
-                {settings?.boughtFor?.length !== 1 ? "s" : ""}
-              </div>
-            </div>
-            <div style={settingsStyles.listActions}>
+        {/* Bought For Management - Compact */}
+        <div
+          style={{
+            ...settingsStyles.section,
+            padding: "12px 0",
+            paddingBottom: "80px", // Extra padding at bottom for navigation
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: bfExpanded ? "12px" : "0",
+            }}
+          >
+            <h3
+              style={{
+                fontSize: "1rem",
+                color: "#333",
+                fontWeight: "600",
+                margin: "0",
+              }}
+            >
+              Bought For ({settings?.boughtFor?.length || 0})
+            </h3>
+            <div style={{ display: "flex", gap: "8px" }}>
               <button
                 onClick={() => setShowAddBf(true)}
-                style={settingsStyles.listButton}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#c7d2fe";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#e0e7ff";
+                style={{
+                  background: "#e0e7ff",
+                  border: "none",
+                  borderRadius: "4px",
+                  color: "#4f46e5",
+                  padding: "6px 12px",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
                 }}
               >
                 Add
               </button>
               <button
                 onClick={() => setBfExpanded(!bfExpanded)}
-                style={settingsStyles.expandButton}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#c7d2fe";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#e0e7ff";
+                style={{
+                  background: "#e0e7ff",
+                  border: "none",
+                  borderRadius: "4px",
+                  color: "#4f46e5",
+                  padding: "6px 12px",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
                 }}
               >
-                {bfExpanded ? "↑" : "↓"}
+                {bfExpanded ? "Hide" : "Show"}
               </button>
             </div>
           </div>
 
           {bfExpanded && (
-            <div style={settingsStyles.listContainer}>
+            <div
+              style={{
+                border: "1px solid #e9ecef",
+                borderRadius: "8px",
+                overflow: "hidden",
+              }}
+            >
               {!settings?.boughtFor || settings.boughtFor.length === 0 ? (
-                <div style={settingsStyles.emptyList}>No entries yet.</div>
+                <div
+                  style={{
+                    padding: "16px",
+                    textAlign: "center",
+                    color: "#6b7280",
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  No entries yet.
+                </div>
               ) : (
                 settings.boughtFor.map((boughtFor, index) => (
-                  <div key={index} style={getListItemStyle(index)}>
-                    <span style={settingsStyles.listItemText}>{boughtFor}</span>
-                    <div style={settingsStyles.listItemActions}>
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 12px",
+                      backgroundColor: index % 2 === 0 ? "white" : "#f9fafb",
+                      borderBottom:
+                        index < (settings.boughtFor?.length || 0) - 1
+                          ? "1px solid #f0f0f0"
+                          : "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.95rem",
+                        color: "#333",
+                      }}
+                    >
+                      {boughtFor}
+                    </span>
+                    <div style={{ display: "flex", gap: "8px" }}>
                       <button
                         onClick={() =>
                           handleEditListItem("boughtFor", boughtFor)
                         }
                         style={{
-                          ...settingsStyles.iconActionButton,
-                          ...settingsStyles.editButton,
+                          background: "none",
+                          border: "none",
+                          fontSize: "1rem",
+                          cursor: "pointer",
+                          color: "#6b7280",
+                          padding: "4px",
                         }}
                         title="Edit"
                       >
@@ -894,8 +1410,12 @@ const SettingsPage: React.FC = () => {
                       <button
                         onClick={() => handleDelete("boughtFor", boughtFor)}
                         style={{
-                          ...settingsStyles.iconActionButton,
-                          ...settingsStyles.deleteButton,
+                          background: "none",
+                          border: "none",
+                          fontSize: "1rem",
+                          cursor: "pointer",
+                          color: "#ef4444",
+                          padding: "4px",
                         }}
                         title="Delete"
                       >
@@ -912,24 +1432,74 @@ const SettingsPage: React.FC = () => {
 
       {/* Add Location Dialog */}
       {showAddLoc && (
-        <div style={settingsStyles.dialogOverlay}>
-          <div style={settingsStyles.dialog}>
-            <h3 style={settingsStyles.dialogTitle}>Add Location</h3>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              borderRadius: "12px",
+              padding: "20px",
+              maxWidth: "400px",
+              width: "100%",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+            }}
+          >
+            <h3
+              style={{
+                margin: "0 0 15px 0",
+                fontSize: "1.1rem",
+                fontWeight: "600",
+                color: "#333",
+              }}
+            >
+              Add Location
+            </h3>
             <input
               type="text"
               value={newLocation}
               onChange={(e) => setNewLocation(e.target.value)}
               placeholder="Enter location name"
-              style={settingsStyles.input}
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: "1px solid #d1d5db",
+                borderRadius: "8px",
+                fontSize: "1rem",
+                marginBottom: "20px",
+              }}
               autoFocus
               onKeyPress={(e) => e.key === "Enter" && handleAddLocation()}
             />
-            <div style={settingsStyles.dialogActions}>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+              }}
+            >
               <button
                 onClick={() => setShowAddLoc(false)}
                 style={{
-                  ...settingsStyles.dialogButton,
-                  ...settingsStyles.cancelDialogButton,
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: "#f8f9fa",
+                  border: "1px solid #e9ecef",
+                  borderRadius: "8px",
+                  color: "#495057",
+                  fontWeight: "500",
+                  cursor: "pointer",
                 }}
               >
                 Cancel
@@ -938,12 +1508,14 @@ const SettingsPage: React.FC = () => {
                 onClick={handleAddLocation}
                 disabled={!newLocation.trim()}
                 style={{
-                  ...settingsStyles.dialogButton,
-                  ...settingsStyles.confirmDialogButton,
-                  ...(!newLocation.trim() && {
-                    backgroundColor: "#9ca3af",
-                    cursor: "not-allowed",
-                  }),
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: !newLocation.trim() ? "#9ca3af" : "#2563eb",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#ffffff",
+                  fontWeight: "500",
+                  cursor: !newLocation.trim() ? "not-allowed" : "pointer",
                 }}
               >
                 Save
@@ -955,24 +1527,74 @@ const SettingsPage: React.FC = () => {
 
       {/* Add Bought For Dialog */}
       {showAddBf && (
-        <div style={settingsStyles.dialogOverlay}>
-          <div style={settingsStyles.dialog}>
-            <h3 style={settingsStyles.dialogTitle}>Add "Bought For"</h3>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              borderRadius: "12px",
+              padding: "20px",
+              maxWidth: "400px",
+              width: "100%",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+            }}
+          >
+            <h3
+              style={{
+                margin: "0 0 15px 0",
+                fontSize: "1.1rem",
+                fontWeight: "600",
+                color: "#333",
+              }}
+            >
+              Add "Bought For"
+            </h3>
             <input
               type="text"
               value={newBoughtFor}
               onChange={(e) => setNewBoughtFor(e.target.value)}
               placeholder="Enter purpose"
-              style={settingsStyles.input}
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: "1px solid #d1d5db",
+                borderRadius: "8px",
+                fontSize: "1rem",
+                marginBottom: "20px",
+              }}
               autoFocus
               onKeyPress={(e) => e.key === "Enter" && handleAddBoughtFor()}
             />
-            <div style={settingsStyles.dialogActions}>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+              }}
+            >
               <button
                 onClick={() => setShowAddBf(false)}
                 style={{
-                  ...settingsStyles.dialogButton,
-                  ...settingsStyles.cancelDialogButton,
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: "#f8f9fa",
+                  border: "1px solid #e9ecef",
+                  borderRadius: "8px",
+                  color: "#495057",
+                  fontWeight: "500",
+                  cursor: "pointer",
                 }}
               >
                 Cancel
@@ -981,12 +1603,14 @@ const SettingsPage: React.FC = () => {
                 onClick={handleAddBoughtFor}
                 disabled={!newBoughtFor.trim()}
                 style={{
-                  ...settingsStyles.dialogButton,
-                  ...settingsStyles.confirmDialogButton,
-                  ...(!newBoughtFor.trim() && {
-                    backgroundColor: "#9ca3af",
-                    cursor: "not-allowed",
-                  }),
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: !newBoughtFor.trim() ? "#9ca3af" : "#2563eb",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#ffffff",
+                  fontWeight: "500",
+                  cursor: !newBoughtFor.trim() ? "not-allowed" : "pointer",
                 }}
               >
                 Save
@@ -998,9 +1622,39 @@ const SettingsPage: React.FC = () => {
 
       {/* Rename Dialog */}
       {renameDialog && (
-        <div style={settingsStyles.dialogOverlay}>
-          <div style={settingsStyles.dialog}>
-            <h3 style={settingsStyles.dialogTitle}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              borderRadius: "12px",
+              padding: "20px",
+              maxWidth: "400px",
+              width: "100%",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+            }}
+          >
+            <h3
+              style={{
+                margin: "0 0 15px 0",
+                fontSize: "1.1rem",
+                fontWeight: "600",
+                color: "#333",
+              }}
+            >
               {renameDialog.type === "location"
                 ? "Rename Location"
                 : 'Rename "Bought For"'}
@@ -1010,19 +1664,37 @@ const SettingsPage: React.FC = () => {
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
               placeholder="Enter new value"
-              style={settingsStyles.input}
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: "1px solid #d1d5db",
+                borderRadius: "8px",
+                fontSize: "1rem",
+                marginBottom: "20px",
+              }}
               autoFocus
               onKeyPress={(e) => e.key === "Enter" && handleSaveListItemEdit()}
             />
-            <div style={settingsStyles.dialogActions}>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+              }}
+            >
               <button
                 onClick={() => {
                   setRenameDialog(null);
                   setRenameValue("");
                 }}
                 style={{
-                  ...settingsStyles.dialogButton,
-                  ...settingsStyles.cancelDialogButton,
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: "#f8f9fa",
+                  border: "1px solid #e9ecef",
+                  borderRadius: "8px",
+                  color: "#495057",
+                  fontWeight: "500",
+                  cursor: "pointer",
                 }}
               >
                 Cancel
@@ -1031,12 +1703,14 @@ const SettingsPage: React.FC = () => {
                 onClick={handleSaveListItemEdit}
                 disabled={!renameValue.trim()}
                 style={{
-                  ...settingsStyles.dialogButton,
-                  ...settingsStyles.confirmDialogButton,
-                  ...(!renameValue.trim() && {
-                    backgroundColor: "#9ca3af",
-                    cursor: "not-allowed",
-                  }),
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: !renameValue.trim() ? "#9ca3af" : "#2563eb",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#ffffff",
+                  fontWeight: "500",
+                  cursor: !renameValue.trim() ? "not-allowed" : "pointer",
                 }}
               >
                 Save

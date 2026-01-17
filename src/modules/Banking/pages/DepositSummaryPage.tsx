@@ -332,7 +332,7 @@ const DepositSummaryPage: React.FC = () => {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "12px 16px",
-          backgroundColor: "#ffffff", // Changed from blue to white
+          backgroundColor: "#ffffff",
           borderBottom: "1px solid #e2e8f0",
           position: "sticky",
           top: 0,
@@ -357,8 +357,8 @@ const DepositSummaryPage: React.FC = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "20px", // Bigger arrow
-              color: "#1e293b", // Darker arrow
+              fontSize: "20px",
+              color: "#1e293b",
               cursor: "pointer",
               transition: "all 0.2s",
             }}
@@ -415,7 +415,7 @@ const DepositSummaryPage: React.FC = () => {
       <div
         style={{
           ...styles.content,
-          padding: "12px", // Reduced padding
+          padding: "12px",
         }}
       >
         {/* Error Message */}
@@ -448,88 +448,120 @@ const DepositSummaryPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Summary Table - Compact layout */}
+            {/* Summary Table - Fixed alignment */}
             <div
               style={{
-                ...styles.tableContainer,
                 marginBottom: "16px",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
+                overflow: "hidden",
               }}
             >
-              {/* Table Header - Compact */}
+              {/* Table Header - Fixed alignment */}
               <div
                 style={{
-                  ...styles.tableHeader,
-                  padding: "8px 10px", // Reduced padding
+                  display: "flex",
+                  padding: "10px 12px",
+                  backgroundColor: "#f9fafb",
+                  borderBottom: "1px solid #e5e7eb",
+                  fontWeight: "600",
+                  fontSize: "13px",
+                  color: "#374151",
                 }}
               >
                 <div
-                  style={{ ...styles.headerCell, flex: 1.5, fontSize: "13px" }}
+                  style={{
+                    flex: "1.5",
+                    paddingLeft: "8px",
+                    minWidth: "0",
+                  }}
                 >
                   Account
                 </div>
                 <div
                   style={{
-                    ...styles.headerCell,
-                    flex: 1,
-                    fontSize: "13px",
+                    flex: "1",
                     textAlign: "right",
+                    paddingRight: "12px",
+                    minWidth: "0",
                   }}
                 >
                   Savings
                 </div>
                 <div
                   style={{
-                    ...styles.headerCell,
-                    flex: 1,
-                    fontSize: "13px",
+                    flex: "1",
                     textAlign: "right",
+                    paddingRight: "12px",
+                    minWidth: "0",
                   }}
                 >
                   Deposits
                 </div>
                 <div
                   style={{
-                    ...styles.headerCell,
-                    flex: 0.5,
-                    fontSize: "13px",
+                    flex: "0.5",
                     textAlign: "center",
+                    minWidth: "0",
                   }}
-                ></div>
+                >
+                  {/* Empty for action column header */}
+                </div>
               </div>
 
-              {/* Table Rows - Compact */}
-              <div style={styles.tableBody}>
+              {/* Table Rows - Fixed alignment */}
+              <div>
                 {summaries.map((summary, index) => {
                   const isEditing = editingAccountId === summary.accountId;
-                  const showEditAction = settings?.showDelete; // Only show edit if setting is true
+                  const showEditAction = settings?.showDelete;
 
                   return (
                     <div
                       key={summary.accountId}
                       style={{
-                        ...styles.tableRow,
-                        padding: "8px 10px", // Reduced padding
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "10px 12px",
                         backgroundColor:
-                          index % 2 === 0 ? "#fafafa" : "#ffffff",
-                        minHeight: "44px", // Reduced height
+                          index % 2 === 0 ? "#ffffff" : "#f9fafb",
+                        borderBottom:
+                          index < summaries.length - 1
+                            ? "1px solid #f3f4f6"
+                            : "none",
+                        minHeight: "48px",
                       }}
                     >
                       {/* Account Code */}
-                      <div style={{ ...styles.cell, flex: 1.5 }}>
+                      <div
+                        style={{
+                          flex: "1.5",
+                          paddingLeft: "8px",
+                          minWidth: "0",
+                          overflow: "hidden",
+                        }}
+                      >
                         <div
                           style={{
-                            fontSize: "14px", // Smaller font
+                            fontSize: "14px",
                             fontWeight: "500",
                             color: "#1e293b",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
                           }}
                         >
                           {summary.accountCode}
                         </div>
                       </div>
 
-                      {/* Savings Amount */}
+                      {/* Savings Amount - Aligned right */}
                       <div
-                        style={{ ...styles.cell, flex: 1, textAlign: "right" }}
+                        style={{
+                          flex: "1",
+                          textAlign: "right",
+                          paddingRight: "12px",
+                          minWidth: "0",
+                        }}
                       >
                         {isEditing ? (
                           <div
@@ -544,11 +576,11 @@ const DepositSummaryPage: React.FC = () => {
                               value={editedSavings}
                               onChange={(e) => setEditedSavings(e.target.value)}
                               style={{
-                                width: "80px", // Reduced width
+                                width: "90px",
                                 padding: "6px 8px",
                                 border: "1px solid #d1d5db",
                                 borderRadius: "4px",
-                                fontSize: "13px", // Smaller font
+                                fontSize: "13px",
                                 textAlign: "right",
                               }}
                               step="0.01"
@@ -560,7 +592,7 @@ const DepositSummaryPage: React.FC = () => {
                         ) : (
                           <div
                             style={{
-                              fontSize: "14px", // Smaller font
+                              fontSize: "14px",
                               fontWeight: "600",
                               color: "#333",
                             }}
@@ -570,9 +602,14 @@ const DepositSummaryPage: React.FC = () => {
                         )}
                       </div>
 
-                      {/* Deposits Amount */}
+                      {/* Deposits Amount - Aligned right */}
                       <div
-                        style={{ ...styles.cell, flex: 1, textAlign: "right" }}
+                        style={{
+                          flex: "1",
+                          textAlign: "right",
+                          paddingRight: "12px",
+                          minWidth: "0",
+                        }}
                       >
                         {isEditing ? (
                           <div
@@ -589,11 +626,11 @@ const DepositSummaryPage: React.FC = () => {
                                 setEditedDeposits(e.target.value)
                               }
                               style={{
-                                width: "80px", // Reduced width
+                                width: "90px",
                                 padding: "6px 8px",
                                 border: "1px solid #d1d5db",
                                 borderRadius: "4px",
-                                fontSize: "13px", // Smaller font
+                                fontSize: "13px",
                                 textAlign: "right",
                               }}
                               step="0.01"
@@ -605,7 +642,7 @@ const DepositSummaryPage: React.FC = () => {
                         ) : (
                           <div
                             style={{
-                              fontSize: "14px", // Smaller font
+                              fontSize: "14px",
                               fontWeight: "600",
                               color: "#333",
                             }}
@@ -615,13 +652,13 @@ const DepositSummaryPage: React.FC = () => {
                         )}
                       </div>
 
-                      {/* Edit/Save/Cancel Buttons */}
+                      {/* Action Column - Fixed width */}
                       <div
                         style={{
-                          ...styles.cell,
-                          flex: 0.5,
+                          flex: "0.5",
+                          display: "flex",
                           justifyContent: "center",
-                          padding: "0 4px", // Reduced padding
+                          minWidth: "60px",
                         }}
                       >
                         {isEditing ? (
@@ -629,8 +666,8 @@ const DepositSummaryPage: React.FC = () => {
                             <button
                               onClick={() => saveEdits(summary.accountId)}
                               style={{
-                                width: "30px",
-                                height: "30px",
+                                width: "32px",
+                                height: "32px",
                                 backgroundColor: "#10b981",
                                 border: "none",
                                 borderRadius: "4px",
@@ -663,8 +700,8 @@ const DepositSummaryPage: React.FC = () => {
                             <button
                               onClick={cancelEditing}
                               style={{
-                                width: "30px",
-                                height: "30px",
+                                width: "32px",
+                                height: "32px",
                                 backgroundColor: "#ef4444",
                                 border: "none",
                                 borderRadius: "4px",
@@ -681,7 +718,7 @@ const DepositSummaryPage: React.FC = () => {
                               ✕
                             </button>
                           </div>
-                        ) : showEditAction ? ( // Only show edit button if setting is true
+                        ) : showEditAction ? (
                           <button
                             onClick={() =>
                               startEditing(
@@ -691,8 +728,8 @@ const DepositSummaryPage: React.FC = () => {
                               )
                             }
                             style={{
-                              width: "30px",
-                              height: "30px",
+                              width: "32px",
+                              height: "32px",
                               backgroundColor: "transparent",
                               border: "none",
                               fontSize: "16px",
@@ -711,107 +748,85 @@ const DepositSummaryPage: React.FC = () => {
                           >
                             ✏️
                           </button>
-                        ) : null}
+                        ) : (
+                          <div style={{ width: "32px", height: "32px" }}></div>
+                        )}
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Totals Row - Compact */}
-              <div
-                style={{
-                  ...styles.totalsRow,
-                  padding: "10px", // Reduced padding
-                  borderTop: "2px solid #e5e7eb",
-                  fontSize: "14px", // Smaller font
-                }}
-              >
-                <div style={{ ...styles.totalsCell, flex: 1.5 }}>
-                  <strong>TOTAL</strong>
-                </div>
-                <div
-                  style={{ ...styles.totalsCell, flex: 1, textAlign: "right" }}
-                >
-                  <strong>{formatLakhs(rupeesToLakhs(totalSavings))}</strong>
-                </div>
-                <div
-                  style={{ ...styles.totalsCell, flex: 1, textAlign: "right" }}
-                >
-                  <strong>{formatLakhs(rupeesToLakhs(totalDeposits))}</strong>
-                </div>
-                <div style={{ ...styles.totalsCell, flex: 0.5 }}>
-                  {adjustments.length > 0 && (
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#6b7280",
-                        backgroundColor: "#f3f4f6",
-                        padding: "2px 6px",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      {adjustments.length} adj
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* History Update Section - Compact */}
-            <div
-              style={{
-                backgroundColor: "#f8fafc",
-                borderRadius: "8px",
-                padding: "12px", // Reduced padding
-                marginBottom: "16px",
-                border: "1px solid #e2e8f0",
-              }}
-            >
+              {/* Totals Row - Perfect alignment with headers, NO adjustments text */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "8px",
-                  marginBottom: "8px",
+                  padding: "12px 12px",
+                  backgroundColor: "#f3f4f6",
+                  borderTop: "2px solid #e5e7eb",
+                  fontWeight: "600",
+                  fontSize: "14px",
+                  color: "#1f2937",
                 }}
               >
-                <span style={{ fontSize: "16px" }}>📅</span>
-                <span
+                <div
                   style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "#1e293b",
+                    flex: "1.5",
+                    paddingLeft: "8px",
+                    minWidth: "0",
                   }}
                 >
-                  Monthly History
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "13px",
-                  color: "#64748b",
-                  marginBottom: "12px",
-                }}
-              >
-                <div style={{ marginBottom: "4px" }}>
-                  <span style={{ fontWeight: "500" }}>Current Month:</span>{" "}
-                  {currentMonth}
+                  TOTAL
                 </div>
-                <div style={{ marginBottom: "4px" }}>
-                  <span style={{ fontWeight: "500" }}>Total Savings:</span>{" "}
+                <div
+                  style={{
+                    flex: "1",
+                    textAlign: "right",
+                    paddingRight: "12px",
+                    minWidth: "0",
+                  }}
+                >
                   {formatLakhs(rupeesToLakhs(totalSavings))}
                 </div>
-                <div style={{ marginBottom: "12px" }}>
-                  <span style={{ fontWeight: "500" }}>Total Deposits:</span>{" "}
+                <div
+                  style={{
+                    flex: "1",
+                    textAlign: "right",
+                    paddingRight: "12px",
+                    minWidth: "0",
+                  }}
+                >
                   {formatLakhs(rupeesToLakhs(totalDeposits))}
                 </div>
+                <div
+                  style={{
+                    flex: "0.5",
+                    textAlign: "center",
+                    minWidth: "60px",
+                  }}
+                >
+                  {/* REMOVED: No adjustments count text here */}
+                </div>
               </div>
+            </div>
+
+            {/* Simplified History Update Section - Only button and text */}
+            <div
+              style={{
+                backgroundColor: "#f8fafc",
+                borderRadius: "8px",
+                padding: "16px",
+                marginBottom: "16px",
+                border: "1px solid #e2e8f0",
+                textAlign: "center",
+              }}
+            >
               <button
                 onClick={handleHistoryUpdate}
                 style={{
                   width: "100%",
-                  padding: "10px",
+                  padding: "12px",
                   backgroundColor: "#3b82f6",
                   border: "none",
                   borderRadius: "6px",
@@ -826,6 +841,7 @@ const DepositSummaryPage: React.FC = () => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  marginBottom: "8px",
                 }}
                 disabled={isUpdatingHistory || !currentMonth}
               >
@@ -852,8 +868,6 @@ const DepositSummaryPage: React.FC = () => {
                 style={{
                   fontSize: "12px",
                   color: "#6b7280",
-                  textAlign: "center",
-                  marginTop: "8px",
                 }}
               >
                 {historyButtonText?.includes("Update") ? "Updates" : "Creates"}{" "}

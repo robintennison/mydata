@@ -14,6 +14,7 @@ import {
 import { firestore } from "../../../lib/firebase";
 import styles from "../styles/DepositSummaryPage.styles";
 import BankingNavigation from "./BankingNavigation";
+import { useSettings } from "../../../contexts/SettingsContext";
 
 interface AccountSummary {
   accountId: string;
@@ -27,11 +28,12 @@ interface AccountSummary {
 const DepositSummaryPage: React.FC = () => {
   const navigate = useNavigate();
   const { loading, accounts, deposits, adjustments } = useBankingData();
+  const { settings } = useSettings(); // Get settings for edit permissions
+
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [editedSavings, setEditedSavings] = useState("");
   const [editedDeposits, setEditedDeposits] = useState("");
   const [summaries, setSummaries] = useState<AccountSummary[]>([]);
-  const [showInactive, setShowInactive] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isUpdatingHistory, setIsUpdatingHistory] = useState(false);
@@ -42,18 +44,18 @@ const DepositSummaryPage: React.FC = () => {
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
   const lakhsToRupees = (lakhs: number): number => lakhs * 100000;
 
-  // Format lakhs for display
+  // Format lakhs for display (removed "L" suffix as requested)
   const formatLakhs = (lakhs: number): string => {
-    return `${lakhs.toFixed(2)} L`;
+    return lakhs.toFixed(2);
   };
 
   // Get current month in "YYYY-MM" format
   useEffect(() => {
     const now = new Date();
-    const month = now.getMonth() + 1; // Months are 0-indexed
+    const month = now.getMonth() + 1;
     const year = now.getFullYear();
     const monthStr = month < 10 ? `0${month}` : `${month}`;
-    setCurrentMonth(`${year}-${monthStr}`); // e.g., "2026-01"
+    setCurrentMonth(`${year}-${monthStr}`);
   }, []);
 
   // Check if current month exists in history
@@ -71,7 +73,6 @@ const DepositSummaryPage: React.FC = () => {
       }
     } catch (error) {
       console.error("Error checking history:", error);
-      // Default to Insert if there's an error
       setHistoryButtonText("Insert History for Current Month");
     }
   };
@@ -82,16 +83,17 @@ const DepositSummaryPage: React.FC = () => {
     }
   }, [currentMonth]);
 
-  // Prepare summary data
+  // Prepare summary data - ONLY ACTIVE ITEMS (removed showInactive)
   const prepareSummaries = () => {
     if (!accounts.length || !deposits.length) return [];
 
-    const filteredDeposits = showInactive
-      ? deposits
-      : deposits.filter((deposit) => deposit.active !== false);
+    // Filter out inactive deposits - ALWAYS hide inactive
+    const filteredDeposits = deposits.filter(
+      (deposit) => deposit.active !== false
+    );
 
     const newSummaries = accounts.map((account) => {
-      // Calculate base deposits for this account
+      // Calculate base deposits for this account (only active)
       const baseDeposits = filteredDeposits
         .filter((deposit) => deposit.accountId === account.id)
         .reduce((sum, deposit) => sum + deposit.amount, 0);
@@ -101,7 +103,7 @@ const DepositSummaryPage: React.FC = () => {
         .filter((adj) => adj.accountId === account.id)
         .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
 
-      // Total deposits = base deposits + adjustments (SAME AS KOTLIN)
+      // Total deposits = base deposits + adjustments
       const totalDeposits = baseDeposits + adjustmentsTotal;
 
       // Convert to lakhs for display
@@ -128,7 +130,7 @@ const DepositSummaryPage: React.FC = () => {
   useEffect(() => {
     const newSummaries = prepareSummaries();
     setSummaries(newSummaries);
-  }, [accounts, deposits, adjustments, showInactive]);
+  }, [accounts, deposits, adjustments]);
 
   // Start editing a row
   const startEditing = (
@@ -152,19 +154,17 @@ const DepositSummaryPage: React.FC = () => {
     setSaveError(null);
   };
 
-  // FIREBASE: Update account savings in 'accounts' collection
+  // Update account savings in 'accounts' collection
   const updateAccountSavings = async (
     accountId: string,
     savingsRupees: number
   ) => {
     try {
-      console.log("Updating account savings:", accountId, savingsRupees);
       const accountRef = doc(firestore, "accounts", accountId);
       await updateDoc(accountRef, {
         savingsAmount: savingsRupees,
         updatedAt: serverTimestamp(),
       });
-      console.log("Account savings updated successfully");
       return true;
     } catch (error: any) {
       console.error("Firestore update error:", error);
@@ -174,20 +174,18 @@ const DepositSummaryPage: React.FC = () => {
     }
   };
 
-  // FIREBASE: Add adjustment to 'deposit_adjustments' collection
+  // Add adjustment to 'deposit_adjustments' collection
   const addDepositAdjustment = async (adjustment: {
     accountId: string;
     adjustmentAmount: number;
     note: string;
   }) => {
     try {
-      console.log("Adding deposit adjustment:", adjustment);
       const adjustmentsRef = collection(firestore, "deposit_adjustments");
       await addDoc(adjustmentsRef, {
         ...adjustment,
         createdAt: serverTimestamp(),
       });
-      console.log("Deposit adjustment added successfully");
       return true;
     } catch (error: any) {
       console.error("Firestore add adjustment error:", error);
@@ -217,20 +215,12 @@ const DepositSummaryPage: React.FC = () => {
         return;
       }
 
-      console.log("Saving edits for account:", accountId, {
-        savingsLakhs,
-        depositsLakhs,
-      });
-
-      // 1. Update savings in accounts collection (SAME AS KOTLIN)
+      // Update savings in accounts collection
       const savingsRupees = lakhsToRupees(savingsLakhs);
       await updateAccountSavings(accountId, savingsRupees);
 
-      // 2. Calculate current deposits for this account (SAME LOGIC AS KOTLIN)
-      const filteredDepositsList = showInactive
-        ? deposits
-        : deposits.filter((d) => d.active !== false);
-
+      // Calculate current deposits for this account (only active)
+      const filteredDepositsList = deposits.filter((d) => d.active !== false);
       const currentBaseDeposits = filteredDepositsList
         .filter((d) => d.accountId === accountId)
         .reduce((sum, d) => sum + d.amount, 0);
@@ -244,15 +234,7 @@ const DepositSummaryPage: React.FC = () => {
       const targetRupees = lakhsToRupees(depositsLakhs);
       const adjustmentNeeded = targetRupees - currentTotalWithAdjustments;
 
-      console.log("Deposit calculation:", {
-        currentBaseDeposits,
-        currentAdjustments,
-        currentTotalWithAdjustments,
-        targetRupees,
-        adjustmentNeeded,
-      });
-
-      // 3. Create adjustment if needed (EXACTLY LIKE KOTLIN)
+      // Create adjustment if needed
       if (Math.abs(adjustmentNeeded) > 0.01) {
         await addDepositAdjustment({
           accountId,
@@ -261,13 +243,9 @@ const DepositSummaryPage: React.FC = () => {
         });
       }
 
-      // 4. Refresh data
+      // Refresh data
       refreshData();
-
-      // 5. Cancel editing mode
       cancelEditing();
-
-      // Show success message
       alert("✓ Changes saved successfully! Totals updated.");
     } catch (error: any) {
       console.error("Error saving edits:", error);
@@ -292,19 +270,14 @@ const DepositSummaryPage: React.FC = () => {
       // Use the totals calculated from summaries
       const historyData = {
         month: currentMonth,
-        savings: totalSavings, // From your totals calculation
-        totalDeposits: totalDeposits, // From your totals calculation
+        savings: totalSavings,
+        totalDeposits: totalDeposits,
       };
 
-      console.log("Saving history for month:", currentMonth, historyData);
-
       const historyRef = doc(firestore, "history", currentMonth);
-
-      // Check if document exists
       const historyDoc = await getDoc(historyRef);
 
       if (historyDoc.exists()) {
-        // Update existing
         await updateDoc(historyRef, historyData);
         alert(
           `✓ History updated for ${currentMonth}!\nSavings: ${formatLakhs(
@@ -312,7 +285,6 @@ const DepositSummaryPage: React.FC = () => {
           )}\nDeposits: ${formatLakhs(rupeesToLakhs(totalDeposits))}`
         );
       } else {
-        // Insert new
         await setDoc(historyRef, historyData);
         alert(
           `✓ History created for ${currentMonth}!\nSavings: ${formatLakhs(
@@ -321,7 +293,6 @@ const DepositSummaryPage: React.FC = () => {
         );
       }
 
-      // Update button text
       await checkCurrentMonthHistory();
     } catch (error: any) {
       console.error("Error updating history:", error);
@@ -354,36 +325,99 @@ const DepositSummaryPage: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
-      <div style={bankingStyles.header}>
-        <div style={bankingStyles.headerTopRow}>
-          <div style={bankingStyles.headerLeft}>
-            <button
-              onClick={() => navigate(-1)}
-              style={styles.backButton}
-              title="Go Back"
-            >
-              ←
-            </button>
-            <h1 style={bankingStyles.headerTitle}>Deposit Summary</h1>
-          </div>
+      {/* Header - Single row with back arrow, title, and settings icon */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "12px 16px",
+          backgroundColor: "#ffffff", // Changed from blue to white
+          borderBottom: "1px solid #e2e8f0",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+          }}
+        >
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              width: "40px",
+              height: "40px",
+              borderRadius: "8px",
+              border: "1px solid #e2e8f0",
+              backgroundColor: "#ffffff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "20px", // Bigger arrow
+              color: "#1e293b", // Darker arrow
+              cursor: "pointer",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#f1f5f9")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "#ffffff")
+            }
+            title="Go Back"
+          >
+            ←
+          </button>
+          <h1
+            style={{
+              fontSize: "18px",
+              fontWeight: "600",
+              color: "#1e293b",
+              margin: 0,
+            }}
+          >
+            Deposit Summary
+          </h1>
         </div>
+
+        <button
+          onClick={() => navigate("/settings")}
+          style={{
+            width: "40px",
+            height: "40px",
+            borderRadius: "8px",
+            border: "1px solid #e2e8f0",
+            backgroundColor: "#ffffff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "18px",
+            color: "#1e293b",
+            cursor: "pointer",
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "#f1f5f9")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "#ffffff")
+          }
+          title="Settings"
+        >
+          ⚙️
+        </button>
       </div>
 
-      <div style={styles.content}>
-        {/* Show/Hide Inactive Toggle */}
-        <div style={styles.toggleContainer}>
-          <label style={styles.toggleLabel}>
-            <input
-              type="checkbox"
-              checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
-              style={styles.toggleInput}
-            />
-            <span style={styles.toggleText}>Show Inactive Deposits</span>
-          </label>
-        </div>
-
+      <div
+        style={{
+          ...styles.content,
+          padding: "12px", // Reduced padding
+        }}
+      >
         {/* Error Message */}
         {saveError && (
           <div style={styles.errorContainer}>
@@ -414,80 +448,168 @@ const DepositSummaryPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Summary Table */}
-            <div style={styles.tableContainer}>
-              {/* Table Header */}
-              <div style={styles.tableHeader}>
-                <div style={{ ...styles.headerCell, flex: 1.5 }}>Account</div>
-                <div style={{ ...styles.headerCell, flex: 1 }}>Savings</div>
-                <div style={{ ...styles.headerCell, flex: 1 }}>Deposits</div>
-                <div style={{ ...styles.headerCell, flex: 0.8 }}>Actions</div>
+            {/* Summary Table - Compact layout */}
+            <div
+              style={{
+                ...styles.tableContainer,
+                marginBottom: "16px",
+              }}
+            >
+              {/* Table Header - Compact */}
+              <div
+                style={{
+                  ...styles.tableHeader,
+                  padding: "8px 10px", // Reduced padding
+                }}
+              >
+                <div
+                  style={{ ...styles.headerCell, flex: 1.5, fontSize: "13px" }}
+                >
+                  Account
+                </div>
+                <div
+                  style={{
+                    ...styles.headerCell,
+                    flex: 1,
+                    fontSize: "13px",
+                    textAlign: "right",
+                  }}
+                >
+                  Savings
+                </div>
+                <div
+                  style={{
+                    ...styles.headerCell,
+                    flex: 1,
+                    fontSize: "13px",
+                    textAlign: "right",
+                  }}
+                >
+                  Deposits
+                </div>
+                <div
+                  style={{
+                    ...styles.headerCell,
+                    flex: 0.5,
+                    fontSize: "13px",
+                    textAlign: "center",
+                  }}
+                ></div>
               </div>
 
-              {/* Table Rows */}
+              {/* Table Rows - Compact */}
               <div style={styles.tableBody}>
                 {summaries.map((summary, index) => {
                   const isEditing = editingAccountId === summary.accountId;
+                  const showEditAction = settings?.showDelete; // Only show edit if setting is true
 
                   return (
                     <div
                       key={summary.accountId}
                       style={{
                         ...styles.tableRow,
+                        padding: "8px 10px", // Reduced padding
                         backgroundColor:
                           index % 2 === 0 ? "#fafafa" : "#ffffff",
+                        minHeight: "44px", // Reduced height
                       }}
                     >
                       {/* Account Code */}
                       <div style={{ ...styles.cell, flex: 1.5 }}>
-                        <div style={styles.accountCode}>
+                        <div
+                          style={{
+                            fontSize: "14px", // Smaller font
+                            fontWeight: "500",
+                            color: "#1e293b",
+                          }}
+                        >
                           {summary.accountCode}
                         </div>
                       </div>
 
                       {/* Savings Amount */}
-                      <div style={{ ...styles.cell, flex: 1 }}>
+                      <div
+                        style={{ ...styles.cell, flex: 1, textAlign: "right" }}
+                      >
                         {isEditing ? (
-                          <div style={styles.editInputContainer}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                            }}
+                          >
                             <input
                               type="number"
                               value={editedSavings}
                               onChange={(e) => setEditedSavings(e.target.value)}
-                              style={styles.editInput}
+                              style={{
+                                width: "80px", // Reduced width
+                                padding: "6px 8px",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "4px",
+                                fontSize: "13px", // Smaller font
+                                textAlign: "right",
+                              }}
                               step="0.01"
                               min="0"
                               placeholder="0.00"
                               disabled={isSaving}
                             />
-                            <span style={styles.lakhSuffix}>L</span>
                           </div>
                         ) : (
-                          <div style={styles.amountDisplay}>
+                          <div
+                            style={{
+                              fontSize: "14px", // Smaller font
+                              fontWeight: "600",
+                              color: "#333",
+                            }}
+                          >
                             {summary.savingsInLakhs}
                           </div>
                         )}
                       </div>
 
                       {/* Deposits Amount */}
-                      <div style={{ ...styles.cell, flex: 1 }}>
+                      <div
+                        style={{ ...styles.cell, flex: 1, textAlign: "right" }}
+                      >
                         {isEditing ? (
-                          <div style={styles.editInputContainer}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                            }}
+                          >
                             <input
                               type="number"
                               value={editedDeposits}
                               onChange={(e) =>
                                 setEditedDeposits(e.target.value)
                               }
-                              style={styles.editInput}
+                              style={{
+                                width: "80px", // Reduced width
+                                padding: "6px 8px",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "4px",
+                                fontSize: "13px", // Smaller font
+                                textAlign: "right",
+                              }}
                               step="0.01"
                               min="0"
                               placeholder="0.00"
                               disabled={isSaving}
                             />
-                            <span style={styles.lakhSuffix}>L</span>
                           </div>
                         ) : (
-                          <div style={styles.amountDisplay}>
+                          <div
+                            style={{
+                              fontSize: "14px", // Smaller font
+                              fontWeight: "600",
+                              color: "#333",
+                            }}
+                          >
                             {summary.depositsInLakhs}
                           </div>
                         )}
@@ -497,34 +619,69 @@ const DepositSummaryPage: React.FC = () => {
                       <div
                         style={{
                           ...styles.cell,
-                          flex: 0.8,
+                          flex: 0.5,
                           justifyContent: "center",
+                          padding: "0 4px", // Reduced padding
                         }}
                       >
                         {isEditing ? (
-                          <div style={styles.actionButtons}>
+                          <div style={{ display: "flex", gap: "6px" }}>
                             <button
                               onClick={() => saveEdits(summary.accountId)}
-                              style={styles.saveButton}
+                              style={{
+                                width: "30px",
+                                height: "30px",
+                                backgroundColor: "#10b981",
+                                border: "none",
+                                borderRadius: "4px",
+                                color: "white",
+                                fontSize: "14px",
+                                cursor: isSaving ? "not-allowed" : "pointer",
+                                opacity: isSaving ? 0.6 : 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
                               title="Save"
                               disabled={isSaving}
                             >
                               {isSaving ? (
-                                <div style={styles.spinnerSmall}></div>
+                                <div
+                                  style={{
+                                    width: "14px",
+                                    height: "14px",
+                                    border: "2px solid #ffffff",
+                                    borderTop: "2px solid transparent",
+                                    borderRadius: "50%",
+                                    animation: "spin 1s linear infinite",
+                                  }}
+                                ></div>
                               ) : (
                                 "✓"
                               )}
                             </button>
                             <button
                               onClick={cancelEditing}
-                              style={styles.cancelButton}
+                              style={{
+                                width: "30px",
+                                height: "30px",
+                                backgroundColor: "#ef4444",
+                                border: "none",
+                                borderRadius: "4px",
+                                color: "white",
+                                fontSize: "14px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
                               title="Cancel"
                               disabled={isSaving}
                             >
                               ✕
                             </button>
                           </div>
-                        ) : (
+                        ) : showEditAction ? ( // Only show edit button if setting is true
                           <button
                             onClick={() =>
                               startEditing(
@@ -533,99 +690,174 @@ const DepositSummaryPage: React.FC = () => {
                                 summary.deposits
                               )
                             }
-                            style={styles.editButton}
+                            style={{
+                              width: "30px",
+                              height: "30px",
+                              backgroundColor: "transparent",
+                              border: "none",
+                              fontSize: "16px",
+                              cursor:
+                                editingAccountId !== null
+                                  ? "not-allowed"
+                                  : "pointer",
+                              color: "#6b7280",
+                              opacity: editingAccountId !== null ? 0.5 : 1,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
                             title="Edit"
                             disabled={editingAccountId !== null}
                           >
                             ✏️
                           </button>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Totals Row */}
-              <div style={styles.totalsRow}>
+              {/* Totals Row - Compact */}
+              <div
+                style={{
+                  ...styles.totalsRow,
+                  padding: "10px", // Reduced padding
+                  borderTop: "2px solid #e5e7eb",
+                  fontSize: "14px", // Smaller font
+                }}
+              >
                 <div style={{ ...styles.totalsCell, flex: 1.5 }}>
                   <strong>TOTAL</strong>
                 </div>
-                <div style={{ ...styles.totalsCell, flex: 1 }}>
+                <div
+                  style={{ ...styles.totalsCell, flex: 1, textAlign: "right" }}
+                >
                   <strong>{formatLakhs(rupeesToLakhs(totalSavings))}</strong>
                 </div>
-                <div style={{ ...styles.totalsCell, flex: 1 }}>
+                <div
+                  style={{ ...styles.totalsCell, flex: 1, textAlign: "right" }}
+                >
                   <strong>{formatLakhs(rupeesToLakhs(totalDeposits))}</strong>
                 </div>
-                <div style={{ ...styles.totalsCell, flex: 0.8 }}>
-                  <span style={styles.totalChangeIndicator}>
-                    {adjustments.length > 0 ? `${adjustments.length} adj` : ""}
-                  </span>
+                <div style={{ ...styles.totalsCell, flex: 0.5 }}>
+                  {adjustments.length > 0 && (
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#6b7280",
+                        backgroundColor: "#f3f4f6",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      {adjustments.length} adj
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* History Update Button - Separate section below table */}
-            <div style={styles.historySection}>
-              <div style={styles.historyHeader}>
-                <span style={styles.historyIcon}>📅</span>
-                <span style={styles.historyTitle}>Monthly History</span>
+            {/* History Update Section - Compact */}
+            <div
+              style={{
+                backgroundColor: "#f8fafc",
+                borderRadius: "8px",
+                padding: "12px", // Reduced padding
+                marginBottom: "16px",
+                border: "1px solid #e2e8f0",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "8px",
+                }}
+              >
+                <span style={{ fontSize: "16px" }}>📅</span>
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "#1e293b",
+                  }}
+                >
+                  Monthly History
+                </span>
               </div>
-              <div style={styles.historyInfo}>
-                <div style={styles.historyRow}>
-                  <span style={styles.historyLabel}>Current Month:</span>
-                  <span style={styles.historyValue}>{currentMonth}</span>
+              <div
+                style={{
+                  fontSize: "13px",
+                  color: "#64748b",
+                  marginBottom: "12px",
+                }}
+              >
+                <div style={{ marginBottom: "4px" }}>
+                  <span style={{ fontWeight: "500" }}>Current Month:</span>{" "}
+                  {currentMonth}
                 </div>
-                <div style={styles.historyRow}>
-                  <span style={styles.historyLabel}>Total Savings:</span>
-                  <span style={styles.historyValue}>
-                    {formatLakhs(rupeesToLakhs(totalSavings))}
-                  </span>
+                <div style={{ marginBottom: "4px" }}>
+                  <span style={{ fontWeight: "500" }}>Total Savings:</span>{" "}
+                  {formatLakhs(rupeesToLakhs(totalSavings))}
                 </div>
-                <div style={styles.historyRow}>
-                  <span style={styles.historyLabel}>Total Deposits:</span>
-                  <span style={styles.historyValue}>
-                    {formatLakhs(rupeesToLakhs(totalDeposits))}
-                  </span>
+                <div style={{ marginBottom: "12px" }}>
+                  <span style={{ fontWeight: "500" }}>Total Deposits:</span>{" "}
+                  {formatLakhs(rupeesToLakhs(totalDeposits))}
                 </div>
               </div>
               <button
                 onClick={handleHistoryUpdate}
-                style={styles.historyButton}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  backgroundColor: "#3b82f6",
+                  border: "none",
+                  borderRadius: "6px",
+                  color: "white",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  cursor:
+                    isUpdatingHistory || !currentMonth
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity: isUpdatingHistory || !currentMonth ? 0.6 : 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
                 disabled={isUpdatingHistory || !currentMonth}
               >
                 {isUpdatingHistory ? (
                   <>
-                    <div style={styles.spinnerSmall}></div>
-                    <span style={{ marginLeft: "8px" }}>Processing...</span>
+                    <div
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        border: "2px solid #ffffff",
+                        borderTop: "2px solid transparent",
+                        borderRadius: "50%",
+                        animation: "spin 1s linear infinite",
+                        marginRight: "8px",
+                      }}
+                    ></div>
+                    Processing...
                   </>
                 ) : (
                   historyButtonText || "Loading..."
                 )}
               </button>
-              <div style={styles.historyNote}>
-                This will{" "}
-                {historyButtonText?.includes("Update") ? "update" : "create"} a
-                record in the history table for {currentMonth}
-              </div>
-            </div>
-
-            {/* Instructions */}
-            <div style={styles.instructions}>
-              <div style={styles.instructionItem}>
-                <span style={styles.instructionIcon}>✏️</span>
-                <span>Click edit icon to modify values</span>
-              </div>
-              <div style={styles.instructionItem}>
-                <span style={styles.instructionIcon}>📊</span>
-                <span>Total = Base Deposits + Adjustments</span>
-              </div>
-              <div style={styles.instructionItem}>
-                <span style={styles.instructionIcon}>💾</span>
-                <span>
-                  Savings update "accounts", deposits create
-                  "deposit_adjustments"
-                </span>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  textAlign: "center",
+                  marginTop: "8px",
+                }}
+              >
+                {historyButtonText?.includes("Update") ? "Updates" : "Creates"}{" "}
+                record in history table for {currentMonth}
               </div>
             </div>
           </>
@@ -633,7 +865,14 @@ const DepositSummaryPage: React.FC = () => {
       </div>
       <BankingNavigation />
       {/* Bottom spacing */}
-      <div style={{ height: "20px" }}></div>
+      <div style={{ height: "10px" }}></div>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

@@ -16,7 +16,9 @@ import MyDataHomepage from "../MyDataHomepage";
 // Import History pages
 import HistoryListPage from "../modules/Banking/pages/HistoryListPage"; // Add this import
 import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage"; // Add this import
-//import HistoryChartPage from "../modules/Banking/HistoryChartPage";
+
+// Import Footer component
+import Footer from "../components/Footer";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -28,6 +30,7 @@ export interface RouteConfig {
   needsUserData?: boolean;
   children?: RouteConfig[];
   isIndex?: boolean;
+  hideFooter?: boolean; // Add this field to optionally hide footer
 }
 
 export interface ModuleRoute {
@@ -60,6 +63,7 @@ const allRoutes: RouteConfig[] = [
     element: <LoginForm />,
     title: "Login",
     requiresAuth: false,
+    hideFooter: true, // Hide footer on login page
   },
   {
     path: "/settings",
@@ -136,7 +140,7 @@ const allRoutes: RouteConfig[] = [
     needsUserData: true,
   },
 
-  // History Routes - ADD THESE
+  // History Routes
   {
     path: "/banking/history",
     element: <HistoryListPage />,
@@ -162,15 +166,6 @@ const allRoutes: RouteConfig[] = [
     needsUserData: true,
   },
 
-  //   {
-  //     path: "/banking/history/chart",
-  //     element: <HistoryChartPage />,
-  //     title: "History Chart",
-  //     icon: "📊",
-  //     requiresAuth: true,
-  //     needsUserData: true,
-  //   },
-
   {
     path: "/banking/summary",
     element: <DepositSummaryPage />,
@@ -181,9 +176,36 @@ const allRoutes: RouteConfig[] = [
   },
 ];
 
+// Helper function to get current route
+const getCurrentRoute = (pathname: string): RouteConfig | undefined => {
+  return allRoutes.find((route) => {
+    // Exact match
+    if (route.path === pathname) return true;
+
+    // Check for parameterized routes (like /edit/:id)
+    if (route.path.includes(":")) {
+      const routeParts = route.path.split("/");
+      const pathParts = pathname.split("/");
+
+      if (routeParts.length === pathParts.length) {
+        return routeParts.every((part, index) => {
+          return part.startsWith(":") || part === pathParts[index];
+        });
+      }
+    }
+    return false;
+  });
+};
+
 // ==================== NAVIGATION ITEMS ====================
 const navigationItems = allRoutes
-  .filter((route: RouteConfig) => route.title && route.icon)
+  .filter(
+    (route: RouteConfig) =>
+      route.title &&
+      route.icon &&
+      !route.path.includes(":") &&
+      route.path !== "/login"
+  )
   .map((route: RouteConfig) => ({
     path: route.path,
     title: route.title!,
@@ -225,33 +247,58 @@ interface AppRoutesProps {
 }
 
 const AppRoutes: React.FC<AppRoutesProps> = ({ isAuthenticated }) => {
+  const [currentPath, setCurrentPath] = React.useState(
+    window.location.pathname
+  );
+
+  // Update current path on location change
+  React.useEffect(() => {
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handleLocationChange);
+
+    return () => {
+      window.removeEventListener("popstate", handleLocationChange);
+    };
+  }, []);
+
+  const currentRoute = getCurrentRoute(currentPath);
+  const shouldShowFooter = !currentRoute?.hideFooter && isAuthenticated;
+
   return (
-    <Routes>
-      {allRoutes.map((route) => {
-        const routeElement = route.requiresAuth ? (
-          <PrivateRoute isAuthenticated={isAuthenticated} redirectTo="/login">
-            {route.element}
-          </PrivateRoute>
-        ) : (
-          route.element
-        );
+    <>
+      <Routes>
+        {allRoutes.map((route) => {
+          const routeElement = route.requiresAuth ? (
+            <PrivateRoute isAuthenticated={isAuthenticated} redirectTo="/login">
+              {route.element}
+            </PrivateRoute>
+          ) : (
+            route.element
+          );
 
-        return (
-          <Route key={route.path} path={route.path} element={routeElement} />
-        );
-      })}
+          return (
+            <Route key={route.path} path={route.path} element={routeElement} />
+          );
+        })}
 
-      {/* 404 Route - Catch all unmatched routes */}
-      <Route
-        path="*"
-        element={
-          <div style={{ padding: "40px", textAlign: "center" }}>
-            <h1>404 - Page Not Found</h1>
-            <p>The page you're looking for doesn't exist.</p>
-          </div>
-        }
-      />
-    </Routes>
+        {/* 404 Route - Catch all unmatched routes */}
+        <Route
+          path="*"
+          element={
+            <div style={{ padding: "40px", textAlign: "center" }}>
+              <h1>404 - Page Not Found</h1>
+              <p>The page you're looking for doesn't exist.</p>
+            </div>
+          }
+        />
+      </Routes>
+
+      {/* Conditionally render Footer */}
+      {shouldShowFooter && <Footer />}
+    </>
   );
 };
 

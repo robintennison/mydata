@@ -1,12 +1,15 @@
+// src/modules/BankingHomePage.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
+import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
   const { loading, accounts, deposits, history, adjustments, settings } =
     useBankingData();
+  const { settings: appSettings } = useSettings();
 
   // Format currency for display
   const formatCurrency = (amount: number): string => {
@@ -103,17 +106,61 @@ const BankingHomePage: React.FC = () => {
   // Calculate total bank balance (savings + deposits)
   const totalBankBalance = totalSavings + totalDeposits;
 
-  // Hardcoded target date: November 2044
-  const targetDate = new Date(2044, 10, 1); // November 2044 (month is 0-indexed)
+  // Get EMW settings from app settings
+  const getEmwSettings = () => {
+    // Default values
+    let interestRate = 5; // 5% default
+    let targetDateStr = "2044-10"; // November 2044 default
 
-  // Calculate EMW
-  const emwAmount = calculateEMW(totalBankBalance, targetDate, 5);
+    if (appSettings) {
+      // Use EMW_Interest from settings or default
+      interestRate =
+        appSettings.EMW_interest !== undefined ? appSettings.EMW_interest : 5;
+
+      // Use EMW_Date from settings or default
+      targetDateStr = appSettings.EMW_Date || "2044-10";
+    }
+
+    // Parse target date string (format: YYYY-MM)
+    let targetDate: Date;
+    try {
+      const [year, month] = targetDateStr.split("-").map(Number);
+      targetDate = new Date(year, month - 1, 1); // month is 0-indexed
+    } catch (error) {
+      // Fallback to default date if parsing fails
+      console.error("Error parsing EMW date:", error);
+      targetDate = new Date(2044, 10, 1); // November 2044
+      targetDateStr = "2044-10";
+    }
+
+    return {
+      interestRate,
+      targetDate,
+      targetDateStr,
+    };
+  };
+
+  // Get EMW settings
+  const emwSettings = getEmwSettings();
+
+  // Calculate EMW using settings values
+  const emwAmount = calculateEMW(
+    totalBankBalance,
+    emwSettings.targetDate,
+    emwSettings.interestRate
+  );
 
   // Format target date for display
-  const formattedTargetDate = targetDate.toLocaleDateString("en-IN", {
-    year: "numeric",
-    month: "long",
-  });
+  const formattedTargetDate = emwSettings.targetDate.toLocaleDateString(
+    "en-IN",
+    {
+      year: "numeric",
+      month: "long",
+    }
+  );
+
+  // Format interest rate for display
+  const formattedInterestRate = `${emwSettings.interestRate}%`;
 
   // Calculate actual withdrawal rate from last 6 months history
   const calculateActualWithdrawalRate = () => {
@@ -348,7 +395,9 @@ const BankingHomePage: React.FC = () => {
                     <span style={bankingHomeStyles.emwBadge}>EMW</span>
                     Monthly Withdrawal
                   </div>
-                  <div style={bankingHomeStyles.interestBadge}>5% interest</div>
+                  <div style={bankingHomeStyles.interestBadge}>
+                    {formattedInterestRate} interest
+                  </div>
                 </div>
 
                 {/* EMW Calculation */}

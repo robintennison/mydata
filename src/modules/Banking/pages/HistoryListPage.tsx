@@ -14,7 +14,7 @@ import {
   Filler,
 } from "chart.js";
 import HistoryChart from "./HistoryChart.tsx";
-import styles from "./HistoryListPage.styles.ts";
+import styles from "../styles/HistoryListPage.styles.ts";
 
 // Register Chart.js components
 ChartJS.register(

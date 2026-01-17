@@ -14,7 +14,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import styles from "./HistoryListPage.styles";
+import styles from "../styles/HistoryListPage.styles";
 
 // Register Chart.js components
 ChartJS.register(

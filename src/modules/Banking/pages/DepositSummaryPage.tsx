@@ -12,7 +12,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
-import styles from "./DepositSummaryPage.styles";
+import styles from "../styles/DepositSummaryPage.styles";
 
 interface AccountSummary {
   accountId: string;

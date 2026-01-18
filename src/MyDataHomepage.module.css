@@ -251,41 +251,6 @@
   line-height: 1.4;
 }
 
-.moduleGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-
-.moduleCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 8px;
-  background-color: #f8f9fa;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid transparent;
-}
-
-.moduleCard:hover {
-  background-color: #eef2f7;
-  transform: translateY(-2px);
-  border-color: #e9ecef;
-}
-
-.moduleIcon {
-  font-size: 1.5rem;
-  margin-bottom: 6px;
-}
-
-.moduleLabel {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #555;
-}
 
 .loading {
   display: flex;

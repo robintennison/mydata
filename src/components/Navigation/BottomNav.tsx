@@ -12,7 +12,8 @@ const navItems: NavItem[] = [
   { path: '/', label: 'Home', icon: '🏠' },
   { path: '/banking', label: 'Banking', icon: '🏦' },
   { path: '/jewellery', label: 'Jewellery', icon: '💎' },
-  { path: '/properties', label: 'Properties', icon: '🏠' },
+  { path: '/properties', label: 'Properties', icon: '🏢' },
+  { path: '/online', label: 'Online', icon: '🌐' },
 ];
 
 const BottomNav: React.FC = () => {

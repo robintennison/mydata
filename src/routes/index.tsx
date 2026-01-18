@@ -197,27 +197,6 @@ const allRoutes: RouteConfig[] = [
   },
 ];
 
-// Helper function to get current route
-const getCurrentRoute = (pathname: string): RouteConfig | undefined => {
-  return allRoutes.find((route) => {
-    // Exact match
-    if (route.path === pathname) return true;
-
-    // Check for parameterized routes (like /edit/:id)
-    if (route.path.includes(":")) {
-      const routeParts = route.path.split("/");
-      const pathParts = pathname.split("/");
-
-      if (routeParts.length === pathParts.length) {
-        return routeParts.every((part, index) => {
-          return part.startsWith(":") || part === pathParts[index];
-        });
-      }
-    }
-    return false;
-  });
-};
-
 // ==================== NAVIGATION ITEMS ====================
 const navigationItems = allRoutes
   .filter(
@@ -268,31 +247,8 @@ interface AppRoutesProps {
 }
 
 const AppRoutes: React.FC<AppRoutesProps> = ({ isAuthenticated }) => {
-  const [currentPath, setCurrentPath] = React.useState(
-    window.location.pathname
-  );
-
-  // Update current path on location change
-  React.useEffect(() => {
-    const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
-
-    window.addEventListener("popstate", handleLocationChange);
-
-    return () => {
-      window.removeEventListener("popstate", handleLocationChange);
-    };
-  }, []);
-
-  const currentRoute = getCurrentRoute(currentPath);
-
   return (
-    <Layout 
-      title={currentRoute?.title} 
-      hideHeader={currentRoute?.path === '/login'}
-      hideFooter={currentRoute?.hideFooter}
-    >
+    <Layout hideFooter={false}>
       <Routes>
         {allRoutes.map((route) => {
           const routeElement = route.requiresAuth ? (

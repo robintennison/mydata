@@ -6,6 +6,7 @@ import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
 import BankingNavigation from "./BankingNavigation";
 import DepositPieChart from "./DepositPieChart";
+import SavingsPieChart from "./SavingsPieChart";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -396,6 +397,9 @@ const BankingHomePage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Savings Distribution Chart */}
+        <SavingsPieChart accounts={accounts} />
 
         {/* Deposit Distribution Chart */}
         <DepositPieChart

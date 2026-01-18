@@ -14,50 +14,24 @@ import { bankingHomeStyles as styles } from "../styles/BankingHomePage.styles";
 // Register Chart.js components for Pie chart
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-interface DepositPieChartProps {
+interface SavingsPieChartProps {
   accounts: any[];
-  deposits: any[];
-  adjustments: any[];
-  showInactive?: boolean;
 }
 
-const DepositPieChart: React.FC<DepositPieChartProps> = ({
-  accounts,
-  deposits,
-  adjustments,
-  showInactive = false,
-}) => {
+const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
   // Prepare data for pie chart
   const chartData = useMemo(() => {
     if (!accounts.length) return null;
 
-    // Filter active deposits if needed
-    const filteredDeposits = showInactive
-      ? deposits
-      : deposits.filter((d) => d.active !== false);
-
-    const summaries = accounts.map((account) => {
-      // Calculate base deposits for this account
-      const baseDeposits = filteredDeposits
-        .filter((deposit) => deposit.accountId === account.id)
-        .reduce((sum, deposit) => sum + deposit.amount, 0);
-
-      // Calculate adjustments for this account
-      const adjustmentsTotal = adjustments
-        .filter((adj) => adj.accountId === account.id)
-        .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
-
-      // Total deposits = base deposits + adjustments
-      return {
-        label: account.acctCode || account.id,
-        value: (baseDeposits + adjustmentsTotal) / 100000, // in Lakhs
-      };
-    });
+    const summaries = accounts.map((account) => ({
+      label: account.acctCode || account.id,
+      value: account.savingsAmount / 100000, // in Lakhs
+    }));
 
     const activeSummaries = summaries.filter((s) => s.value > 0);
 
-    // Group items < 10 lakhs into "Others"
-    const threshold = 10;
+    // Group items < 10,000 (0.1 Lakhs) into "Others"
+    const threshold = 0.1;
     const majorSummaries = activeSummaries.filter((s) => s.value >= threshold);
     const minorSummaries = activeSummaries.filter((s) => s.value < threshold);
 
@@ -82,8 +56,8 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
         {
           data: finalSummaries.map((s) => s.value),
           backgroundColor: [
-            "rgba(66, 133, 244, 0.7)",  // blue
             "rgba(52, 168, 83, 0.7)",   // green
+            "rgba(66, 133, 244, 0.7)",  // blue
             "rgba(251, 188, 5, 0.7)",   // yellow
             "rgba(234, 67, 53, 0.7)",   // red
             "rgba(156, 39, 176, 0.7)",  // purple
@@ -93,8 +67,8 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
             "rgba(96, 125, 139, 0.7)",  // blue grey
           ],
           borderColor: [
-            "#4285f4",
             "#34a853",
+            "#4285f4",
             "#fbbc05",
             "#ea4335",
             "#9c27b0",
@@ -109,7 +83,7 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
     };
 
     return data;
-  }, [accounts, deposits, adjustments, showInactive]);
+  }, [accounts]);
 
   const chardOptions: ChartOptions<"pie"> = {
     responsive: true,
@@ -139,23 +113,21 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
         formatter: (value: number, context: any) => {
           const label = context.chart.data.labels?.[context.dataIndex] as string || "";
           
-          // Don't truncate "Others"
           if (label === "Others") {
             return `Others\n${value.toFixed(2)}`;
           }
           
-          // Truncate first 3 characters for other accounts
           const displayLabel = label.length > 3 ? label.substring(3) : label;
           return `${displayLabel}\n${value.toFixed(2)}`;
         },
         textAlign: "center",
         padding: 4,
-        clip: false, // Ensure labels are never clipped
+        clip: false,
         display: (context) => {
           const label = context.chart.data.labels?.[context.dataIndex] as string;
           if (label === "Others") return true; 
           const value = context.dataset.data[context.dataIndex] as number;
-          return value >= 0.1;
+          return value >= 0.01; // Show even small labels if they aren't 'Others'
         },
       },
     },
@@ -176,7 +148,7 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
       <div style={styles.card}>
         <div style={styles.cardTitle}>
           <span>📊</span>
-          <span>Deposit Distribution</span>
+          <span>Savings Distribution</span>
         </div>
         <div style={{ height: "360px", position: "relative" }}>
           <Pie data={chartData} options={chardOptions} />
@@ -186,4 +158,4 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
   );
 };
 
-export default DepositPieChart;
+export default SavingsPieChart;

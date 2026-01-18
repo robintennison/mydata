@@ -50,7 +50,7 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
     marginTop: "8px",
   },
   emptyChart: {
-    textAlign: "center" as const,
+    textAlign: "center",
     padding: "20px",
     color: "#6c757d",
   },
@@ -161,47 +161,109 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
     borderRadius: "8px",
     border: "1px solid #e9ecef",
   },
+  
+  // FIXED TABLE HEADER STYLES
   tableHeader: {
     display: "flex",
-    padding: "10px 12px",
-    backgroundColor: "#f8f9fa",
-    borderBottom: "1px solid #e9ecef",
-    fontSize: "0.8rem",
+    padding: "12px 12px",
+    backgroundColor: "#f9fafb",
+    borderBottom: "1px solid #e5e7eb",
     fontWeight: 600,
-    color: "#495057",
+    fontSize: "13px",
+    color: "#374151",
+    minHeight: "44px",
+    alignItems: "center",
   },
-  headerCell: {
-    padding: "0 4px",
+  
+  // SPECIFIC HEADER CELL STYLES FOR PERFECT ALIGNMENT
+  headerCellMonth: {
+    flex: "1.5",
+    minWidth: "0",
+    paddingLeft: "8px",
+    boxSizing: "border-box",
   },
+  
+  headerCellDeposits: {
+    flex: "1",
+    minWidth: "0",
+    textAlign: "right",
+    paddingRight: "12px",
+    boxSizing: "border-box",
+  },
+  
+  headerCellTotal: {
+    flex: "1",
+    minWidth: "0",
+    textAlign: "right",
+    paddingRight: "12px",
+    boxSizing: "border-box",
+  },
+  
+  headerCellActions: {
+    flex: "0.5",
+    minWidth: "60px",
+    textAlign: "center",
+    boxSizing: "border-box",
+  },
+
   tableBody: {
     maxHeight: "400px",
     overflowY: "auto",
   },
+  
+  // FIXED TABLE ROW STYLES
   tableRow: {
     display: "flex",
     alignItems: "center",
-    padding: "8px 12px",
-    minHeight: "44px",
-    borderBottom: "1px solid #f0f0f0",
+    padding: "12px 12px",
+    minHeight: "48px",
+    borderBottom: "1px solid #f3f4f6",
+    boxSizing: "border-box",
   },
-  editRow: {
+  
+  // SPECIFIC CELL STYLES FOR PERFECT ALIGNMENT
+  cellMonth: {
+    flex: "1.5",
+    minWidth: "0",
+    paddingLeft: "8px",
+    overflow: "hidden",
+    boxSizing: "border-box",
+  },
+  
+  cellDeposits: {
+    flex: "1",
+    minWidth: "0",
+    textAlign: "right",
+    paddingRight: "12px",
+    boxSizing: "border-box",
+  },
+  
+  cellTotal: {
+    flex: "1",
+    minWidth: "0",
+    textAlign: "right",
+    paddingRight: "12px",
+    boxSizing: "border-box",
+  },
+  
+  cellActions: {
+    flex: "0.5",
+    minWidth: "60px",
     display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    width: "100%",
+    justifyContent: "center",
+    boxSizing: "border-box",
   },
-  cell: {
-    padding: "0 4px",
-    display: "flex",
-    alignItems: "center",
-  },
+
   monthDisplay: {
     minWidth: "0",
   },
   monthName: {
-    fontSize: "0.9rem",
-    fontWeight: 600,
-    color: "#333",
+    fontSize: "14px",
+    fontWeight: 500,
+    color: "#1e293b",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
     lineHeight: 1.2,
   },
   monthId: {
@@ -210,7 +272,7 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
     marginTop: "1px",
   },
   amountDisplay: {
-    fontSize: "0.9rem",
+    fontSize: "14px",
     fontWeight: 600,
     color: "#333",
     lineHeight: 1.2,
@@ -221,76 +283,86 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
     marginTop: "1px",
     fontStyle: "italic",
   },
+  
+  // FIXED EDIT INPUT STYLES
   editInput: {
+    width: "90px",
     padding: "6px 8px",
-    border: "1px solid #ddd",
+    border: "1px solid #d1d5db",
     borderRadius: "4px",
-    fontSize: "0.85rem",
-    width: "100%",
-    boxSizing: "border-box" as const,
+    fontSize: "13px",
+    textAlign: "right",
+    boxSizing: "border-box",
   },
+  
+  editInputContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  
   actionButtons: {
     display: "flex",
     gap: "6px",
   },
+  
+  // FIXED BUTTON STYLES
   editButton: {
-    background: "none",
+    width: "32px",
+    height: "32px",
+    backgroundColor: "transparent",
     border: "none",
-    fontSize: "0.9rem",
+    fontSize: "16px",
     cursor: "pointer",
-    opacity: 0.7,
-    padding: "4px",
-    borderRadius: "4px",
-    minWidth: "28px",
-    minHeight: "28px",
+    color: "#6b7280",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
+  
   deleteButton: {
-    background: "none",
+    width: "32px",
+    height: "32px",
+    backgroundColor: "transparent",
     border: "none",
-    fontSize: "0.9rem",
+    fontSize: "16px",
     cursor: "pointer",
-    opacity: 0.7,
-    padding: "4px",
-    borderRadius: "4px",
-    minWidth: "28px",
-    minHeight: "28px",
+    color: "#6b7280",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
+  
   saveButton: {
-    background: "none",
+    width: "32px",
+    height: "32px",
+    backgroundColor: "#10b981",
     border: "none",
-    fontSize: "1rem",
-    color: "#34a853",
-    cursor: "pointer",
-    padding: "4px",
     borderRadius: "4px",
-    minWidth: "28px",
-    minHeight: "28px",
+    color: "white",
+    fontSize: "14px",
+    cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
+  
   cancelButton: {
-    background: "none",
+    width: "32px",
+    height: "32px",
+    backgroundColor: "#ef4444",
     border: "none",
-    fontSize: "1rem",
-    color: "#ea4335",
-    cursor: "pointer",
-    padding: "4px",
     borderRadius: "4px",
-    minWidth: "28px",
-    minHeight: "28px",
+    color: "white",
+    fontSize: "14px",
+    cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
+  
   emptyState: {
-    textAlign: "center" as const,
+    textAlign: "center",
     padding: "30px 20px",
     color: "#6c757d",
   },
@@ -308,7 +380,7 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
     fontSize: "0.8rem",
   },
   dialogOverlay: {
-    position: "fixed" as const,
+    position: "fixed",
     top: 0,
     left: 0,
     right: 0,

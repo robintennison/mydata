@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HistoryListPageStyles from "../styles/HistoryListPage.styles";
 import HistoryChart from "./HistoryChart";
@@ -21,21 +21,6 @@ const HistoryListPage: React.FC = () => {
     null,
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState("");
-
-  // Get current month in "YYYY-MM" format
-  useEffect(() => {
-    const now = new Date();
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
-    const monthStr = month < 10 ? `0${month}` : `${month}`;
-    setCurrentMonth(`${year}-${monthStr}`);
-  }, []);
-
-  // Find current month data
-  const currentMonthData = history.find(
-    (record) => record.month === currentMonth,
-  );
 
   // Convert rupees to lakhs for display
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
@@ -152,7 +137,7 @@ const HistoryListPage: React.FC = () => {
   // Show ALL history records
   const filteredHistory = history.sort((a, b) =>
     b.month.localeCompare(a.month),
-  ); // Sort by date descending
+  );
 
   // Count total records
   const totalRecords = history.length;
@@ -180,130 +165,52 @@ const HistoryListPage: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
-      <div
-        style={{
-          backgroundColor: "#4285f4",
-          color: "white",
-          padding: "20px 15px",
-          marginBottom: "15px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              flex: 1,
-            }}
+      {/* Header - REVERTED TO PREVIOUS STYLE */}
+      <div style={styles.sectionHeader}>
+        <div style={styles.sectionTitle}>
+          <button
+            onClick={() => navigate(-1)}
+            style={styles.backButton}
+            title="Go Back"
           >
-            <button
-              onClick={() => navigate(-1)}
-              style={styles.backButton}
-              title="Go Back"
-            >
-              ←
-            </button>
-            <div>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: "1.4rem",
-                  fontWeight: 600,
-                }}
-              >
-                History
-              </h1>
-              <p
-                style={{
-                  margin: "4px 0 0 0",
-                  fontSize: "0.85rem",
-                  opacity: 0.9,
-                }}
-              >
-                Track your savings and deposits over time
-              </p>
-            </div>
-          </div>
-          <div style={styles.headerActions}>
-            <button
-              onClick={() => navigate("/banking/deposit-summary")}
-              style={styles.iconButton}
-              title="Go to Deposit Summary"
-            >
-              📊
-            </button>
-            <button
-              onClick={() => navigate("/settings")}
-              style={styles.iconButton}
-              title="Settings"
-            >
-              ⚙️
-            </button>
-          </div>
+            ←
+          </button>
+          <span style={styles.sectionIcon}>📜</span>
+          History
+        </div>
+        <div style={styles.headerActions}>
+          <button
+            onClick={() => navigate("/banking/deposit-summary")}
+            style={styles.iconButton}
+            title="Go to Deposit Summary"
+          >
+            📊
+          </button>
+          <button
+            onClick={() => navigate("/settings")}
+            style={styles.iconButton}
+            title="Settings"
+          >
+            ⚙️
+          </button>
         </div>
       </div>
 
       <div style={{ padding: "0 15px 80px 15px" }}>
-        {/* Current Month Summary Card */}
-        {currentMonthData && (
-          <div style={styles.currentMonthCard}>
-            <div style={styles.currentMonthHeader}>
-              <div style={styles.currentMonthIcon}>📅</div>
-              <div>
-                <div style={styles.currentMonthTitle}>Current Month</div>
-                <div style={styles.currentMonthDate}>
-                  {formatMonthDisplay(currentMonth).name}{" "}
-                  {formatMonthDisplay(currentMonth).year}
-                </div>
-              </div>
-            </div>
-            <div style={styles.currentMonthValues}>
-              <div style={styles.currentMonthRow}>
-                <span>Savings</span>
-                <span style={styles.currentMonthAmount}>
-                  {formatLakhs(rupeesToLakhs(currentMonthData.savings))}
-                </span>
-              </div>
-              <div style={styles.currentMonthRow}>
-                <span>Deposits</span>
-                <span style={styles.currentMonthAmount}>
-                  {formatLakhs(rupeesToLakhs(currentMonthData.totalDeposits))}
-                </span>
-              </div>
-              <div
-                style={{
-                  ...styles.currentMonthRow,
-                  ...styles.currentMonthTotal,
-                }}
-              >
-                <span style={{ fontWeight: 600 }}>Total Assets</span>
-                <span style={styles.currentMonthTotalAmount}>
-                  {formatLakhs(
-                    rupeesToLakhs(
-                      currentMonthData.savings + currentMonthData.totalDeposits,
-                    ),
-                  )}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* History Chart */}
         <HistoryChart history={history} />
 
         {/* History Records Table */}
         <div style={styles.section}>
-          <div style={styles.sectionHeader}>
+          <div
+            style={{
+              ...styles.sectionHeader,
+              padding: "16px 16px 12px 16px",
+              marginBottom: "0",
+            }}
+          >
             <div style={styles.sectionTitle}>
-              <span style={styles.sectionIcon}>📜</span>
+              <span style={styles.sectionIcon}>📊</span>
               History Records
             </div>
             <div style={styles.sectionSubtitle}>{totalRecords} records</div>
@@ -319,70 +226,13 @@ const HistoryListPage: React.FC = () => {
             </div>
           ) : (
             <div style={styles.tableContainer}>
-              {/* PERFECTLY ALIGNED TABLE HEADER */}
-              <div
-                style={{
-                  display: "flex",
-                  padding: "12px 12px",
-                  backgroundColor: "#f9fafb",
-                  borderBottom: "1px solid #e5e7eb",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  color: "#374151",
-                  minHeight: "44px",
-                  alignItems: "center",
-                }}
-              >
-                {/* Month Column - EXACT WIDTH */}
-                <div
-                  style={{
-                    flex: "1.5",
-                    minWidth: "0",
-                    paddingLeft: "8px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  Month
-                </div>
-
-                {/* Savings Column - EXACT WIDTH */}
-                <div
-                  style={{
-                    flex: "1",
-                    minWidth: "0",
-                    textAlign: "right",
-                    paddingRight: "12px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  Savings
-                </div>
-
-                {/* Deposits Column - EXACT WIDTH */}
-                <div
-                  style={{
-                    flex: "1",
-                    minWidth: "0",
-                    textAlign: "right",
-                    paddingRight: "12px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  Deposits
-                </div>
-
-                {/* Actions Column - EXACT WIDTH */}
+              {/* FIXED TABLE HEADER */}
+              <div style={styles.tableHeader}>
+                <div style={styles.headerCellMonth}>Month</div>
+                <div style={styles.headerCellDeposits}>Deposits</div>
+                <div style={styles.headerCellTotal}>Total</div>
                 {settings?.showDelete && (
-                  <div
-                    style={{
-                      flex: "0.5",
-                      minWidth: "60px",
-                      textAlign: "center",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    Actions
-                  </div>
+                  <div style={styles.headerCellActions}>Actions</div>
                 )}
               </div>
 
@@ -392,35 +242,27 @@ const HistoryListPage: React.FC = () => {
                   const monthDisplay = formatMonthDisplay(record.month);
                   const isEditing = editingMonth === record.month;
                   const showActions = settings?.showDelete;
-                  const isCurrentMonth = record.month === currentMonth;
+
+                  // Calculate values for display
+                  const depositsValue = rupeesToLakhs(record.totalDeposits);
+                  const savingsValue = rupeesToLakhs(record.savings);
+                  const totalValue = depositsValue + savingsValue;
 
                   return (
                     <div
                       key={record.month}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "12px 12px",
-                        minHeight: "48px",
+                        ...styles.tableRow,
+                        backgroundColor:
+                          index % 2 === 0 ? "#ffffff" : "#f9fafb",
                         borderBottom:
                           index < filteredHistory.length - 1
                             ? "1px solid #f3f4f6"
                             : "none",
-                        backgroundColor:
-                          index % 2 === 0 ? "#ffffff" : "#f9fafb",
-                        boxSizing: "border-box",
                       }}
                     >
-                      {/* Month Column - EXACT SAME WIDTH AS HEADER */}
-                      <div
-                        style={{
-                          flex: "1.5",
-                          minWidth: "0",
-                          paddingLeft: "8px",
-                          overflow: "hidden",
-                          boxSizing: "border-box",
-                        }}
-                      >
+                      {/* Month Column - REMOVED YEAR-MONTH BELOW */}
+                      <div style={styles.cellMonth}>
                         {isEditing ? (
                           <div
                             style={{
@@ -432,138 +274,26 @@ const HistoryListPage: React.FC = () => {
                             {monthDisplay.name} {monthDisplay.year}
                           </div>
                         ) : (
-                          <div style={{ minWidth: "0" }}>
-                            <div
-                              style={{
-                                fontSize: "14px",
-                                fontWeight: 500,
-                                color: "#1e293b",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
+                          <div style={styles.monthDisplay}>
+                            <div style={styles.monthName}>
                               {monthDisplay.name} {monthDisplay.year}
-                              {isCurrentMonth && (
-                                <span
-                                  style={{
-                                    fontSize: "0.7rem",
-                                    color: "#4285f4",
-                                    marginLeft: "6px",
-                                  }}
-                                >
-                                  (Current)
-                                </span>
-                              )}
                             </div>
-                            <div
-                              style={{
-                                fontSize: "0.7rem",
-                                color: "#888",
-                                marginTop: "1px",
-                              }}
-                            >
-                              {record.month}
-                            </div>
+                            {/* REMOVED: <div style={styles.monthId}>{record.month}</div> */}
                           </div>
                         )}
                       </div>
 
-                      {/* Savings Column - EXACT SAME WIDTH AS HEADER */}
-                      <div
-                        style={{
-                          flex: "1",
-                          minWidth: "0",
-                          textAlign: "right",
-                          paddingRight: "12px",
-                          boxSizing: "border-box",
-                        }}
-                      >
+                      {/* Deposits Column - REMOVED "deposits" TEXT BELOW */}
+                      <div style={styles.cellDeposits}>
                         {isEditing ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "flex-end",
-                            }}
-                          >
-                            <input
-                              type="number"
-                              value={editedSavings}
-                              onChange={(e) => setEditedSavings(e.target.value)}
-                              style={{
-                                width: "90px",
-                                padding: "6px 8px",
-                                border: "1px solid #d1d5db",
-                                borderRadius: "4px",
-                                fontSize: "13px",
-                                textAlign: "right",
-                                boxSizing: "border-box",
-                              }}
-                              step="0.01"
-                              min="0"
-                              placeholder="0.00"
-                              disabled={isSaving}
-                            />
-                          </div>
-                        ) : (
-                          <div>
-                            <div
-                              style={{
-                                fontSize: "14px",
-                                fontWeight: 600,
-                                color: "#333",
-                              }}
-                            >
-                              {formatLakhs(rupeesToLakhs(record.savings))}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "0.7rem",
-                                color: "#666",
-                                marginTop: "1px",
-                                fontStyle: "italic",
-                              }}
-                            >
-                              savings
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Deposits Column - EXACT SAME WIDTH AS HEADER */}
-                      <div
-                        style={{
-                          flex: "1",
-                          minWidth: "0",
-                          textAlign: "right",
-                          paddingRight: "12px",
-                          boxSizing: "border-box",
-                        }}
-                      >
-                        {isEditing ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "flex-end",
-                            }}
-                          >
+                          <div style={styles.editInputContainer}>
                             <input
                               type="number"
                               value={editedDeposits}
                               onChange={(e) =>
                                 setEditedDeposits(e.target.value)
                               }
-                              style={{
-                                width: "90px",
-                                padding: "6px 8px",
-                                border: "1px solid #d1d5db",
-                                borderRadius: "4px",
-                                fontSize: "13px",
-                                textAlign: "right",
-                                boxSizing: "border-box",
-                              }}
+                              style={styles.editInput}
                               step="0.01"
                               min="0"
                               placeholder="0.00"
@@ -572,57 +302,52 @@ const HistoryListPage: React.FC = () => {
                           </div>
                         ) : (
                           <div>
-                            <div
-                              style={{
-                                fontSize: "14px",
-                                fontWeight: 600,
-                                color: "#333",
-                              }}
-                            >
-                              {formatLakhs(rupeesToLakhs(record.totalDeposits))}
+                            <div style={styles.amountDisplay}>
+                              {formatLakhs(depositsValue)}
                             </div>
-                            <div
-                              style={{
-                                fontSize: "0.7rem",
-                                color: "#666",
-                                marginTop: "1px",
-                                fontStyle: "italic",
-                              }}
-                            >
-                              deposits
+                            {/* REMOVED: <div style={styles.savingsNote}>deposits</div> */}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Total Column - CHANGED "savings:" TO "S:" */}
+                      <div style={styles.cellTotal}>
+                        {isEditing ? (
+                          <div style={styles.editInputContainer}>
+                            <input
+                              type="number"
+                              value={editedSavings}
+                              onChange={(e) => setEditedSavings(e.target.value)}
+                              style={styles.editInput}
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              disabled={isSaving}
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <div style={styles.amountDisplay}>
+                              {formatLakhs(totalValue)}
+                            </div>
+                            <div style={styles.savingsNote}>
+                              S: {formatLakhs(savingsValue)}
                             </div>
                           </div>
                         )}
                       </div>
 
-                      {/* Actions Column - EXACT SAME WIDTH AS HEADER */}
+                      {/* Actions Column */}
                       {showActions && (
-                        <div
-                          style={{
-                            flex: "0.5",
-                            minWidth: "60px",
-                            display: "flex",
-                            justifyContent: "center",
-                            boxSizing: "border-box",
-                          }}
-                        >
+                        <div style={styles.cellActions}>
                           {isEditing ? (
-                            <div style={{ display: "flex", gap: "6px" }}>
+                            <div style={styles.actionButtons}>
                               <button
                                 onClick={() => saveEdits(record.month)}
                                 style={{
-                                  width: "32px",
-                                  height: "32px",
-                                  backgroundColor: "#10b981",
-                                  border: "none",
-                                  borderRadius: "4px",
-                                  color: "white",
-                                  fontSize: "14px",
+                                  ...styles.saveButton,
                                   cursor: isSaving ? "not-allowed" : "pointer",
                                   opacity: isSaving ? 0.6 : 1,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
                                 }}
                                 title="Save"
                                 disabled={isSaving}
@@ -645,17 +370,8 @@ const HistoryListPage: React.FC = () => {
                               <button
                                 onClick={cancelEditing}
                                 style={{
-                                  width: "32px",
-                                  height: "32px",
-                                  backgroundColor: "#ef4444",
-                                  border: "none",
-                                  borderRadius: "4px",
-                                  color: "white",
-                                  fontSize: "14px",
+                                  ...styles.cancelButton,
                                   cursor: "pointer",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
                                 }}
                                 title="Cancel"
                                 disabled={isSaving}
@@ -664,7 +380,7 @@ const HistoryListPage: React.FC = () => {
                               </button>
                             </div>
                           ) : (
-                            <div style={{ display: "flex", gap: "6px" }}>
+                            <div style={styles.actionButtons}>
                               <button
                                 onClick={() =>
                                   startEditing(
@@ -674,20 +390,12 @@ const HistoryListPage: React.FC = () => {
                                   )
                                 }
                                 style={{
-                                  width: "32px",
-                                  height: "32px",
-                                  backgroundColor: "transparent",
-                                  border: "none",
-                                  fontSize: "16px",
+                                  ...styles.editButton,
                                   cursor:
                                     editingMonth !== null
                                       ? "not-allowed"
                                       : "pointer",
                                   opacity: editingMonth !== null ? 0.5 : 1,
-                                  color: "#6b7280",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
                                 }}
                                 title="Edit"
                                 disabled={editingMonth !== null}
@@ -697,20 +405,12 @@ const HistoryListPage: React.FC = () => {
                               <button
                                 onClick={() => confirmDelete(record.month)}
                                 style={{
-                                  width: "32px",
-                                  height: "32px",
-                                  backgroundColor: "transparent",
-                                  border: "none",
-                                  fontSize: "16px",
+                                  ...styles.deleteButton,
                                   cursor:
                                     editingMonth !== null
                                       ? "not-allowed"
                                       : "pointer",
                                   opacity: editingMonth !== null ? 0.5 : 1,
-                                  color: "#6b7280",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
                                 }}
                                 title="Delete"
                                 disabled={editingMonth !== null}

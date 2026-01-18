@@ -138,27 +138,31 @@ const AccountsPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div style={{ ...bankingStyles.card, margin: 0, borderRadius: 0 }}>
-              {/* Table Header */}
+            <div
+              style={{
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
+                overflow: "hidden",
+                marginBottom: "16px",
+                backgroundColor: "#ffffff",
+              }}
+            >
+              {/* Table Header - Matching style across Banking module */}
               <div
                 style={{
                   display: "flex",
-                  padding: "12px 16px",
-                  marginBottom: "8px",
-                  fontSize: "0.9rem",
+                  padding: "10px 12px",
+                  backgroundColor: "#f9fafb",
+                  borderBottom: "1px solid #e5e7eb",
                   fontWeight: "600",
-                  color: "#495057",
-                  borderBottom: "2px solid #e9ecef",
+                  fontSize: "13px",
+                  color: "#374151",
                 }}
               >
-                <div style={{ flex: 4, padding: "0 8px" }}>Account</div>
-                <div style={{ flex: 3, padding: "0 8px", textAlign: "right" }}>
-                  Savings
-                </div>
-                <div style={{ flex: 3, padding: "0 8px" }}>MPIN</div>
-                {settings?.showDelete && (
-                  <div style={{ width: "60px", padding: "0 8px" }}></div>
-                )}
+                <div style={{ flex: 4 }}>Account</div>
+                <div style={{ flex: 3, textAlign: "right" }}>Savings</div>
+                <div style={{ flex: 3, paddingLeft: "12px" }}>MPIN</div>
+                {settings?.showDelete && <div style={{ width: "40px" }}></div>}
               </div>
 
               {/* Accounts Rows */}
@@ -176,30 +180,36 @@ const AccountsPage: React.FC = () => {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        padding: "12px 16px",
+                        padding: "10px 12px",
+                        minHeight: "48px",
+                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
                         borderBottom:
                           index < sortedAccounts.length - 1
-                            ? "1px solid #e9ecef"
+                            ? "1px solid #f3f4f6"
                             : "none",
                         opacity: isActive ? 1 : 0.7,
                       }}
                     >
-                      <div style={{ flex: 4, padding: "0 8px" }}>
+                      <div style={{ flex: 4 }}>
                         <div
                           style={{
                             fontWeight: "500",
-                            color: isActive ? "#333" : "#6c757d",
-                            fontSize: "0.95rem",
+                            color: isActive ? "#1e293b" : "#6c757d",
+                            fontSize: "14px",
                             textDecoration: isActive ? "none" : "line-through",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {account.acctCode}
                           {!isActive && (
                             <span
                               style={{
-                                fontSize: "0.7rem",
+                                fontSize: "11px",
                                 color: "#dc2626",
                                 marginLeft: "6px",
+                                fontWeight: "normal",
                               }}
                             >
                               (inactive)
@@ -210,13 +220,12 @@ const AccountsPage: React.FC = () => {
                       <div
                         style={{
                           flex: 3,
-                          padding: "0 8px",
                           textAlign: "right",
                         }}
                       >
                         <div
                           style={{
-                            fontSize: "0.95rem",
+                            fontSize: "14px",
                             fontWeight: "600",
                             color: isActive ? "#4285f4" : "#6c757d",
                           }}
@@ -224,12 +233,15 @@ const AccountsPage: React.FC = () => {
                           {formatCurrency(account.savingsAmount)}
                         </div>
                       </div>
-                      <div style={{ flex: 3, padding: "0 8px" }}>
+                      <div style={{ flex: 3, paddingLeft: "12px" }}>
                         <div
                           style={{
                             fontFamily: "'Courier New', monospace",
-                            fontSize: "0.9rem",
-                            color: isActive ? "#666" : "#9ca3af",
+                            fontSize: "13px",
+                            color: isActive ? "#475569" : "#9ca3af",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {account.mpin || "••••"}
@@ -239,10 +251,9 @@ const AccountsPage: React.FC = () => {
                       {settings?.showDelete && (
                         <div
                           style={{
-                            width: "60px",
+                            width: "40px",
                             display: "flex",
-                            justifyContent: "center",
-                            padding: "0 8px",
+                            justifyContent: "flex-end",
                           }}
                         >
                           <button
@@ -250,10 +261,17 @@ const AccountsPage: React.FC = () => {
                               navigate(`/banking/accounts/edit/${account.id}`)
                             }
                             style={{
-                              ...bankingStyles.editButton,
-                              padding: "6px 10px",
-                              fontSize: "0.8rem",
-                              minWidth: "auto",
+                              padding: "4px",
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "#6b7280",
+                              fontSize: "16px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: "32px",
+                              height: "32px",
                             }}
                             title="Edit Account"
                           >
@@ -266,28 +284,28 @@ const AccountsPage: React.FC = () => {
                 })}
               </div>
 
-              {/* Total Savings at the bottom of the list */}
+              {/* Total Savings - Integrated as a footer to the table */}
               <div
                 style={{
-                  marginTop: "15px",
-                  padding: "16px",
-                  borderTop: "2px solid #e9ecef",
+                  padding: "12px",
+                  backgroundColor: "#f3f4f6",
+                  borderTop: "2px solid #e5e7eb",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
                 }}
               >
                 <div>
-                  <div style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                  <div style={{ fontSize: "12px", color: "#6b7280" }}>
                     {settings?.showInactive
-                      ? `Showing ${sortedAccounts.length} of ${accounts.length} accounts`
-                      : `Showing ${sortedAccounts.length} active accounts`}
+                      ? `${sortedAccounts.length} of ${accounts.length} accounts`
+                      : `${sortedAccounts.length} active accounts`}
                   </div>
                   <div
                     style={{
-                      fontSize: "0.7rem",
-                      color: "#4285f4",
-                      marginTop: "2px",
+                      fontSize: "11px",
+                      color: "#94a3b8",
+                      marginTop: "1px",
                     }}
                   >
                     ({activeAccountsCount} active, {inactiveAccountsCount}{" "}
@@ -295,13 +313,21 @@ const AccountsPage: React.FC = () => {
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#64748b",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
                     Total Savings
                   </div>
                   <div
                     style={{
-                      fontSize: "1.1rem",
-                      fontWeight: "600",
+                      fontSize: "16px",
+                      fontWeight: "700",
                       color: "#4285f4",
                     }}
                   >

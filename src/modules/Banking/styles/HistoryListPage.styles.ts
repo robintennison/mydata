@@ -73,6 +73,7 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "12px",
+    padding: "16px 16px 0 16px",
   },
   sectionTitle: {
     fontSize: "1rem",
@@ -153,9 +154,10 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
     backgroundColor: "white",
     borderRadius: "12px",
     margin: "15px",
-    padding: "16px",
+    padding: "0",
     boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
     border: "1px solid #e9ecef",
+    overflow: "hidden",
   },
   tableContainer: {
     overflow: "hidden",

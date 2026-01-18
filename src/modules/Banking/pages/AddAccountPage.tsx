@@ -106,48 +106,6 @@ const AccountsPage: React.FC = () => {
 
   return (
     <div style={accountsPageStyles.container}>
-      {/* Header */}
-      <div style={accountsPageStyles.header}>
-        <h1 style={accountsPageStyles.headerTitle}>📋 Banking / Accounts</h1>
-        <div style={accountsPageStyles.headerSubtitle}>
-          Manage your bank accounts
-        </div>
-      </div>
-
-      {/* Top Navigation */}
-      <div style={accountsPageStyles.topNav}>
-        <button
-          onClick={() => navigate("/banking")}
-          style={accountsPageStyles.navButton}
-          title="Back to Banking"
-        >
-          ←
-        </button>
-        <div style={accountsPageStyles.navTitle}>
-          Banking / {settings?.showInactive ? "Inactive Accounts" : "Active Accounts"}
-        </div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            onClick={() => navigate("/settings")}
-            style={{
-              ...accountsPageStyles.navButton,
-              padding: "6px 10px",
-              fontSize: "1.2rem",
-            }}
-            title="Settings"
-          >
-            ⚙️
-          </button>
-          <button
-            onClick={() => navigate("/banking/accounts/add")}
-            style={accountsPageStyles.navButton}
-            title="Add Account"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div style={{ width: "100%" }}>
         {/* Search Bar */}

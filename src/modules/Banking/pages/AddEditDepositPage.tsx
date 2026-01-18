@@ -175,15 +175,6 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
   return (
     <div ref={containerRef} style={bankingStyles.container}>
-      {/* Header */}
-      <div style={bankingStyles.header}>
-        <h1 style={bankingStyles.headerTitle}>
-          💰 Banking / {isEdit ? "Edit" : "Add"} Deposit
-        </h1>
-        <div style={bankingStyles.headerSubtitle}>
-          {isEdit ? "Update deposit details" : "Create new deposit"}
-        </div>
-      </div>
 
       {/* Top Navigation */}
       <div style={bankingStyles.topNav}>

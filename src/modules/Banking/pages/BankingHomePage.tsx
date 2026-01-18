@@ -196,13 +196,6 @@ const BankingHomePage: React.FC = () => {
 
   return (
     <div style={bankingHomeStyles.centeredContainer}>
-      {/* Header - Removed subtitle */}
-      <div style={bankingHomeStyles.header}>
-        <h1 style={bankingHomeStyles.headerTitle}>
-          <span>🏦</span>
-          <span>Banking</span>
-        </h1>
-      </div>
 
       {/* Top Navigation */}
       <div style={bankingHomeStyles.topNav}>

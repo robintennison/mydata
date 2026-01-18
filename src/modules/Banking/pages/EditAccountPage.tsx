@@ -173,13 +173,6 @@ const EditAccountPage: React.FC = () => {
 
   return (
     <div style={bankingStyles.container}>
-      {/* Header */}
-      <div style={bankingStyles.header}>
-        <h1 style={bankingStyles.headerTitle}>✏️ Edit Account</h1>
-        <div style={bankingStyles.headerSubtitle}>
-          Update account details for {account?.acctCode}
-        </div>
-      </div>
 
       {/* Top Navigation */}
       <div style={bankingStyles.topNav}>

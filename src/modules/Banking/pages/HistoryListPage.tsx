@@ -28,31 +28,9 @@ const HistoryListPage: React.FC = () => {
     return lakhs.toFixed(2);
   };
 
-  // Format month for display
-  const formatMonthDisplay = (
-    month: string,
-  ): { name: string; year: string } => {
-    try {
-      const [year, monthNum] = month.split("-");
-      const monthNames = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
-      const monthName = monthNames[parseInt(monthNum) - 1] || monthNum;
-      return { name: monthName, year: year };
-    } catch {
-      return { name: month, year: "" };
-    }
+  // Format month for display (just show YYYY-MM from database)
+  const formatMonthDisplay = (month: string): string => {
+    return month; // Just return the database format: "2026-01"
   };
 
   // Start editing a row
@@ -165,38 +143,88 @@ const HistoryListPage: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header - REVERTED TO PREVIOUS STYLE */}
-      <div style={styles.sectionHeader}>
-        <div style={styles.sectionTitle}>
+      {/* Header - MATCHING SUMMARY PAGE STYLE */}
+      <div
+        style={{
+          backgroundColor: "#ffffff",
+          padding: "12px 16px",
+          borderBottom: "1px solid #e2e8f0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+          }}
+        >
           <button
             onClick={() => navigate(-1)}
-            style={styles.backButton}
+            style={{
+              width: "40px",
+              height: "40px",
+              borderRadius: "8px",
+              border: "1px solid #e2e8f0",
+              backgroundColor: "#ffffff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "20px",
+              color: "#1e293b",
+              cursor: "pointer",
+              transition: "all 0.2s",
+            }}
             title="Go Back"
           >
             ←
           </button>
-          <span style={styles.sectionIcon}>📜</span>
-          History
-        </div>
-        <div style={styles.headerActions}>
-          <button
-            onClick={() => navigate("/banking/deposit-summary")}
-            style={styles.iconButton}
-            title="Go to Deposit Summary"
+          <h1
+            style={{
+              fontSize: "18px",
+              fontWeight: "600",
+              color: "#1e293b",
+              margin: 0,
+            }}
           >
-            📊
-          </button>
-          <button
-            onClick={() => navigate("/settings")}
-            style={styles.iconButton}
-            title="Settings"
-          >
-            ⚙️
-          </button>
+            Banking / History
+          </h1>
         </div>
+
+        <button
+          onClick={() => navigate("/settings")}
+          style={{
+            width: "40px",
+            height: "40px",
+            borderRadius: "8px",
+            border: "1px solid #e2e8f0",
+            backgroundColor: "#ffffff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "18px",
+            color: "#1e293b",
+            cursor: "pointer",
+            transition: "all 0.2s",
+          }}
+          title="Settings"
+        >
+          ⚙️
+        </button>
       </div>
 
-      <div style={{ padding: "0 15px 80px 15px" }}>
+      <div
+        style={{
+          padding: "0",
+          backgroundColor: "#ffffff",
+          minHeight: "calc(100vh - 120px)",
+        }}
+      >
         {/* History Chart */}
         <HistoryChart history={history} />
 
@@ -226,9 +254,10 @@ const HistoryListPage: React.FC = () => {
             </div>
           ) : (
             <div style={styles.tableContainer}>
-              {/* FIXED TABLE HEADER */}
+              {/* TABLE HEADER - 4 COLUMNS: Month, Savings, Deposits, Total */}
               <div style={styles.tableHeader}>
                 <div style={styles.headerCellMonth}>Month</div>
+                <div style={styles.headerCellSavings}>Savings</div>
                 <div style={styles.headerCellDeposits}>Deposits</div>
                 <div style={styles.headerCellTotal}>Total</div>
                 {settings?.showDelete && (
@@ -244,9 +273,9 @@ const HistoryListPage: React.FC = () => {
                   const showActions = settings?.showDelete;
 
                   // Calculate values for display
-                  const depositsValue = rupeesToLakhs(record.totalDeposits);
                   const savingsValue = rupeesToLakhs(record.savings);
-                  const totalValue = depositsValue + savingsValue;
+                  const depositsValue = rupeesToLakhs(record.totalDeposits);
+                  const totalValue = savingsValue + depositsValue;
 
                   return (
                     <div
@@ -261,7 +290,7 @@ const HistoryListPage: React.FC = () => {
                             : "none",
                       }}
                     >
-                      {/* Month Column - REMOVED YEAR-MONTH BELOW */}
+                      {/* Month Column - SHOW YYYY-MM from database */}
                       <div style={styles.cellMonth}>
                         {isEditing ? (
                           <div
@@ -271,19 +300,40 @@ const HistoryListPage: React.FC = () => {
                               color: "#1e293b",
                             }}
                           >
-                            {monthDisplay.name} {monthDisplay.year}
+                            {monthDisplay}
                           </div>
                         ) : (
                           <div style={styles.monthDisplay}>
-                            <div style={styles.monthName}>
-                              {monthDisplay.name} {monthDisplay.year}
-                            </div>
-                            {/* REMOVED: <div style={styles.monthId}>{record.month}</div> */}
+                            <div style={styles.monthName}>{monthDisplay}</div>
                           </div>
                         )}
                       </div>
 
-                      {/* Deposits Column - REMOVED "deposits" TEXT BELOW */}
+                      {/* Savings Column */}
+                      <div style={styles.cellSavings}>
+                        {isEditing ? (
+                          <div style={styles.editInputContainer}>
+                            <input
+                              type="number"
+                              value={editedSavings}
+                              onChange={(e) => setEditedSavings(e.target.value)}
+                              style={styles.editInput}
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              disabled={isSaving}
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <div style={styles.amountDisplay}>
+                              {formatLakhs(savingsValue)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Deposits Column */}
                       <div style={styles.cellDeposits}>
                         {isEditing ? (
                           <div style={styles.editInputContainer}>
@@ -305,36 +355,15 @@ const HistoryListPage: React.FC = () => {
                             <div style={styles.amountDisplay}>
                               {formatLakhs(depositsValue)}
                             </div>
-                            {/* REMOVED: <div style={styles.savingsNote}>deposits</div> */}
                           </div>
                         )}
                       </div>
 
-                      {/* Total Column - CHANGED "savings:" TO "S:" */}
+                      {/* Total Column */}
                       <div style={styles.cellTotal}>
-                        {isEditing ? (
-                          <div style={styles.editInputContainer}>
-                            <input
-                              type="number"
-                              value={editedSavings}
-                              onChange={(e) => setEditedSavings(e.target.value)}
-                              style={styles.editInput}
-                              step="0.01"
-                              min="0"
-                              placeholder="0.00"
-                              disabled={isSaving}
-                            />
-                          </div>
-                        ) : (
-                          <div>
-                            <div style={styles.amountDisplay}>
-                              {formatLakhs(totalValue)}
-                            </div>
-                            <div style={styles.savingsNote}>
-                              S: {formatLakhs(savingsValue)}
-                            </div>
-                          </div>
-                        )}
+                        <div style={styles.amountDisplay}>
+                          {formatLakhs(totalValue)}
+                        </div>
                       </div>
 
                       {/* Actions Column */}
@@ -437,11 +466,8 @@ const HistoryListPage: React.FC = () => {
             <div style={styles.dialogTitle}>Confirm Delete</div>
             <div style={styles.dialogMessage}>
               Are you sure you want to delete the history record for{" "}
-              <strong>
-                {formatMonthDisplay(deleteConfirmMonth).name}{" "}
-                {formatMonthDisplay(deleteConfirmMonth).year}
-              </strong>
-              ? This action cannot be undone.
+              <strong>{formatMonthDisplay(deleteConfirmMonth)}</strong>? This
+              action cannot be undone.
             </div>
             <div style={styles.dialogButtons}>
               <button

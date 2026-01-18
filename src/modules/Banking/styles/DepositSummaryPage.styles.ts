@@ -63,7 +63,7 @@ export const depositSummaryStyles = {
   } as React.CSSProperties,
 
   content: {
-    padding: "12px",
+    padding: "0 4px",
     backgroundColor: "#ffffff",
     minHeight: "calc(100vh - 120px)",
   } as React.CSSProperties,

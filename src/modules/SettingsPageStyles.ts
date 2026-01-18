@@ -63,7 +63,7 @@ export const settingsStyles = {
   } as React.CSSProperties,
 
   content: {
-    padding: "15px",
+    padding: "0 4px",
     backgroundColor: "#ffffff",
     minHeight: "calc(100vh - 160px)",
   } as React.CSSProperties,

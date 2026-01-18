@@ -39,7 +39,7 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
   chartSection: {
     backgroundColor: "white",
     borderRadius: "12px",
-    margin: "15px",
+    margin: "15px 4px",
     padding: "16px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
     border: "1px solid #e9ecef",
@@ -93,7 +93,7 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
   currentMonthCard: {
     backgroundColor: "white",
     borderRadius: "12px",
-    margin: "15px",
+    margin: "15px 4px",
     padding: "16px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
     border: "1px solid #e9ecef",
@@ -153,7 +153,7 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
   section: {
     backgroundColor: "white",
     borderRadius: "12px",
-    margin: "15px",
+    margin: "15px 4px",
     padding: "0",
     boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
     border: "1px solid #e9ecef",

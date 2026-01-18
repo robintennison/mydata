@@ -158,7 +158,7 @@ const EditAccountPage: React.FC = () => {
         <div style={bankingStyles.header}>
           <h1 style={bankingStyles.headerTitle}>Account Not Found</h1>
         </div>
-        <div style={{ padding: "20px", textAlign: "center" }}>
+        <div style={{ padding: "15px 4px", position: "relative" }}>
           <p>The account you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate("/banking/accounts")}
@@ -206,7 +206,7 @@ const EditAccountPage: React.FC = () => {
       )}
 
       {/* Form */}
-      <div style={{ padding: "15px" }}>
+      <div style={{ padding: "15px 4px" }}>
         <form onSubmit={handleSubmit}>
           {/* Account Code */}
           <div style={{ marginBottom: "20px" }}>

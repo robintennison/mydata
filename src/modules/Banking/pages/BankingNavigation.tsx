@@ -68,7 +68,7 @@ const BankingNavigation: React.FC = () => {
   return (
     <div
       style={{
-        padding: "0 15px 15px 15px",
+        padding: "0 4px 15px 4px",
         marginTop: "auto",
       }}
     >

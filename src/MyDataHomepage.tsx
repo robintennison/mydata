@@ -8,6 +8,7 @@ import {
   calculateTotalDeposits,
   getUpcomingMaturities,
 } from "./modules/Banking/utils/bankingCalculations";
+import CombinedAssetPieChart from "./modules/Banking/pages/CombinedAssetPieChart";
 
 const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
@@ -121,6 +122,14 @@ const MyDataHomepage: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Asset Distribution Chart */}
+      <CombinedAssetPieChart 
+        accounts={accounts} 
+        deposits={deposits} 
+        adjustments={adjustments} 
+        showInactive={settings?.showInactive}
+      />
 
       {/* Upcoming Maturities Section - Compact */}
       <div

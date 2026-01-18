@@ -224,7 +224,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
       </div>
 
       {/* Form */}
-      <div style={{ padding: "15px 4px", position: "relative" }}>
+      <div style={{ padding: "15px 0", position: "relative" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {/* Account Dropdown - FIXED WIDTH to match container */}
           <div style={{ position: "relative", width: "100%" }}>

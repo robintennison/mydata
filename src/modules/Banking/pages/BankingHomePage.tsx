@@ -399,7 +399,7 @@ const BankingHomePage: React.FC = () => {
         {/* Recent History - Already sorted newest first */}
         <div
           style={{
-            padding: "0 4px 15px 4px",
+            padding: "0 0 15px 0",
           }}
         >
           <div style={bankingHomeStyles.card}>

@@ -165,7 +165,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   formContainer: {
     backgroundColor: "white",
     borderRadius: "12px",
-    margin: "15px 4px",
+    margin: "15px 0",
     padding: "20px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
     border: "1px solid #e9ecef",

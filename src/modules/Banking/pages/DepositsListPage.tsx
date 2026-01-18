@@ -452,7 +452,7 @@ const DepositsListPage: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <div style={{ padding: "0 4px" }}>
+      <div style={{ padding: "0" }}>
         {filteredDeposits.length === 0 ? (
           <div
             style={{

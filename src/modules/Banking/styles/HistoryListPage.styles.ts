@@ -5,7 +5,7 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
     width: "100%",
     maxWidth: "600px",
     margin: "0 auto",
-    backgroundColor: "#f5f7fa",
+    backgroundColor: "#ffffff",
     minHeight: "100vh",
   },
 
@@ -38,11 +38,10 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
   },
   chartSection: {
     backgroundColor: "white",
-    borderRadius: "12px",
-    margin: "15px 4px",
+    borderRadius: "8px",
+    margin: "0 0 16px 0",
     padding: "16px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    border: "1px solid #e9ecef",
+    border: "1px solid #e5e7eb",
   },
   chartWrapper: {
     position: "relative",
@@ -92,11 +91,10 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
   },
   currentMonthCard: {
     backgroundColor: "white",
-    borderRadius: "12px",
-    margin: "15px 4px",
+    borderRadius: "8px",
+    margin: "0 0 16px 0",
     padding: "16px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    border: "1px solid #e9ecef",
+    border: "1px solid #e5e7eb",
   },
   currentMonthHeader: {
     display: "flex",
@@ -152,11 +150,10 @@ const HistoryListPageStyles: { [key: string]: CSSProperties } = {
   },
   section: {
     backgroundColor: "white",
-    borderRadius: "12px",
-    margin: "15px 4px",
+    borderRadius: "8px",
+    margin: "0 0 16px 0",
     padding: "0",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-    border: "1px solid #e9ecef",
+    border: "1px solid #e5e7eb",
     overflow: "hidden",
   },
   tableContainer: {

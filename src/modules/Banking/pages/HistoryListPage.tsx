@@ -133,7 +133,7 @@ const HistoryListPage: React.FC = () => {
       {/* Header - Compact single row */}
       <div
         style={{
-          backgroundColor: "#f8f9fa",
+          backgroundColor: "#ffffff",
           padding: "12px 16px",
           borderBottom: "1px solid #e9ecef",
           display: "flex",

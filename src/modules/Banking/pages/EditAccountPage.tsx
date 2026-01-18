@@ -206,7 +206,7 @@ const EditAccountPage: React.FC = () => {
       )}
 
       {/* Form */}
-      <div style={{ padding: "15px 4px" }}>
+      <div style={{ padding: "15px 0" }}>
         <form onSubmit={handleSubmit}>
           {/* Account Code */}
           <div style={{ marginBottom: "20px" }}>

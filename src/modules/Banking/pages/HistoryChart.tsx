@@ -149,7 +149,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
             if (value === null || value === undefined) {
               return `${context.dataset.label}: No data`;
             }
-            return `${context.dataset.label}: ${value.toFixed(2)} L`;
+            return `${context.dataset.label}: ${value.toFixed(2)}`;
           },
         },
       },
@@ -172,7 +172,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
           weight: "bold",
         },
         formatter: (value) => {
-          return `${value.toFixed(2)} L`;
+          return `${value.toFixed(2)}`;
         },
         align: "top",
         offset: 8,
@@ -212,13 +212,13 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
           padding: 4,
           callback: function (value) {
             if (value === null || value === undefined) return "";
-            if (typeof value === "number") return `${value} L`;
+            if (typeof value === "number") return `${value}`;
             return value;
           },
         },
         title: {
           display: true,
-          text: "Amount (in Lakhs)",
+          text: "Amount",
           font: {
             size: 11,
             weight: 500,

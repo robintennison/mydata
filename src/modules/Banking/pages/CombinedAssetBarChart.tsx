@@ -219,7 +219,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
           size: 9,
         } as any,
         formatter: (_value: number, context: Context) => {
-          // Show both savings and deposits values with arrow indicator
+          // Show both savings and deposits values
           if (context.datasetIndex === 1) {
             // Deposits dataset (top of stack)
             const savings = context.chart.data.datasets[0].data[
@@ -237,7 +237,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
               const depositsFormatted = deposits.toFixed(
                 deposits >= 10 ? 0 : 1,
               );
-              return `↑\nS:${savingsFormatted}\nD:${depositsFormatted}`;
+              return `S:${savingsFormatted}\nD:${depositsFormatted}`;
             }
           }
           return "";

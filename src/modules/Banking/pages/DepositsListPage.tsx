@@ -481,165 +481,160 @@ const DepositsListPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Table Header - Exactly like Android */}
+            {/* Desktop-like Table Layout matching Deposit Summary Page */}
             <div
               style={{
-                display: "flex",
-                padding: "12px 0",
-                marginBottom: "8px",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "#666",
-                borderBottom: "2px solid #e0e0e0",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
+                overflow: "hidden",
+                marginBottom: "16px",
+                backgroundColor: "#ffffff",
               }}
             >
-              <div style={{ flex: 1 }}>Account</div>
-              <div style={{ flex: 1.2 }}>Amount / Notes</div>
-              <div style={{ flex: 0.8, textAlign: "right" }}>End Date</div>
+              {/* Table Header - Matching Deposit Summary exactly */}
               <div
                 style={{
-                  width: settings?.showDelete ? "40px" : "0px", // Dynamic width based on settings
-                  transition: "width 0.2s ease",
+                  display: "flex",
+                  padding: "10px 12px",
+                  backgroundColor: "#f9fafb",
+                  borderBottom: "1px solid #e5e7eb",
+                  fontWeight: "600",
+                  fontSize: "13px",
+                  color: "#374151",
                 }}
-              ></div>
-            </div>
+              >
+                <div style={{ flex: 1 }}>Account</div>
+                <div style={{ flex: 1.2 }}>Amount / Notes</div>
+                <div style={{ flex: 0.8, textAlign: "right" }}>End Date</div>
+                {settings?.showDelete && <div style={{ width: "40px" }}></div>}
+              </div>
 
-            {/* Deposits List - Matching Android Card styling */}
-            <div
-              style={{ maxHeight: "calc(100vh - 250px)", overflowY: "auto" }}
-            >
-              {filteredDeposits.map((deposit, _index) => {
-                const accountName = getAccountName(deposit.accountId);
+              {/* Table Body - Single container for all rows */}
+              <div
+                style={{ maxHeight: "calc(100vh - 350px)", overflowY: "auto" }}
+              >
+                {filteredDeposits.map((deposit, index) => {
+                  const accountName = getAccountName(deposit.accountId);
 
-                return (
-                  <div
-                    key={deposit.id}
-                    style={{
-                      backgroundColor: "#f8f9fa",
-                      borderRadius: "8px",
-                      marginBottom: "8px",
-                      padding: "10px 12px", // Reduced padding
-                      minHeight: "36px", // Reduced height
-                      display: "flex",
-                      alignItems: "center",
-                      opacity: deposit.active ? 1 : 0.7,
-                      border: "1px solid #e0e0e0",
-                    }}
-                  >
-                    {/* Account */}
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          fontSize: "0.9rem", // Reduced font size
-                          fontWeight: 500,
-                          color: "#333",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {accountName}
-                      </div>
-                    </div>
-
-                    {/* Amount + Comments - Single row like Android */}
+                  return (
                     <div
+                      key={deposit.id}
                       style={{
-                        flex: 1.2,
                         display: "flex",
                         alignItems: "center",
+                        padding: "10px 12px",
+                        minHeight: "48px",
+                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
+                        borderBottom:
+                          index < filteredDeposits.length - 1
+                            ? "1px solid #f3f4f6"
+                            : "none",
+                        opacity: deposit.active ? 1 : 0.7,
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: "0.8rem", // Reduced font size
-                          fontWeight: 600,
-                          color: "#1976d2",
-                          flex: "0.6",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {formatInLakhs(deposit.amount)}{" "}
-                        {/* REMOVED "L" suffix */}
-                      </div>
-                      <div style={{ width: "4px" }}></div>{" "}
-                      {/* Reduced spacing */}
-                      <div
-                        style={{
-                          fontSize: "0.8rem", // Reduced font size
-                          color: "#666",
-                          flex: "1",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {deposit.comments.substring(0, 25)}{" "}
-                        {/* Reduced length */}
-                        {deposit.comments.length > 25 && "..."}
-                      </div>
-                    </div>
-
-                    {/* End Date - Right aligned */}
-                    <div
-                      style={{
-                        flex: 0.8,
-                        textAlign: "right",
-                        paddingRight: settings?.showDelete ? "8px" : "0px", // Dynamic padding
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "0.85rem", // Reduced font size
-                          color: "#495057",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          fontFamily: "monospace",
-                          letterSpacing: "-0.5px", // Tighter letter spacing for date
-                        }}
-                      >
-                        {formatDate(deposit.endDate)}
-                      </div>
-                    </div>
-
-                    {/* Actions - Only show edit icon */}
-                    {settings?.showDelete && (
-                      <div
-                        style={{
-                          width: "40px", // Fixed width for edit icon only
-                          display: "flex",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        <button
-                          onClick={() =>
-                            navigate(`/banking/deposits/edit/${deposit.id}`)
-                          }
+                      {/* Account */}
+                      <div style={{ flex: 1 }}>
+                        <div
                           style={{
-                            padding: "4px",
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            color: "#666",
-                            fontSize: "0.9rem",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "32px",
-                            height: "32px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#1e293b",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
-                          title="Edit"
                         >
-                          ✏️
-                        </button>
+                          {accountName}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+
+                      {/* Amount + Comments */}
+                      <div
+                        style={{
+                          flex: 1.2,
+                          display: "flex",
+                          alignItems: "center",
+                          minWidth: 0,
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "#1976d2",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {formatInLakhs(deposit.amount)}
+                        </div>
+                        <div style={{ width: "8px" }}></div>
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "#6b7280",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {deposit.comments}
+                        </div>
+                      </div>
+
+                      {/* End Date - Right aligned */}
+                      <div
+                        style={{
+                          flex: 0.8,
+                          textAlign: "right",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "#475569",
+                            fontFamily: "monospace",
+                          }}
+                        >
+                          {formatDate(deposit.endDate)}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      {settings?.showDelete && (
+                        <div
+                          style={{
+                            width: "40px",
+                            display: "flex",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <button
+                            onClick={() =>
+                              navigate(`/banking/deposits/edit/${deposit.id}`)
+                            }
+                            style={{
+                              padding: "4px",
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "#6b7280",
+                              fontSize: "16px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: "32px",
+                              height: "32px",
+                            }}
+                            title="Edit"
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Total Summary Card - Matching Android exactly */}

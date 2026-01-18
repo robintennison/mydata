@@ -5,6 +5,7 @@ import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
 import BankingNavigation from "./BankingNavigation";
+import DepositPieChart from "./DepositPieChart";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -395,6 +396,14 @@ const BankingHomePage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Deposit Distribution Chart */}
+        <DepositPieChart
+          accounts={accounts}
+          deposits={deposits}
+          adjustments={adjustments}
+          showInactive={settings.showInactive}
+        />
 
         {/* Recent History - Already sorted newest first */}
         <div

@@ -156,21 +156,13 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
       x: {
         beginAtZero: true,
         grid: {
-          display: true,
+          display: false, // Remove grid lines for cleaner look
         },
         ticks: {
-          callback: function (value: string | number) {
-            if (typeof value === "number") {
-              return value.toFixed(1); // Remove "L" suffix
-            }
-            return value;
-          },
-          font: {
-            size: 11,
-          },
+          display: false, // Hide x-axis ticks completely
         },
         title: {
-          display: false, // Hide the x-axis title to remove reference to "Lakhs"
+          display: false,
         },
         stacked: true,
       },
@@ -216,50 +208,18 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
         },
       },
       tooltip: {
-        callbacks: {
-          title: (context) => {
-            const index = context[0].dataIndex;
-            const fullLabels = chartData?.fullLabels;
-            if (fullLabels && index >= 0 && index < fullLabels.length) {
-              return fullLabels[index];
-            }
-            return context[0].label;
-          },
-          label: (context) => {
-            const label = context.dataset.label || "";
-            const value = context.parsed.x;
-            if (typeof value === "number") {
-              return `${label}: ${value.toFixed(1)}`; // Remove "Lakhs"
-            }
-            return `${label}: ${value}`;
-          },
-          footer: (context) => {
-            const savings = context[0].parsed._stacks?.x[0] || 0;
-            const deposits = context[0].parsed._stacks?.x[1] || 0;
-            const total = savings + deposits;
-            return `Total: ${total.toFixed(1)}`; // Remove "Lakhs"
-          },
-        },
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
-        titleColor: "#1a202c",
-        bodyColor: "#4a5568",
-        borderColor: "#e2e8f0",
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 8,
-        displayColors: true,
-        boxPadding: 4,
+        enabled: false, // Disable tooltips since we're showing values on chart
       },
       datalabels: {
         anchor: "end" as const,
         align: "end" as const,
-        color: "#4a5568",
+        color: "#1a202c",
         font: {
           weight: 600,
-          size: 10,
+          size: 9,
         } as any,
-        formatter: (context: Context) => {
-          // Show both savings and deposits values
+        formatter: (_value: number, context: Context) => {
+          // Show both savings and deposits values with arrow indicator
           if (context.datasetIndex === 1) {
             // Deposits dataset (top of stack)
             const savings = context.chart.data.datasets[0].data[
@@ -270,10 +230,14 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
             ] as number;
             const total = savings + deposits;
 
-            if (total >= 0.5) {
-              // Show for totals >= 0.5
+            if (total >= 0.1) {
+              // Show for all values
               // Create a multi-line label showing both values
-              return `S: ${savings.toFixed(1)}\nD: ${deposits.toFixed(1)}`;
+              const savingsFormatted = savings.toFixed(savings >= 10 ? 0 : 1);
+              const depositsFormatted = deposits.toFixed(
+                deposits >= 10 ? 0 : 1,
+              );
+              return `↑\nS:${savingsFormatted}\nD:${depositsFormatted}`;
             }
           }
           return "";
@@ -288,20 +252,20 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
               context.dataIndex
             ] as number;
             const total = savings + deposits;
-            return total >= 0.5; // Show for totals >= 0.5
+            return total >= 0.1; // Show for all values
           }
           return false;
         },
         padding: {
-          top: 2,
-          bottom: 2,
+          right: 4, // Add padding to prevent overlap with chart edge
         },
+        offset: 8, // Move labels further away from bars
       },
     },
     layout: {
       padding: {
         left: 10,
-        right: 20,
+        right: 80, // Increased right padding for labels
         top: 40,
         bottom: 20,
       },
@@ -342,8 +306,15 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
         <div className={styles.sectionTitle}>
           <span>📊</span> Asset Distribution
         </div>
+        <div
+          style={{ fontSize: "0.75rem", color: "#666", fontWeight: "normal" }}
+        >
+          S=Savings | D=Deposits
+        </div>
       </div>
-      <div style={{ height: "400px", position: "relative" }}>
+      <div style={{ height: "450px", position: "relative" }}>
+        {" "}
+        {/* Increased height */}
         <Bar data={chartData.chartData} options={chartOptions} />
       </div>
     </div>

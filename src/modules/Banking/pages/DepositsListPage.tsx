@@ -192,7 +192,7 @@ const DepositsListPage: React.FC = () => {
                 margin: 0,
               }}
             >
-              Deposits
+              Banking / Deposits
             </h1>
           </div>
 

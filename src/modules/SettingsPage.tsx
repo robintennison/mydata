@@ -510,7 +510,7 @@ const SettingsPage: React.FC = () => {
         >
           ←
         </button>
-        <h1 style={settingsStyles.navTitle}>Settings</h1>
+        <h1 style={settingsStyles.navTitle}>System / Settings</h1>
         <button
           onClick={() => navigate("/banking")}
           style={{

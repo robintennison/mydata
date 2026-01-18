@@ -213,7 +213,7 @@ const BankingHomePage: React.FC = () => {
         >
           🏠
         </button>
-        <div style={bankingHomeStyles.navTitle}>Banking Dashboard</div>
+        <div style={bankingHomeStyles.navTitle}>Banking / Dashboard</div>
         <button
           onClick={() => navigate("/settings")}
           style={bankingHomeStyles.navButton}

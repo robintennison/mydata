@@ -66,7 +66,7 @@ const EditHistoryPage: React.FC = () => {
               ←
             </button>
             <h1 style={bankingStyles.headerTitle}>
-              {month ? "Edit History" : "Add History"}
+              {month ? "Banking / Edit History" : "Banking / Add History"}
             </h1>
           </div>
           <div style={styles.headerActions}>

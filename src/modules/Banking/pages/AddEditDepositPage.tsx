@@ -178,7 +178,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
       {/* Header */}
       <div style={bankingStyles.header}>
         <h1 style={bankingStyles.headerTitle}>
-          💰 {isEdit ? "Edit" : "Add"} Deposit
+          💰 Banking / {isEdit ? "Edit" : "Add"} Deposit
         </h1>
         <div style={bankingStyles.headerSubtitle}>
           {isEdit ? "Update deposit details" : "Create new deposit"}
@@ -196,7 +196,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           ←
         </button>
         <div style={bankingStyles.navTitle}>
-          {isEdit ? "Edit Deposit" : "Add Deposit"}
+          Banking / {isEdit ? "Edit Deposit" : "Add Deposit"}
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           {isEdit && (

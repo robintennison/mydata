@@ -108,7 +108,7 @@ const AccountsPage: React.FC = () => {
     <div style={accountsPageStyles.container}>
       {/* Header */}
       <div style={accountsPageStyles.header}>
-        <h1 style={accountsPageStyles.headerTitle}>📋 Accounts</h1>
+        <h1 style={accountsPageStyles.headerTitle}>📋 Banking / Accounts</h1>
         <div style={accountsPageStyles.headerSubtitle}>
           Manage your bank accounts
         </div>
@@ -124,7 +124,7 @@ const AccountsPage: React.FC = () => {
           ←
         </button>
         <div style={accountsPageStyles.navTitle}>
-          {settings?.showInactive ? "Inactive Accounts" : "Active Accounts"}
+          Banking / {settings?.showInactive ? "Inactive Accounts" : "Active Accounts"}
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           <button

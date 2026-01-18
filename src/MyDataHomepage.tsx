@@ -77,7 +77,7 @@ const MyDataHomepage: React.FC = () => {
       <div className={styles.header}>
         <div className={styles.headerTopRow}>
           <div className={styles.headerLeft}>
-            <h1 className={styles.title}>MyData Dashboard</h1>
+            <h1 className={styles.title}>MyData / Dashboard</h1>
             <p className={styles.subtitle}>
               Personal Finance & Assets Overview
             </p>

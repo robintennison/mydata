@@ -94,7 +94,7 @@ const AccountsPage: React.FC = () => {
         >
           ←
         </button>
-        <div style={bankingStyles.navTitle}>Accounts</div>
+        <div style={bankingStyles.navTitle}>Banking / Accounts</div>
         <div style={{ display: "flex", gap: "8px" }}>
           {/* Settings Button */}
           <button

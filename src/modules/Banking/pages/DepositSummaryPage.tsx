@@ -342,7 +342,7 @@ const DepositSummaryPage: React.FC = () => {
           >
             ←
           </button>
-          <h1 style={styles.headerTitle}>Deposit Summary</h1>
+          <h1 style={styles.headerTitle}>Banking / Deposit Summary</h1>
         </div>
 
         <button

@@ -191,7 +191,7 @@ const EditAccountPage: React.FC = () => {
         >
           ←
         </button>
-        <div style={bankingStyles.navTitle}>Edit Account</div>
+        <div style={bankingStyles.navTitle}>Banking / Edit Account</div>
         <div style={{ width: "40px" }}></div>
       </div>
 

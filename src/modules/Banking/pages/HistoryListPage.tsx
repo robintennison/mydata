@@ -171,7 +171,7 @@ const HistoryListPage: React.FC = () => {
               color: "#333",
             }}
           >
-            History
+            Banking / History
           </h1>
         </div>
         <div>

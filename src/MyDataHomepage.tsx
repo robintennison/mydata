@@ -2,20 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBankingData } from "./modules/Banking/hooks/useBankingData";
 import { useSettings } from "./contexts/SettingsContext";
-import { bankingStyles } from "./modules/Banking/styles/BankingStyles";
-import {
-  myDataHomepageStyles,
-  getSectionStyle,
-  getSectionHeaderStyle,
-  injectMyDataHomepageStyles,
-} from "./styles/MyDataHomepageStyles";
+import styles from "./MyDataHomepage.module.css";
 
 const MyDataHomepage: React.FC = () => {
-  // Inject global styles
-  React.useEffect(() => {
-    injectMyDataHomepageStyles();
-  }, []);
-
   const navigate = useNavigate();
   const { settings } = useSettings();
   const { accounts, deposits, adjustments, loading } = useBankingData();
@@ -101,9 +90,9 @@ const MyDataHomepage: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={bankingStyles.container}>
-        <div style={bankingStyles.loading}>
-          <div style={bankingStyles.spinner}></div>
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <div className={styles.spinner}></div>
           <p>Loading MyData...</p>
         </div>
       </div>
@@ -113,77 +102,69 @@ const MyDataHomepage: React.FC = () => {
   const hasMaturities = upcomingMaturities.length > 0;
 
   return (
-    <div style={myDataHomepageStyles.container}>
+    <div className={styles.container}>
       {/* Header with Settings Button */}
-      <div style={myDataHomepageStyles.header}>
-        <div style={myDataHomepageStyles.headerTopRow}>
-          <div style={myDataHomepageStyles.headerLeft}>
-            <h1 style={myDataHomepageStyles.title}>MyData Dashboard</h1>
-            <p style={myDataHomepageStyles.subtitle}>
+      <div className={styles.header}>
+        <div className={styles.headerTopRow}>
+          <div className={styles.headerLeft}>
+            <h1 className={styles.title}>MyData Dashboard</h1>
+            <p className={styles.subtitle}>
               Personal Finance & Assets Overview
             </p>
           </div>
           <button
-            style={myDataHomepageStyles.settingsButton}
+            className={styles.settingsButton}
             onClick={() => navigate("/settings")}
             title="Settings"
           >
             ⚙️
             {settings?.showDelete && (
-              <span style={myDataHomepageStyles.editBadge}>✏️</span>
+              <span className={styles.editBadge}>✏️</span>
             )}
           </button>
         </div>
       </div>
 
       {/* Compact Top Stats Cards */}
-      <div style={myDataHomepageStyles.statsRow}>
+      <div className={styles.statsRow}>
         {/* Card 1: Total Balance */}
-        <div
-          style={myDataHomepageStyles.statCard}
-          onClick={() => navigate("/banking")}
-        >
-          <div style={myDataHomepageStyles.cardTitle}>Total Balance</div>
-          <div style={myDataHomepageStyles.cardValue}>
-            {formatLakhs(totalBalance)}
-          </div>
-          {/* REMOVED rupee value subtitle */}
+        <div className={styles.statCard} onClick={() => navigate("/banking")}>
+          <div className={styles.cardTitle}>Total Balance</div>
+          <div className={styles.cardValue}>{formatLakhs(totalBalance)}</div>
         </div>
 
         {/* Card 2: Total Deposits */}
-        <div
-          style={myDataHomepageStyles.statCard}
-          onClick={() => navigate("/banking")}
-        >
-          <div style={myDataHomepageStyles.cardTitle}>Total Deposits</div>
-          <div style={myDataHomepageStyles.cardValue}>
-            {formatLakhs(totalDeposits)}
-          </div>
-          {/* REMOVED rupee value subtitle */}
+        <div className={styles.statCard} onClick={() => navigate("/banking")}>
+          <div className={styles.cardTitle}>Total Deposits</div>
+          <div className={styles.cardValue}>{formatLakhs(totalDeposits)}</div>
         </div>
 
         {/* Card 3: Total Accounts */}
         <div
-          style={myDataHomepageStyles.statCard}
+          className={styles.statCard}
           onClick={() => navigate("/banking/accounts")}
         >
-          <div style={myDataHomepageStyles.cardTitle}>Accounts</div>
-          <div style={myDataHomepageStyles.cardValue}>{accounts.length}</div>
-          <div style={myDataHomepageStyles.cardSubtitle}>
+          <div className={styles.cardTitle}>Accounts</div>
+          <div className={styles.cardValue}>{accounts.length}</div>
+          <div className={styles.cardSubtitle}>
             {activeDepositsCount} deposits
           </div>
         </div>
       </div>
 
       {/* Upcoming Maturities Section - Compact */}
-      <div style={getSectionStyle(hasMaturities)}>
-        <div style={getSectionHeaderStyle(hasMaturities)}>
-          <div style={myDataHomepageStyles.sectionTitle}>
-            Upcoming Maturities
-          </div>
+      <div
+        className={styles.section}
+        style={{ minHeight: hasMaturities ? "auto" : "80px" }}
+      >
+        <div
+          className={styles.sectionHeader}
+          style={{ marginBottom: hasMaturities ? "15px" : "0" }}
+        >
+          <div className={styles.sectionTitle}>Upcoming Maturities</div>
           {hasMaturities && (
             <button
-              style={myDataHomepageStyles.viewAllButton}
+              className={styles.viewAllButton}
               onClick={() => navigate("/banking/deposits")}
             >
               View All
@@ -192,44 +173,35 @@ const MyDataHomepage: React.FC = () => {
         </div>
 
         {!hasMaturities ? (
-          <div style={myDataHomepageStyles.emptyState}>
-            <div style={myDataHomepageStyles.emptyText}>
-              No upcoming maturities
-            </div>
-            <div style={myDataHomepageStyles.emptySubtext}>
-              Next 30 days are clear
-            </div>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyText}>No upcoming maturities</div>
+            <div className={styles.emptySubtext}>Next 30 days are clear</div>
           </div>
         ) : (
-          <div style={myDataHomepageStyles.maturitiesList}>
+          <div className={styles.maturitiesList}>
             {upcomingMaturities.map((deposit) => (
               <div
                 key={deposit.id}
-                style={myDataHomepageStyles.maturityCard}
+                className={styles.maturityCard}
                 onClick={() => navigate(`/banking/deposits/edit/${deposit.id}`)}
               >
-                <div style={myDataHomepageStyles.maturityLeft}>
-                  <div style={myDataHomepageStyles.maturityDate}>
+                <div className={styles.maturityLeft}>
+                  <div className={styles.maturityDate}>
                     {formatDate(deposit.endDate)}
                   </div>
-                  <div style={myDataHomepageStyles.maturityAccount}>
+                  <div className={styles.maturityAccount}>
                     {getAccountName(deposit.accountId)}
                   </div>
                 </div>
-                <div style={myDataHomepageStyles.maturityRight}>
-                  <div style={myDataHomepageStyles.maturityAmount}>
-                    {/* Format deposit amount in lakhs without "L" */}
+                <div className={styles.maturityRight}>
+                  <div className={styles.maturityAmount}>
                     {formatLakhs(deposit.amount)}
                   </div>
                   <div
-                    style={
-                      {
-                        ...myDataHomepageStyles.maturityStatus,
-                        color: deposit.active ? "#34a853" : "#ea4335",
-                      } as React.CSSProperties
-                    }
+                    className={styles.maturityStatus}
+                    style={{ color: deposit.active ? "#34a853" : "#ea4335" }}
                   >
-                    {deposit.active ? "●" : "●"}
+                    ●
                   </div>
                 </div>
               </div>
@@ -239,15 +211,13 @@ const MyDataHomepage: React.FC = () => {
       </div>
 
       {/* Placeholder Section for Future Features - Compact */}
-      <div style={getSectionStyle(true)}>
-        <div style={getSectionHeaderStyle(true)}>
-          <div style={myDataHomepageStyles.sectionTitle}>Coming Soon</div>
+      <div className={styles.section}>
+        <div className={styles.sectionHeader} style={{ marginBottom: "15px" }}>
+          <div className={styles.sectionTitle}>Coming Soon</div>
         </div>
-        <div style={myDataHomepageStyles.placeholderCard}>
-          <div style={myDataHomepageStyles.placeholderTitle}>
-            Advanced Analytics
-          </div>
-          <div style={myDataHomepageStyles.placeholderText}>
+        <div className={styles.placeholderCard}>
+          <div className={styles.placeholderTitle}>Advanced Analytics</div>
+          <div className={styles.placeholderText}>
             Investment insights, growth projections, and performance reports
             coming soon.
           </div>

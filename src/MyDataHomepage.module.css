@@ -1,0 +1,252 @@
+/* src/MyDataHomepage.module.css */
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #f5f7fa;
+  min-height: calc(100vh - 80px);
+  padding-bottom: 100px;
+}
+
+.header {
+  background: linear-gradient(135deg, #4285f4 0%, #5c9cff 100%);
+  color: white;
+  padding: 20px 15px 25px 15px;
+  border-radius: 0 0 20px 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.headerTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.headerLeft {
+  flex: 1;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.settingsButton {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+  margin-left: 10px;
+}
+
+.settingsButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.editBadge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  font-size: 0.7rem;
+  background-color: #34a853;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0 12px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  background-color: white;
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.cardTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.cardValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 3px;
+}
+
+.cardSubtitle {
+  font-size: 0.7rem;
+  color: #888;
+}
+
+.section {
+  background-color: white;
+  border-radius: 12px;
+  margin: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e9ecef;
+  margin-bottom: 15px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.viewAllButton {
+  background-color: transparent;
+  color: #4285f4;
+  border: 1px solid #4285f4;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.maturitiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.maturityCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  border-left: 3px solid #4285f4;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.maturityCard:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.maturityLeft {
+  flex: 1;
+}
+
+.maturityDate {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 3px;
+}
+
+.maturityAccount {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.maturityRight {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.maturityAmount {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #34a853;
+}
+
+.maturityStatus {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 15px 10px;
+  color: #6c757d;
+}
+
+.emptyText {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.emptySubtext {
+  font-size: 0.75rem;
+}
+
+.placeholderCard {
+  background-color: #f0f7ff;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  border: 2px dashed #c2e0ff;
+}
+
+.placeholderTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4285f4;
+  margin-bottom: 8px;
+}
+
+.placeholderText {
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1.4;
+}

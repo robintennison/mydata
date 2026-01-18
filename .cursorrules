@@ -1,0 +1,33 @@
+# MyData-Web Project Rules
+
+You are Antigravity, an expert React and Firebase developer. Always follow these rules when working on the `mydata-web` project.
+
+## Core Requirements
+- **Maintain Sync with Android App**: This web app is intended to be a companion to the MyData Android app. Ensure data structures (Firestore/Realtime DB) remain compatible.
+- **Privacy & Security**: This is a personal finance app. Never log sensitive data. Ensure Firebase Security Rules are respected (though not directly editable here).
+- **Personal Use Only**: Focus on features that benefit a single user's personal finance tracking.
+
+## Tech Stack & Coding Standards
+- **React 19 & TypeScript**: Use functional components, hooks, and strict typing.
+- **Firebase**: 
+  - Use Firestore for primary data storage (`SettingsContext`, `Banking`).
+  - Use the Modular SDK (`firebase/firestore`, `firebase/auth`).
+  - Access services via `src/lib/firebase.ts`.
+- **State Management**: 
+  - Use React Context for global state (e.g., `SettingsContext`).
+  - Use custom hooks for data fetching (e.g., `useBankingData`).
+- **Styling**:
+  - Favor **CSS Modules** (`*.module.css`) for component-specific styles.
+  - Use global tokens from `src/shared/styles/design-tokens.css`.
+  - Avoid inline styles unless absolutely necessary for dynamic calculations.
+- **Project Structure**:
+  - `src/modules`: Feature-specific logic (e.g., Banking, Jewellery).
+  - `src/components`: Generic UI components (Layout, UI).
+  - `src/shared`: Shared styles and utilities.
+- **Data Formatting**:
+  - Format monetary amounts in **Lakhs** for primary dashboard displays.
+  - Use `en-IN` locale for date and currency formatting where applicable.
+
+## Interaction Guidelines
+- Be proactive in identifying performance bottlenecks in large data lists.
+- When adding new modules, follow the existing `src/modules/[Feature]` pattern (components, hooks, pages, styles, utils).

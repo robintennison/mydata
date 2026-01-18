@@ -25,13 +25,13 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
 
     const summaries = accounts.map((account) => ({
       label: account.acctCode || account.id,
-      value: account.savingsAmount / 100000, // in Lakhs
+      value: Math.floor(account.savingsAmount / 1000), // in Thousands, floor to ignore decimals
     }));
 
     const activeSummaries = summaries.filter((s) => s.value > 0);
 
-    // Group items < 10,000 (0.1 Lakhs) into "Others"
-    const threshold = 0.1;
+    // Group items < 10,000 (10 Thousands) into "Others"
+    const threshold = 10;
     const majorSummaries = activeSummaries.filter((s) => s.value >= threshold);
     const minorSummaries = activeSummaries.filter((s) => s.value < threshold);
 
@@ -97,7 +97,7 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
           label: (context) => {
             const label = context.label || "";
             const value = context.parsed;
-            return ` ${label}: ${value.toFixed(2)}`;
+            return ` ${label}: ${value}`;
           },
         },
       },
@@ -114,11 +114,11 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
           const label = context.chart.data.labels?.[context.dataIndex] as string || "";
           
           if (label === "Others") {
-            return `Others\n${value.toFixed(2)}`;
+            return `Others\n${value}`;
           }
           
           const displayLabel = label.length > 3 ? label.substring(3) : label;
-          return `${displayLabel}\n${value.toFixed(2)}`;
+          return `${displayLabel}\n${value}`;
         },
         textAlign: "center",
         padding: 4,

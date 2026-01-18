@@ -61,37 +61,50 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
         .filter((adj) => adj.accountId === account.id)
         .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
 
-      // Total assets = savings + deposits + adjustments
+      // Total deposits = base deposits + adjustments
+      const totalDeposits = baseDeposits + adjustmentsTotal;
+
       return {
         label: account.acctCode || account.id,
         fullLabel: account.acctName || account.acctCode || account.id,
-        value: (savings + baseDeposits + adjustmentsTotal) / 100000, // in Lakhs
+        savings: savings / 100000, // in Lakhs
+        deposits: totalDeposits / 100000, // in Lakhs
+        total: (savings + totalDeposits) / 100000, // Total in Lakhs
       };
     });
 
-    // Filter out accounts with 0 assets for the chart clarity
-    const activeSummaries = summaries.filter((s) => s.value > 0);
+    // Filter out accounts with 0 total assets for the chart clarity
+    const activeSummaries = summaries.filter((s) => s.total > 0);
 
-    // Group items < 10 lakhs into "Others"
+    // Group items < 10 lakhs total into "Others"
     const threshold = 10;
-    const majorSummaries = activeSummaries.filter((s) => s.value >= threshold);
-    const minorSummaries = activeSummaries.filter((s) => s.value < threshold);
+    const majorSummaries = activeSummaries.filter((s) => s.total >= threshold);
+    const minorSummaries = activeSummaries.filter((s) => s.total < threshold);
 
     let finalSummaries = [...majorSummaries];
 
     if (minorSummaries.length > 0) {
-      const othersValue = minorSummaries.reduce((sum, s) => sum + s.value, 0);
+      const othersSavings = minorSummaries.reduce(
+        (sum, s) => sum + s.savings,
+        0,
+      );
+      const othersDeposits = minorSummaries.reduce(
+        (sum, s) => sum + s.deposits,
+        0,
+      );
       finalSummaries.push({
         label: "Others",
         fullLabel: "Other Accounts",
-        value: othersValue,
+        savings: othersSavings,
+        deposits: othersDeposits,
+        total: othersSavings + othersDeposits,
       });
     }
 
     if (finalSummaries.length === 0) return null;
 
-    // Sort by value descending
-    finalSummaries.sort((a, b) => b.value - a.value);
+    // Sort by total value descending
+    finalSummaries.sort((a, b) => b.total - a.total);
 
     // Limit to top 8 for better readability
     const displaySummaries = finalSummaries.slice(0, 8);
@@ -100,23 +113,31 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
       labels: displaySummaries.map((s) => s.label),
       datasets: [
         {
-          label: "Assets (in Lakhs)",
-          data: displaySummaries.map((s) => s.value),
-          backgroundColor: displaySummaries.map((_, index) =>
-            index === displaySummaries.length - 1 &&
-            displaySummaries[displaySummaries.length - 1].label === "Others"
-              ? "rgba(121, 85, 72, 0.7)" // Different color for "Others"
-              : "rgba(66, 133, 244, 0.7)",
+          label: "Savings",
+          data: displaySummaries.map((s) => s.savings),
+          backgroundColor: "rgba(52, 168, 83, 0.7)", // Green for savings
+          borderColor: "#34a853",
+          borderWidth: 1,
+          borderRadius: 4,
+          borderSkipped: false,
+          stack: "Stack 0",
+        },
+        {
+          label: "Deposits",
+          data: displaySummaries.map((s) => s.deposits),
+          backgroundColor: displaySummaries.map(
+            (s) =>
+              s.label === "Others"
+                ? "rgba(121, 85, 72, 0.7)" // Brown for "Others" deposits
+                : "rgba(66, 133, 244, 0.7)", // Blue for regular deposits
           ),
-          borderColor: displaySummaries.map((_, index) =>
-            index === displaySummaries.length - 1 &&
-            displaySummaries[displaySummaries.length - 1].label === "Others"
-              ? "#795548"
-              : "#4285f4",
+          borderColor: displaySummaries.map((s) =>
+            s.label === "Others" ? "#795548" : "#4285f4",
           ),
           borderWidth: 1,
           borderRadius: 4,
           borderSkipped: false,
+          stack: "Stack 0",
         },
       ],
     };
@@ -157,6 +178,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
           },
           padding: { top: 10, bottom: 0 },
         },
+        stacked: true,
       },
       y: {
         grid: {
@@ -167,11 +189,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
             size: 11,
             weight: 500,
           } as any,
-          callback: function (
-            value: string | number,
-            index: number,
-            //    ticks: any[],
-          ) {
+          callback: function (value: string | number, index: number) {
             if (
               typeof value === "number" &&
               this.chart?.scales?.y?.getLabels?.()
@@ -188,11 +206,20 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
             return value;
           },
         },
+        stacked: true,
       },
     },
     plugins: {
       legend: {
-        display: false,
+        position: "top" as const,
+        labels: {
+          boxWidth: 12,
+          padding: 15,
+          font: {
+            size: 11,
+          },
+          usePointStyle: true,
+        },
       },
       tooltip: {
         callbacks: {
@@ -205,11 +232,18 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
             return context[0].label;
           },
           label: (context) => {
+            const label = context.dataset.label || "";
             const value = context.parsed.x;
             if (typeof value === "number") {
-              return `Assets: ${value.toFixed(2)} Lakhs`;
+              return `${label}: ${value.toFixed(2)} Lakhs`;
             }
-            return `Assets: ${value}`;
+            return `${label}: ${value}`;
+          },
+          footer: (context) => {
+            const savings = context[0].parsed._stacks?.x[0] || 0;
+            const deposits = context[0].parsed._stacks?.x[1] || 0;
+            const total = savings + deposits;
+            return `Total: ${total.toFixed(2)} Lakhs`;
           },
         },
         backgroundColor: "rgba(255, 255, 255, 0.95)",
@@ -219,6 +253,8 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
         borderWidth: 1,
         padding: 12,
         cornerRadius: 8,
+        displayColors: true,
+        boxPadding: 4,
       },
       datalabels: {
         anchor: "end" as const,
@@ -228,12 +264,36 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
           weight: 600,
           size: 10,
         } as any,
-        formatter: (value: number) => {
-          return `${value.toFixed(1)} L`;
+        formatter: (context: Context) => {
+          // Only show total on the deposits segment (top of stack)
+          if (context.datasetIndex === 1) {
+            // Deposits dataset
+            const savings = context.chart.data.datasets[0].data[
+              context.dataIndex
+            ] as number;
+            const deposits = context.chart.data.datasets[1].data[
+              context.dataIndex
+            ] as number;
+            const total = savings + deposits;
+            if (total >= 1) {
+              return `${total.toFixed(1)} L`;
+            }
+          }
+          return "";
         },
         display: (context: Context) => {
-          const value = context.dataset.data[context.dataIndex];
-          return typeof value === "number" && value >= 1; // Only show labels for values >= 1 Lakh
+          // Only show on deposits dataset (top of stack)
+          if (context.datasetIndex === 1) {
+            const savings = context.chart.data.datasets[0].data[
+              context.dataIndex
+            ] as number;
+            const deposits = context.chart.data.datasets[1].data[
+              context.dataIndex
+            ] as number;
+            const total = savings + deposits;
+            return total >= 1;
+          }
+          return false;
         },
       },
     },
@@ -241,7 +301,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
       padding: {
         left: 10,
         right: 20,
-        top: 20,
+        top: 40,
         bottom: 20,
       },
     },
@@ -282,7 +342,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
           <span>📊</span> Asset Distribution
         </div>
       </div>
-      <div style={{ height: "360px", position: "relative" }}>
+      <div style={{ height: "400px", position: "relative" }}>
         <Bar data={chartData.chartData} options={chartOptions} />
       </div>
     </div>

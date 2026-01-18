@@ -10,18 +10,18 @@
 }
 
 .header {
-  background: linear-gradient(135deg, #4285f4 0%, #5c9cff 100%);
-  color: white;
-  padding: 20px 15px 25px 15px;
-  border-radius: 0 0 20px 20px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+  background-color: #ffffff;
+  color: #1a202c;
+  padding: 24px 15px;
+  border-bottom: 1px solid #edf2f7;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .headerTopRow {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .headerLeft {
@@ -30,36 +30,40 @@
 
 .title {
   font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 6px 0;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  color: #1a202c;
+  letter-spacing: -0.025em;
 }
 
 .subtitle {
-  font-size: 0.85rem;
-  opacity: 0.9;
+  font-size: 0.875rem;
+  color: #718096;
   margin: 0;
+  font-weight: 500;
 }
 
 .settingsButton {
-  background-color: rgba(255, 255, 255, 0.2);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  background-color: #f7fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  color: white;
+  font-size: 1.25rem;
+  color: #4a5568;
   cursor: pointer;
   position: relative;
-  transition: all 0.2s;
-  margin-left: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 12px;
 }
 
 .settingsButton:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  background-color: #edf2f7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .editBadge {

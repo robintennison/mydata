@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { firestore } from "../../../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { useError } from "../../../contexts/ErrorContext";
 import type {
   BankAccount,
   Deposit,
@@ -23,6 +24,7 @@ export const useBankingData = (): BankingData => {
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [history, setHistory] = useState<History[]>([]);
   const [adjustments, setAdjustments] = useState<DepositAdjustment[]>([]);
+  const { setError } = useError();
   const [settings, setSettings] = useState<{ showInactive: boolean }>({
     showInactive: false, // Default value
   });
@@ -32,24 +34,28 @@ export const useBankingData = (): BankingData => {
       setLoading(true);
       try {
         // Load accounts
-        const accountsSnapshot = await getDocs(collection(firestore, "accounts"));
+        const accountsSnapshot = await getDocs(
+          collection(firestore, "accounts")
+        );
         const accountsData = accountsSnapshot.docs.map(
           (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as BankAccount)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as BankAccount)
         );
         setAccounts(accountsData);
 
         // Load deposits
-        const depositsSnapshot = await getDocs(collection(firestore, "deposits"));
+        const depositsSnapshot = await getDocs(
+          collection(firestore, "deposits")
+        );
         const depositsData = depositsSnapshot.docs.map(
           (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Deposit)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Deposit)
         );
         setDeposits(depositsData);
 
@@ -57,10 +63,10 @@ export const useBankingData = (): BankingData => {
         const historySnapshot = await getDocs(collection(firestore, "history"));
         const historyData = historySnapshot.docs.map(
           (doc) =>
-            ({
-              month: doc.id,
-              ...doc.data(),
-            } as History)
+          ({
+            month: doc.id,
+            ...doc.data(),
+          } as History)
         );
         setHistory(historyData);
 
@@ -70,17 +76,18 @@ export const useBankingData = (): BankingData => {
         );
         const adjustmentsData = adjustmentsSnapshot.docs.map(
           (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as DepositAdjustment)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as DepositAdjustment)
         );
         setAdjustments(adjustmentsData);
 
-        // Load settings from Firestore if you have a settings collection
-        // Or keep the default value if no settings collection exists
+        // Load settings
         try {
-          const settingsSnapshot = await getDocs(collection(firestore, "settings"));
+          const settingsSnapshot = await getDocs(
+            collection(firestore, "settings")
+          );
           if (!settingsSnapshot.empty) {
             const settingsData = settingsSnapshot.docs[0].data();
             setSettings({
@@ -89,18 +96,17 @@ export const useBankingData = (): BankingData => {
           }
         } catch (error) {
           console.log("No settings found, using defaults");
-          // Keep default settings
         }
-
       } catch (error) {
         console.error("Error loading banking data:", error);
+        setError("Failed to load banking data. Please check your connection.");
       } finally {
         setLoading(false);
       }
     };
 
     loadAllData();
-  }, []);
+  }, [setError]);
 
   return {
     loading,

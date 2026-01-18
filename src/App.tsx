@@ -6,6 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { AppRoutes } from "./routes";
 import { SettingsProvider } from "./contexts/SettingsContext";
+import { ErrorProvider } from "./contexts/ErrorContext";
 
 // Import global styles
 import "./shared/styles/design-tokens.css";
@@ -41,37 +42,39 @@ function App() {
   const isAuthenticated = !!user;
 
   return (
-    <SettingsProvider>
-      <BrowserRouter>
-        <div className={styles.container}>
-          <div className={styles.app}>
-            {/* Simple Header - Only show on login page */}
-            {!isAuthenticated && (
-              <header className={styles.header}>
-                <div className={styles.headerContent}>
-                  <h1 className={styles.logo}>
-                    <span className={styles.logoIcon}>📱</span>
-                    My Data Web
-                  </h1>
-                </div>
-              </header>
-            )}
+    <ErrorProvider>
+      <SettingsProvider>
+        <BrowserRouter>
+          <div className={styles.container}>
+            <div className={styles.app}>
+              {/* Simple Header - Only show on login page */}
+              {!isAuthenticated && (
+                <header className={styles.header}>
+                  <div className={styles.headerContent}>
+                    <h1 className={styles.logo}>
+                      <span className={styles.logoIcon}>📱</span>
+                      My Data Web
+                    </h1>
+                  </div>
+                </header>
+              )}
 
-            <main className={styles.main}>
-              <AppRoutes isAuthenticated={isAuthenticated} user={user} />
-            </main>
+              <main className={styles.main}>
+                <AppRoutes isAuthenticated={isAuthenticated} user={user} />
+              </main>
 
-            {/* Simple Footer */}
-            <footer className={styles.footer}>
-              <p>
-                Connected to Firebase • Same data as Android app • Personal use
-                only
-              </p>
-            </footer>
+              {/* Simple Footer */}
+              <footer className={styles.footer}>
+                <p>
+                  Connected to Firebase • Same data as Android app • Personal use
+                  only
+                </p>
+              </footer>
+            </div>
           </div>
-        </div>
-      </BrowserRouter>
-    </SettingsProvider>
+        </BrowserRouter>
+      </SettingsProvider>
+    </ErrorProvider>
   );
 }
 

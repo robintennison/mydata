@@ -15,6 +15,7 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import { firestore } from "../lib/firebase";
+import { useError } from "./ErrorContext";
 
 interface Settings {
   locations: string[];
@@ -75,40 +76,53 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
 }) => {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const { setError } = useError();
   const settingsRef = doc(firestore, "settings", "app");
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(settingsRef, (docSnapshot) => {
-      if (docSnapshot.exists()) {
-        const data = docSnapshot.data();
-        setSettings({
-          locations: data.locations || [],
-          boughtFor: data.boughtFor || [],
-          goldRatePerGram: data.goldRatePerGram || 0,
-          makingTaxPercent: data.makingTaxPercent || 0,
-          resaleDiscountPercent: data.resaleDiscountPercent || 0,
-          liabilities: data.liabilities || 0,
-          showInactive: data.showInactive || false,
-          showDelete: data.showDelete || false,
-          // Add EMW fields with defaults
-          EMW_interest: data.EMW_Interest !== undefined ? data.EMW_Interest : 5,
-          EMW_Date: data.EMW_Date || "2044-10",
-        });
-      } else {
-        // Create default document if it doesn't exist
-        setDoc(settingsRef, defaultSettings);
-        setSettings(defaultSettings);
+    const unsubscribe = onSnapshot(
+      settingsRef,
+      (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          setSettings({
+            locations: data.locations || [],
+            boughtFor: data.boughtFor || [],
+            goldRatePerGram: data.goldRatePerGram || 0,
+            makingTaxPercent: data.makingTaxPercent || 0,
+            resaleDiscountPercent: data.resaleDiscountPercent || 0,
+            liabilities: data.liabilities || 0,
+            showInactive: data.showInactive || false,
+            showDelete: data.showDelete || false,
+            // Add EMW fields with defaults
+            EMW_interest:
+              data.EMW_Interest !== undefined ? data.EMW_Interest : 5,
+            EMW_Date: data.EMW_Date || "2044-10",
+          });
+        } else {
+          // Create default document if it doesn't exist
+          setDoc(settingsRef, defaultSettings).catch(() => {
+            setError("Failed to initialize settings. Check your connection.");
+          });
+          setSettings(defaultSettings);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        setError("Firebase connection error. Your settings might be outdated.");
+        console.error("Firebase onSnapshot error:", error);
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    );
 
     return () => unsubscribe();
-  }, []);
+  }, [setError]);
 
   const updateSettings = async (updates: Partial<Settings>) => {
     try {
       await updateDoc(settingsRef, updates);
     } catch (error) {
+      setError("Failed to save settings. Please try again.");
       console.error("Error updating settings:", error);
     }
   };
@@ -119,6 +133,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         locations: arrayUnion(location.trim()),
       });
     } catch (error) {
+      setError("Failed to add location.");
       console.error("Error adding location:", error);
     }
   };
@@ -129,6 +144,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         locations: arrayRemove(location),
       });
     } catch (error) {
+      setError("Failed to remove location.");
       console.error("Error removing location:", error);
     }
   };
@@ -139,6 +155,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         boughtFor: arrayUnion(purpose.trim()),
       });
     } catch (error) {
+      setError("Failed to update preferences.");
       console.error("Error adding boughtFor:", error);
     }
   };
@@ -149,6 +166,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         boughtFor: arrayRemove(purpose),
       });
     } catch (error) {
+      setError("Failed to update preferences.");
       console.error("Error removing boughtFor:", error);
     }
   };

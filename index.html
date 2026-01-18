@@ -1,37 +1,5 @@
 <!doctype html>
 <html lang="en">
-  <!-- Add this to your index.html right before </body> -->
-<script>
-  // Emergency overflow fix
-  document.addEventListener('DOMContentLoaded', function() {
-    // Fix HTML and Body
-    document.documentElement.style.overflowX = 'hidden';
-    document.documentElement.style.width = '100vw';
-    document.documentElement.style.maxWidth = '100vw';
-    
-    document.body.style.overflowX = 'hidden';
-    document.body.style.width = '100vw';
-    document.body.style.maxWidth = '100vw';
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    
-    // Fix root
-    const root = document.getElementById('root');
-    if (root) {
-      root.style.overflowX = 'hidden';
-      root.style.width = '100vw';
-      root.style.maxWidth = '100vw';
-    }
-    
-    // Fix banking container
-    const bankingContainer = document.querySelector('.enhanced-banking-container');
-    if (bankingContainer) {
-      bankingContainer.style.overflowX = 'hidden';
-      bankingContainer.style.width = '100%';
-      bankingContainer.style.maxWidth = '100%';
-    }
-  });
-</script>
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -41,5 +9,36 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Emergency overflow fix
+      document.addEventListener('DOMContentLoaded', function() {
+        // Fix HTML and Body
+        document.documentElement.style.overflowX = 'hidden';
+        document.documentElement.style.width = '100vw';
+        document.documentElement.style.maxWidth = '100vw';
+        
+        document.body.style.overflowX = 'hidden';
+        document.body.style.width = '100vw';
+        document.body.style.maxWidth = '100vw';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        
+        // Fix root
+        const root = document.getElementById('root');
+        if (root) {
+          root.style.overflowX = 'hidden';
+          root.style.width = '100vw';
+          root.style.maxWidth = '100vw';
+        }
+        
+        // Fix banking container
+        const bankingContainer = document.querySelector('.enhanced-banking-container');
+        if (bankingContainer) {
+          bankingContainer.style.overflowX = 'hidden';
+          bankingContainer.style.width = '100%';
+          bankingContainer.style.maxWidth = '100%';
+        }
+      });
+    </script>
   </body>
 </html>

@@ -1,71 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBankingData } from "./modules/Banking/hooks/useBankingData";
 import { useSettings } from "./contexts/SettingsContext";
 import styles from "./MyDataHomepage.module.css";
+import {
+  calculateTotalBalance,
+  calculateTotalDeposits,
+  getUpcomingMaturities,
+} from "./modules/Banking/utils/bankingCalculations";
 
 const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
   const { accounts, deposits, adjustments, loading } = useBankingData();
 
-  const [upcomingMaturities, setUpcomingMaturities] = useState<any[]>([]);
-  const [totalBalance, setTotalBalance] = useState<number>(0);
-  const [totalDeposits, setTotalDeposits] = useState<number>(0);
-
-  // Calculate total balance (savings + adjusted deposits) AND total deposits
-  useEffect(() => {
-    if (accounts.length > 0 && deposits.length > 0) {
-      // Calculate total savings from all accounts
-      const totalSavings = accounts.reduce(
-        (sum, account) => sum + account.savingsAmount,
-        0
-      );
-
-      // Apply same filtering as BankingHomePage
-      const filteredDeposits = settings?.showInactive
-        ? deposits
-        : deposits.filter((deposit) => deposit.active !== false);
-
-      // Calculate total deposits (matching BankingHomePage logic)
-      const calculatedTotalDeposits = accounts.reduce((total, account) => {
-        const accountId = account.id;
-
-        // 1. Base deposits for this account
-        const baseDeposits = filteredDeposits
-          .filter((deposit) => deposit.accountId === accountId)
-          .reduce((sum, deposit) => sum + deposit.amount, 0);
-
-        // 2. Adjustments for this account
-        const adjustmentsTotal = adjustments
-          .filter((adj) => adj.accountId === accountId)
-          .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
-
-        // 3. Add them together (Android/BankingHomePage logic)
-        return total + baseDeposits + adjustmentsTotal;
-      }, 0);
-
-      setTotalDeposits(calculatedTotalDeposits);
-
-      // Total balance = savings + adjusted deposits
-      const calculatedTotalBalance = totalSavings + calculatedTotalDeposits;
-      setTotalBalance(calculatedTotalBalance);
-
-      // Calculate upcoming maturities (next 30 days)
-      const today = Date.now();
-      const thirtyDaysFromNow = today + 30 * 24 * 60 * 60 * 1000;
-
-      const upcoming = deposits
-        .filter(
-          (deposit) =>
-            deposit.endDate > today && deposit.endDate <= thirtyDaysFromNow
-        )
-        .sort((a, b) => a.endDate - b.endDate)
-        .slice(0, 5);
-
-      setUpcomingMaturities(upcoming);
+  // Memoize calculations for better performance
+  const { totalBalance, totalDeposits, upcomingMaturities } = useMemo(() => {
+    if (loading || accounts.length === 0) {
+      return { totalBalance: 0, totalDeposits: 0, upcomingMaturities: [] };
     }
-  }, [accounts, deposits, adjustments, settings?.showInactive]);
+
+    return {
+      totalBalance: calculateTotalBalance(
+        accounts,
+        deposits,
+        adjustments,
+        settings?.showInactive
+      ),
+      totalDeposits: calculateTotalDeposits(
+        accounts,
+        deposits,
+        adjustments,
+        settings?.showInactive
+      ),
+      upcomingMaturities: getUpcomingMaturities(deposits, 30, 5),
+    };
+  }, [accounts, deposits, adjustments, settings?.showInactive, loading]);
 
   // Format lakhs for display - REMOVED "L" suffix
   const formatLakhs = (amount: number): string => {

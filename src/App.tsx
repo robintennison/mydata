@@ -45,33 +45,7 @@ function App() {
     <ErrorProvider>
       <SettingsProvider>
         <BrowserRouter>
-          <div className={styles.container}>
-            <div className={styles.app}>
-              {/* Simple Header - Only show on login page */}
-              {!isAuthenticated && (
-                <header className={styles.header}>
-                  <div className={styles.headerContent}>
-                    <h1 className={styles.logo}>
-                      <span className={styles.logoIcon}>📱</span>
-                      My Data Web
-                    </h1>
-                  </div>
-                </header>
-              )}
-
-              <main className={styles.main}>
-                <AppRoutes isAuthenticated={isAuthenticated} user={user} />
-              </main>
-
-              {/* Simple Footer */}
-              <footer className={styles.footer}>
-                <p>
-                  Connected to Firebase • Same data as Android app • Personal use
-                  only
-                </p>
-              </footer>
-            </div>
-          </div>
+          <AppRoutes isAuthenticated={isAuthenticated} user={user} />
         </BrowserRouter>
       </SettingsProvider>
     </ErrorProvider>

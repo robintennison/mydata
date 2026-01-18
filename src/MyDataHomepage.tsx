@@ -180,6 +180,31 @@ const MyDataHomepage: React.FC = () => {
         )}
       </div>
 
+      {/* Module Navigation Grid */}
+      <div className={styles.section}>
+        <div className={styles.sectionHeader} style={{ marginBottom: "15px" }}>
+          <div className={styles.sectionTitle}>Modules</div>
+        </div>
+        <div className={styles.moduleGrid}>
+          <div className={styles.moduleCard} onClick={() => navigate("/banking")}>
+            <span className={styles.moduleIcon} style={{ color: "#34a853" }}>🏦</span>
+            <span className={styles.moduleLabel}>Banking</span>
+          </div>
+          <div className={styles.moduleCard} onClick={() => navigate("/jewellery")}>
+            <span className={styles.moduleIcon} style={{ color: "#FFD700" }}>💎</span>
+            <span className={styles.moduleLabel}>Jewellery</span>
+          </div>
+          <div className={styles.moduleCard} onClick={() => navigate("/properties")}>
+            <span className={styles.moduleIcon} style={{ color: "#ea4335" }}>🏠</span>
+            <span className={styles.moduleLabel}>Properties</span>
+          </div>
+          <div className={styles.moduleCard} onClick={() => navigate("/online")}>
+            <span className={styles.moduleIcon} style={{ color: "#4285f4" }}>🌐</span>
+            <span className={styles.moduleLabel}>Online</span>
+          </div>
+        </div>
+      </div>
+
       {/* Placeholder Section for Future Features - Compact */}
       <div className={styles.section}>
         <div className={styles.sectionHeader} style={{ marginBottom: "15px" }}>

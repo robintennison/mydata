@@ -89,7 +89,7 @@
   border-radius: 12px;
   padding: 12px 10px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #e9ecef;
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
@@ -101,7 +101,7 @@
 
 .statCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .cardTitle {
@@ -128,7 +128,7 @@
   border-radius: 12px;
   margin: 12px;
   padding: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #e9ecef;
   margin-bottom: 15px;
 }
@@ -176,7 +176,7 @@
 
 .maturityCard:hover {
   transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .maturityLeft {
@@ -249,4 +249,68 @@
   font-size: 0.8rem;
   color: #666;
   line-height: 1.4;
+}
+
+.moduleGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.moduleCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.moduleCard:hover {
+  background-color: #eef2f7;
+  transform: translateY(-2px);
+  border-color: #e9ecef;
+}
+
+.moduleIcon {
+  font-size: 1.5rem;
+  margin-bottom: 6px;
+}
+
+.moduleLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4285f4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

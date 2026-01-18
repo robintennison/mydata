@@ -10,15 +10,13 @@ import AddAccountPage from "../modules/Banking/pages/AddAccountPage";
 import EditAccountPage from "../modules/Banking/pages/EditAccountPage";
 import DepositSummaryPage from "../modules/Banking/pages/DepositSummaryPage";
 import SettingsPage from "../modules/SettingsPage";
+import Layout from "../components/Layout/Layout";
 import LoginForm from "../components/Auth/LoginForm";
 import MyDataHomepage from "../MyDataHomepage";
 
 // Import History pages
 import HistoryListPage from "../modules/Banking/pages/HistoryListPage"; // Add this import
 import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage"; // Add this import
-
-// Import Footer component
-import Footer from "../components/Footer";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -174,6 +172,29 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
+
+  // Other Module Routes (Currently placeholders)
+  {
+    path: "/online",
+    element: <div style={{ padding: '20px', textAlign: 'center' }}><h2>🌐 Online Module</h2><p>Coming Soon</p></div>,
+    title: "Online",
+    icon: "🌐",
+    requiresAuth: true,
+  },
+  {
+    path: "/jewellery",
+    element: <div style={{ padding: '20px', textAlign: 'center' }}><h2>💎 Jewellery Module</h2><p>Coming Soon</p></div>,
+    title: "Jewellery",
+    icon: "💎",
+    requiresAuth: true,
+  },
+  {
+    path: "/properties",
+    element: <div style={{ padding: '20px', textAlign: 'center' }}><h2>🏠 Properties Module</h2><p>Coming Soon</p></div>,
+    title: "Properties",
+    icon: "🏠",
+    requiresAuth: true,
+  },
 ];
 
 // Helper function to get current route
@@ -265,10 +286,13 @@ const AppRoutes: React.FC<AppRoutesProps> = ({ isAuthenticated }) => {
   }, []);
 
   const currentRoute = getCurrentRoute(currentPath);
-  const shouldShowFooter = !currentRoute?.hideFooter && isAuthenticated;
 
   return (
-    <>
+    <Layout 
+      title={currentRoute?.title} 
+      hideHeader={currentRoute?.path === '/login'}
+      hideFooter={currentRoute?.hideFooter}
+    >
       <Routes>
         {allRoutes.map((route) => {
           const routeElement = route.requiresAuth ? (
@@ -295,10 +319,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({ isAuthenticated }) => {
           }
         />
       </Routes>
-
-      {/* Conditionally render Footer */}
-      {shouldShowFooter && <Footer />}
-    </>
+    </Layout>
   );
 };
 

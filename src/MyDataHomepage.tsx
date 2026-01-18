@@ -8,7 +8,7 @@ import {
   calculateTotalDeposits,
   getUpcomingMaturities,
 } from "./modules/Banking/utils/bankingCalculations";
-import CombinedAssetPieChart from "./modules/Banking/pages/CombinedAssetPieChart";
+import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 
 const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,13 +26,13 @@ const MyDataHomepage: React.FC = () => {
         accounts,
         deposits,
         adjustments,
-        settings?.showInactive
+        settings?.showInactive,
       ),
       totalDeposits: calculateTotalDeposits(
         accounts,
         deposits,
         adjustments,
-        settings?.showInactive
+        settings?.showInactive,
       ),
       upcomingMaturities: getUpcomingMaturities(deposits, 30, 5),
     };
@@ -122,12 +122,12 @@ const MyDataHomepage: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Asset Distribution Chart */}
-      <CombinedAssetPieChart 
-        accounts={accounts} 
-        deposits={deposits} 
-        adjustments={adjustments} 
+      <CombinedAssetBarChart
+        accounts={accounts}
+        deposits={deposits}
+        adjustments={adjustments}
         showInactive={settings?.showInactive}
       />
 
@@ -188,7 +188,6 @@ const MyDataHomepage: React.FC = () => {
           </div>
         )}
       </div>
-
 
       {/* Placeholder Section for Future Features - Compact */}
       <div className={styles.section}>

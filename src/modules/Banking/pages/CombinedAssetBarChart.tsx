@@ -161,7 +161,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
         ticks: {
           callback: function (value: string | number) {
             if (typeof value === "number") {
-              return `${value} L`;
+              return value.toFixed(1); // Remove "L" suffix
             }
             return value;
           },
@@ -170,13 +170,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
           },
         },
         title: {
-          display: true,
-          text: "Amount (in Lakhs)",
-          font: {
-            size: 12,
-            weight: "bold" as const,
-          },
-          padding: { top: 10, bottom: 0 },
+          display: false, // Hide the x-axis title to remove reference to "Lakhs"
         },
         stacked: true,
       },
@@ -235,7 +229,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
             const label = context.dataset.label || "";
             const value = context.parsed.x;
             if (typeof value === "number") {
-              return `${label}: ${value.toFixed(2)} Lakhs`;
+              return `${label}: ${value.toFixed(1)}`; // Remove "Lakhs"
             }
             return `${label}: ${value}`;
           },
@@ -243,7 +237,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
             const savings = context[0].parsed._stacks?.x[0] || 0;
             const deposits = context[0].parsed._stacks?.x[1] || 0;
             const total = savings + deposits;
-            return `Total: ${total.toFixed(2)} Lakhs`;
+            return `Total: ${total.toFixed(1)}`; // Remove "Lakhs"
           },
         },
         backgroundColor: "rgba(255, 255, 255, 0.95)",
@@ -265,9 +259,9 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
           size: 10,
         } as any,
         formatter: (context: Context) => {
-          // Only show total on the deposits segment (top of stack)
+          // Show both savings and deposits values
           if (context.datasetIndex === 1) {
-            // Deposits dataset
+            // Deposits dataset (top of stack)
             const savings = context.chart.data.datasets[0].data[
               context.dataIndex
             ] as number;
@@ -275,8 +269,11 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
               context.dataIndex
             ] as number;
             const total = savings + deposits;
-            if (total >= 1) {
-              return `${total.toFixed(1)} L`;
+
+            if (total >= 0.5) {
+              // Show for totals >= 0.5
+              // Create a multi-line label showing both values
+              return `S: ${savings.toFixed(1)}\nD: ${deposits.toFixed(1)}`;
             }
           }
           return "";
@@ -291,9 +288,13 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
               context.dataIndex
             ] as number;
             const total = savings + deposits;
-            return total >= 1;
+            return total >= 0.5; // Show for totals >= 0.5
           }
           return false;
+        },
+        padding: {
+          top: 2,
+          bottom: 2,
         },
       },
     },

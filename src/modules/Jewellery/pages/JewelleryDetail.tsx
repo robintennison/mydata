@@ -4,14 +4,26 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
 
+interface Bill {
+  id: string;
+  downloadUrl: string;
+  mimeType: string;
+  notes: string | null;
+  createdAt: number;
+  uploadedAt: number;
+}
+
 const JewelleryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [item, setItem] = useState<Jewellery | null>(null);
+  const [bill, setBill] = useState<Bill | null>(null);
   const [loading, setLoading] = useState(true);
+  const [billLoading, setBillLoading] = useState(false);
+  const [billError, setBillError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchJewellery = async () => {
+    const fetchData = async () => {
       if (!id) {
         console.error("No ID provided");
         setLoading(false);
@@ -20,14 +32,15 @@ const JewelleryDetail: React.FC = () => {
 
       try {
         const db = getFirestore();
+
         const docRef = doc(db, "jewellery", id);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          // Create a proper Jewellery object with the id
+
           const jewellery: Jewellery = {
-            id: docSnap.id, // Use docSnap.id which is guaranteed to be a string
+            id: docSnap.id,
             code: data.code || "",
             description: data.description || "",
             weight: data.weight || 0,
@@ -43,8 +56,11 @@ const JewelleryDetail: React.FC = () => {
             verificationNotes: data.verificationNotes || "",
           };
           setItem(jewellery);
+
+          if (data.billId) {
+            await fetchBill(data.billId);
+          }
         } else {
-          console.log("No such document!");
           setItem(null);
         }
       } catch (error) {
@@ -54,8 +70,154 @@ const JewelleryDetail: React.FC = () => {
       }
     };
 
-    fetchJewellery();
+    fetchData();
   }, [id]);
+
+  const fetchBill = async (billId: string) => {
+    try {
+      setBillLoading(true);
+      setBillError(null);
+      const db = getFirestore();
+      const billRef = doc(db, "bills", billId);
+      const billSnap = await getDoc(billRef);
+
+      if (billSnap.exists()) {
+        const data = billSnap.data();
+
+        const billData: Bill = {
+          id: billSnap.id,
+          downloadUrl: data.downloadUrl || "",
+          mimeType: data.mimeType || "",
+          notes: data.notes || null,
+          createdAt: data.createdAt || 0,
+          uploadedAt: data.uploadedAt || 0,
+        };
+
+        if (!billData.downloadUrl) {
+          const possibleUrlFields = [
+            "url",
+            "fileUrl",
+            "imageUrl",
+            "pdfUrl",
+            "billUrl",
+            "documentUrl",
+            "attachmentUrl",
+          ];
+
+          for (const field of possibleUrlFields) {
+            if (data[field]) {
+              billData.downloadUrl = data[field];
+              break;
+            }
+          }
+        }
+
+        if (billData.downloadUrl) {
+          setBill(billData);
+        } else {
+          setBillError("Bill has no downloadable content");
+          setBill(billData);
+        }
+      } else {
+        setBillError("Bill document not found");
+        setBill(null);
+      }
+    } catch (error) {
+      console.error("Error fetching bill:", error);
+      setBillError(`Failed to load bill: ${error}`);
+      setBill(null);
+    } finally {
+      setBillLoading(false);
+    }
+  };
+
+  const formatDate = (timestamp: number): string => {
+    if (!timestamp || timestamp === 0) return "N/A";
+
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid date";
+    }
+  };
+
+  const handleViewBill = () => {
+    if (!bill) return;
+
+    if (bill.downloadUrl) {
+      window.open(bill.downloadUrl, "_blank");
+    } else {
+      alert(`Bill Details:\n
+Bill Notes: ${bill.notes || "No notes"}\n
+File Type: ${bill.mimeType || "Unknown"}\n
+Uploaded: ${formatDate(bill.uploadedAt)}\n
+\nNo bill document URL available.`);
+    }
+  };
+
+  const handleDownloadBill = () => {
+    if (!bill || !bill.downloadUrl) {
+      alert("No bill document available for download.");
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = bill.downloadUrl;
+
+    let filename = `Bill_${item?.code || "Document"}`;
+
+    try {
+      const urlObj = new URL(bill.downloadUrl);
+      const pathParts = urlObj.pathname.split("/");
+      const lastPart = pathParts[pathParts.length - 1];
+      if (lastPart && lastPart.includes(".")) {
+        filename = lastPart;
+      }
+    } catch (e) {
+      console.log("Could not parse URL for filename");
+    }
+
+    if (bill.mimeType) {
+      if (
+        bill.mimeType.includes("pdf") &&
+        !filename.toLowerCase().endsWith(".pdf")
+      ) {
+        filename += ".pdf";
+      } else if (
+        bill.mimeType.includes("image") &&
+        !filename.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)
+      ) {
+        if (bill.mimeType.includes("jpeg")) {
+          filename += ".jpg";
+        } else if (bill.mimeType.includes("png")) {
+          filename += ".png";
+        } else if (bill.mimeType.includes("gif")) {
+          filename += ".gif";
+        } else {
+          filename += ".jpg";
+        }
+      }
+    }
+
+    link.download = filename;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const getFileTypeIcon = (mimeType: string): string => {
+    if (mimeType.includes("pdf")) return "📄";
+    if (mimeType.includes("image")) return "🖼️";
+    if (mimeType.includes("text")) return "📝";
+    return "📎";
+  };
 
   if (loading) {
     return (
@@ -172,6 +334,145 @@ const JewelleryDetail: React.FC = () => {
                 ? new Date(item.purchaseDate).toLocaleDateString()
                 : "Not specified"}
             </div>
+
+            {/* Bill Information Section */}
+            {item.billId && (
+              <div
+                style={{
+                  backgroundColor: "#f8fafc",
+                  padding: "15px",
+                  borderRadius: "8px",
+                  marginTop: "10px",
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <strong style={{ fontSize: "16px" }}>Attached Bill</strong>
+                  {billLoading && (
+                    <span style={{ fontSize: "12px", color: "#6b7280" }}>
+                      Loading bill...
+                    </span>
+                  )}
+                  {billError && (
+                    <span style={{ fontSize: "12px", color: "#ef4444" }}>
+                      {billError}
+                    </span>
+                  )}
+                </div>
+
+                {bill ? (
+                  <>
+                    <div style={{ marginBottom: "10px" }}>
+                      <div>
+                        <strong>Notes:</strong> {bill.notes || "No notes"}
+                      </div>
+                      <div>
+                        <strong>File Type:</strong> {bill.mimeType || "Unknown"}
+                      </div>
+                      <div>
+                        <strong>Uploaded:</strong> {formatDate(bill.uploadedAt)}
+                      </div>
+                      <div>
+                        <strong>Status:</strong>{" "}
+                        {bill.downloadUrl ? (
+                          <span style={{ color: "#10b981" }}>Available</span>
+                        ) : (
+                          <span style={{ color: "#ef4444" }}>
+                            No download URL
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Bill Action Buttons */}
+                    {bill.downloadUrl && (
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          marginTop: "15px",
+                        }}
+                      >
+                        <button
+                          onClick={handleViewBill}
+                          style={{
+                            flex: 1,
+                            padding: "10px",
+                            backgroundColor: "#3b82f6",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                          }}
+                          title="View Bill"
+                        >
+                          <span>{getFileTypeIcon(bill.mimeType)}</span>
+                          <span>View Bill</span>
+                        </button>
+
+                        <button
+                          onClick={handleDownloadBill}
+                          style={{
+                            flex: 1,
+                            padding: "10px",
+                            backgroundColor: "#10b981",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                          }}
+                          title="Download Bill"
+                        >
+                          <span>📥</span>
+                          <span>Download</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {!bill.downloadUrl && (
+                      <div
+                        style={{
+                          padding: "10px",
+                          backgroundColor: "#fef3c7",
+                          borderRadius: "6px",
+                          color: "#92400e",
+                          fontSize: "14px",
+                        }}
+                      >
+                        ⚠️ Bill document exists but no download URL is
+                        available.
+                      </div>
+                    )}
+                  </>
+                ) : !billLoading && !billError ? (
+                  <div
+                    style={{
+                      color: "#6b7280",
+                      textAlign: "center",
+                      padding: "10px",
+                    }}
+                  >
+                    Bill information not loaded
+                  </div>
+                ) : null}
+              </div>
+            )}
+
             <div>
               <strong>Status:</strong>{" "}
               <span

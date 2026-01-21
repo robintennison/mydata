@@ -15,6 +15,15 @@ import { jewelleryStyles } from "../styles/jewelleryStyles";
 import JewelleryNavigation from "../components/JewelleryNavigation";
 import { useJewellerySettings } from "../hooks/useSettingsData";
 
+// Interface for Bill data
+interface Bill {
+  id: string;
+  billNumber: string;
+  purchaseDate: number;
+  shopName: string;
+  // Add other bill fields as needed
+}
+
 const JewelleryList: React.FC = () => {
   const navigate = useNavigate();
   const { showInactive: showInactiveSetting, showDelete: showDeleteSetting } =
@@ -22,6 +31,7 @@ const JewelleryList: React.FC = () => {
 
   const [jewelleryItems, setJewelleryItems] = useState<Jewellery[]>([]);
   const [filteredItems, setFilteredItems] = useState<Jewellery[]>([]);
+  const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInactive, setShowInactive] = useState(showInactiveSetting);
   const [error, setError] = useState<string | null>(null);
@@ -36,52 +46,78 @@ const JewelleryList: React.FC = () => {
   const boughtForButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const fetchJewellery = async () => {
+    const fetchData = async () => {
       try {
-        console.log("Starting to fetch jewellery...");
+        console.log("Starting to fetch jewellery and bills...");
         setError(null);
 
         const db = getFirestore();
 
-        let q = query(collection(db, "jewellery"));
+        // Fetch jewellery items
+        let jewelleryQuery = query(collection(db, "jewellery"));
 
         if (!showInactive) {
-          q = query(q, where("active", "==", true));
+          jewelleryQuery = query(jewelleryQuery, where("active", "==", true));
         }
 
-        q = query(q, orderBy("code", "desc"));
+        jewelleryQuery = query(jewelleryQuery, orderBy("code", "desc"));
 
-        const snapshot = await getDocs(q);
-        console.log(
-          `Query returned ${snapshot.size} items, showInactive: ${showInactive}`,
+        // Fetch bills in parallel
+        const billsQuery = query(collection(db, "bills"));
+
+        const [jewellerySnapshot, billsSnapshot] = await Promise.all([
+          getDocs(jewelleryQuery),
+          getDocs(billsQuery),
+        ]);
+
+        console.log(`Jewellery query returned ${jewellerySnapshot.size} items`);
+        console.log(`Bills query returned ${billsSnapshot.size} items`);
+
+        // Parse jewellery items
+        const items: Jewellery[] = [];
+        jewellerySnapshot.forEach(
+          (doc: QueryDocumentSnapshot<DocumentData>) => {
+            const data = doc.data();
+            const item: Jewellery = {
+              id: doc.id,
+              code: data.code || "",
+              description: data.description || "",
+              weight: data.weight || 0,
+              location: data.location || "",
+              boughtFor: data.boughtFor || "",
+              purchaseDate: data.purchaseDate || 0,
+              imageUrl: data.imageUrl || "",
+              active: data.active !== false,
+              billId: data.billId,
+              lastVerified: data.lastVerified || 0,
+              verificationStatus: data.verificationStatus || "Not Verified",
+              verificationNotes: data.verificationNotes || "",
+            };
+            items.push(item);
+          },
         );
 
-        const items: Jewellery[] = [];
-        snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+        // Parse bills
+        const billItems: Bill[] = [];
+        billsSnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
           const data = doc.data();
-          const item: Jewellery = {
+          const bill: Bill = {
             id: doc.id,
-            code: data.code || "",
-            description: data.description || "",
-            weight: data.weight || 0,
-            location: data.location || "",
-            boughtFor: data.boughtFor || "",
+            billNumber: data.billNumber || "",
             purchaseDate: data.purchaseDate || 0,
-            imageUrl: data.imageUrl || "",
-            active: data.active !== false,
-            billId: data.billId,
-            lastVerified: data.lastVerified || 0,
-            verificationStatus: data.verificationStatus || "Not Verified",
-            verificationNotes: data.verificationNotes || "",
+            shopName: data.shopName || "",
           };
-          items.push(item);
+          billItems.push(bill);
         });
 
-        console.log(`Parsed ${items.length} items`);
+        console.log(
+          `Parsed ${items.length} jewellery items and ${billItems.length} bills`,
+        );
         setJewelleryItems(items);
         setFilteredItems(items);
+        setBills(billItems);
       } catch (error: any) {
-        console.error("Error fetching jewellery:", error);
+        console.error("Error fetching data:", error);
 
         if (
           error.code === "failed-precondition" &&
@@ -100,7 +136,7 @@ const JewelleryList: React.FC = () => {
       }
     };
 
-    fetchJewellery();
+    fetchData();
   }, [showInactive]);
 
   // Apply filters whenever search term or filters change
@@ -132,6 +168,29 @@ const JewelleryList: React.FC = () => {
     setFilteredItems(result);
   }, [jewelleryItems, searchTerm, selectedLocation, selectedBoughtFor]);
 
+  // Get bill details for a jewellery item
+  const getBillDetails = (billId: string | undefined) => {
+    if (!billId) return null;
+    return bills.find((bill) => bill.id === billId);
+  };
+
+  // Format date for display
+  const formatDate = (timestamp: number): string => {
+    if (!timestamp || timestamp === 0) return "";
+
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
+  };
+
   // Get unique locations and boughtFor values for filters
   const locations = Array.from(
     new Set(jewelleryItems.map((item) => item.location).filter(Boolean)),
@@ -145,32 +204,38 @@ const JewelleryList: React.FC = () => {
     setLoading(true);
     setJewelleryItems([]);
     setFilteredItems([]);
+    setBills([]);
     setError(null);
     setSearchTerm("");
     setSelectedLocation("");
     setSelectedBoughtFor("");
 
     setTimeout(() => {
-      fetchJewellery();
+      fetchData();
     }, 100);
   };
 
-  const fetchJewellery = async () => {
+  const fetchData = async () => {
     try {
       const db = getFirestore();
 
-      let q = query(collection(db, "jewellery"));
+      let jewelleryQuery = query(collection(db, "jewellery"));
 
       if (!showInactive) {
-        q = query(q, where("active", "==", true));
+        jewelleryQuery = query(jewelleryQuery, where("active", "==", true));
       }
 
-      q = query(q, orderBy("code", "desc"));
+      jewelleryQuery = query(jewelleryQuery, orderBy("code", "desc"));
 
-      const snapshot = await getDocs(q);
+      const billsQuery = query(collection(db, "bills"));
+
+      const [jewellerySnapshot, billsSnapshot] = await Promise.all([
+        getDocs(jewelleryQuery),
+        getDocs(billsQuery),
+      ]);
 
       const items: Jewellery[] = [];
-      snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+      jewellerySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
         const data = doc.data();
         items.push({
           id: doc.id,
@@ -189,8 +254,20 @@ const JewelleryList: React.FC = () => {
         });
       });
 
+      const billItems: Bill[] = [];
+      billsSnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+        const data = doc.data();
+        billItems.push({
+          id: doc.id,
+          billNumber: data.billNumber || "",
+          purchaseDate: data.purchaseDate || 0,
+          shopName: data.shopName || "",
+        });
+      });
+
       setJewelleryItems(items);
       setFilteredItems(items);
+      setBills(billItems);
       setError(null);
     } catch (error: any) {
       console.error("Refresh error:", error);
@@ -263,7 +340,7 @@ const JewelleryList: React.FC = () => {
       <div style={jewelleryStyles.container}>
         <div style={jewelleryStyles.loading}>
           <div style={jewelleryStyles.spinner}></div>
-          <p>Loading jewellery items...</p>
+          <p>Loading jewellery items and bills...</p>
         </div>
       </div>
     );
@@ -762,210 +839,238 @@ const JewelleryList: React.FC = () => {
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column" }}>
-              {filteredItems.map((item, index) => (
-                <div
-                  key={item.id}
-                  style={{
-                    backgroundColor: "white",
-                    padding: "6px 10px",
-                    minHeight: "50px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    borderBottom:
-                      index < filteredItems.length - 1
-                        ? "1px solid #e5e7eb"
-                        : "none",
-                    opacity: item.active ? 1 : 0.7,
-                    position: "relative",
-                  }}
-                  onClick={() => navigate(`/jewellery/detail/${item.id}`)}
-                >
-                  {/* Item Image */}
+              {filteredItems.map((item, index) => {
+                // Get bill details for this item
+                const billDetails = getBillDetails(item.billId);
+                const purchaseDate =
+                  billDetails?.purchaseDate || item.purchaseDate;
+                const formattedDate = formatDate(purchaseDate);
+
+                return (
                   <div
+                    key={item.id}
                     style={{
-                      width: "40px",
-                      height: "40px",
-                      flexShrink: 0,
-                      backgroundColor: "#f3f4f6",
-                      borderRadius: "4px",
+                      backgroundColor: "white",
+                      padding: "6px 10px",
+                      minHeight: "50px",
+                      cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      overflow: "hidden",
-                      border: !item.active ? "1px dashed #9ca3af" : "none",
+                      gap: "8px",
+                      borderBottom:
+                        index < filteredItems.length - 1
+                          ? "1px solid #e5e7eb"
+                          : "none",
+                      opacity: item.active ? 1 : 0.7,
+                      position: "relative",
                     }}
+                    onClick={() => navigate(`/jewellery/detail/${item.id}`)}
                   >
-                    {item.imageUrl ? (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.code}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      <div style={{ fontSize: "16px", color: "#9ca3af" }}>
-                        💎
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Item Details - FIXED LAYOUT */}
-                  <div
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      paddingRight: showDeleteSetting ? "36px" : "0", // Space for edit button
-                    }}
-                  >
-                    {/* ROW 1: Code + Description + Weight */}
+                    {/* Item Image */}
                     <div
                       style={{
-                        display: "flex",
-                        alignItems: "baseline",
-                        justifyContent: "space-between",
-                        marginBottom: "2px",
-                        gap: "6px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "baseline",
-                          gap: "4px",
-                          minWidth: 0,
-                          flex: 1,
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontWeight: "600",
-                            fontSize: "13px",
-                            color: item.active ? "#111827" : "#6b7280",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {item.code}
-                        </div>
-                        {!item.active && (
-                          <span
-                            style={{
-                              fontSize: "9px",
-                              backgroundColor: "#9ca3af",
-                              color: "white",
-                              padding: "1px 4px",
-                              borderRadius: "8px",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            Inactive
-                          </span>
-                        )}
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#6b7280",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            flex: 1,
-                            minWidth: 0,
-                          }}
-                        >
-                          {item.description}
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#374151",
-                          fontWeight: "500",
-                          whiteSpace: "nowrap",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {item.weight}g
-                      </div>
-                    </div>
-
-                    {/* ROW 2: Location • Bought For */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        fontSize: "10px",
-                        color: "#9ca3af",
-                        gap: "4px",
-                      }}
-                    >
-                      {item.location && (
-                        <>
-                          <span>{item.location}</span>
-                          {item.boughtFor && <span>•</span>}
-                        </>
-                      )}
-                      {item.boughtFor && <span>{item.boughtFor}</span>}
-                    </div>
-                  </div>
-
-                  {/* Status Indicator */}
-                  <div
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      backgroundColor:
-                        item.verificationStatus === "Verified"
-                          ? "#10b981"
-                          : item.verificationStatus === "Missing"
-                            ? "#ef4444"
-                            : "#d1d5db",
-                      flexShrink: 0,
-                      marginRight: showDeleteSetting ? "36px" : "0", // Align with edit button space
-                    }}
-                    title={item.verificationStatus}
-                  />
-
-                  {/* Edit Button - Only show if showDeleteSetting is true */}
-                  {showDeleteSetting && (
-                    <button
-                      onClick={(e) => handleEditClick(e, item.id)}
-                      style={{
-                        position: "absolute",
-                        right: "8px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        backgroundColor: "transparent",
-                        border: "none",
-                        fontSize: "14px",
-                        color: "#3b82f6",
-                        cursor: "pointer",
-                        padding: "4px",
+                        width: "40px",
+                        height: "40px",
+                        flexShrink: 0,
+                        backgroundColor: "#f3f4f6",
                         borderRadius: "4px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        width: "28px",
-                        height: "28px",
-                        zIndex: 2,
-                      }}
-                      title="Edit"
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = "#e0f2fe";
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
+                        overflow: "hidden",
+                        border: !item.active ? "1px dashed #9ca3af" : "none",
                       }}
                     >
-                      ✏️
-                    </button>
-                  )}
-                </div>
-              ))}
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.code}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <div style={{ fontSize: "16px", color: "#9ca3af" }}>
+                          💎
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Item Details */}
+                    <div
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        paddingRight: showDeleteSetting ? "36px" : "0",
+                      }}
+                    >
+                      {/* ROW 1: Code + Description + Weight */}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "baseline",
+                          justifyContent: "space-between",
+                          marginBottom: "2px",
+                          gap: "6px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "baseline",
+                            gap: "4px",
+                            minWidth: 0,
+                            flex: 1,
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontWeight: "600",
+                              fontSize: "13px",
+                              color: item.active ? "#111827" : "#6b7280",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {item.code}
+                          </div>
+                          {!item.active && (
+                            <span
+                              style={{
+                                fontSize: "9px",
+                                backgroundColor: "#9ca3af",
+                                color: "white",
+                                padding: "1px 4px",
+                                borderRadius: "8px",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              Inactive
+                            </span>
+                          )}
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              color: "#6b7280",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              flex: 1,
+                              minWidth: 0,
+                            }}
+                          >
+                            {item.description}
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#374151",
+                            fontWeight: "500",
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {item.weight}g
+                        </div>
+                      </div>
+
+                      {/* ROW 2: Location • Bought For • Purchase Date */}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          fontSize: "10px",
+                          color: "#9ca3af",
+                          gap: "4px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {item.location && (
+                          <>
+                            <span>{item.location}</span>
+                            {(item.boughtFor || formattedDate) && (
+                              <span>•</span>
+                            )}
+                          </>
+                        )}
+                        {item.boughtFor && (
+                          <>
+                            <span>{item.boughtFor}</span>
+                            {formattedDate && <span>•</span>}
+                          </>
+                        )}
+                        {formattedDate && (
+                          <span title={`Purchase Date: ${formattedDate}`}>
+                            📅 {formattedDate}
+                          </span>
+                        )}
+                        {!item.location &&
+                          !item.boughtFor &&
+                          !formattedDate && (
+                            <span style={{ fontStyle: "italic" }}>
+                              No details
+                            </span>
+                          )}
+                      </div>
+                    </div>
+
+                    {/* Status Indicator */}
+                    <div
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        backgroundColor:
+                          item.verificationStatus === "Verified"
+                            ? "#10b981"
+                            : item.verificationStatus === "Missing"
+                              ? "#ef4444"
+                              : "#d1d5db",
+                        flexShrink: 0,
+                        marginRight: showDeleteSetting ? "36px" : "0",
+                      }}
+                      title={item.verificationStatus}
+                    />
+
+                    {/* Edit Button */}
+                    {showDeleteSetting && (
+                      <button
+                        onClick={(e) => handleEditClick(e, item.id)}
+                        style={{
+                          position: "absolute",
+                          right: "8px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          backgroundColor: "transparent",
+                          border: "none",
+                          fontSize: "14px",
+                          color: "#3b82f6",
+                          cursor: "pointer",
+                          padding: "4px",
+                          borderRadius: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: "28px",
+                          height: "28px",
+                          zIndex: 2,
+                        }}
+                        title="Edit"
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.backgroundColor = "#e0f2fe";
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                        }}
+                      >
+                        ✏️
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

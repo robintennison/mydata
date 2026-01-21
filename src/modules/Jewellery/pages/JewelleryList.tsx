@@ -29,54 +29,24 @@ const JewelleryList: React.FC = () => {
 
         const db = getFirestore();
 
-        // Try without any filters first
-        const allItemsRef = collection(db, "jewellery");
-        const allSnapshot = await getDocs(allItemsRef);
-
-        console.log(`Found ${allSnapshot.size} total documents in collection`);
-
-        if (allSnapshot.size === 0) {
-          console.log("Collection is empty");
-          setJewelleryItems([]);
-          setLoading(false);
-          return;
-        }
-
-        // Log first few documents - FIXED: forEach takes only one parameter
-        let logCount = 0;
-        allSnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-          if (logCount < 3) {
-            console.log(`Document ${logCount + 1}:`, {
-              id: doc.id,
-              data: doc.data(),
-            });
-            logCount++;
-          }
-        });
-
-        // Now try with filters
+        // EXACT SAME QUERY AS KOTLIN
         let q = query(collection(db, "jewellery"));
 
-        // Check if documents have 'active' field
-        const firstDoc = allSnapshot.docs[0];
-        const firstData = firstDoc.data();
-        const hasActiveField = "active" in firstData;
-        console.log("Documents have 'active' field:", hasActiveField);
-
-        if (!showInactive && hasActiveField) {
+        if (!showInactive) {
           q = query(q, where("active", "==", true));
         }
 
-        // Try without orderBy first to avoid index errors
-        try {
-          q = query(q, orderBy("code"));
-        } catch (orderError) {
-          console.log("Could not order by code, will fetch unordered");
-          // Continue without ordering
-        }
+        // Newest purchases first (actually newest by code in descending order)
+        q = query(q, orderBy("code", "desc"));
+
+        console.log("Executing query:", {
+          collection: "jewellery",
+          filter: showInactive ? "all items" : "active only",
+          orderBy: "code desc",
+        });
 
         const snapshot = await getDocs(q);
-        console.log(`Filtered query returned ${snapshot.size} items`);
+        console.log(`Query returned ${snapshot.size} items`);
 
         const items: Jewellery[] = [];
         snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
@@ -103,7 +73,20 @@ const JewelleryList: React.FC = () => {
         setJewelleryItems(items);
       } catch (error: any) {
         console.error("Error fetching jewellery:", error);
-        setError(`Failed to load: ${error.message}`);
+
+        // If it's an index error, show helpful message
+        if (
+          error.code === "failed-precondition" &&
+          error.message.includes("index")
+        ) {
+          setError(`Index required. Please create a Firestore composite index for:
+            Collection: jewellery
+            Fields: active (ascending), code (descending)
+            
+            Or click the link in the browser console to create it automatically.`);
+        } else {
+          setError(`Failed to load: ${error.message}`);
+        }
       } finally {
         setLoading(false);
       }
@@ -112,18 +95,33 @@ const JewelleryList: React.FC = () => {
     fetchJewellery();
   }, [showInactive]);
 
-  // Simple refresh function
+  // Refresh function
   const handleRefresh = () => {
     setLoading(true);
-    fetchJewellery();
+    setJewelleryItems([]);
+    setError(null);
+
+    // Re-fetch after a short delay
+    setTimeout(() => {
+      fetchJewellery();
+    }, 100);
   };
 
   // Re-fetch function
   const fetchJewellery = async () => {
     try {
       const db = getFirestore();
-      const jewelleryRef = collection(db, "jewellery");
-      const snapshot = await getDocs(jewelleryRef);
+
+      // EXACT SAME QUERY AS KOTLIN
+      let q = query(collection(db, "jewellery"));
+
+      if (!showInactive) {
+        q = query(q, where("active", "==", true));
+      }
+
+      q = query(q, orderBy("code", "desc"));
+
+      const snapshot = await getDocs(q);
 
       const items: Jewellery[] = [];
       snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
@@ -179,6 +177,11 @@ const JewelleryList: React.FC = () => {
         </button>
         <div style={jewelleryStyles.navTitle}>
           Jewellery Items ({jewelleryItems.length})
+          <div
+            style={{ fontSize: "12px", color: "#6b7280", fontWeight: "normal" }}
+          >
+            Sorted by code (newest first)
+          </div>
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           <button
@@ -212,27 +215,109 @@ const JewelleryList: React.FC = () => {
         <div
           style={{
             margin: "15px",
-            padding: "10px",
-            backgroundColor: "#fee2e2",
-            border: "1px solid #ef4444",
+            padding: "15px",
+            backgroundColor: "#fef3c7",
+            border: "1px solid #f59e0b",
             borderRadius: "8px",
-            color: "#991b1b",
+            color: "#92400e",
           }}
         >
-          <strong>Error:</strong> {error}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "8px",
+            }}
+          >
+            <span style={{ fontSize: "20px" }}>⚠️</span>
+            <strong>Index Required</strong>
+          </div>
+          <div style={{ fontSize: "14px", marginBottom: "12px" }}>
+            This query needs a Firestore composite index. The mobile app may
+            have created it automatically.
+          </div>
+          <div
+            style={{
+              fontSize: "13px",
+              backgroundColor: "#fef9c3",
+              padding: "10px",
+              borderRadius: "6px",
+              marginBottom: "12px",
+            }}
+          >
+            <strong>Index needed:</strong>
+            <div>
+              • Collection: <code>jewellery</code>
+            </div>
+            <div>
+              • Fields: <code>active</code> (ascending), <code>code</code>{" "}
+              (descending)
+            </div>
+          </div>
+          <div style={{ fontSize: "13px" }}>
+            <strong>Quick fix:</strong> Click any link in the browser console
+            error, or go to Firebase Console → Firestore → Indexes.
+          </div>
+          <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
+            <button
+              onClick={() => {
+                // Try without orderBy as fallback
+                setShowInactive(true); // Show all items
+                setError(
+                  "Showing all items without sorting. Create index for proper sorting.",
+                );
+              }}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#f59e0b",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "13px",
+              }}
+            >
+              Show All Items (No Sort)
+            </button>
+            <button
+              onClick={handleRefresh}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#3b82f6",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "13px",
+              }}
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       )}
 
       {/* Filter Toggle */}
       <div style={{ padding: "15px" }}>
-        <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <label
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            fontSize: "14px",
+          }}
+        >
           <input
             type="checkbox"
             checked={showInactive}
             onChange={(e) => setShowInactive(e.target.checked)}
           />
-          Show inactive items
+          Show inactive items ({showInactive ? "showing all" : "active only"})
         </label>
+        <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
+          Filter: {showInactive ? "All items" : "Active items only"}
+        </div>
       </div>
 
       {/* Items List */}
@@ -252,15 +337,17 @@ const JewelleryList: React.FC = () => {
             <p style={{ marginBottom: "16px", fontSize: "16px" }}>
               No jewellery items found.
             </p>
-            <div
-              style={{
-                marginBottom: "24px",
-                fontSize: "14px",
-                color: "#6b7280",
-              }}
-            >
-              Check browser console (F12) for debugging information.
-            </div>
+            {!showInactive && (
+              <p
+                style={{
+                  marginBottom: "16px",
+                  fontSize: "14px",
+                  color: "#6b7280",
+                }}
+              >
+                Try checking "Show inactive items" to see all items.
+              </p>
+            )}
             <button
               onClick={() => navigate("/jewellery/add")}
               style={{
@@ -271,11 +358,12 @@ const JewelleryList: React.FC = () => {
                 borderRadius: "8px",
                 cursor: "pointer",
                 fontSize: "14px",
+                marginBottom: "16px",
               }}
             >
               Add your first item
             </button>
-            <div style={{ marginTop: "20px" }}>
+            <div>
               <button
                 onClick={handleRefresh}
                 style={{
@@ -284,84 +372,125 @@ const JewelleryList: React.FC = () => {
                   color: "#6b7280",
                   cursor: "pointer",
                   textDecoration: "underline",
+                  fontSize: "13px",
                 }}
               >
-                Try refreshing
+                Refresh list
               </button>
             </div>
           </div>
         ) : (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
-            {jewelleryItems.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: "12px",
-                  padding: "15px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  opacity: item.active ? 1 : 0.7,
-                  cursor: "pointer",
-                }}
-                onClick={() => navigate(`/jewellery/detail/${item.id}`)}
-              >
+          <>
+            <div
+              style={{
+                fontSize: "13px",
+                color: "#6b7280",
+                marginBottom: "10px",
+                paddingLeft: "4px",
+              }}
+            >
+              Showing {jewelleryItems.length} items sorted by code (Z → A)
+            </div>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+            >
+              {jewelleryItems.map((item) => (
                 <div
+                  key={item.id}
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "start",
+                    backgroundColor: "white",
+                    borderRadius: "12px",
+                    padding: "15px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    opacity: item.active ? 1 : 0.7,
+                    cursor: "pointer",
+                    borderLeft: item.active
+                      ? "4px solid #10b981"
+                      : "4px solid #9ca3af",
                   }}
+                  onClick={() => navigate(`/jewellery/detail/${item.id}`)}
                 >
-                  <div>
-                    <div style={{ fontWeight: "600", fontSize: "16px" }}>
-                      {item.code}
-                    </div>
-                    <div
-                      style={{
-                        color: "#6b7280",
-                        fontSize: "14px",
-                        marginTop: "4px",
-                      }}
-                    >
-                      {item.description}
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "15px",
-                        marginTop: "8px",
-                        fontSize: "13px",
-                      }}
-                    >
-                      <span>{item.weight}g</span>
-                      <span>{item.location}</span>
-                    </div>
-                  </div>
-
-                  {/* Status Badge */}
                   <div
                     style={{
-                      backgroundColor:
-                        item.verificationStatus === "Verified"
-                          ? "#10b981"
-                          : item.verificationStatus === "Missing"
-                            ? "#ef4444"
-                            : "#6b7280",
-                      color: "white",
-                      padding: "4px 12px",
-                      borderRadius: "20px",
-                      fontSize: "12px",
-                      fontWeight: "500",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "start",
                     }}
                   >
-                    {item.verificationStatus}
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          fontWeight: "600",
+                          fontSize: "16px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        {item.code}
+                        {!item.active && (
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              backgroundColor: "#9ca3af",
+                              color: "white",
+                              padding: "2px 6px",
+                              borderRadius: "10px",
+                            }}
+                          >
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        style={{
+                          color: "#6b7280",
+                          fontSize: "14px",
+                          marginTop: "4px",
+                        }}
+                      >
+                        {item.description}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "15px",
+                          marginTop: "8px",
+                          fontSize: "13px",
+                        }}
+                      >
+                        <span>Weight: {item.weight}g</span>
+                        {item.location && (
+                          <span>Location: {item.location}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div
+                      style={{
+                        backgroundColor:
+                          item.verificationStatus === "Verified"
+                            ? "#10b981"
+                            : item.verificationStatus === "Missing"
+                              ? "#ef4444"
+                              : "#6b7280",
+                        color: "white",
+                        padding: "4px 12px",
+                        borderRadius: "20px",
+                        fontSize: "12px",
+                        fontWeight: "500",
+                        minWidth: "90px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {item.verificationStatus}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

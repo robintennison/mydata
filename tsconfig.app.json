@@ -9,7 +9,6 @@
     "skipLibCheck": true,
     "verbatimModuleSyntax": false,
     "esModuleInterop": true,
-    "baseUrl": "./src",
     "allowSyntheticDefaultImports": true,
 
     /* Bundler mode */

@@ -17,7 +17,7 @@ import {
 import { firestore } from "../lib/firebase";
 import { useError } from "./ErrorContext";
 
-interface Settings {
+export interface Settings {
   locations: string[];
   boughtFor: string[];
   goldRatePerGram: number;
@@ -26,7 +26,6 @@ interface Settings {
   liabilities: number;
   showInactive: boolean;
   showDelete: boolean;
-  // Add EMW fields
   EMW_interest: number;
   EMW_Date: string;
 }
@@ -34,11 +33,11 @@ interface Settings {
 interface SettingsContextType {
   settings: Settings | null;
   loading: boolean;
-  updateSettings: (updates: Partial<Settings>) => void;
-  addLocation: (location: string) => void;
-  removeLocation: (location: string) => void;
-  addBoughtFor: (purpose: string) => void;
-  removeBoughtFor: (purpose: string) => void;
+  updateSettings: (updates: Partial<Settings>) => Promise<void>;
+  addLocation: (location: string) => Promise<void>;
+  removeLocation: (location: string) => Promise<void>;
+  addBoughtFor: (purpose: string) => Promise<void>;
+  removeBoughtFor: (purpose: string) => Promise<void>;
 }
 
 const defaultSettings: Settings = {
@@ -50,16 +49,15 @@ const defaultSettings: Settings = {
   liabilities: 0,
   showInactive: false,
   showDelete: false,
-  // Default EMW values
-  EMW_interest: 5, // 5% default interest rate
-  EMW_Date: "2044-10", // November 2044
+  EMW_interest: 5,
+  EMW_Date: "2044-10",
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined
+  undefined,
 );
 
-export const useSettings = () => {
+export const useSettings = (): SettingsContextType => {
   const context = useContext(SettingsContext);
   if (!context) {
     throw new Error("useSettings must be used within a SettingsProvider");
@@ -85,6 +83,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
+
           setSettings({
             locations: data.locations || [],
             boughtFor: data.boughtFor || [],
@@ -94,25 +93,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
             liabilities: data.liabilities || 0,
             showInactive: data.showInactive || false,
             showDelete: data.showDelete || false,
-            // Add EMW fields with defaults
-            EMW_interest:
-              data.EMW_Interest !== undefined ? data.EMW_Interest : 5,
+            EMW_interest: data.EMW_interest ?? 5,
             EMW_Date: data.EMW_Date || "2044-10",
           });
         } else {
-          // Create default document if it doesn't exist
           setDoc(settingsRef, defaultSettings).catch(() => {
-            setError("Failed to initialize settings. Check your connection.");
+            setError("Failed to initialize settings.");
           });
           setSettings(defaultSettings);
         }
         setLoading(false);
       },
       (error) => {
-        setError("Firebase connection error. Your settings might be outdated.");
         console.error("Firebase onSnapshot error:", error);
+        setError("Firebase connection error.");
         setLoading(false);
-      }
+      },
     );
 
     return () => unsubscribe();
@@ -122,19 +118,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     try {
       await updateDoc(settingsRef, updates);
     } catch (error) {
-      setError("Failed to save settings. Please try again.");
       console.error("Error updating settings:", error);
+      setError("Failed to save settings.");
     }
   };
 
   const addLocation = async (location: string) => {
+    const trimmed = location.trim();
+    if (!trimmed) return;
+
     try {
       await updateDoc(settingsRef, {
-        locations: arrayUnion(location.trim()),
+        locations: arrayUnion(trimmed),
       });
     } catch (error) {
-      setError("Failed to add location.");
       console.error("Error adding location:", error);
+      setError("Failed to add location.");
     }
   };
 
@@ -144,19 +143,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         locations: arrayRemove(location),
       });
     } catch (error) {
-      setError("Failed to remove location.");
       console.error("Error removing location:", error);
+      setError("Failed to remove location.");
     }
   };
 
   const addBoughtFor = async (purpose: string) => {
+    const trimmed = purpose.trim();
+    if (!trimmed) return;
+
     try {
       await updateDoc(settingsRef, {
-        boughtFor: arrayUnion(purpose.trim()),
+        boughtFor: arrayUnion(trimmed),
       });
     } catch (error) {
-      setError("Failed to update preferences.");
       console.error("Error adding boughtFor:", error);
+      setError("Failed to update preferences.");
     }
   };
 
@@ -166,23 +168,23 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         boughtFor: arrayRemove(purpose),
       });
     } catch (error) {
-      setError("Failed to update preferences.");
       console.error("Error removing boughtFor:", error);
+      setError("Failed to update preferences.");
     }
   };
 
-  const value = {
-    settings,
-    loading,
-    updateSettings,
-    addLocation,
-    removeLocation,
-    addBoughtFor,
-    removeBoughtFor,
-  };
-
   return (
-    <SettingsContext.Provider value={value}>
+    <SettingsContext.Provider
+      value={{
+        settings,
+        loading,
+        updateSettings,
+        addLocation,
+        removeLocation,
+        addBoughtFor,
+        removeBoughtFor,
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   );

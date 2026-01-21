@@ -18,6 +18,16 @@ import MyDataHomepage from "../MyDataHomepage";
 import HistoryListPage from "../modules/Banking/pages/HistoryListPage"; // Add this import
 import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage"; // Add this import
 
+// Import Jewellery pages
+import JewelleryHome from "../modules/Jewellery/index";
+import JewelleryList from "../modules/Jewellery/pages/JewelleryList";
+import JewelleryForm from "../modules/Jewellery/pages/JewelleryForm";
+import BillsList from "../modules/Jewellery/pages/BillsList";
+import BillForm from "../modules/Jewellery/pages/BillForm";
+import JewelleryDetail from "../modules/Jewellery/pages/JewelleryDetail";
+import JewelleryStats from "../modules/Jewellery/pages/JewelleryStats";
+import VerificationPage from "../modules/Jewellery/pages/VerificationPage";
+
 // ==================== TYPES ====================
 export interface RouteConfig {
   path: string;
@@ -173,24 +183,98 @@ const allRoutes: RouteConfig[] = [
     needsUserData: true,
   },
 
-  // Other Module Routes (Currently placeholders)
-  {
-    path: "/online",
-    element: <div style={{ padding: '20px', textAlign: 'center' }}><h2>🌐 Online Module</h2><p>Coming Soon</p></div>,
-    title: "Online",
-    icon: "🌐",
-    requiresAuth: true,
-  },
+  // Jewellery Module Routes
   {
     path: "/jewellery",
-    element: <div style={{ padding: '20px', textAlign: 'center' }}><h2>💎 Jewellery Module</h2><p>Coming Soon</p></div>,
+    element: <JewelleryHome />,
     title: "Jewellery",
     icon: "💎",
     requiresAuth: true,
   },
   {
+    path: "/jewellery/list",
+    element: <JewelleryList />,
+    title: "Jewellery Items",
+    icon: "💎",
+    requiresAuth: true,
+  },
+  {
+    path: "/jewellery/add",
+    element: <JewelleryForm />,
+    title: "Add Jewellery",
+    icon: "➕",
+    requiresAuth: true,
+  },
+  {
+    path: "/jewellery/edit/:id",
+    element: <JewelleryForm />,
+    title: "Edit Jewellery",
+    icon: "✏️",
+    requiresAuth: true,
+  },
+  {
+    path: "/jewellery/detail/:id",
+    element: <JewelleryDetail />,
+    title: "Jewellery Detail",
+    requiresAuth: true,
+  },
+  {
+    path: "/jewellery/bills",
+    element: <BillsList />,
+    title: "Bills & Documents",
+    icon: "📄",
+    requiresAuth: true,
+  },
+  {
+    path: "/jewellery/bills/add",
+    element: <BillForm />,
+    title: "Add Bill",
+    icon: "➕",
+    requiresAuth: true,
+  },
+  {
+    path: "/jewellery/bills/edit/:id",
+    element: <BillForm />,
+    title: "Edit Bill",
+    icon: "✏️",
+    requiresAuth: true,
+  },
+  {
+    path: "/jewellery/stats",
+    element: <JewelleryStats />,
+    title: "Jewellery Statistics",
+    icon: "📊",
+    requiresAuth: true,
+  },
+  {
+    path: "/jewellery/verification",
+    element: <VerificationPage />,
+    title: "Stock Verification",
+    icon: "✅",
+    requiresAuth: true,
+  },
+
+  // Other Module Routes (Currently placeholders)
+  {
+    path: "/online",
+    element: (
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <h2>🌐 Online Module</h2>
+        <p>Coming Soon</p>
+      </div>
+    ),
+    title: "Online",
+    icon: "🌐",
+    requiresAuth: true,
+  },
+  {
     path: "/properties",
-    element: <div style={{ padding: '20px', textAlign: 'center' }}><h2>🏠 Properties Module</h2><p>Coming Soon</p></div>,
+    element: (
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <h2>🏠 Properties Module</h2>
+        <p>Coming Soon</p>
+      </div>
+    ),
     title: "Properties",
     icon: "🏠",
     requiresAuth: true,
@@ -204,7 +288,9 @@ const navigationItems = allRoutes
       route.title &&
       route.icon &&
       !route.path.includes(":") &&
-      route.path !== "/login"
+      route.path !== "/login" &&
+      !route.path.includes("/banking/") && // Exclude nested banking routes
+      !route.path.includes("/jewellery/"), // Exclude nested jewellery routes
   )
   .map((route: RouteConfig) => ({
     path: route.path,
@@ -213,6 +299,43 @@ const navigationItems = allRoutes
     module: "main",
     requiresAuth: route.requiresAuth,
   }));
+
+// Add module-specific navigation groups
+const moduleNavigationItems = {
+  banking: allRoutes
+    .filter(
+      (route: RouteConfig) =>
+        route.title &&
+        route.icon &&
+        route.path.startsWith("/banking") &&
+        !route.path.includes(":") &&
+        route.path !== "/banking", // Exclude banking home from submenu
+    )
+    .map((route: RouteConfig) => ({
+      path: route.path,
+      title: route.title!,
+      icon: route.icon!,
+      module: "banking",
+      requiresAuth: route.requiresAuth,
+    })),
+
+  jewellery: allRoutes
+    .filter(
+      (route: RouteConfig) =>
+        route.title &&
+        route.icon &&
+        route.path.startsWith("/jewellery") &&
+        !route.path.includes(":") &&
+        route.path !== "/jewellery", // Exclude jewellery home from submenu
+    )
+    .map((route: RouteConfig) => ({
+      path: route.path,
+      title: route.title!,
+      icon: route.icon!,
+      module: "jewellery",
+      requiresAuth: route.requiresAuth,
+    })),
+};
 
 // ==================== HELPER FUNCTIONS ====================
 const getRouteByPath = (path: string) =>
@@ -285,6 +408,7 @@ export {
   PrivateRoute,
   allRoutes,
   navigationItems,
+  moduleNavigationItems,
   getRouteByPath,
   routeExists,
 };

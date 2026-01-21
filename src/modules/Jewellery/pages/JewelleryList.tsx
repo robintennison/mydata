@@ -29,21 +29,13 @@ const JewelleryList: React.FC = () => {
 
         const db = getFirestore();
 
-        // EXACT SAME QUERY AS KOTLIN
         let q = query(collection(db, "jewellery"));
 
         if (!showInactive) {
           q = query(q, where("active", "==", true));
         }
 
-        // Newest purchases first (actually newest by code in descending order)
         q = query(q, orderBy("code", "desc"));
-
-        console.log("Executing query:", {
-          collection: "jewellery",
-          filter: showInactive ? "all items" : "active only",
-          orderBy: "code desc",
-        });
 
         const snapshot = await getDocs(q);
         console.log(`Query returned ${snapshot.size} items`);
@@ -74,7 +66,6 @@ const JewelleryList: React.FC = () => {
       } catch (error: any) {
         console.error("Error fetching jewellery:", error);
 
-        // If it's an index error, show helpful message
         if (
           error.code === "failed-precondition" &&
           error.message.includes("index")
@@ -95,24 +86,20 @@ const JewelleryList: React.FC = () => {
     fetchJewellery();
   }, [showInactive]);
 
-  // Refresh function
   const handleRefresh = () => {
     setLoading(true);
     setJewelleryItems([]);
     setError(null);
 
-    // Re-fetch after a short delay
     setTimeout(() => {
       fetchJewellery();
     }, 100);
   };
 
-  // Re-fetch function
   const fetchJewellery = async () => {
     try {
       const db = getFirestore();
 
-      // EXACT SAME QUERY AS KOTLIN
       let q = query(collection(db, "jewellery"));
 
       if (!showInactive) {
@@ -175,22 +162,14 @@ const JewelleryList: React.FC = () => {
         >
           ←
         </button>
-        <div style={jewelleryStyles.navTitle}>
-          Jewellery Items ({jewelleryItems.length})
-          <div
-            style={{ fontSize: "12px", color: "#6b7280", fontWeight: "normal" }}
-          >
-            Sorted by code (newest first)
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div style={jewelleryStyles.navTitle}>Jewellery Items</div>
+        <div style={{ display: "flex", gap: "6px" }}>
           <button
             onClick={handleRefresh}
             style={{
               ...jewelleryStyles.navButton,
-              padding: "6px 12px",
+              padding: "6px",
               fontSize: "14px",
-              backgroundColor: "#10b981",
             }}
             title="Refresh"
           >
@@ -200,12 +179,23 @@ const JewelleryList: React.FC = () => {
             onClick={() => navigate("/jewellery/add")}
             style={{
               ...jewelleryStyles.navButton,
-              padding: "6px 12px",
+              padding: "6px",
               fontSize: "14px",
             }}
             title="Add New"
           >
-            + Add
+            ➕
+          </button>
+          <button
+            onClick={() => navigate("/settings")}
+            style={{
+              ...jewelleryStyles.navButton,
+              padding: "6px",
+              fontSize: "14px",
+            }}
+            title="Settings"
+          >
+            ⚙️
           </button>
         </div>
       </div>
@@ -216,82 +206,50 @@ const JewelleryList: React.FC = () => {
         {error && (
           <div
             style={{
-              margin: "15px",
-              padding: "15px",
+              margin: "10px 0",
+              padding: "10px",
               backgroundColor: "#fef3c7",
               border: "1px solid #f59e0b",
-              borderRadius: "8px",
+              borderRadius: "6px",
               color: "#92400e",
+              fontSize: "12px",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "8px",
-              }}
-            >
-              <span style={{ fontSize: "20px" }}>⚠️</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>⚠️</span>
               <strong>Index Required</strong>
             </div>
-            <div style={{ fontSize: "14px", marginBottom: "12px" }}>
-              This query needs a Firestore composite index. The mobile app may
-              have created it automatically.
+            <div style={{ margin: "6px 0" }}>
+              Create Firestore index for: jewellery, active, code
             </div>
-            <div
-              style={{
-                fontSize: "13px",
-                backgroundColor: "#fef9c3",
-                padding: "10px",
-                borderRadius: "6px",
-                marginBottom: "12px",
-              }}
-            >
-              <strong>Index needed:</strong>
-              <div>
-                • Collection: <code>jewellery</code>
-              </div>
-              <div>
-                • Fields: <code>active</code> (ascending), <code>code</code>{" "}
-                (descending)
-              </div>
-            </div>
-            <div style={{ fontSize: "13px" }}>
-              <strong>Quick fix:</strong> Click any link in the browser console
-              error, or go to Firebase Console → Firestore → Indexes.
-            </div>
-            <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "6px" }}>
               <button
                 onClick={() => {
-                  // Try without orderBy as fallback
-                  setShowInactive(true); // Show all items
-                  setError(
-                    "Showing all items without sorting. Create index for proper sorting.",
-                  );
+                  setShowInactive(true);
+                  setError("Showing all items without sorting.");
                 }}
                 style={{
-                  padding: "8px 16px",
+                  padding: "4px 8px",
                   backgroundColor: "#f59e0b",
                   color: "white",
                   border: "none",
-                  borderRadius: "6px",
+                  borderRadius: "4px",
                   cursor: "pointer",
-                  fontSize: "13px",
+                  fontSize: "11px",
                 }}
               >
-                Show All Items (No Sort)
+                Show All
               </button>
               <button
                 onClick={handleRefresh}
                 style={{
-                  padding: "8px 16px",
+                  padding: "4px 8px",
                   backgroundColor: "#3b82f6",
                   color: "white",
                   border: "none",
-                  borderRadius: "6px",
+                  borderRadius: "4px",
                   cursor: "pointer",
-                  fontSize: "13px",
+                  fontSize: "11px",
                 }}
               >
                 Try Again
@@ -300,211 +258,194 @@ const JewelleryList: React.FC = () => {
           </div>
         )}
 
-        {/* Filter Toggle */}
-        <div style={{ padding: "15px 15px 0 15px" }}>
-          <label
+        {/* Items Count - Compact */}
+        {!error && jewelleryItems.length > 0 && (
+          <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "14px",
+              fontSize: "11px",
+              color: "#6b7280",
+              padding: "6px 12px 2px",
+              textAlign: "right",
             }}
           >
-            <input
-              type="checkbox"
-              checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
-            />
-            Show inactive items ({showInactive ? "showing all" : "active only"})
-          </label>
-          <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
-            Filter: {showInactive ? "All items" : "Active items only"}
+            {jewelleryItems.length} items
           </div>
-        </div>
+        )}
 
-        {/* Items List */}
-        <div style={{ padding: "15px" }}>
+        {/* Items List - Compact 2-Line Design */}
+        <div style={{ padding: "0 0 5px 0" }}>
           {jewelleryItems.length === 0 ? (
             <div
               style={{
                 textAlign: "center",
-                padding: "40px",
+                padding: "20px",
                 color: "#9ca3af",
-                backgroundColor: "white",
-                borderRadius: "12px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                fontSize: "13px",
+                margin: "10px",
               }}
             >
-              <div style={{ fontSize: "48px", marginBottom: "16px" }}>📦</div>
-              <p style={{ marginBottom: "16px", fontSize: "16px" }}>
-                No jewellery items found.
-              </p>
-              {!showInactive && (
-                <p
-                  style={{
-                    marginBottom: "16px",
-                    fontSize: "14px",
-                    color: "#6b7280",
-                  }}
-                >
-                  Try checking "Show inactive items" to see all items.
-                </p>
-              )}
+              <div style={{ fontSize: "24px", marginBottom: "8px" }}>📦</div>
+              <p>No jewellery items found.</p>
               <button
                 onClick={() => navigate("/jewellery/add")}
                 style={{
-                  padding: "10px 20px",
+                  padding: "6px 12px",
                   backgroundColor: "#3b82f6",
                   color: "white",
                   border: "none",
-                  borderRadius: "8px",
+                  borderRadius: "4px",
                   cursor: "pointer",
-                  fontSize: "14px",
-                  marginBottom: "16px",
+                  fontSize: "12px",
+                  marginTop: "8px",
                 }}
               >
-                Add your first item
+                Add First Item
               </button>
-              <div>
-                <button
-                  onClick={handleRefresh}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#6b7280",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    fontSize: "13px",
-                  }}
-                >
-                  Refresh list
-                </button>
-              </div>
             </div>
           ) : (
-            <>
-              <div
-                style={{
-                  fontSize: "13px",
-                  color: "#6b7280",
-                  marginBottom: "10px",
-                  paddingLeft: "4px",
-                }}
-              >
-                Showing {jewelleryItems.length} items sorted by code (Z → A)
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
-                {jewelleryItems.map((item) => (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {jewelleryItems.map((item, index) => (
+                <div
+                  key={item.id}
+                  style={{
+                    backgroundColor: "white",
+                    padding: "6px 10px",
+                    minHeight: "50px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    borderBottom:
+                      index < jewelleryItems.length - 1
+                        ? "1px solid #e5e7eb"
+                        : "none",
+                  }}
+                  onClick={() => navigate(`/jewellery/detail/${item.id}`)}
+                >
+                  {/* Item Image */}
                   <div
-                    key={item.id}
                     style={{
-                      backgroundColor: "white",
-                      borderRadius: "12px",
-                      padding: "15px",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                      opacity: item.active ? 1 : 0.7,
-                      cursor: "pointer",
-                      borderLeft: item.active
-                        ? "4px solid #10b981"
-                        : "4px solid #9ca3af",
+                      width: "40px",
+                      height: "40px",
+                      flexShrink: 0,
+                      backgroundColor: "#f3f4f6",
+                      borderRadius: "4px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
                     }}
-                    onClick={() => navigate(`/jewellery/detail/${item.id}`)}
                   >
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.code}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <div style={{ fontSize: "16px", color: "#9ca3af" }}>
+                        💎
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Item Details - EXACTLY 2 ROWS */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* ROW 1: Code + Description + Weight */}
                     <div
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "start",
+                        alignItems: "baseline",
+                        gap: "6px",
+                        marginBottom: "2px",
                       }}
                     >
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            fontWeight: "600",
-                            fontSize: "16px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          {item.code}
-                          {!item.active && (
-                            <span
-                              style={{
-                                fontSize: "11px",
-                                backgroundColor: "#9ca3af",
-                                color: "white",
-                                padding: "2px 6px",
-                                borderRadius: "10px",
-                              }}
-                            >
-                              Inactive
-                            </span>
-                          )}
-                        </div>
-                        <div
-                          style={{
-                            color: "#6b7280",
-                            fontSize: "14px",
-                            marginTop: "4px",
-                          }}
-                        >
-                          {item.description}
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "15px",
-                            marginTop: "8px",
-                            fontSize: "13px",
-                          }}
-                        >
-                          <span>Weight: {item.weight}g</span>
-                          {item.location && (
-                            <span>Location: {item.location}</span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Status Badge */}
                       <div
                         style={{
-                          backgroundColor:
-                            item.verificationStatus === "Verified"
-                              ? "#10b981"
-                              : item.verificationStatus === "Missing"
-                                ? "#ef4444"
-                                : "#6b7280",
-                          color: "white",
-                          padding: "4px 12px",
-                          borderRadius: "20px",
-                          fontSize: "12px",
-                          fontWeight: "500",
-                          minWidth: "90px",
-                          textAlign: "center",
+                          fontWeight: "600",
+                          fontSize: "13px",
+                          color: "#111827",
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        {item.verificationStatus}
+                        {item.code}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: "#6b7280",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          flex: 1,
+                        }}
+                      >
+                        {item.description}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#374151",
+                          fontWeight: "500",
+                          whiteSpace: "nowrap",
+                          marginLeft: "4px",
+                        }}
+                      >
+                        {item.weight}g
                       </div>
                     </div>
+
+                    {/* ROW 2: Location • Bought For */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        fontSize: "10px",
+                        color: "#9ca3af",
+                        gap: "4px",
+                      }}
+                    >
+                      {item.location && (
+                        <>
+                          <span>{item.location}</span>
+                          {item.boughtFor && <span>•</span>}
+                        </>
+                      )}
+                      {item.boughtFor && <span>{item.boughtFor}</span>}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </>
+
+                  {/* Status Indicator */}
+                  <div
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor:
+                        item.verificationStatus === "Verified"
+                          ? "#10b981"
+                          : item.verificationStatus === "Missing"
+                            ? "#ef4444"
+                            : "#d1d5db",
+                      flexShrink: 0,
+                    }}
+                    title={item.verificationStatus}
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Jewellery Navigation - Now inside the scrollable content */}
+        {/* Jewellery Navigation */}
         <JewelleryNavigation />
 
-        {/* Bottom spacing for fixed bottom module navigation */}
-        <div style={{ height: "80px" }}></div>
+        {/* Minimal bottom spacing */}
+        <div style={{ height: "5px" }}></div>
       </div>
     </div>
   );

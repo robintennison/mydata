@@ -24,9 +24,9 @@ import JewelleryList from "../modules/Jewellery/pages/JewelleryList";
 import BillsList from "../modules/Jewellery/pages/BillsList";
 import BillForm from "../modules/Jewellery/pages/BillForm";
 import JewelleryDetail from "../modules/Jewellery/pages/JewelleryDetail";
-import JewelleryStats from "../modules/Jewellery/pages/JewelleryStats";
 import VerificationPageWrapper from "../modules/Jewellery/pages/VerificationPageWrapper";
 import JewelleryFormWrapper from "../modules/Jewellery/pages/JewelleryFormWrapper";
+import GalleryPage from "../modules/Jewellery/pages/GalleryPage";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -228,11 +228,12 @@ const allRoutes: RouteConfig[] = [
     icon: "✏️",
     requiresAuth: true,
   },
+
   {
-    path: "/jewellery/stats",
-    element: <JewelleryStats />,
-    title: "Jewellery Statistics",
-    icon: "📊",
+    path: "/jewellery/gallery",
+    element: <GalleryPage />,
+    title: "Gallery",
+    icon: "🖼️",
     requiresAuth: true,
   },
   {

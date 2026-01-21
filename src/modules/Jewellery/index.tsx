@@ -76,11 +76,11 @@ const JewelleryHome: React.FC = () => {
       path: "/jewellery/bills",
     },
     {
-      id: "stats",
-      title: "Statistics",
-      description: "View jewellery statistics and reports",
+      id: "gallery",
+      title: "Gallery",
+      description: "View jewellery Gallery",
       icon: "📊",
-      path: "/jewellery/stats",
+      path: "/jewellery/gallery",
     },
     {
       id: "verification",

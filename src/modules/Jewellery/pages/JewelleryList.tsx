@@ -264,21 +264,45 @@ const JewelleryList: React.FC = () => {
 
   return (
     <div style={jewelleryStyles.container}>
-      {/* Top Navigation with Search */}
-      <div style={jewelleryStyles.topNav}>
+      {/* Top Navigation with Search - SIMPLIFIED LAYOUT */}
+      <div
+        style={{
+          ...jewelleryStyles.topNav,
+          display: "flex",
+          alignItems: "center",
+          padding: "8px 10px",
+          gap: "8px",
+        }}
+      >
+        {/* Back Button - Fixed width */}
         <button
           onClick={() => navigate("/jewellery")}
-          style={jewelleryStyles.navButton}
+          style={{
+            ...jewelleryStyles.navButton,
+            padding: "6px",
+            fontSize: "16px",
+            width: "36px",
+            height: "36px",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           title="Back to Jewellery"
         >
           ←
         </button>
 
-        {/* Search Box */}
-        <div style={{ flex: 1, margin: "0 10px" }}>
+        {/* Search Box - Flexible width */}
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           <input
             type="text"
-            placeholder="Search code or description..."
+            placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
@@ -288,72 +312,95 @@ const JewelleryList: React.FC = () => {
               border: "1px solid #e5e7eb",
               fontSize: "13px",
               backgroundColor: "white",
-              color: "#374151", // Added text color
+              color: "#374151",
             }}
           />
         </div>
 
-        <div style={{ display: "flex", gap: "4px" }}>
+        {/* Button Group - Auto width with small buttons */}
+        <div
+          style={{
+            display: "flex",
+            gap: "4px",
+            flexShrink: 0,
+          }}
+        >
           {/* Location Filter */}
-          <div>
-            <button
-              ref={locationButtonRef}
-              onClick={() => {
-                setShowBoughtForFilter(false);
-                setShowLocationFilter(!showLocationFilter);
-              }}
-              style={{
-                ...jewelleryStyles.navButton,
-                padding: "6px",
-                fontSize: "14px",
-                backgroundColor: selectedLocation ? "#e0f2fe" : "transparent",
-              }}
-              title={`Filter by location${selectedLocation ? `: ${selectedLocation}` : ""}`}
-            >
-              📍
-            </button>
-          </div>
+          <button
+            ref={locationButtonRef}
+            onClick={() => {
+              setShowBoughtForFilter(false);
+              setShowLocationFilter(!showLocationFilter);
+            }}
+            style={{
+              ...jewelleryStyles.navButton,
+              padding: "5px",
+              fontSize: "14px",
+              width: "32px",
+              height: "32px",
+              backgroundColor: selectedLocation ? "#e0f2fe" : "transparent",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            title={`Filter by location${selectedLocation ? `: ${selectedLocation}` : ""}`}
+          >
+            📍
+          </button>
 
           {/* Bought For Filter */}
-          <div>
-            <button
-              ref={boughtForButtonRef}
-              onClick={() => {
-                setShowLocationFilter(false);
-                setShowBoughtForFilter(!showBoughtForFilter);
-              }}
-              style={{
-                ...jewelleryStyles.navButton,
-                padding: "6px",
-                fontSize: "14px",
-                backgroundColor: selectedBoughtFor ? "#e0f2fe" : "transparent",
-              }}
-              title={`Filter by purpose${selectedBoughtFor ? `: ${selectedBoughtFor}` : ""}`}
-            >
-              🎁
-            </button>
-          </div>
+          <button
+            ref={boughtForButtonRef}
+            onClick={() => {
+              setShowLocationFilter(false);
+              setShowBoughtForFilter(!showBoughtForFilter);
+            }}
+            style={{
+              ...jewelleryStyles.navButton,
+              padding: "5px",
+              fontSize: "14px",
+              width: "32px",
+              height: "32px",
+              backgroundColor: selectedBoughtFor ? "#e0f2fe" : "transparent",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            title={`Filter by purpose${selectedBoughtFor ? `: ${selectedBoughtFor}` : ""}`}
+          >
+            🎁
+          </button>
 
           {/* Add Button */}
           <button
             onClick={() => navigate("/jewellery/add")}
             style={{
               ...jewelleryStyles.navButton,
-              padding: "6px",
+              padding: "5px",
               fontSize: "14px",
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
             title="Add New"
           >
             ➕
           </button>
 
-          {/* Settings Button */}
+          {/* Settings Button - MUST BE VISIBLE */}
           <button
             onClick={() => navigate("/settings")}
             style={{
               ...jewelleryStyles.navButton,
-              padding: "6px",
+              padding: "5px",
               fontSize: "14px",
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
             title="Settings"
           >
@@ -409,7 +456,7 @@ const JewelleryList: React.FC = () => {
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              color: "#374151", // Added text color
+              color: "#374151",
             }}
           >
             <span>📍</span>
@@ -436,7 +483,7 @@ const JewelleryList: React.FC = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                color: "#374151", // Added text color
+                color: "#374151",
               }}
             >
               <span>📍</span>
@@ -492,7 +539,7 @@ const JewelleryList: React.FC = () => {
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              color: "#374151", // Added text color
+              color: "#374151",
             }}
           >
             <span>🎁</span>
@@ -519,7 +566,7 @@ const JewelleryList: React.FC = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                color: "#374151", // Added text color
+                color: "#374151",
               }}
             >
               <span>🎁</span>

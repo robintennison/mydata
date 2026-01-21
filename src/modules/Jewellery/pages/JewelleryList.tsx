@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getFirestore,
@@ -17,9 +17,19 @@ import JewelleryNavigation from "../components/JewelleryNavigation";
 const JewelleryList: React.FC = () => {
   const navigate = useNavigate();
   const [jewelleryItems, setJewelleryItems] = useState<Jewellery[]>([]);
+  const [filteredItems, setFilteredItems] = useState<Jewellery[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInactive, setShowInactive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showLocationFilter, setShowLocationFilter] = useState(false);
+  const [showBoughtForFilter, setShowBoughtForFilter] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [selectedBoughtFor, setSelectedBoughtFor] = useState<string>("");
+
+  // Refs for dropdown positioning
+  const locationButtonRef = useRef<HTMLButtonElement>(null);
+  const boughtForButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const fetchJewellery = async () => {
@@ -63,6 +73,7 @@ const JewelleryList: React.FC = () => {
 
         console.log(`Parsed ${items.length} items`);
         setJewelleryItems(items);
+        setFilteredItems(items); // Initialize filtered items
       } catch (error: any) {
         console.error("Error fetching jewellery:", error);
 
@@ -86,10 +97,55 @@ const JewelleryList: React.FC = () => {
     fetchJewellery();
   }, [showInactive]);
 
+  // Apply filters whenever search term or filters change
+  useEffect(() => {
+    if (jewelleryItems.length === 0) return;
+
+    let result = jewelleryItems;
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      result = result.filter(
+        (item) =>
+          item.code.toLowerCase().includes(term) ||
+          item.description.toLowerCase().includes(term),
+      );
+    }
+
+    // Apply location filter
+    if (selectedLocation) {
+      result = result.filter((item) => item.location === selectedLocation);
+    }
+
+    // Apply boughtFor filter
+    if (selectedBoughtFor) {
+      result = result.filter((item) => item.boughtFor === selectedBoughtFor);
+    }
+
+    console.log(
+      `Filtered ${result.length} items from ${jewelleryItems.length} total`,
+    );
+    setFilteredItems(result);
+  }, [jewelleryItems, searchTerm, selectedLocation, selectedBoughtFor]);
+
+  // Get unique locations and boughtFor values for filters
+  const locations = Array.from(
+    new Set(jewelleryItems.map((item) => item.location).filter(Boolean)),
+  ).sort();
+
+  const boughtForOptions = Array.from(
+    new Set(jewelleryItems.map((item) => item.boughtFor).filter(Boolean)),
+  ).sort();
+
   const handleRefresh = () => {
     setLoading(true);
     setJewelleryItems([]);
+    setFilteredItems([]);
     setError(null);
+    setSearchTerm("");
+    setSelectedLocation("");
+    setSelectedBoughtFor("");
 
     setTimeout(() => {
       fetchJewellery();
@@ -131,6 +187,7 @@ const JewelleryList: React.FC = () => {
       });
 
       setJewelleryItems(items);
+      setFilteredItems(items);
       setError(null);
     } catch (error: any) {
       console.error("Refresh error:", error);
@@ -139,6 +196,60 @@ const JewelleryList: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedLocation("");
+    setSelectedBoughtFor("");
+    setShowLocationFilter(false);
+    setShowBoughtForFilter(false);
+  };
+
+  // Get dropdown position
+  const getDropdownPosition = (
+    buttonRef: React.RefObject<HTMLButtonElement | null>,
+  ) => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      return {
+        top: rect.bottom + window.scrollY + 5,
+        right: window.innerWidth - rect.right,
+      };
+    }
+    return { top: 60, right: 20 }; // Default position
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      // Close location filter if clicking outside
+      if (
+        showLocationFilter &&
+        locationButtonRef.current &&
+        !locationButtonRef.current.contains(target) &&
+        !target.closest(".location-dropdown")
+      ) {
+        setShowLocationFilter(false);
+      }
+
+      // Close boughtFor filter if clicking outside
+      if (
+        showBoughtForFilter &&
+        boughtForButtonRef.current &&
+        !boughtForButtonRef.current.contains(target) &&
+        !target.closest(".boughtfor-dropdown")
+      ) {
+        setShowBoughtForFilter(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showLocationFilter, showBoughtForFilter]);
 
   if (loading) {
     return (
@@ -153,7 +264,7 @@ const JewelleryList: React.FC = () => {
 
   return (
     <div style={jewelleryStyles.container}>
-      {/* Top Navigation */}
+      {/* Top Navigation with Search */}
       <div style={jewelleryStyles.topNav}>
         <button
           onClick={() => navigate("/jewellery")}
@@ -162,19 +273,68 @@ const JewelleryList: React.FC = () => {
         >
           ←
         </button>
-        <div style={jewelleryStyles.navTitle}>Jewellery Items</div>
-        <div style={{ display: "flex", gap: "6px" }}>
-          <button
-            onClick={handleRefresh}
+
+        {/* Search Box */}
+        <div style={{ flex: 1, margin: "0 10px" }}>
+          <input
+            type="text"
+            placeholder="Search code or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             style={{
-              ...jewelleryStyles.navButton,
-              padding: "6px",
-              fontSize: "14px",
+              width: "100%",
+              padding: "6px 10px",
+              borderRadius: "20px",
+              border: "1px solid #e5e7eb",
+              fontSize: "13px",
+              backgroundColor: "white",
+              color: "#374151", // Added text color
             }}
-            title="Refresh"
-          >
-            🔄
-          </button>
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: "4px" }}>
+          {/* Location Filter */}
+          <div>
+            <button
+              ref={locationButtonRef}
+              onClick={() => {
+                setShowBoughtForFilter(false);
+                setShowLocationFilter(!showLocationFilter);
+              }}
+              style={{
+                ...jewelleryStyles.navButton,
+                padding: "6px",
+                fontSize: "14px",
+                backgroundColor: selectedLocation ? "#e0f2fe" : "transparent",
+              }}
+              title={`Filter by location${selectedLocation ? `: ${selectedLocation}` : ""}`}
+            >
+              📍
+            </button>
+          </div>
+
+          {/* Bought For Filter */}
+          <div>
+            <button
+              ref={boughtForButtonRef}
+              onClick={() => {
+                setShowLocationFilter(false);
+                setShowBoughtForFilter(!showBoughtForFilter);
+              }}
+              style={{
+                ...jewelleryStyles.navButton,
+                padding: "6px",
+                fontSize: "14px",
+                backgroundColor: selectedBoughtFor ? "#e0f2fe" : "transparent",
+              }}
+              title={`Filter by purpose${selectedBoughtFor ? `: ${selectedBoughtFor}` : ""}`}
+            >
+              🎁
+            </button>
+          </div>
+
+          {/* Add Button */}
           <button
             onClick={() => navigate("/jewellery/add")}
             style={{
@@ -186,6 +346,8 @@ const JewelleryList: React.FC = () => {
           >
             ➕
           </button>
+
+          {/* Settings Button */}
           <button
             onClick={() => navigate("/settings")}
             style={{
@@ -199,6 +361,210 @@ const JewelleryList: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Dropdowns - RENDERED OUTSIDE THE TOP NAV */}
+      {showLocationFilter && (
+        <div
+          className="location-dropdown"
+          style={{
+            position: "fixed",
+            top: getDropdownPosition(locationButtonRef).top + "px",
+            right: getDropdownPosition(locationButtonRef).right + "px",
+            backgroundColor: "white",
+            border: "1px solid #e5e7eb",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            padding: "8px",
+            zIndex: 1000,
+            minWidth: "180px",
+            maxHeight: "300px",
+            overflowY: "auto",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "13px",
+              fontWeight: "600",
+              marginBottom: "8px",
+              color: "#374151",
+            }}
+          >
+            Filter by Location
+          </div>
+          <button
+            onClick={() => {
+              setSelectedLocation("");
+              setShowLocationFilter(false);
+            }}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              fontSize: "13px",
+              textAlign: "left",
+              backgroundColor: !selectedLocation ? "#f3f4f6" : "transparent",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              marginBottom: "4px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              color: "#374151", // Added text color
+            }}
+          >
+            <span>📍</span>
+            <span>All Locations</span>
+          </button>
+          {locations.map((location) => (
+            <button
+              key={location}
+              onClick={() => {
+                setSelectedLocation(location);
+                setShowLocationFilter(false);
+              }}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                fontSize: "13px",
+                textAlign: "left",
+                backgroundColor:
+                  selectedLocation === location ? "#e0f2fe" : "transparent",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                marginBottom: "2px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#374151", // Added text color
+              }}
+            >
+              <span>📍</span>
+              <span>{location}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {showBoughtForFilter && (
+        <div
+          className="boughtfor-dropdown"
+          style={{
+            position: "fixed",
+            top: getDropdownPosition(boughtForButtonRef).top + "px",
+            right: getDropdownPosition(boughtForButtonRef).right + "px",
+            backgroundColor: "white",
+            border: "1px solid #e5e7eb",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            padding: "8px",
+            zIndex: 1000,
+            minWidth: "180px",
+            maxHeight: "300px",
+            overflowY: "auto",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "13px",
+              fontWeight: "600",
+              marginBottom: "8px",
+              color: "#374151",
+            }}
+          >
+            Filter by Purpose
+          </div>
+          <button
+            onClick={() => {
+              setSelectedBoughtFor("");
+              setShowBoughtForFilter(false);
+            }}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              fontSize: "13px",
+              textAlign: "left",
+              backgroundColor: !selectedBoughtFor ? "#f3f4f6" : "transparent",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              marginBottom: "4px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              color: "#374151", // Added text color
+            }}
+          >
+            <span>🎁</span>
+            <span>All Purposes</span>
+          </button>
+          {boughtForOptions.map((boughtFor) => (
+            <button
+              key={boughtFor}
+              onClick={() => {
+                setSelectedBoughtFor(boughtFor);
+                setShowBoughtForFilter(false);
+              }}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                fontSize: "13px",
+                textAlign: "left",
+                backgroundColor:
+                  selectedBoughtFor === boughtFor ? "#e0f2fe" : "transparent",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                marginBottom: "2px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#374151", // Added text color
+              }}
+            >
+              <span>🎁</span>
+              <span>{boughtFor}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Filter Indicators */}
+      {(searchTerm || selectedLocation || selectedBoughtFor) && (
+        <div
+          style={{
+            padding: "6px 12px",
+            backgroundColor: "#f8fafc",
+            borderBottom: "1px solid #e5e7eb",
+            fontSize: "11px",
+            color: "#6b7280",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            {searchTerm && <span>Search: "{searchTerm}"</span>}
+            {selectedLocation && <span> • Location: {selectedLocation}</span>}
+            {selectedBoughtFor && <span> • Purpose: {selectedBoughtFor}</span>}
+          </div>
+          <button
+            onClick={clearFilters}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#ef4444",
+              cursor: "pointer",
+              fontSize: "11px",
+              padding: "2px 6px",
+              borderRadius: "4px",
+              backgroundColor: "#fee2e2",
+            }}
+          >
+            Clear Filters
+          </button>
+        </div>
+      )}
 
       {/* ALL CONTENT INSIDE SCROLLABLE WRAPPER */}
       <div style={jewelleryStyles.contentWrapper}>
@@ -259,7 +625,7 @@ const JewelleryList: React.FC = () => {
         )}
 
         {/* Items Count - Compact */}
-        {!error && jewelleryItems.length > 0 && (
+        {!error && filteredItems.length > 0 && (
           <div
             style={{
               fontSize: "11px",
@@ -268,13 +634,15 @@ const JewelleryList: React.FC = () => {
               textAlign: "right",
             }}
           >
-            {jewelleryItems.length} items
+            {filteredItems.length} items
+            {filteredItems.length !== jewelleryItems.length &&
+              ` (of ${jewelleryItems.length})`}
           </div>
         )}
 
         {/* Items List - Compact 2-Line Design */}
         <div style={{ padding: "0 0 5px 0" }}>
-          {jewelleryItems.length === 0 ? (
+          {filteredItems.length === 0 ? (
             <div
               style={{
                 textAlign: "center",
@@ -285,26 +653,32 @@ const JewelleryList: React.FC = () => {
               }}
             >
               <div style={{ fontSize: "24px", marginBottom: "8px" }}>📦</div>
-              <p>No jewellery items found.</p>
-              <button
-                onClick={() => navigate("/jewellery/add")}
-                style={{
-                  padding: "6px 12px",
-                  backgroundColor: "#3b82f6",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  marginTop: "8px",
-                }}
-              >
-                Add First Item
-              </button>
+              <p>
+                {jewelleryItems.length === 0
+                  ? "No jewellery items found."
+                  : "No items match your search/filters."}
+              </p>
+              {(searchTerm || selectedLocation || selectedBoughtFor) && (
+                <button
+                  onClick={clearFilters}
+                  style={{
+                    padding: "6px 12px",
+                    backgroundColor: "#3b82f6",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    marginTop: "8px",
+                  }}
+                >
+                  Clear Filters
+                </button>
+              )}
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column" }}>
-              {jewelleryItems.map((item, index) => (
+              {filteredItems.map((item, index) => (
                 <div
                   key={item.id}
                   style={{
@@ -316,7 +690,7 @@ const JewelleryList: React.FC = () => {
                     alignItems: "center",
                     gap: "8px",
                     borderBottom:
-                      index < jewelleryItems.length - 1
+                      index < filteredItems.length - 1
                         ? "1px solid #e5e7eb"
                         : "none",
                   }}

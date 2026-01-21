@@ -2,13 +2,31 @@ import { CSSProperties } from "react";
 
 export const jewelleryStyles = {
   // Container
-  container: {
-    maxWidth: "600px",
-    margin: "0 auto",
+ container: {
+    display: "flex",
+    flexDirection: "column" as const,
     minHeight: "100vh",
     backgroundColor: "#f5f5f5",
-  } as CSSProperties,
+  },
 
+  contentWrapper: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column" as const,
+    maxWidth: "500px",
+    margin: "0 auto",
+    width: "100%",
+    padding: "0 15px",
+  },
+
+  centeredContainer: {
+    display: "flex",
+    flexDirection: "column" as const,
+    minHeight: "100vh",
+    backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   // Top Navigation
   topNav: {
     display: "flex",

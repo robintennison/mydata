@@ -6,14 +6,18 @@ import {
   doc, 
   deleteDoc, 
   getDocs, 
-  getDoc,
   query, 
   orderBy,
   Timestamp 
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { firestore, storage } from "../../../lib/firebase";
+import { firestore } from "../../../lib/firebase";
 import { Jewellery } from "../models/types";
+import { 
+  uploadImage, 
+  getBill, 
+  uploadBillAndCreateDoc, 
+  updateBillNotes 
+} from "../hooks/firebaseUtils";
 
 export const useJewelleryData = () => {
   const [items, setItems] = useState<Jewellery[]>([]);
@@ -42,7 +46,7 @@ export const useJewelleryData = () => {
           purchaseDate: data.purchaseDate || 0,
           imageUrl: data.imageUrl || "",
           active: data.active !== false,
-          billId: data.billId || null,
+          billId: data.billId || undefined,
           lastVerified: data.lastVerified || 0,
           verificationStatus: data.verificationStatus || "Not Verified",
           verificationNotes: data.verificationNotes || "",
@@ -58,12 +62,11 @@ export const useJewelleryData = () => {
     }
   };
 
-  // Helper function to convert purchaseDate to timestamp
-  const convertPurchaseDate = (purchaseDate: number | Date): number => {
+  // Helper to safely convert purchase date to timestamp
+  const getPurchaseTimestamp = (purchaseDate: number | Date): number => {
     if (purchaseDate instanceof Date) {
       return purchaseDate.getTime();
     }
-    // If it's already a timestamp (number), return it
     return Number(purchaseDate);
   };
 
@@ -71,7 +74,7 @@ export const useJewelleryData = () => {
   const addItem = async (item: Jewellery): Promise<string> => {
     setLoading(true);
     try {
-      const purchaseDate = convertPurchaseDate(item.purchaseDate);
+      const purchaseTimestamp = getPurchaseTimestamp(item.purchaseDate);
       
       const jewelleryData = {
         code: item.code,
@@ -79,7 +82,7 @@ export const useJewelleryData = () => {
         weight: item.weight,
         location: item.location,
         boughtFor: item.boughtFor,
-        purchaseDate: purchaseDate,
+        purchaseDate: purchaseTimestamp,
         imageUrl: item.imageUrl || "",
         active: item.active !== false,
         billId: item.billId || null,
@@ -114,7 +117,7 @@ export const useJewelleryData = () => {
     try {
       const jewelleryRef = doc(firestore, "jewellery", id);
       
-      const purchaseDate = convertPurchaseDate(item.purchaseDate);
+      const purchaseTimestamp = getPurchaseTimestamp(item.purchaseDate);
       
       const updateData = {
         code: item.code,
@@ -122,7 +125,7 @@ export const useJewelleryData = () => {
         weight: item.weight,
         location: item.location,
         boughtFor: item.boughtFor,
-        purchaseDate: purchaseDate,
+        purchaseDate: purchaseTimestamp,
         imageUrl: item.imageUrl || "",
         active: item.active !== false,
         billId: item.billId || null,
@@ -158,91 +161,12 @@ export const useJewelleryData = () => {
     }
   };
 
-  // Upload image to Firebase Storage
-  const uploadImage = async (file: File): Promise<string> => {
-    try {
-      const timestamp = Date.now();
-      const fileExtension = file.name.split('.').pop() || 'jpg';
-      const fileName = `jewellery_images/${timestamp}.${fileExtension}`;
-      
-      const storageRef = ref(storage, fileName);
-      await uploadBytes(storageRef, file);
-      
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      throw new Error("Failed to upload image");
-    }
-  };
-
-  // Get bill by ID
-  const getBill = async (billId: string) => {
-    try {
-      const billDoc = await getDoc(doc(firestore, "bills", billId));
-      if (billDoc.exists()) {
-        const data = billDoc.data();
-        return {
-          id: billDoc.id,
-          downloadUrl: data.downloadUrl,
-          mimeType: data.mimeType,
-          notes: data.notes,
-          createdAt: data.createdAt?.toMillis() || 0,
-          updatedAt: data.updatedAt?.toMillis(),
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error("Error fetching bill:", error);
-      return null;
-    }
-  };
-
-  // Upload bill file
-  const uploadBillAndCreateDoc = async (
-    file: File,
-    notes?: string
-  ): Promise<string> => {
-    try {
-      const timestamp = Date.now();
-      const fileExtension = file.name.split('.').pop() || 'pdf';
-      const fileName = `bills/${timestamp}.${fileExtension}`;
-      
-      const storageRef = ref(storage, fileName);
-      await uploadBytes(storageRef, file);
-      
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      const billData = {
-        downloadUrl: downloadURL,
-        mimeType: file.type,
-        notes: notes || null,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      };
-      
-      const docRef = await addDoc(collection(firestore, "bills"), billData);
-      return docRef.id;
-    } catch (error) {
-      console.error("Error uploading bill:", error);
-      throw new Error("Failed to upload bill");
-    }
-  };
-
-  // Update bill notes
-  const updateBillNotes = async (billId: string, notes?: string): Promise<void> => {
-    try {
-      const billRef = doc(firestore, "bills", billId);
-      const updateData = {
-        notes: notes || null,
-        updatedAt: Timestamp.now(),
-      };
-      
-      await updateDoc(billRef, updateData);
-    } catch (error) {
-      console.error("Error updating bill notes:", error);
-      throw new Error("Failed to update bill notes");
-    }
+  // Export the imported functions directly
+  const firebaseUtils = {
+    uploadImage,
+    getBill,
+    uploadBillAndCreateDoc,
+    updateBillNotes,
   };
 
   useEffect(() => {
@@ -256,10 +180,7 @@ export const useJewelleryData = () => {
     addItem,
     updateItem,
     deleteItem,
-    uploadImage,
-    getBill,
-    uploadBillAndCreateDoc,
-    updateBillNotes,
+    ...firebaseUtils, // Spread the Firebase utils
     refresh: loadItems,
   };
 };

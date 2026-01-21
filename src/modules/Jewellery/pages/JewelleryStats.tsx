@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
 import JewelleryNavigation from "../components/JewelleryNavigation";
-import { Jewellery, VerificationStatus } from "../models/types";
+import { Jewellery } from "../models/types";
 
 const JewelleryStats: React.FC = () => {
   const navigate = useNavigate();
@@ -29,13 +29,13 @@ const JewelleryStats: React.FC = () => {
         totalItems: mockItems.length,
         totalWeight: mockItems.reduce((sum, item) => sum + item.weight, 0),
         verifiedCount: mockItems.filter(
-          (item) => item.verificationStatus === VerificationStatus.VERIFIED,
+          (item) => item.verificationStatus === "Verified", // Match Android
         ).length,
         missingCount: mockItems.filter(
-          (item) => item.verificationStatus === VerificationStatus.MISSING,
+          (item) => item.verificationStatus === "Missing", // Match Android
         ).length,
         notVerifiedCount: mockItems.filter(
-          (item) => item.verificationStatus === VerificationStatus.NOT_VERIFIED,
+          (item) => item.verificationStatus === "Not Verified", // Match Android
         ).length,
         byLocation: {},
         byPerson: {},

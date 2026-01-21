@@ -4,6 +4,8 @@ import { jewelleryStyles } from "./styles/jewelleryStyles";
 import JewelleryNavigation from "./components/JewelleryNavigation";
 import { useJewellerySettings } from "./hooks/useSettingsData";
 
+// newly inserted
+
 const JewelleryHome: React.FC = () => {
   const navigate = useNavigate();
   const { goldRate } = useJewellerySettings();

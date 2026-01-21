@@ -15,18 +15,18 @@ import LoginForm from "../components/Auth/LoginForm";
 import MyDataHomepage from "../MyDataHomepage";
 
 // Import History pages
-import HistoryListPage from "../modules/Banking/pages/HistoryListPage"; // Add this import
-import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage"; // Add this import
+import HistoryListPage from "../modules/Banking/pages/HistoryListPage";
+import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage";
 
 // Import Jewellery pages
 import JewelleryHome from "../modules/Jewellery/index";
 import JewelleryList from "../modules/Jewellery/pages/JewelleryList";
-import JewelleryForm from "../modules/Jewellery/pages/JewelleryForm";
 import BillsList from "../modules/Jewellery/pages/BillsList";
 import BillForm from "../modules/Jewellery/pages/BillForm";
 import JewelleryDetail from "../modules/Jewellery/pages/JewelleryDetail";
 import JewelleryStats from "../modules/Jewellery/pages/JewelleryStats";
-import VerificationPage from "../modules/Jewellery/pages/VerificationPage";
+import VerificationPageWrapper from "../modules/Jewellery/pages/VerificationPageWrapper";
+import JewelleryFormWrapper from "../modules/Jewellery/pages/JewelleryFormWrapper";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -38,13 +38,7 @@ export interface RouteConfig {
   needsUserData?: boolean;
   children?: RouteConfig[];
   isIndex?: boolean;
-  hideFooter?: boolean; // Add this field to optionally hide footer
-}
-
-export interface ModuleRoute {
-  moduleName: string;
-  basePath: string;
-  routes: RouteConfig[];
+  hideFooter?: boolean;
 }
 
 export interface NavigationItem {
@@ -71,7 +65,7 @@ const allRoutes: RouteConfig[] = [
     element: <LoginForm />,
     title: "Login",
     requiresAuth: false,
-    hideFooter: true, // Hide footer on login page
+    hideFooter: true,
   },
   {
     path: "/settings",
@@ -113,8 +107,6 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
-
-  // Deposit Routes
   {
     path: "/banking/deposits",
     element: <DepositsListPage />,
@@ -147,8 +139,6 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
-
-  // History Routes
   {
     path: "/banking/history",
     element: <HistoryListPage />,
@@ -173,7 +163,6 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
-
   {
     path: "/banking/summary",
     element: <DepositSummaryPage />,
@@ -200,14 +189,14 @@ const allRoutes: RouteConfig[] = [
   },
   {
     path: "/jewellery/add",
-    element: <JewelleryForm />,
+    element: <JewelleryFormWrapper />,
     title: "Add Jewellery",
     icon: "➕",
     requiresAuth: true,
   },
   {
     path: "/jewellery/edit/:id",
-    element: <JewelleryForm />,
+    element: <JewelleryFormWrapper isEditing={true} />,
     title: "Edit Jewellery",
     icon: "✏️",
     requiresAuth: true,
@@ -248,13 +237,13 @@ const allRoutes: RouteConfig[] = [
   },
   {
     path: "/jewellery/verification",
-    element: <VerificationPage />,
+    element: <VerificationPageWrapper />,
     title: "Stock Verification",
     icon: "✅",
     requiresAuth: true,
   },
 
-  // Other Module Routes (Currently placeholders)
+  // Other Module Routes
   {
     path: "/online",
     element: (
@@ -289,8 +278,8 @@ const navigationItems = allRoutes
       route.icon &&
       !route.path.includes(":") &&
       route.path !== "/login" &&
-      !route.path.includes("/banking/") && // Exclude nested banking routes
-      !route.path.includes("/jewellery/"), // Exclude nested jewellery routes
+      !route.path.includes("/banking/") &&
+      !route.path.includes("/jewellery/"),
   )
   .map((route: RouteConfig) => ({
     path: route.path,
@@ -309,7 +298,7 @@ const moduleNavigationItems = {
         route.icon &&
         route.path.startsWith("/banking") &&
         !route.path.includes(":") &&
-        route.path !== "/banking", // Exclude banking home from submenu
+        route.path !== "/banking",
     )
     .map((route: RouteConfig) => ({
       path: route.path,
@@ -326,7 +315,7 @@ const moduleNavigationItems = {
         route.icon &&
         route.path.startsWith("/jewellery") &&
         !route.path.includes(":") &&
-        route.path !== "/jewellery", // Exclude jewellery home from submenu
+        route.path !== "/jewellery",
     )
     .map((route: RouteConfig) => ({
       path: route.path,
@@ -359,7 +348,6 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} replace />;
   }
-
   return <>{children}</>;
 };
 
@@ -387,7 +375,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({ isAuthenticated }) => {
           );
         })}
 
-        {/* 404 Route - Catch all unmatched routes */}
+        {/* 404 Route */}
         <Route
           path="*"
           element={

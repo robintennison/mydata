@@ -1,44 +1,61 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { Jewellery, VerificationStatus } from "../models/types";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
-import { Jewellery } from "../models/types";
 
 const JewelleryDetail: React.FC = () => {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [item, setItem] = useState<Jewellery | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Fetch jewellery item details from Firebase
-    setTimeout(() => {
-      const mockItem: Jewellery = {
-        id,
-        code: "G001",
-        description: "Gold Chain",
-        weight: 25.5,
-        location: "Locker",
-        boughtFor: "Robin",
-        purchaseDate: Date.now() - 30 * 24 * 60 * 60 * 1000,
-        imageUrl: "",
-        active: true,
-        lastVerified: Date.now(),
-        verificationStatus: "Verified",
-        verificationNotes: "Verified on 15th Dec",
-      };
-      setItem(mockItem);
-      setLoading(false);
-    }, 500);
-  }, [id]);
+    const fetchJewellery = async () => {
+      if (!id) {
+        console.error("No ID provided");
+        setLoading(false);
+        return;
+      }
 
-  const formatDate = (timestamp: number) => {
-    if (!timestamp) return "Never";
-    return new Date(timestamp).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
+      try {
+        const db = getFirestore();
+        const docRef = doc(db, "jewellery", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          // Create a proper Jewellery object with the id
+          const jewellery: Jewellery = {
+            id: docSnap.id, // Use docSnap.id which is guaranteed to be a string
+            code: data.code || "",
+            description: data.description || "",
+            weight: data.weight || 0,
+            location: data.location || "",
+            boughtFor: data.boughtFor || "",
+            purchaseDate: data.purchaseDate || 0,
+            imageUrl: data.imageUrl || "",
+            active: data.active !== false,
+            billId: data.billId,
+            lastVerified: data.lastVerified || 0,
+            verificationStatus:
+              data.verificationStatus || VerificationStatus.NOT_VERIFIED,
+            verificationNotes: data.verificationNotes || "",
+          };
+          setItem(jewellery);
+        } else {
+          console.log("No such document!");
+          setItem(null);
+        }
+      } catch (error) {
+        console.error("Error fetching jewellery:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJewellery();
+  }, [id]);
 
   if (loading) {
     return (
@@ -54,22 +71,31 @@ const JewelleryDetail: React.FC = () => {
   if (!item) {
     return (
       <div style={jewelleryStyles.container}>
-        <div style={jewelleryStyles.emptyState}>
-          <div style={{ fontSize: "2rem", marginBottom: "10px" }}>🔍</div>
-          <div>Jewellery item not found</div>
+        <div style={jewelleryStyles.topNav}>
+          <button
+            onClick={() => navigate("/jewellery/list")}
+            style={jewelleryStyles.navButton}
+            title="Back to Jewellery"
+          >
+            ←
+          </button>
+          <div style={jewelleryStyles.navTitle}>Jewellery Not Found</div>
+          <div style={{ width: "40px" }}></div>
+        </div>
+        <div style={{ padding: "20px", textAlign: "center" }}>
+          <p>The requested jewellery item was not found.</p>
           <button
             onClick={() => navigate("/jewellery/list")}
             style={{
-              marginTop: "15px",
               padding: "10px 20px",
               backgroundColor: "#3b82f6",
+              color: "white",
               border: "none",
               borderRadius: "8px",
-              color: "#ffffff",
               cursor: "pointer",
             }}
           >
-            Back to List
+            Back to Jewellery List
           </button>
         </div>
       </div>
@@ -83,207 +109,102 @@ const JewelleryDetail: React.FC = () => {
         <button
           onClick={() => navigate("/jewellery/list")}
           style={jewelleryStyles.navButton}
-          title="Back to List"
+          title="Back to Jewellery"
         >
           ←
         </button>
         <div style={jewelleryStyles.navTitle}>Jewellery Details</div>
-        <button
-          onClick={() => navigate(`/jewellery/edit/${id}`)}
-          style={{
-            ...jewelleryStyles.navButton,
-            fontSize: "0.9rem",
-            padding: "6px 10px",
-          }}
-          title="Edit"
-        >
-          Edit
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            onClick={() => navigate(`/jewellery/edit/${item.id}`)}
+            style={{
+              ...jewelleryStyles.navButton,
+              padding: "6px 12px",
+              fontSize: "14px",
+            }}
+            title="Edit"
+          >
+            Edit
+          </button>
+        </div>
       </div>
 
       {/* Content */}
-      <div style={jewelleryStyles.formContainer}>
-        {/* Image Preview */}
-        {item.imageUrl && (
-          <div style={{ textAlign: "center", marginBottom: "20px" }}>
-            <img
-              src={item.imageUrl}
-              alt={item.description}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "300px",
-                borderRadius: "8px",
-              }}
-            />
-          </div>
-        )}
+      <div style={{ padding: "15px" }}>
+        <div style={jewelleryStyles.statsCard}>
+          <h3 style={{ margin: "0 0 15px 0", color: "#333" }}>{item.code}</h3>
 
-        {/* Details Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: "15px",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "4px",
-              }}
-            >
-              Code
+          {item.imageUrl && (
+            <div style={{ marginBottom: "20px", textAlign: "center" }}>
+              <img
+                src={item.imageUrl}
+                alt={item.code}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "300px",
+                  borderRadius: "8px",
+                }}
+              />
             </div>
-            <div style={{ fontWeight: "600", fontSize: "16px" }}>
-              {item.code}
-            </div>
-          </div>
+          )}
 
-          <div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "4px",
-              }}
-            >
-              Weight
-            </div>
-            <div
-              style={{ fontWeight: "600", fontSize: "16px", color: "#4285f4" }}
-            >
-              {item.weight}g
-            </div>
-          </div>
-
-          <div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "4px",
-              }}
-            >
-              Location
-            </div>
-            <div style={{ fontWeight: "500", fontSize: "14px" }}>
-              {item.location}
-            </div>
-          </div>
-
-          <div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "4px",
-              }}
-            >
-              Bought For
-            </div>
-            <div style={{ fontWeight: "500", fontSize: "14px" }}>
-              {item.boughtFor}
-            </div>
-          </div>
-
-          <div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "4px",
-              }}
-            >
-              Purchase Date
-            </div>
-            <div style={{ fontWeight: "500", fontSize: "14px" }}>
-              {formatDate(item.purchaseDate)}
-            </div>
-          </div>
-
-          <div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "4px",
-              }}
-            >
-              Status
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
+            <div>
+              <strong>Code:</strong> {item.code}
             </div>
             <div>
+              <strong>Description:</strong> {item.description}
+            </div>
+            <div>
+              <strong>Weight:</strong> {item.weight}g
+            </div>
+            <div>
+              <strong>Location:</strong> {item.location}
+            </div>
+            <div>
+              <strong>Bought For:</strong> {item.boughtFor}
+            </div>
+            <div>
+              <strong>Purchase Date:</strong>{" "}
+              {item.purchaseDate
+                ? new Date(item.purchaseDate).toLocaleDateString()
+                : "Not specified"}
+            </div>
+            <div>
+              <strong>Status:</strong>{" "}
               <span
-                style={jewelleryStyles.statusBadge(item.verificationStatus)}
+                style={{
+                  backgroundColor:
+                    item.verificationStatus === VerificationStatus.VERIFIED
+                      ? "#10b981"
+                      : item.verificationStatus === VerificationStatus.MISSING
+                        ? "#ef4444"
+                        : "#6b7280",
+                  color: "white",
+                  padding: "2px 8px",
+                  borderRadius: "12px",
+                  fontSize: "12px",
+                }}
               >
                 {item.verificationStatus}
               </span>
             </div>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div style={{ marginTop: "20px" }}>
-          <div
-            style={{ fontSize: "12px", color: "#6b7280", marginBottom: "4px" }}
-          >
-            Description
-          </div>
-          <div style={{ fontSize: "14px", lineHeight: "1.5" }}>
-            {item.description}
-          </div>
-        </div>
-
-        {/* Verification Details */}
-        {item.verificationNotes && (
-          <div style={{ marginTop: "20px" }}>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "4px",
-              }}
-            >
-              Verification Notes
+            {item.verificationNotes && (
+              <div>
+                <strong>Verification Notes:</strong> {item.verificationNotes}
+              </div>
+            )}
+            {item.lastVerified > 0 && (
+              <div>
+                <strong>Last Verified:</strong>{" "}
+                {new Date(item.lastVerified).toLocaleDateString()}
+              </div>
+            )}
+            <div>
+              <strong>Active:</strong> {item.active ? "Yes" : "No"}
             </div>
-            <div style={{ fontSize: "14px", lineHeight: "1.5" }}>
-              {item.verificationNotes}
-            </div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#9ca3af",
-                marginTop: "4px",
-              }}
-            >
-              Last verified: {formatDate(item.lastVerified)}
-            </div>
-          </div>
-        )}
-
-        {/* Active Status */}
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "12px",
-            backgroundColor: item.active ? "#f0fdf4" : "#f3f4f6",
-            borderRadius: "8px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          <div
-            style={{
-              width: "12px",
-              height: "12px",
-              backgroundColor: item.active ? "#10b981" : "#6b7280",
-              borderRadius: "50%",
-            }}
-          ></div>
-          <div style={{ fontSize: "14px", fontWeight: "500" }}>
-            {item.active ? "Active Item" : "Inactive Item"}
           </div>
         </div>
       </div>

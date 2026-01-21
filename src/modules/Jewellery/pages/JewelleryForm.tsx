@@ -1,238 +1,228 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { jewelleryStyles } from "../styles/jewelleryStyles";
-import { Jewellery, VerificationStatus } from "../models/types";
-import { useJewellerySettings } from "../hooks/useSettingsData";
+import React, { useState } from "react";
+import {
+  Jewellery,
+  VerificationStatus,
+  VerificationStatusType,
+} from "../models/types";
 
-const JewelleryForm: React.FC = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const isEditMode = !!id;
+interface JewelleryFormProps {
+  initialData?: Partial<Jewellery>;
+  onSubmit: (data: Partial<Jewellery>) => void;
+  isEditing?: boolean;
+}
 
-  const { locations, boughtForOptions } = useJewellerySettings();
-  const [loading, setLoading] = useState(false);
-  //const [imagePreview, setImagePreview] = useState<string>("");
-  const [imageFile] = useState<File | null>(null);
-
-  const [formData, setFormData] = useState<Jewellery>({
+const JewelleryForm: React.FC<JewelleryFormProps> = ({
+  initialData,
+  onSubmit,
+  isEditing = false,
+}) => {
+  const [formData, setFormData] = useState<Partial<Jewellery>>({
     code: "",
     description: "",
     weight: 0,
-    location: locations[0] || "", // Use first location from settings
-    boughtFor: boughtForOptions[0] || "", // Use first boughtFor from settings
+    location: "",
+    boughtFor: "",
     purchaseDate: Date.now(),
     imageUrl: "",
     active: true,
-    lastVerified: 0,
-    verificationStatus: VerificationStatus.NOT_VERIFIED,
+    verificationStatus: VerificationStatus.NOT_VERIFIED, // Use the VALUE
     verificationNotes: "",
+    lastVerified: 0,
+    ...initialData,
   });
 
-  useEffect(() => {
-    if (isEditMode) {
-      // TODO: Load jewellery data from Firebase
-      setLoading(true);
-      setTimeout(() => {
-        const mockData: Jewellery = {
-          id,
-          code: "G001",
-          description: "Gold Chain",
-          weight: 25.5,
-          location: "Locker", // This should come from saved data
-          boughtFor: "Robin", // This should come from saved data
-          purchaseDate: Date.now() - 30 * 24 * 60 * 60 * 1000,
-          imageUrl: "",
-          active: true,
-          lastVerified: Date.now(),
-          verificationStatus: VerificationStatus.VERIFIED,
-          verificationNotes: "Verified on 15th Dec",
-        };
-        setFormData(mockData);
-        setLoading(false);
-      }, 500);
-    } else {
-      // For new items, set default values from settings
-      setFormData((prev) => ({
-        ...prev,
-        location: locations[0] || "",
-        boughtFor: boughtForOptions[0] || "",
-      }));
-    }
-  }, [id, isEditMode, locations, boughtForOptions]);
+  // Derive status options from VerificationStatus object VALUES
+  const statusOptions = Object.values(VerificationStatus).map((value) => ({
+    value,
+    label: value,
+  }));
 
-  // ... rest of the handleImageUpload function remains the same ...
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const { name, value, type } = e.target;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // TODO: Upload image first if exists
-      let imageUrl = formData.imageUrl;
-      if (imageFile) {
-        // TODO: Call Firebase upload function
-        // imageUrl = await uploadImage(imageFile);
-      }
-
-      const jewelleryData = {
+    if (type === "checkbox") {
+      setFormData({
         ...formData,
-        imageUrl,
-        purchaseDate: new Date(formData.purchaseDate).getTime(),
-      };
+        [name]: (e.target as HTMLInputElement).checked,
+      });
+    } else if (name === "weight") {
+      setFormData({ ...formData, [name]: parseFloat(value) || 0 });
+    } else if (name === "verificationStatus") {
+      // Validate that the value is a valid VerificationStatus VALUE
+      const validValues = Object.values(VerificationStatus);
+      if (validValues.includes(value as VerificationStatusType)) {
+        setFormData({ ...formData, [name]: value as VerificationStatusType });
 
-      // TODO: Save to Firebase
-      console.log("Saving jewellery:", jewelleryData);
-
-      // Show success message and navigate back
-      setTimeout(() => {
-        setLoading(false);
-        navigate("/jewellery/list");
-      }, 1000);
-    } catch (error) {
-      console.error("Error saving jewellery:", error);
-      setLoading(false);
-      alert("Error saving jewellery. Please try again.");
+        // If status changes to Verified/Missing, update lastVerified timestamp
+        if (
+          value === VerificationStatus.VERIFIED ||
+          value === VerificationStatus.MISSING
+        ) {
+          setFormData((prev) => ({
+            ...prev,
+            [name]: value as VerificationStatusType,
+            lastVerified: Date.now(),
+          }));
+        }
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
     }
   };
 
-  if (loading && isEditMode) {
-    return (
-      <div style={jewelleryStyles.container}>
-        <div style={jewelleryStyles.loading}>
-          <div style={jewelleryStyles.spinner}></div>
-          <p>Loading jewellery data...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Ensure lastVerified is set for verified/missing items
+    const finalData = { ...formData };
+    if (
+      finalData.verificationStatus === VerificationStatus.VERIFIED ||
+      finalData.verificationStatus === VerificationStatus.MISSING
+    ) {
+      finalData.lastVerified = finalData.lastVerified || Date.now();
+    }
+
+    onSubmit(finalData);
+  };
+
+  // Update verification status with notes
+  const updateVerification = (
+    status: VerificationStatusType,
+    notes?: string,
+  ) => {
+    setFormData({
+      ...formData,
+      verificationStatus: status,
+      verificationNotes: notes || "",
+      lastVerified: status === VerificationStatus.NOT_VERIFIED ? 0 : Date.now(),
+    });
+  };
 
   return (
-    <div style={jewelleryStyles.container}>
-      {/* Top Navigation */}
-      <div style={jewelleryStyles.topNav}>
-        <button
-          onClick={() => navigate("/jewellery/list")}
-          style={jewelleryStyles.navButton}
-          title="Back to List"
-        >
-          ←
-        </button>
-        <div style={jewelleryStyles.navTitle}>
-          {isEditMode ? "Edit Jewellery" : "Add Jewellery"}
-        </div>
-        <div style={{ width: "40px" }}></div>
+    <form onSubmit={handleSubmit}>
+      {/* Basic Information */}
+      <div>
+        <label>Code *</label>
+        <input
+          type="text"
+          name="code"
+          value={formData.code || ""}
+          onChange={handleChange}
+          required
+        />
       </div>
 
-      <form onSubmit={handleSubmit} style={jewelleryStyles.formContainer}>
-        {/* Basic Information */}
-        <div style={jewelleryStyles.formGroup}>
-          <label style={jewelleryStyles.label}>Code *</label>
-          <input
-            type="text"
-            value={formData.code}
-            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-            style={jewelleryStyles.input}
-            required
-            placeholder="e.g., G001, S002"
-          />
-        </div>
+      <div>
+        <label>Weight (grams) *</label>
+        <input
+          type="number"
+          name="weight"
+          step="0.01"
+          value={formData.weight || ""}
+          onChange={handleChange}
+          required
+        />
+      </div>
 
-        <div style={jewelleryStyles.formGroup}>
-          <label style={jewelleryStyles.label}>Description *</label>
+      {/* Verification Status Section */}
+      <div>
+        <label>Verification Status</label>
+        <select
+          name="verificationStatus"
+          value={formData.verificationStatus || VerificationStatus.NOT_VERIFIED}
+          onChange={handleChange}
+        >
+          {statusOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {formData.verificationStatus !== VerificationStatus.NOT_VERIFIED && (
+        <div>
+          <label>Verification Notes</label>
           <textarea
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            style={jewelleryStyles.textarea}
-            required
-            placeholder="Describe the jewellery item"
+            name="verificationNotes"
+            value={formData.verificationNotes || ""}
+            onChange={handleChange}
+            placeholder="Add notes about verification..."
           />
         </div>
+      )}
 
-        <div style={jewelleryStyles.formGroup}>
-          <label style={jewelleryStyles.label}>Weight (grams) *</label>
-          <input
-            type="number"
-            step="0.1"
-            value={formData.weight}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                weight: parseFloat(e.target.value) || 0,
-              })
-            }
-            style={jewelleryStyles.input}
-            required
-            min="0"
-          />
-        </div>
+      {/* Quick verification buttons */}
+      <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+        <button
+          type="button"
+          onClick={() =>
+            updateVerification(
+              VerificationStatus.VERIFIED,
+              formData.verificationNotes,
+            )
+          }
+          style={{
+            backgroundColor:
+              formData.verificationStatus === VerificationStatus.VERIFIED
+                ? "#10b981"
+                : "#e5e7eb",
+            color:
+              formData.verificationStatus === VerificationStatus.VERIFIED
+                ? "white"
+                : "#374151",
+          }}
+        >
+          Mark as Verified
+        </button>
 
-        {/* Location Dropdown from Settings */}
-        <div style={jewelleryStyles.formGroup}>
-          <label style={jewelleryStyles.label}>Location</label>
-          <select
-            value={formData.location}
-            onChange={(e) =>
-              setFormData({ ...formData, location: e.target.value })
-            }
-            style={jewelleryStyles.select}
-          >
-            {locations.map((location) => (
-              <option key={location} value={location}>
-                {location}
-              </option>
-            ))}
-          </select>
-          <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
-            Manage locations in{" "}
-            <a
-              href="/settings"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/settings", { state: { scrollTo: "locations" } });
-              }}
-              style={{ color: "#3b82f6", textDecoration: "underline" }}
-            >
-              Settings
-            </a>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() =>
+            updateVerification(VerificationStatus.MISSING, "Marked as missing")
+          }
+          style={{
+            backgroundColor:
+              formData.verificationStatus === VerificationStatus.MISSING
+                ? "#ef4444"
+                : "#e5e7eb",
+            color:
+              formData.verificationStatus === VerificationStatus.MISSING
+                ? "white"
+                : "#374151",
+          }}
+        >
+          Mark as Missing
+        </button>
 
-        {/* Bought For Dropdown from Settings */}
-        <div style={jewelleryStyles.formGroup}>
-          <label style={jewelleryStyles.label}>Bought For</label>
-          <select
-            value={formData.boughtFor}
-            onChange={(e) =>
-              setFormData({ ...formData, boughtFor: e.target.value })
-            }
-            style={jewelleryStyles.select}
-          >
-            {boughtForOptions.map((person) => (
-              <option key={person} value={person}>
-                {person}
-              </option>
-            ))}
-          </select>
-          <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
-            Manage "Bought For" in{" "}
-            <a
-              href="/settings"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/settings", { state: { scrollTo: "boughtFor" } });
-              }}
-              style={{ color: "#3b82f6", textDecoration: "underline" }}
-            >
-              Settings
-            </a>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() =>
+            updateVerification(VerificationStatus.NOT_VERIFIED, "")
+          }
+          style={{
+            backgroundColor:
+              formData.verificationStatus === VerificationStatus.NOT_VERIFIED
+                ? "#6b7280"
+                : "#e5e7eb",
+            color:
+              formData.verificationStatus === VerificationStatus.NOT_VERIFIED
+                ? "white"
+                : "#374151",
+          }}
+        >
+          Reset to Not Verified
+        </button>
+      </div>
 
-        {/* ... rest of the form remains the same ... */}
-      </form>
-    </div>
+      <button type="submit">
+        {isEditing ? "Update Jewellery" : "Add Jewellery"}
+      </button>
+    </form>
   );
 };
 

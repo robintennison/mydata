@@ -1,164 +1,118 @@
-// jewellery/hooks/firebaseUtils.ts
-import { firestore, storage } from "../../../lib/firebase"; // Use firestore, not db
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+// jewellery/utils/firebaseUtils.ts
 import { 
   collection, 
   addDoc, 
   updateDoc, 
   doc, 
   getDoc,
-  Timestamp 
+  Timestamp
 } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { firestore, storage } from "../../../lib/firebase";
+import { Bill } from "../models/types";
 
-interface Bill {
-  id: string;
-  downloadUrl: string;
-  mimeType: string;
-  notes?: string;
-  createdAt: number;
-  updatedAt?: number;
-}
+// Upload image with compression - matching your Kotlin uploadImage function
+export const uploadImage = async (file: File): Promise<string> => {
+  try {
+    // Generate UUID for filename
+    const fileName = `${generateUUID()}.jpg`;
+    const imageRef = ref(storage, `jewellery_images/${fileName}`);
 
-export const getFirebaseUtils = () => ({
-  // Upload image with compression (similar to your Kotlin uploadImage)
-  uploadImage: async (file: File): Promise<string> => {
-    try {
-      // Compress image before upload (you can add compression logic here)
-      const compressedFile = await compressImage(file);
-      
-      const timestamp = Date.now();
-      const fileExtension = file.name.split('.').pop() || 'jpg';
-      const fileName = `jewellery_images/${timestamp}.${fileExtension}`;
-      
-      const storageRef = ref(storage, fileName);
-      await uploadBytes(storageRef, compressedFile);
-      
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      throw error;
-    }
-  },
+    console.log(`Uploading to path: jewellery_images/${fileName}`);
 
-  // Get bill by ID (similar to your Kotlin getBill)
-  getBill: async (billId: string): Promise<Bill | null> => {
-    try {
-      const billDoc = await getDoc(doc(firestore, "bills", billId)); // Use firestore
-      if (billDoc.exists()) {
-        const data = billDoc.data();
-        return {
-          id: billDoc.id,
-          downloadUrl: data.downloadUrl,
-          mimeType: data.mimeType,
-          notes: data.notes,
-          createdAt: data.createdAt?.toMillis() || 0,
-          updatedAt: data.updatedAt?.toMillis(),
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error("Error getting bill:", error);
-      return null;
-    }
-  },
+    // Upload the file
+    await uploadBytes(imageRef, file);
 
-  // Update bill notes (similar to your Kotlin updateBillNotes)
-  updateBillNotes: async (billId: string, notes?: string): Promise<void> => {
-    try {
-      const billRef = doc(firestore, "bills", billId); // Use firestore
-      const updateData = {
-        notes: notes || null,
-        updatedAt: Timestamp.now(),
-      };
-      
-      await updateDoc(billRef, updateData);
-    } catch (error) {
-      console.error("Error updating bill notes:", error);
-      throw error;
-    }
-  },
+    // Get download URL
+    const downloadUri = await getDownloadURL(imageRef);
+    return downloadUri.toString();
+  } catch (e) {
+    console.error("Exception during upload", e);
+    throw new Error("Failed to upload image");
+  }
+};
 
-  // Upload bill and create document (similar to your Kotlin uploadBillAndCreateDoc)
-  uploadBillAndCreateDoc: async (
-    file: File,
-    notes?: string
-  ): Promise<string> => {
-    try {
-      const timestamp = Date.now();
-      const fileExtension = file.name.split('.').pop() || 'pdf';
-      const fileName = `bills/${timestamp}.${fileExtension}`;
-      
-      const storageRef = ref(storage, fileName);
-      await uploadBytes(storageRef, file);
-      
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      const billData = {
-        downloadUrl: downloadURL,
-        mimeType: file.type,
-        notes: notes || null,
-        createdAt: Timestamp.now(),
-      };
-      
-      const docRef = await addDoc(collection(firestore, "bills"), billData); // Use firestore
-      return docRef.id;
-    } catch (error) {
-      console.error("Error uploading bill:", error);
-      throw error;
-    }
-  },
-});
-
-// Image compression helper (matches your Kotlin compression)
-const compressImage = async (file: File): Promise<File> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Calculate new dimensions (max 800px)
-        let width = img.width;
-        let height = img.height;
-        const maxSize = 800;
-        
-        if (width > height && width > maxSize) {
-          height = (height * maxSize) / width;
-          width = maxSize;
-        } else if (height > maxSize) {
-          width = (width * maxSize) / height;
-          height = maxSize;
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        
-        ctx?.drawImage(img, 0, 0, width, height);
-        
-        // Convert to blob with 70% quality
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const compressedFile = new File([blob], file.name, {
-                type: 'image/jpeg',
-                lastModified: Date.now(),
-              });
-              resolve(compressedFile);
-            } else {
-              reject(new Error('Failed to compress image'));
-            }
-          },
-          'image/jpeg',
-          0.7
-        );
-      };
-      img.onerror = reject;
-      img.src = e.target?.result as string;
+// Update bill notes - matching your Kotlin updateBillNotes
+export const updateBillNotes = async (billId: string, notes?: string): Promise<void> => {
+  try {
+    const updateData = {
+      notes: notes || null,
+      updatedAt: Timestamp.now(),
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+    
+    await updateDoc(doc(firestore, "bills", billId), updateData);
+  } catch (e) {
+    console.error("Error updating bill notes", e);
+    throw e;
+  }
+};
+
+// Get bill by ID - matching your Kotlin getBill
+export const getBill = async (billId: string): Promise<Bill | null> => {
+  try {
+    const snap = await getDoc(doc(firestore, "bills", billId));
+    if (snap.exists()) {
+      const data = snap.data();
+      return {
+        id: snap.id,
+        downloadUrl: data.downloadUrl,
+        mimeType: data.mimeType,
+        notes: data.notes || undefined, // Convert null to undefined
+        createdAt: data.createdAt?.toMillis() || data.createdAt || 0,
+        updatedAt: data.updatedAt?.toMillis() || data.updatedAt,
+      };
+    }
+    return null;
+  } catch (e) {
+    console.error("Error getting bill", e);
+    throw e;
+  }
+};
+
+// Upload bill and create document - matching your Kotlin uploadBillAndCreateDoc
+export const uploadBillAndCreateDoc = async (
+  file: File,
+  notes?: string
+): Promise<string> => {
+  try {
+    const mime = file.type || "application/octet-stream";
+    const ext = mime === "application/pdf" 
+      ? "pdf" 
+      : mime.startsWith("image/") 
+        ? mime.split('/')[1] || "jpg" 
+        : "bin";
+
+    const fileName = `${generateUUID()}.${ext}`;
+    const storageRef = ref(storage, `bills/${fileName}`);
+
+    // Upload the file
+    await uploadBytes(storageRef, file);
+    const httpsUrl = await getDownloadURL(storageRef);
+
+    const billData = {
+      downloadUrl: httpsUrl,
+      mimeType: mime,
+      createdAt: Timestamp.now(),
+      notes: notes || null,
+    };
+
+    const docRef = await addDoc(collection(firestore, "bills"), billData);
+    return docRef.id;
+  } catch (e) {
+    console.error("Error uploading bill", e);
+    throw e;
+  }
+};
+
+// Utility to generate UUID (since crypto.randomUUID might not be available everywhere)
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
   });
 };

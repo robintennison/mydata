@@ -13,13 +13,17 @@ import {
 import { Jewellery } from "../models/types";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
 import JewelleryNavigation from "../components/JewelleryNavigation";
+import { useJewellerySettings } from "../hooks/useSettingsData";
 
 const JewelleryList: React.FC = () => {
   const navigate = useNavigate();
+  const { showInactive: showInactiveSetting, showDelete: showDeleteSetting } =
+    useJewellerySettings();
+
   const [jewelleryItems, setJewelleryItems] = useState<Jewellery[]>([]);
   const [filteredItems, setFilteredItems] = useState<Jewellery[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showInactive, setShowInactive] = useState(false);
+  const [showInactive, setShowInactive] = useState(showInactiveSetting);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showLocationFilter, setShowLocationFilter] = useState(false);
@@ -48,7 +52,9 @@ const JewelleryList: React.FC = () => {
         q = query(q, orderBy("code", "desc"));
 
         const snapshot = await getDocs(q);
-        console.log(`Query returned ${snapshot.size} items`);
+        console.log(
+          `Query returned ${snapshot.size} items, showInactive: ${showInactive}`,
+        );
 
         const items: Jewellery[] = [];
         snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
@@ -73,7 +79,7 @@ const JewelleryList: React.FC = () => {
 
         console.log(`Parsed ${items.length} items`);
         setJewelleryItems(items);
-        setFilteredItems(items); // Initialize filtered items
+        setFilteredItems(items);
       } catch (error: any) {
         console.error("Error fetching jewellery:", error);
 
@@ -103,7 +109,6 @@ const JewelleryList: React.FC = () => {
 
     let result = jewelleryItems;
 
-    // Apply search filter
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
       result = result.filter(
@@ -113,12 +118,10 @@ const JewelleryList: React.FC = () => {
       );
     }
 
-    // Apply location filter
     if (selectedLocation) {
       result = result.filter((item) => item.location === selectedLocation);
     }
 
-    // Apply boughtFor filter
     if (selectedBoughtFor) {
       result = result.filter((item) => item.boughtFor === selectedBoughtFor);
     }
@@ -205,6 +208,12 @@ const JewelleryList: React.FC = () => {
     setShowBoughtForFilter(false);
   };
 
+  // Handle edit button click
+  const handleEditClick = (e: React.MouseEvent, itemId: string) => {
+    e.stopPropagation();
+    navigate(`/jewellery/edit/${itemId}`);
+  };
+
   // Get dropdown position
   const getDropdownPosition = (
     buttonRef: React.RefObject<HTMLButtonElement | null>,
@@ -216,7 +225,7 @@ const JewelleryList: React.FC = () => {
         right: window.innerWidth - rect.right,
       };
     }
-    return { top: 60, right: 20 }; // Default position
+    return { top: 60, right: 20 };
   };
 
   // Close dropdowns when clicking outside
@@ -224,7 +233,6 @@ const JewelleryList: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
 
-      // Close location filter if clicking outside
       if (
         showLocationFilter &&
         locationButtonRef.current &&
@@ -234,7 +242,6 @@ const JewelleryList: React.FC = () => {
         setShowLocationFilter(false);
       }
 
-      // Close boughtFor filter if clicking outside
       if (
         showBoughtForFilter &&
         boughtForButtonRef.current &&
@@ -264,7 +271,7 @@ const JewelleryList: React.FC = () => {
 
   return (
     <div style={jewelleryStyles.container}>
-      {/* Top Navigation with Search - SIMPLIFIED LAYOUT */}
+      {/* Top Navigation with Search */}
       <div
         style={{
           ...jewelleryStyles.topNav,
@@ -274,7 +281,7 @@ const JewelleryList: React.FC = () => {
           gap: "8px",
         }}
       >
-        {/* Back Button - Fixed width */}
+        {/* Back Button */}
         <button
           onClick={() => navigate("/jewellery")}
           style={{
@@ -293,7 +300,7 @@ const JewelleryList: React.FC = () => {
           ←
         </button>
 
-        {/* Search Box - Flexible width */}
+        {/* Search Box */}
         <div
           style={{
             flex: 1,
@@ -317,7 +324,7 @@ const JewelleryList: React.FC = () => {
           />
         </div>
 
-        {/* Button Group - Auto width with small buttons */}
+        {/* Button Group */}
         <div
           style={{
             display: "flex",
@@ -389,7 +396,7 @@ const JewelleryList: React.FC = () => {
             ➕
           </button>
 
-          {/* Settings Button - MUST BE VISIBLE */}
+          {/* Settings Button */}
           <button
             onClick={() => navigate("/settings")}
             style={{
@@ -409,7 +416,35 @@ const JewelleryList: React.FC = () => {
         </div>
       </div>
 
-      {/* Dropdowns - RENDERED OUTSIDE THE TOP NAV */}
+      {/* Inactive Items Toggle */}
+      {showInactiveSetting && (
+        <div
+          style={{
+            padding: "8px 12px",
+            backgroundColor: "#f8fafc",
+            borderBottom: "1px solid #e5e7eb",
+            fontSize: "12px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <label style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+              style={{ width: "16px", height: "16px" }}
+            />
+            <span>Show inactive items</span>
+          </label>
+          <span style={{ fontSize: "11px", color: "#6b7280" }}>
+            ({showInactive ? "Showing all" : "Active only"})
+          </span>
+        </div>
+      )}
+
+      {/* Dropdowns */}
       {showLocationFilter && (
         <div
           className="location-dropdown"
@@ -671,7 +706,7 @@ const JewelleryList: React.FC = () => {
           </div>
         )}
 
-        {/* Items Count - Compact */}
+        {/* Items Count */}
         {!error && filteredItems.length > 0 && (
           <div
             style={{
@@ -684,10 +719,12 @@ const JewelleryList: React.FC = () => {
             {filteredItems.length} items
             {filteredItems.length !== jewelleryItems.length &&
               ` (of ${jewelleryItems.length})`}
+            {showInactive &&
+              ` • Showing ${showInactive ? "all" : "active only"}`}
           </div>
         )}
 
-        {/* Items List - Compact 2-Line Design */}
+        {/* Items List */}
         <div style={{ padding: "0 0 5px 0" }}>
           {filteredItems.length === 0 ? (
             <div
@@ -740,6 +777,8 @@ const JewelleryList: React.FC = () => {
                       index < filteredItems.length - 1
                         ? "1px solid #e5e7eb"
                         : "none",
+                    opacity: item.active ? 1 : 0.7,
+                    position: "relative",
                   }}
                   onClick={() => navigate(`/jewellery/detail/${item.id}`)}
                 >
@@ -755,6 +794,7 @@ const JewelleryList: React.FC = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       overflow: "hidden",
+                      border: !item.active ? "1px dashed #9ca3af" : "none",
                     }}
                   >
                     {item.imageUrl ? (
@@ -774,38 +814,70 @@ const JewelleryList: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Item Details - EXACTLY 2 ROWS */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  {/* Item Details - FIXED LAYOUT */}
+                  <div
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      paddingRight: showDeleteSetting ? "36px" : "0", // Space for edit button
+                    }}
+                  >
                     {/* ROW 1: Code + Description + Weight */}
                     <div
                       style={{
                         display: "flex",
                         alignItems: "baseline",
-                        gap: "6px",
+                        justifyContent: "space-between",
                         marginBottom: "2px",
+                        gap: "6px",
                       }}
                     >
                       <div
                         style={{
-                          fontWeight: "600",
-                          fontSize: "13px",
-                          color: "#111827",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {item.code}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#6b7280",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          display: "flex",
+                          alignItems: "baseline",
+                          gap: "4px",
+                          minWidth: 0,
                           flex: 1,
                         }}
                       >
-                        {item.description}
+                        <div
+                          style={{
+                            fontWeight: "600",
+                            fontSize: "13px",
+                            color: item.active ? "#111827" : "#6b7280",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {item.code}
+                        </div>
+                        {!item.active && (
+                          <span
+                            style={{
+                              fontSize: "9px",
+                              backgroundColor: "#9ca3af",
+                              color: "white",
+                              padding: "1px 4px",
+                              borderRadius: "8px",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            Inactive
+                          </span>
+                        )}
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#6b7280",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            flex: 1,
+                            minWidth: 0,
+                          }}
+                        >
+                          {item.description}
+                        </div>
                       </div>
                       <div
                         style={{
@@ -813,7 +885,7 @@ const JewelleryList: React.FC = () => {
                           color: "#374151",
                           fontWeight: "500",
                           whiteSpace: "nowrap",
-                          marginLeft: "4px",
+                          flexShrink: 0,
                         }}
                       >
                         {item.weight}g
@@ -853,9 +925,45 @@ const JewelleryList: React.FC = () => {
                             ? "#ef4444"
                             : "#d1d5db",
                       flexShrink: 0,
+                      marginRight: showDeleteSetting ? "36px" : "0", // Align with edit button space
                     }}
                     title={item.verificationStatus}
                   />
+
+                  {/* Edit Button - Only show if showDeleteSetting is true */}
+                  {showDeleteSetting && (
+                    <button
+                      onClick={(e) => handleEditClick(e, item.id)}
+                      style={{
+                        position: "absolute",
+                        right: "8px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        backgroundColor: "transparent",
+                        border: "none",
+                        fontSize: "14px",
+                        color: "#3b82f6",
+                        cursor: "pointer",
+                        padding: "4px",
+                        borderRadius: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "28px",
+                        height: "28px",
+                        zIndex: 2,
+                      }}
+                      title="Edit"
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = "#e0f2fe";
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                    >
+                      ✏️
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

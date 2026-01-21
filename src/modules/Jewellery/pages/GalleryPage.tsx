@@ -62,8 +62,11 @@ const GalleryPage: React.FC = () => {
           if (item.boughtFor) boughtFor.add(item.boughtFor);
         });
 
-        setJewelleryItems(items);
-        setFilteredItems(items.filter((item) => item.active));
+        // Sort by code in descending order (Z → A) when loading
+        const sortedItems = items.sort((a, b) => b.code.localeCompare(a.code));
+
+        setJewelleryItems(sortedItems);
+        setFilteredItems(sortedItems.filter((item) => item.active));
         setLocationOptions(Array.from(locations));
         setBoughtForOptions(Array.from(boughtFor));
       } catch (error) {
@@ -76,7 +79,7 @@ const GalleryPage: React.FC = () => {
     fetchJewellery();
   }, []);
 
-  // Apply filters
+  // Apply filters and sorting
   useEffect(() => {
     let result = jewelleryItems;
 
@@ -105,7 +108,10 @@ const GalleryPage: React.FC = () => {
       result = result.filter((item) => item.boughtFor === boughtForFilter);
     }
 
-    setFilteredItems(result);
+    // Sort by code in descending order (Z → A, newest first)
+    const sortedResult = result.sort((a, b) => b.code.localeCompare(a.code));
+
+    setFilteredItems(sortedResult);
   }, [
     jewelleryItems,
     searchTerm,
@@ -114,7 +120,7 @@ const GalleryPage: React.FC = () => {
     showInactive,
   ]);
 
-  // Group items into rows of 3
+  // Group items into rows of 3 (already sorted in descending order)
   const rows = [];
   for (let i = 0; i < filteredItems.length; i += 3) {
     rows.push(filteredItems.slice(i, i + 3));
@@ -135,6 +141,12 @@ const GalleryPage: React.FC = () => {
         return styles.notVerified;
     }
   };
+
+  //   // Function to extract numeric part from code for better sorting
+  //   const extractNumberFromCode = (code: string): number => {
+  //     const match = code.match(/\d+/);
+  //     return match ? parseInt(match[0], 10) : 0;
+  //   };
 
   if (loading) {
     return (
@@ -158,7 +170,19 @@ const GalleryPage: React.FC = () => {
         >
           ←
         </button>
-        <div className={styles.navTitle}>Jewellery Gallery</div>
+        <div className={styles.navTitle}>
+          Jewellery Gallery
+          <div
+            style={{
+              fontSize: "12px",
+              color: "#6b7280",
+              fontWeight: "normal",
+              marginTop: "2px",
+            }}
+          >
+            Sorted by code (Z → A, newest first)
+          </div>
+        </div>
         <div className={styles.navActions}>
           <button
             onClick={() => navigate("/jewellery/list")}
@@ -230,7 +254,7 @@ const GalleryPage: React.FC = () => {
             Showing {filteredItems.length} item
             {filteredItems.length !== 1 ? "s" : ""}
           </span>
-          <span>3 images per row</span>
+          <span>Sorted: Z → A • 3 per row</span>
         </div>
       </div>
 
@@ -335,6 +359,16 @@ const GalleryPage: React.FC = () => {
               ).length
             }
           </div>
+        </div>
+        <div
+          style={{
+            fontSize: "11px",
+            color: "#9ca3af",
+            marginTop: "4px",
+            textAlign: "center",
+          }}
+        >
+          Sorted by code in descending order (Z → A)
         </div>
       </div>
 

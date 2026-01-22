@@ -8,11 +8,13 @@ import {
 } from "firebase/firestore";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
+import { useNavigate } from "react-router-dom";
 
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
   onSubmit: (data: Partial<Jewellery>) => void;
   isEditing?: boolean;
+  onCancel?: () => void; // Optional cancel callback
 }
 
 interface Bill {
@@ -28,7 +30,10 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   initialData,
   onSubmit,
   isEditing = false,
+  onCancel,
 }) => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState<Partial<Jewellery>>({
     code: "",
     description: "",
@@ -273,6 +278,15 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
   const handleAddBillClick = () => {
     setShowBillDropdown(true);
+  };
+
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    } else {
+      // Default behavior: navigate back
+      navigate(-1);
+    }
   };
 
   return (
@@ -809,8 +823,36 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         )}
       </div>
 
-      {/* Submit Button */}
-      <div style={{ textAlign: "center" }}>
+      {/* Submit and Cancel Buttons */}
+      <div
+        style={{
+          display: "flex",
+          gap: "15px",
+          justifyContent: "center",
+          marginTop: "10px",
+        }}
+      >
+        <button
+          type="button"
+          onClick={handleCancel}
+          style={{
+            padding: "10px 30px",
+            backgroundColor: "#f3f4f6",
+            color: "#374151",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "500",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>←</span>
+          <span>Cancel</span>
+        </button>
+
         <button
           type="submit"
           style={{

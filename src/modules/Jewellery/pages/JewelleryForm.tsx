@@ -7,6 +7,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { Jewellery, VerificationStatus } from "../models/types";
+import { useJewellerySettings } from "../hooks/useSettingsData";
 
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
@@ -49,6 +50,13 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   const [loadingAssignedBill, setLoadingAssignedBill] = useState(false);
   const [showBillDropdown, setShowBillDropdown] = useState(false);
   const [billError, setBillError] = useState<string | null>(null);
+
+  // Get settings data
+  const {
+    locations,
+    boughtForOptions,
+    loading: settingsLoading,
+  } = useJewellerySettings();
 
   // Fetch assigned bill details based on billId
   useEffect(() => {
@@ -100,7 +108,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           }
 
           if (!billData.downloadUrl) {
-            setBillError("Bill has no downloadable content");
+            setBillError("No downloadable content available");
           }
 
           setAssignedBill(billData);
@@ -198,11 +206,9 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     if (assignedBill.downloadUrl) {
       window.open(assignedBill.downloadUrl, "_blank");
     } else {
-      alert(`Bill Details:\n
-Bill Notes: ${assignedBill.notes || "No notes"}\n
-File Type: ${assignedBill.mimeType || "Unknown"}\n
-Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
-\nNo bill document URL available.`);
+      alert(
+        `Bill Details:\n\nBill Notes: ${assignedBill.notes || "No notes"}\n\nNo bill document available.`,
+      );
     }
   };
 
@@ -257,29 +263,6 @@ Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
     document.body.removeChild(link);
   };
 
-  const getFileTypeIcon = (mimeType: string): string => {
-    if (mimeType.includes("pdf")) return "📄";
-    if (mimeType.includes("image")) return "🖼️";
-    if (mimeType.includes("text")) return "📝";
-    return "📎";
-  };
-
-  const formatDate = (timestamp: number): string => {
-    if (!timestamp || timestamp === 0) return "N/A";
-
-    try {
-      const date = new Date(timestamp);
-      return date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "Invalid date";
-    }
-  };
-
   const handleChangeBillClick = () => {
     setShowBillDropdown(true);
   };
@@ -297,10 +280,6 @@ Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
       onSubmit={handleSubmit}
       style={{ maxWidth: "600px", margin: "0 auto" }}
     >
-      <h2 style={{ marginBottom: "20px", color: "#374151" }}>
-        {isEditing ? "Edit Jewellery Item" : "Add Jewellery Item"}
-      </h2>
-
       {/* Code and Weight in same row */}
       <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
         <div style={{ flex: 1 }}>
@@ -390,17 +369,164 @@ Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
         />
       </div>
 
-      {/* Bill Section */}
-      <div style={{ marginBottom: "15px" }}>
+      {/* Location and Bought For in same row - NOW AS DROPDOWNS */}
+      <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+        <div style={{ flex: 1 }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "5px",
+              fontSize: "13px",
+              color: "#6b7280",
+            }}
+          >
+            Location
+          </label>
+          <select
+            name="location"
+            value={formData.location || ""}
+            onChange={handleChange}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              borderRadius: "6px",
+              border: "1px solid #d1d5db",
+              fontSize: "14px",
+              backgroundColor: "white",
+              boxSizing: "border-box",
+            }}
+          >
+            <option value="">Select Location</option>
+            {settingsLoading ? (
+              <option value="" disabled>
+                Loading locations...
+              </option>
+            ) : (
+              locations.map((location, index) => (
+                <option key={index} value={location}>
+                  {location}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "5px",
+              fontSize: "13px",
+              color: "#6b7280",
+            }}
+          >
+            Bought For
+          </label>
+          <select
+            name="boughtFor"
+            value={formData.boughtFor || ""}
+            onChange={handleChange}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              borderRadius: "6px",
+              border: "1px solid #d1d5db",
+              fontSize: "14px",
+              backgroundColor: "white",
+              boxSizing: "border-box",
+            }}
+          >
+            <option value="">Select Purpose</option>
+            {settingsLoading ? (
+              <option value="" disabled>
+                Loading options...
+              </option>
+            ) : (
+              boughtForOptions.map((option, index) => (
+                <option key={index} value={option}>
+                  {option}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+      </div>
+
+      {/* Purchase Date and Active checkbox in same row */}
+      <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
+        <div style={{ flex: 1 }}>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "5px",
+              fontSize: "13px",
+              color: "#6b7280",
+            }}
+          >
+            Purchase Date
+          </label>
+          <input
+            type="date"
+            name="purchaseDate"
+            value={
+              formData.purchaseDate
+                ? new Date(formData.purchaseDate).toISOString().split("T")[0]
+                : ""
+            }
+            onChange={handleChange}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              borderRadius: "6px",
+              border: "1px solid #d1d5db",
+              fontSize: "14px",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+
+        <div style={{ flex: 1, display: "flex", alignItems: "flex-end" }}>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "14px",
+              color: "#374151",
+              height: "100%",
+              paddingBottom: "8px",
+            }}
+          >
+            <input
+              type="checkbox"
+              name="active"
+              checked={formData.active !== false}
+              onChange={handleChange}
+              style={{ width: "16px", height: "16px" }}
+            />
+            Active Item
+          </label>
+        </div>
+      </div>
+
+      {/* Bill Section - MOVED TO BOTTOM */}
+      <div
+        style={{
+          marginBottom: "20px",
+          borderTop: "1px solid #e5e7eb",
+          paddingTop: "20px",
+        }}
+      >
         <label
           style={{
             display: "block",
-            marginBottom: "5px",
-            fontSize: "13px",
-            color: "#6b7280",
+            marginBottom: "10px",
+            fontSize: "14px",
+            color: "#374151",
+            fontWeight: "500",
           }}
         >
-          Bill
+          Bill Assignment
         </label>
 
         {/* Show assigned bill details when available */}
@@ -411,12 +537,10 @@ Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
             {/* Bill details card */}
             <div
               style={{
-                padding: "15px",
+                padding: "12px",
                 backgroundColor: "#f8fafc",
                 border: "1px solid #e2e8f0",
                 borderRadius: "6px",
-                fontSize: "14px",
-                color: "#1e293b",
               }}
             >
               <div
@@ -424,7 +548,7 @@ Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: "10px",
+                  marginBottom: "8px",
                 }}
               >
                 <div
@@ -434,10 +558,14 @@ Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
                     gap: "8px",
                   }}
                 >
-                  <span style={{ fontSize: "18px" }}>
-                    {getFileTypeIcon(assignedBill.mimeType)}
-                  </span>
-                  <span style={{ fontWeight: "500", fontSize: "15px" }}>
+                  <span style={{ fontSize: "16px", color: "#3b82f6" }}>📄</span>
+                  <span
+                    style={{
+                      fontWeight: "500",
+                      fontSize: "14px",
+                      color: "#1e293b",
+                    }}
+                  >
                     {assignedBill.notes ||
                       `Bill ${assignedBill.id.substring(0, 8)}...`}
                   </span>
@@ -450,125 +578,88 @@ Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
                 )}
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "8px",
-                  fontSize: "13px",
-                  color: "#475569",
-                }}
-              >
-                <div>
-                  <span style={{ color: "#64748b" }}>File Type:</span>{" "}
-                  {assignedBill.mimeType || "Unknown"}
-                </div>
-                <div>
-                  <span style={{ color: "#64748b" }}>Uploaded:</span>{" "}
-                  {formatDate(assignedBill.uploadedAt)}
-                </div>
-                <div>
-                  <span style={{ color: "#64748b" }}>Status:</span>{" "}
-                  {assignedBill.downloadUrl ? (
-                    <span style={{ color: "#10b981" }}>Available</span>
-                  ) : (
-                    <span style={{ color: "#ef4444" }}>No download URL</span>
-                  )}
-                </div>
-              </div>
-
               {/* Bill Action Buttons */}
               <div
                 style={{
                   display: "flex",
-                  gap: "10px",
-                  marginTop: "15px",
-                  alignItems: "center",
+                  gap: "8px",
+                  marginTop: "8px",
                 }}
               >
-                <div style={{ flex: 1, display: "flex", gap: "10px" }}>
-                  {assignedBill.downloadUrl && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={handleViewBill}
-                        style={{
-                          flex: 1,
-                          padding: "8px 12px",
-                          backgroundColor: "#3b82f6",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "6px",
-                        }}
-                        title="View Bill"
-                      >
-                        <span>{getFileTypeIcon(assignedBill.mimeType)}</span>
-                        <span>View</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleDownloadBill}
-                        style={{
-                          flex: 1,
-                          padding: "8px 12px",
-                          backgroundColor: "#10b981",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "6px",
-                        }}
-                        title="Download Bill"
-                      >
-                        <span>📥</span>
-                        <span>Download</span>
-                      </button>
-                    </>
-                  )}
-
-                  {!assignedBill.downloadUrl && (
-                    <div
+                {assignedBill.downloadUrl ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleViewBill}
                       style={{
-                        flex: 1,
-                        padding: "8px 12px",
-                        backgroundColor: "#fef3c7",
-                        borderRadius: "6px",
-                        color: "#92400e",
+                        padding: "6px 12px",
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
                         fontSize: "13px",
                         display: "flex",
                         alignItems: "center",
-                        gap: "6px",
+                        gap: "4px",
                       }}
+                      title="View Bill"
                     >
-                      <span>⚠️</span>
-                      <span>No download URL available</span>
-                    </div>
-                  )}
-                </div>
+                      <span>👁️</span>
+                      <span>View</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleDownloadBill}
+                      style={{
+                        padding: "6px 12px",
+                        backgroundColor: "#10b981",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "13px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                      title="Download Bill"
+                    >
+                      <span>📥</span>
+                      <span>Download</span>
+                    </button>
+                  </>
+                ) : (
+                  <div
+                    style={{
+                      padding: "6px 10px",
+                      backgroundColor: "#fef3c7",
+                      borderRadius: "4px",
+                      color: "#92400e",
+                      fontSize: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <span>⚠️</span>
+                    <span>No file available</span>
+                  </div>
+                )}
 
                 <button
                   type="button"
                   onClick={handleChangeBillClick}
                   style={{
-                    padding: "8px 15px",
+                    marginLeft: "auto",
+                    padding: "6px 12px",
                     backgroundColor: "#f1f5f9",
                     color: "#475569",
                     border: "1px solid #cbd5e1",
-                    borderRadius: "6px",
+                    borderRadius: "4px",
                     cursor: "pointer",
                     fontSize: "13px",
-                    whiteSpace: "nowrap",
                   }}
                 >
                   Change Bill
@@ -716,122 +807,6 @@ Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
             )}
           </div>
         )}
-      </div>
-
-      {/* Location and Bought For in same row */}
-      <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Location
-          </label>
-          <input
-            type="text"
-            name="location"
-            value={formData.location || ""}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
-            placeholder="Location"
-          />
-        </div>
-
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Bought For
-          </label>
-          <input
-            type="text"
-            name="boughtFor"
-            value={formData.boughtFor || ""}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
-            placeholder="Purpose"
-          />
-        </div>
-      </div>
-
-      {/* Purchase Date and Active checkbox in same row */}
-      <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Purchase Date
-          </label>
-          <input
-            type="date"
-            name="purchaseDate"
-            value={
-              formData.purchaseDate
-                ? new Date(formData.purchaseDate).toISOString().split("T")[0]
-                : ""
-            }
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
-          />
-        </div>
-
-        <div style={{ flex: 1, display: "flex", alignItems: "flex-end" }}>
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "14px",
-              color: "#374151",
-              height: "100%",
-              paddingBottom: "8px",
-            }}
-          >
-            <input
-              type="checkbox"
-              name="active"
-              checked={formData.active !== false}
-              onChange={handleChange}
-              style={{ width: "16px", height: "16px" }}
-            />
-            Active Item
-          </label>
-        </div>
       </div>
 
       {/* Submit Button */}

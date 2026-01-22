@@ -159,8 +159,8 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
   // Format boughtFor name (truncate if too long)
   const formatBoughtFor = (boughtFor?: string) => {
     if (!boughtFor) return "N/A";
-    if (boughtFor.length > 12) {
-      return boughtFor.substring(0, 10) + "...";
+    if (boughtFor.length > 10) {
+      return boughtFor.substring(0, 8) + "...";
     }
     return boughtFor;
   };
@@ -169,14 +169,22 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
   const formatStatusText = (status: VerificationStatusType) => {
     switch (status) {
       case VerificationStatus.VERIFIED:
-        return "Verified";
+        return "✓";
       case VerificationStatus.MISSING:
-        return "Missing";
+        return "✗";
       case VerificationStatus.NOT_VERIFIED:
-        return "Not Verified";
+        return "⟲";
       default:
-        return status;
+        return "?";
     }
+  };
+
+  // Truncate description to 25 characters
+  const truncateDescription = (description: string) => {
+    if (description.length > 25) {
+      return description.substring(0, 23) + "...";
+    }
+    return description;
   };
 
   return (
@@ -294,7 +302,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
             </div>
           </div>
 
-          {/* Search and Filter */}
+          {/* Search and Location in Single Row */}
           <div
             style={{
               display: "flex",
@@ -304,7 +312,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
           >
             <input
               type="text"
-              placeholder="Search code or description..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
@@ -320,28 +328,34 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
               style={{
+                width: "140px",
                 padding: "8px 10px",
                 borderRadius: "8px",
                 border: "1px solid #e5e7eb",
                 backgroundColor: "white",
                 fontSize: "14px",
-                minWidth: "120px",
               }}
             >
               <option value="">All Locations</option>
               {locations.map((location) => (
                 <option key={location} value={location}>
-                  {location.length > 10
-                    ? location.substring(0, 8) + "..."
+                  {location.length > 12
+                    ? location.substring(0, 10) + "..."
                     : location}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Bulk Actions */}
+          {/* Bulk Actions - Only show when location is selected */}
           {selectedLocation && (
-            <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "6px",
+                marginBottom: "12px",
+              }}
+            >
               <button
                 onClick={() => handleBulkAction(VerificationStatus.VERIFIED)}
                 style={{
@@ -356,7 +370,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                   fontWeight: "500",
                 }}
               >
-                ✓ All Verified
+                ✓ Mark All as Verified
               </button>
               <button
                 onClick={() =>
@@ -399,7 +413,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
             </span>
           </div>
 
-          {/* Items List - More compact layout */}
+          {/* Items List - Ultra compact layout */}
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             {filteredItems.length === 0 ? (
               <div
@@ -421,22 +435,22 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                   style={{
                     backgroundColor: "white",
                     borderRadius: "8px",
-                    padding: "8px",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                    padding: "6px",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
                   }}
                 >
-                  {/* Single Row Layout - More compact */}
+                  {/* Single Row Layout - Ultra compact */}
                   <div
                     style={{
                       display: "flex",
                       gap: "8px",
                     }}
                   >
-                    {/* Image - Smaller */}
+                    {/* Image - Even smaller */}
                     <div
                       style={{
-                        width: "50px",
-                        height: "50px",
+                        width: "45px",
+                        height: "45px",
                         flexShrink: 0,
                         backgroundColor: "#f3f4f6",
                         borderRadius: "6px",
@@ -460,7 +474,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                         <div
                           style={{
                             color: "#9ca3af",
-                            fontSize: "10px",
+                            fontSize: "9px",
                             textAlign: "center",
                             padding: "2px",
                           }}
@@ -470,7 +484,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                       )}
                     </div>
 
-                    {/* Content - Two lines only */}
+                    {/* Content - Ultra compact two lines */}
                     <div
                       style={{
                         flex: 1,
@@ -478,15 +492,15 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                         flexDirection: "column",
                         justifyContent: "space-between",
                         minWidth: 0,
-                        gap: "6px",
+                        gap: "4px",
                       }}
                     >
-                      {/* First Line: Code, Description, Weight */}
+                      {/* First Line: Code, Weight, Description (truncated) */}
                       <div style={{ minWidth: 0 }}>
                         <div
                           style={{
                             display: "flex",
-                            alignItems: "flex-start",
+                            alignItems: "center",
                             gap: "6px",
                             marginBottom: "2px",
                           }}
@@ -494,19 +508,19 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                           <div
                             style={{
                               fontWeight: "600",
-                              fontSize: "13px",
+                              fontSize: "12px",
                               color: "#111827",
                               whiteSpace: "nowrap",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
-                              maxWidth: "80px",
+                              maxWidth: "70px",
                             }}
                           >
                             {item.code}
                           </div>
                           <div
                             style={{
-                              fontSize: "11px",
+                              fontSize: "10px",
                               color: "#6b7280",
                               fontWeight: "500",
                               whiteSpace: "nowrap",
@@ -517,18 +531,20 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                           >
                             {item.weight}g
                           </div>
-                        </div>
-                        <div
-                          style={{
-                            color: "#6b7280",
-                            fontSize: "11px",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            lineHeight: "1.3",
-                          }}
-                        >
-                          {item.description}
+                          <div
+                            style={{
+                              fontSize: "10px",
+                              color: "#6b7280",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              flex: 1,
+                              maxWidth: "120px",
+                            }}
+                            title={item.description}
+                          >
+                            {truncateDescription(item.description)}
+                          </div>
                         </div>
                       </div>
 
@@ -538,26 +554,26 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                           display: "flex",
                           alignItems: "center",
                           gap: "4px",
-                          fontSize: "10px",
+                          fontSize: "9px",
                         }}
                       >
                         {/* Location */}
                         <div
                           style={{
                             backgroundColor: "#f3f4f6",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
+                            padding: "2px 5px",
+                            borderRadius: "3px",
                             color: "#4b5563",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            maxWidth: "60px",
+                            maxWidth: "50px",
                           }}
                           title={item.location || "No Location"}
                         >
                           {item.location
-                            ? item.location.length > 8
-                              ? item.location.substring(0, 6) + "..."
+                            ? item.location.length > 6
+                              ? item.location.substring(0, 5) + ".."
                               : item.location
                             : "No Loc"}
                         </div>
@@ -566,42 +582,43 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                         <div
                           style={{
                             backgroundColor: "#e0f2fe",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
+                            padding: "2px 5px",
+                            borderRadius: "3px",
                             color: "#0369a1",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            maxWidth: "60px",
+                            maxWidth: "50px",
                           }}
                           title={item.boughtFor || "N/A"}
                         >
                           {formatBoughtFor(item.boughtFor)}
                         </div>
 
-                        {/* Current Status */}
+                        {/* Current Status - Just icon */}
                         <div
                           style={{
                             backgroundColor: getStatusColor(
                               item.verificationStatus,
                             ),
                             color: "white",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                            fontSize: "9px",
+                            padding: "2px 4px",
+                            borderRadius: "3px",
+                            fontSize: "8px",
                             fontWeight: "600",
                             whiteSpace: "nowrap",
-                            marginRight: "auto",
                           }}
+                          title={item.verificationStatus}
                         >
                           {formatStatusText(item.verificationStatus)}
                         </div>
 
-                        {/* Verification Buttons - Very compact */}
+                        {/* Verification Buttons - Extra compact */}
                         <div
                           style={{
                             display: "flex",
                             gap: "2px",
+                            marginLeft: "auto",
                           }}
                         >
                           <SmallVerificationButton
@@ -621,19 +638,19 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                           />
                         </div>
 
-                        {/* Notes Arrow */}
+                        {/* Notes Arrow - Smaller */}
                         <button
                           onClick={() => toggleExpand(item.id)}
                           style={{
                             backgroundColor: "#f3f4f6",
                             color: "#6b7280",
                             border: "none",
-                            borderRadius: "4px",
+                            borderRadius: "3px",
                             cursor: "pointer",
-                            fontSize: "10px",
+                            fontSize: "9px",
                             fontWeight: "600",
-                            width: "20px",
-                            height: "20px",
+                            width: "18px",
+                            height: "18px",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -652,9 +669,9 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                   {expandedItem === item.id && (
                     <div
                       style={{
-                        marginTop: "8px",
+                        marginTop: "6px",
                         borderTop: "1px solid #f3f4f6",
-                        paddingTop: "8px",
+                        paddingTop: "6px",
                       }}
                     >
                       <textarea
@@ -668,13 +685,13 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                         }
                         style={{
                           width: "100%",
-                          padding: "8px",
-                          borderRadius: "6px",
+                          padding: "6px",
+                          borderRadius: "4px",
                           border: "1px solid #e5e7eb",
-                          fontSize: "12px",
-                          minHeight: "50px",
+                          fontSize: "11px",
+                          minHeight: "40px",
                           resize: "vertical",
-                          marginBottom: "8px",
+                          marginBottom: "6px",
                         }}
                       />
 
@@ -691,13 +708,13 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                             setExpandedItem(null);
                           }}
                           style={{
-                            padding: "6px 12px",
+                            padding: "4px 8px",
                             backgroundColor: "#3b82f6",
                             color: "white",
                             border: "none",
-                            borderRadius: "6px",
+                            borderRadius: "4px",
                             cursor: "pointer",
-                            fontSize: "12px",
+                            fontSize: "11px",
                             fontWeight: "500",
                           }}
                         >
@@ -709,10 +726,10 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                       {item.lastVerified > 0 && (
                         <div
                           style={{
-                            fontSize: "10px",
+                            fontSize: "9px",
                             color: "#9ca3af",
                             textAlign: "right",
-                            marginTop: "6px",
+                            marginTop: "4px",
                           }}
                         >
                           Last verified:{" "}

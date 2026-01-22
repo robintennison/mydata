@@ -128,10 +128,10 @@
   align-items: center;
 }
 
-/* Gallery Grid */
+/* Gallery Grid - 3 Images Per Row */
 .galleryContainer {
-  padding: 0 15px 15px 15px;
   flex: 1;
+  padding: 8px; /* Small padding for visual comfort */
 }
 
 .emptyState {
@@ -141,7 +141,7 @@
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin-top: 20px;
+  margin: 20px 15px;
 }
 
 .emptyIcon {
@@ -176,99 +176,155 @@
   background-color: #2563eb;
 }
 
-/* Rows and Items */
-.rowsContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.row {
+/* Grid Container - ALWAYS 3 columns */
+.gridContainer {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr); /* Always 3 columns */
+  gap: 4px; /* Minimal gap to maximize space */
+  margin: 0;
+  width: 100%;
 }
 
-/* Gallery Item */
+/* Gallery Item - Image Only Style */
 .galleryItem {
-  background-color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: relative;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  opacity: 1;
-}
-
-.galleryItem:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  overflow: hidden;
+  aspect-ratio: 1/1; /* Square items */
+  width: 100%;
 }
 
 .galleryItem.inactive {
   opacity: 0.7;
 }
 
+/* Image Container */
 .imageContainer {
   width: 100%;
-  aspect-ratio: 1/1;
-  background-color: #f3f4f6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  height: 100%;
+  position: relative;
+  background-color: #000; /* Black background for contrast */
 }
 
 .image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+/* Overlay for image items */
+.imageOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 50%, transparent 100%);
+  padding: 8px;
+  color: white;
+}
+
+.overlayContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.overlayCode {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.overlayWeight {
+  font-size: 12px;
+  color: #e5e7eb;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.overlayStatus {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.overlayInactive {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: #9ca3af;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Placeholder for items without images */
+.placeholderContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #1f2937; /* Dark background for contrast */
+  color: white;
 }
 
 .placeholder {
-  font-size: 32px;
-  color: #9ca3af;
+  font-size: 48px;
+  margin-bottom: 8px;
 }
 
-.itemInfo {
-  padding: 12px;
-}
-
-.itemCode {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.itemDescription {
-  font-size: 12px;
-  color: #6b7280;
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.itemMeta {
-  font-size: 11px;
-  color: #9ca3af;
+.placeholderInfo {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
 }
 
-/* Badges */
-.statusBadge {
-  margin-top: 8px;
+.placeholderCode {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.placeholderWeight {
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+.placeholderStatus {
+  font-size: 9px;
   padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: 500;
-  display: inline-block;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
 }
 
+.placeholderInactive {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: #9ca3af;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* Badge Styles - Keep existing */
 .verified {
   background-color: #10b981;
   color: white;
@@ -282,17 +338,6 @@
 .notVerified {
   background-color: #6b7280;
   color: white;
-}
-
-.inactiveBadge {
-  margin-top: 4px;
-  padding: 2px 6px;
-  background-color: #9ca3af;
-  color: white;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: 500;
-  display: inline-block;
 }
 
 /* Statistics */
@@ -315,7 +360,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: center; /* Fixed: hyphen added */
   min-height: 60vh;
   gap: 16px;
 }
@@ -333,9 +378,4 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-/* Utility */
-.hidden {
-  visibility: hidden;
 }

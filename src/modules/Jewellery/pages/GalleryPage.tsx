@@ -120,12 +120,6 @@ const GalleryPage: React.FC = () => {
     showInactive,
   ]);
 
-  // Group items into rows of 3 (already sorted in descending order)
-  const rows = [];
-  for (let i = 0; i < filteredItems.length; i += 3) {
-    rows.push(filteredItems.slice(i, i + 3));
-  }
-
   const handleImageClick = (item: Jewellery) => {
     navigate(`/jewellery/detail/${item.id}`);
   };
@@ -141,12 +135,6 @@ const GalleryPage: React.FC = () => {
         return styles.notVerified;
     }
   };
-
-  //   // Function to extract numeric part from code for better sorting
-  //   const extractNumberFromCode = (code: string): number => {
-  //     const match = code.match(/\d+/);
-  //     return match ? parseInt(match[0], 10) : 0;
-  //   };
 
   if (loading) {
     return (
@@ -254,11 +242,11 @@ const GalleryPage: React.FC = () => {
             Showing {filteredItems.length} item
             {filteredItems.length !== 1 ? "s" : ""}
           </span>
-          <span>Sorted: Z → A • 3 per row</span>
+          <span>Sorted: Z → A</span>
         </div>
       </div>
 
-      {/* Gallery Grid */}
+      {/* Gallery Grid - Maximized Image Display */}
       <div className={styles.galleryContainer}>
         {filteredItems.length === 0 ? (
           <div className={styles.emptyState}>
@@ -279,61 +267,86 @@ const GalleryPage: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className={styles.rowsContainer}>
-            {rows.map((row, rowIndex) => (
-              <div key={rowIndex} className={styles.row}>
-                {row.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleImageClick(item)}
-                    className={`${styles.galleryItem} ${!item.active ? styles.inactive : ""}`}
-                  >
-                    {/* Image */}
-                    <div className={styles.imageContainer}>
-                      {item.imageUrl ? (
-                        <img
-                          src={item.imageUrl}
-                          alt={item.code}
-                          className={styles.image}
-                        />
-                      ) : (
-                        <div className={styles.placeholder}>💎</div>
-                      )}
-                    </div>
+          <div className={styles.gridContainer}>
+            {filteredItems.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => handleImageClick(item)}
+                className={`${styles.galleryItem} ${!item.active ? styles.inactive : ""}`}
+              >
+                {/* Image Container with Overlay Info */}
+                <div className={styles.imageContainer}>
+                  {item.imageUrl ? (
+                    <>
+                      <img
+                        src={item.imageUrl}
+                        alt={item.code}
+                        className={styles.image}
+                      />
+                      {/* Overlay for Code and Weight */}
+                      <div className={styles.imageOverlay}>
+                        <div className={styles.overlayContent}>
+                          <div className={styles.overlayCode}>{item.code}</div>
+                          <div className={styles.overlayWeight}>
+                            {item.weight}g
+                          </div>
 
-                    {/* Item Info */}
-                    <div className={styles.itemInfo}>
-                      <div className={styles.itemCode}>{item.code}</div>
-                      <div className={styles.itemDescription}>
-                        {item.description || "No description"}
-                      </div>
-                      <div className={styles.itemMeta}>
-                        <span>{item.weight}g</span>
-                        {item.location && <span>{item.location}</span>}
-                      </div>
+                          {/* Status Badge - Only show if not VERIFIED */}
+                          {item.verificationStatus !==
+                            VerificationStatus.VERIFIED && (
+                            <div
+                              className={`${styles.overlayStatus} ${getStatusBadgeClass(item.verificationStatus)}`}
+                            >
+                              {item.verificationStatus ===
+                              VerificationStatus.MISSING
+                                ? "MISSING"
+                                : "NOT VERIFIED"}
+                            </div>
+                          )}
 
-                      {/* Status Badge */}
-                      {item.verificationStatus && (
-                        <div
-                          className={`${styles.statusBadge} ${getStatusBadgeClass(item.verificationStatus)}`}
-                        >
-                          {item.verificationStatus}
+                          {/* Inactive Badge */}
+                          {!item.active && (
+                            <div className={styles.overlayInactive}>
+                              INACTIVE
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className={styles.placeholderContainer}>
+                      <div className={styles.placeholder}>💎</div>
+                      <div className={styles.placeholderInfo}>
+                        <div className={styles.placeholderCode}>
+                          {item.code}
+                        </div>
+                        <div className={styles.placeholderWeight}>
+                          {item.weight}g
+                        </div>
 
-                      {/* Inactive Badge */}
-                      {!item.active && (
-                        <div className={styles.inactiveBadge}>Inactive</div>
-                      )}
+                        {/* Status Badge - Only show if not VERIFIED */}
+                        {item.verificationStatus !==
+                          VerificationStatus.VERIFIED && (
+                          <div
+                            className={`${styles.placeholderStatus} ${getStatusBadgeClass(item.verificationStatus)}`}
+                          >
+                            {item.verificationStatus ===
+                            VerificationStatus.MISSING
+                              ? "MISSING"
+                              : "NOT VERIFIED"}
+                          </div>
+                        )}
+
+                        {/* Inactive Badge */}
+                        {!item.active && (
+                          <div className={styles.placeholderInactive}>
+                            INACTIVE
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-
-                {/* Fill empty slots in last row */}
-                {row.length < 3 &&
-                  Array.from({ length: 3 - row.length }).map((_, index) => (
-                    <div key={`empty-${index}`} className={styles.hidden} />
-                  ))}
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -368,7 +381,7 @@ const GalleryPage: React.FC = () => {
             textAlign: "center",
           }}
         >
-          Sorted by code in descending order (Z → A)
+          Tap images to view details
         </div>
       </div>
 

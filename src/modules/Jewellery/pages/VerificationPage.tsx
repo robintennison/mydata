@@ -73,7 +73,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
     const itemNotes = notes[id] || "";
     onUpdateVerification(id, status, itemNotes);
     setNotes((prev) => ({ ...prev, [id]: "" }));
-    setExpandedItem(null); // Collapse after update
+    setExpandedItem(null);
   };
 
   // Handle bulk action for location
@@ -97,36 +97,13 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
     }
   };
 
-  // Toggle item expansion
+  // Toggle item expansion for notes
   const toggleExpand = (id: string) => {
     setExpandedItem(expandedItem === id ? null : id);
   };
 
-  // Compact status badge
-  const StatusBadge = ({ status }: { status: VerificationStatusType }) => (
-    <div
-      style={{
-        backgroundColor: getStatusColor(status),
-        color: "white",
-        padding: "2px 8px",
-        borderRadius: "12px",
-        fontSize: "10px",
-        fontWeight: "600",
-        minWidth: "60px",
-        textAlign: "center",
-      }}
-    >
-      {status === VerificationStatus.VERIFIED
-        ? "✓"
-        : status === VerificationStatus.MISSING
-          ? "✗"
-          : "⟲"}{" "}
-      {status.split(" ")[0]}
-    </div>
-  );
-
-  // Quick action button
-  const QuickActionButton = ({
+  // Small verification button
+  const SmallVerificationButton = ({
     itemId,
     status,
     currentStatus,
@@ -140,17 +117,17 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
       [VerificationStatus.VERIFIED]: {
         bg: isActive ? "#10b981" : "#d1fae5",
         color: isActive ? "white" : "#065f46",
-        symbol: "✓",
+        text: "✓",
       },
       [VerificationStatus.MISSING]: {
         bg: isActive ? "#ef4444" : "#fee2e2",
         color: isActive ? "white" : "#991b1b",
-        symbol: "✗",
+        text: "✗",
       },
       [VerificationStatus.NOT_VERIFIED]: {
         bg: isActive ? "#6b7280" : "#f3f4f6",
         color: isActive ? "white" : "#374151",
-        symbol: "⟲",
+        text: "⟲",
       },
     }[status];
 
@@ -158,27 +135,53 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
       <button
         onClick={() => handleQuickUpdate(itemId, status)}
         style={{
-          padding: "6px 8px",
+          padding: "4px 6px",
           backgroundColor: config.bg,
           color: config.color,
           border: "none",
-          borderRadius: "6px",
+          borderRadius: "4px",
           cursor: "pointer",
-          fontSize: "12px",
+          fontSize: "10px",
           fontWeight: "600",
-          flex: 1,
-          minWidth: "60px",
+          minWidth: "28px",
+          height: "24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
         title={status}
       >
-        {config.symbol}
+        {config.text}
       </button>
     );
   };
 
+  // Format boughtFor name (truncate if too long)
+  const formatBoughtFor = (boughtFor?: string) => {
+    if (!boughtFor) return "N/A";
+    if (boughtFor.length > 12) {
+      return boughtFor.substring(0, 10) + "...";
+    }
+    return boughtFor;
+  };
+
+  // Format status text for display
+  const formatStatusText = (status: VerificationStatusType) => {
+    switch (status) {
+      case VerificationStatus.VERIFIED:
+        return "Verified";
+      case VerificationStatus.MISSING:
+        return "Missing";
+      case VerificationStatus.NOT_VERIFIED:
+        return "Not Verified";
+      default:
+        return status;
+    }
+  };
+
   return (
     <div style={jewelleryStyles.container}>
-      {/* Header with back button */}
+      {/* Header */}
       <div style={jewelleryStyles.topNav}>
         <button
           onClick={() => navigate("/jewellery")}
@@ -191,10 +194,10 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
         <div style={{ width: "40px" }}></div>
       </div>
 
-      {/* ALL CONTENT INSIDE SCROLLABLE WRAPPER */}
+      {/* Content */}
       <div style={jewelleryStyles.contentWrapper}>
         <div style={{ padding: "10px 0" }}>
-          {/* Compact Stats Grid */}
+          {/* Stats Grid */}
           <div
             style={{
               display: "grid",
@@ -291,7 +294,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
             </div>
           </div>
 
-          {/* Search and Filter Row */}
+          {/* Search and Filter */}
           <div
             style={{
               display: "flex",
@@ -301,7 +304,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
           >
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search code or description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
@@ -325,7 +328,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                 minWidth: "120px",
               }}
             >
-              <option value="">All</option>
+              <option value="">All Locations</option>
               {locations.map((location) => (
                 <option key={location} value={location}>
                   {location.length > 10
@@ -396,7 +399,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
             </span>
           </div>
 
-          {/* Compact Items List */}
+          {/* Items List - More compact layout */}
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             {filteredItems.length === 0 ? (
               <div
@@ -418,125 +421,244 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                   style={{
                     backgroundColor: "white",
                     borderRadius: "8px",
-                    padding: "10px",
+                    padding: "8px",
                     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
                   }}
                 >
-                  {/* Compact Header Row */}
+                  {/* Single Row Layout - More compact */}
                   <div
                     style={{
                       display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer",
+                      gap: "8px",
                     }}
-                    onClick={() => toggleExpand(item.id)}
                   >
-                    <div style={{ flex: 1 }}>
+                    {/* Image - Smaller */}
+                    <div
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        flexShrink: 0,
+                        backgroundColor: "#f3f4f6",
+                        borderRadius: "6px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.code}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            color: "#9ca3af",
+                            fontSize: "10px",
+                            textAlign: "center",
+                            padding: "2px",
+                          }}
+                        >
+                          No Image
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content - Two lines only */}
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        minWidth: 0,
+                        gap: "6px",
+                      }}
+                    >
+                      {/* First Line: Code, Description, Weight */}
+                      <div style={{ minWidth: 0 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: "6px",
+                            marginBottom: "2px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontWeight: "600",
+                              fontSize: "13px",
+                              color: "#111827",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              maxWidth: "80px",
+                            }}
+                          >
+                            {item.code}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              color: "#6b7280",
+                              fontWeight: "500",
+                              whiteSpace: "nowrap",
+                              backgroundColor: "#f3f4f6",
+                              padding: "1px 4px",
+                              borderRadius: "3px",
+                            }}
+                          >
+                            {item.weight}g
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            color: "#6b7280",
+                            fontSize: "11px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            lineHeight: "1.3",
+                          }}
+                        >
+                          {item.description}
+                        </div>
+                      </div>
+
+                      {/* Second Line: Location, Bought For, Status, Verification Buttons, Notes Arrow */}
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          gap: "8px",
-                          marginBottom: "4px",
+                          gap: "4px",
+                          fontSize: "10px",
                         }}
                       >
+                        {/* Location */}
                         <div
                           style={{
+                            backgroundColor: "#f3f4f6",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            color: "#4b5563",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: "60px",
+                          }}
+                          title={item.location || "No Location"}
+                        >
+                          {item.location
+                            ? item.location.length > 8
+                              ? item.location.substring(0, 6) + "..."
+                              : item.location
+                            : "No Loc"}
+                        </div>
+
+                        {/* Bought For */}
+                        <div
+                          style={{
+                            backgroundColor: "#e0f2fe",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            color: "#0369a1",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: "60px",
+                          }}
+                          title={item.boughtFor || "N/A"}
+                        >
+                          {formatBoughtFor(item.boughtFor)}
+                        </div>
+
+                        {/* Current Status */}
+                        <div
+                          style={{
+                            backgroundColor: getStatusColor(
+                              item.verificationStatus,
+                            ),
+                            color: "white",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            fontSize: "9px",
                             fontWeight: "600",
-                            fontSize: "14px",
-                            color: "#111827",
+                            whiteSpace: "nowrap",
+                            marginRight: "auto",
                           }}
                         >
-                          {item.code}
+                          {formatStatusText(item.verificationStatus)}
                         </div>
-                        <StatusBadge status={item.verificationStatus} />
-                      </div>
 
-                      <div
-                        style={{
-                          color: "#6b7280",
-                          fontSize: "12px",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {item.description}
-                      </div>
+                        {/* Verification Buttons - Very compact */}
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "2px",
+                          }}
+                        >
+                          <SmallVerificationButton
+                            itemId={item.id}
+                            status={VerificationStatus.VERIFIED}
+                            currentStatus={item.verificationStatus}
+                          />
+                          <SmallVerificationButton
+                            itemId={item.id}
+                            status={VerificationStatus.MISSING}
+                            currentStatus={item.verificationStatus}
+                          />
+                          <SmallVerificationButton
+                            itemId={item.id}
+                            status={VerificationStatus.NOT_VERIFIED}
+                            currentStatus={item.verificationStatus}
+                          />
+                        </div>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "12px",
-                          marginTop: "4px",
-                          fontSize: "11px",
-                          color: "#9ca3af",
-                        }}
-                      >
-                        <span>{item.weight}g</span>
-                        {item.location && (
-                          <span
-                            style={{
-                              backgroundColor: "#f3f4f6",
-                              padding: "2px 6px",
-                              borderRadius: "4px",
-                            }}
-                          >
-                            {item.location}
-                          </span>
-                        )}
+                        {/* Notes Arrow */}
+                        <button
+                          onClick={() => toggleExpand(item.id)}
+                          style={{
+                            backgroundColor: "#f3f4f6",
+                            color: "#6b7280",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "10px",
+                            fontWeight: "600",
+                            width: "20px",
+                            height: "20px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 0,
+                            flexShrink: 0,
+                          }}
+                          title="Add verification notes"
+                        >
+                          {expandedItem === item.id ? "▲" : "▼"}
+                        </button>
                       </div>
-                    </div>
-
-                    <div
-                      style={{
-                        color: "#9ca3af",
-                        fontSize: "16px",
-                        marginLeft: "8px",
-                      }}
-                    >
-                      {expandedItem === item.id ? "▲" : "▼"}
                     </div>
                   </div>
 
-                  {/* Expandable Content */}
+                  {/* Notes Section (expanded) */}
                   {expandedItem === item.id && (
                     <div
                       style={{
-                        marginTop: "10px",
+                        marginTop: "8px",
                         borderTop: "1px solid #f3f4f6",
-                        paddingTop: "10px",
+                        paddingTop: "8px",
                       }}
                     >
-                      {/* Quick Actions */}
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "6px",
-                          marginBottom: "10px",
-                        }}
-                      >
-                        <QuickActionButton
-                          itemId={item.id}
-                          status={VerificationStatus.VERIFIED}
-                          currentStatus={item.verificationStatus}
-                        />
-                        <QuickActionButton
-                          itemId={item.id}
-                          status={VerificationStatus.MISSING}
-                          currentStatus={item.verificationStatus}
-                        />
-                        <QuickActionButton
-                          itemId={item.id}
-                          status={VerificationStatus.NOT_VERIFIED}
-                          currentStatus={item.verificationStatus}
-                        />
-                      </div>
-
-                      {/* Notes Input */}
                       <textarea
-                        placeholder="Add notes..."
+                        placeholder="Add verification notes..."
                         value={notes[item.id] || ""}
                         onChange={(e) =>
                           setNotes((prev) => ({
@@ -556,16 +678,44 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                         }}
                       />
 
+                      <div
+                        style={{ display: "flex", justifyContent: "flex-end" }}
+                      >
+                        <button
+                          onClick={() => {
+                            onUpdateVerification(
+                              item.id,
+                              item.verificationStatus,
+                              notes[item.id] || "",
+                            );
+                            setExpandedItem(null);
+                          }}
+                          style={{
+                            padding: "6px 12px",
+                            backgroundColor: "#3b82f6",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontSize: "12px",
+                            fontWeight: "500",
+                          }}
+                        >
+                          Save Notes
+                        </button>
+                      </div>
+
                       {/* Last verified info */}
                       {item.lastVerified > 0 && (
                         <div
                           style={{
-                            fontSize: "11px",
+                            fontSize: "10px",
                             color: "#9ca3af",
                             textAlign: "right",
+                            marginTop: "6px",
                           }}
                         >
-                          Verified:{" "}
+                          Last verified:{" "}
                           {new Date(item.lastVerified).toLocaleDateString()}
                         </div>
                       )}
@@ -577,10 +727,8 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
           </div>
         </div>
 
-        {/* Jewellery Navigation */}
+        {/* Navigation */}
         <JewelleryNavigation />
-
-        {/* Bottom spacing */}
         <div style={{ height: "80px" }}></div>
       </div>
     </div>

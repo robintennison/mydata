@@ -27,6 +27,8 @@ import JewelleryDetail from "../modules/Jewellery/pages/JewelleryDetail";
 import VerificationPageWrapper from "../modules/Jewellery/pages/VerificationPageWrapper";
 import JewelleryFormWrapper from "../modules/Jewellery/pages/JewelleryFormWrapper";
 import GalleryPage from "../modules/Jewellery/pages/GalleryPage";
+// Import the new component for viewing jewellery linked to a bill
+import JewelleryForBill from "../modules/Jewellery/pages/JewelleryForBill";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -228,7 +230,13 @@ const allRoutes: RouteConfig[] = [
     icon: "✏️",
     requiresAuth: true,
   },
-
+  // New route for viewing jewellery linked to a bill
+  {
+    path: "/jewellery/bills/:billId/linked-jewellery",
+    element: <JewelleryForBill />,
+    title: "Linked Jewellery",
+    requiresAuth: true,
+  },
   {
     path: "/jewellery/gallery",
     element: <GalleryPage />,

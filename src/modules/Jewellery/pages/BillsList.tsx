@@ -116,11 +116,29 @@ const BillsList: React.FC = () => {
     return "📎";
   };
 
-  const handleOpenBill = (bill: Bill) => {
+  const handleOpenBill = (e: React.MouseEvent, bill: Bill) => {
+    e.stopPropagation(); // Prevent triggering the row click
     if (bill.downloadUrl) {
       window.open(bill.downloadUrl, "_blank");
     } else {
       alert("No download URL available");
+    }
+  };
+
+  const handleViewLinkedJewellery = (billId: string) => {
+    navigate(`/jewellery/bills/${billId}/linked-jewellery`);
+  };
+
+  const handleEditBill = (e: React.MouseEvent, billId: string) => {
+    e.stopPropagation(); // Prevent triggering the row click
+    navigate(`/jewellery/bills/edit/${billId}`);
+  };
+
+  const handleDeleteBill = (e: React.MouseEvent, billId: string) => {
+    e.stopPropagation(); // Prevent triggering the row click
+    if (window.confirm("Delete this bill?")) {
+      // TODO: Implement delete
+      console.log("Delete bill:", billId);
     }
   };
 
@@ -241,7 +259,9 @@ const BillsList: React.FC = () => {
                     borderRadius: "12px",
                     padding: "15px",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    cursor: "pointer", // Add cursor pointer for clickable row
                   }}
+                  onClick={() => handleViewLinkedJewellery(bill.id)}
                 >
                   <div
                     style={{
@@ -316,7 +336,7 @@ const BillsList: React.FC = () => {
                     style={{ display: "flex", gap: "8px", marginTop: "15px" }}
                   >
                     <button
-                      onClick={() => handleOpenBill(bill)}
+                      onClick={(e) => handleOpenBill(e, bill)}
                       style={{
                         padding: "8px 16px",
                         backgroundColor: "#3b82f6",
@@ -331,9 +351,7 @@ const BillsList: React.FC = () => {
                       Open Bill
                     </button>
                     <button
-                      onClick={() =>
-                        navigate(`/jewellery/bills/edit/${bill.id}`)
-                      }
+                      onClick={(e) => handleEditBill(e, bill.id)}
                       style={{
                         padding: "8px 16px",
                         backgroundColor: "#10b981",
@@ -348,12 +366,7 @@ const BillsList: React.FC = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => {
-                        if (window.confirm("Delete this bill?")) {
-                          // TODO: Implement delete
-                          console.log("Delete bill:", bill.id);
-                        }
-                      }}
+                      onClick={(e) => handleDeleteBill(e, bill.id)}
                       style={{
                         padding: "8px 16px",
                         backgroundColor: "#ef4444",

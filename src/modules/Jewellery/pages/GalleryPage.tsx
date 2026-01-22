@@ -21,7 +21,7 @@ const GalleryPage: React.FC = () => {
   const [boughtForFilter, setBoughtForFilter] = useState<string>("All");
   const [showInactive, setShowInactive] = useState(false);
 
-  // Unique filter options
+  // Get unique filter options
   const [locationOptions, setLocationOptions] = useState<string[]>(["All"]);
   const [boughtForOptions, setBoughtForOptions] = useState<string[]>(["All"]);
 
@@ -124,18 +124,6 @@ const GalleryPage: React.FC = () => {
     navigate(`/jewellery/detail/${item.id}`);
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case VerificationStatus.VERIFIED:
-        return styles.verified;
-      case VerificationStatus.MISSING:
-        return styles.missing;
-      case VerificationStatus.NOT_VERIFIED:
-      default:
-        return styles.notVerified;
-    }
-  };
-
   if (loading) {
     return (
       <div className={styles.container}>
@@ -149,122 +137,91 @@ const GalleryPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Top Navigation */}
-      <div className={styles.nav}>
+      {/* Compact Top Bar - All in one row */}
+      <div className={styles.compactTopBar}>
+        {/* Back Button */}
         <button
           onClick={() => navigate("/jewellery")}
-          className={styles.navButton}
+          className={styles.backButton}
           title="Back to Jewellery"
         >
           ←
         </button>
-        <div className={styles.navTitle}>
-          Jewellery Gallery
-          <div
-            style={{
-              fontSize: "12px",
-              color: "#6b7280",
-              fontWeight: "normal",
-              marginTop: "2px",
-            }}
-          >
-            Sorted by code (Z → A, newest first)
-          </div>
-        </div>
-        <div className={styles.navActions}>
-          <button
-            onClick={() => navigate("/jewellery/list")}
-            className={styles.navButton}
-            title="List View"
-          >
-            📋 List
-          </button>
-        </div>
-      </div>
 
-      {/* Filters */}
-      <div className={styles.filters}>
-        {/* Search */}
+        {/* Search Field - Takes priority */}
         <input
           type="text"
-          placeholder="Search by code or description..."
+          placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.searchInput}
+          className={styles.compactSearch}
         />
 
-        {/* Filter Row */}
-        <div className={styles.filterRow}>
-          {/* Location Filter */}
+        {/* Location Filter - Compact */}
+        <div className={styles.filterContainer}>
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            className={styles.filterSelect}
+            className={styles.compactSelect}
+            title="Location"
           >
             {locationOptions.map((location) => (
               <option key={location} value={location}>
-                Location: {location}
+                {location === "All" ? "📍 All" : `📍 ${location}`}
               </option>
             ))}
           </select>
+        </div>
 
-          {/* Bought For Filter */}
+        {/* Bought For Filter - Compact */}
+        <div className={styles.filterContainer}>
           <select
             value={boughtForFilter}
             onChange={(e) => setBoughtForFilter(e.target.value)}
-            className={styles.filterSelect}
+            className={styles.compactSelect}
+            title="Bought For"
           >
             {boughtForOptions.map((boughtFor) => (
               <option key={boughtFor} value={boughtFor}>
-                Bought For: {boughtFor}
+                {boughtFor === "All" ? "👤 All" : `👤 ${boughtFor}`}
               </option>
             ))}
           </select>
-
-          {/* Show Inactive Toggle */}
-          <div className={styles.toggleContainer}>
-            <input
-              type="checkbox"
-              id="showInactive"
-              checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
-              className={styles.toggleCheckbox}
-            />
-            <label htmlFor="showInactive" className={styles.toggleLabel}>
-              Show Inactive
-            </label>
-          </div>
         </div>
 
-        {/* Results Count */}
-        <div className={styles.resultsInfo}>
-          <span>
-            Showing {filteredItems.length} item
-            {filteredItems.length !== 1 ? "s" : ""}
-          </span>
-          <span>Sorted: Z → A</span>
-        </div>
+        {/* Settings Icon */}
+        <button
+          onClick={() => navigate("/settings")}
+          className={styles.settingsButton}
+          title="Settings"
+        >
+          ⚙️
+        </button>
+
+        {/* Show Inactive Toggle (very small) */}
+        <label className={styles.inactiveToggle} title="Show Inactive">
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(e) => setShowInactive(e.target.checked)}
+            className={styles.inactiveCheckbox}
+          />
+          <span className={styles.toggleLabel}>In</span>
+        </label>
       </div>
 
-      {/* Gallery Grid - Maximized Image Display */}
+      {/* Gallery Grid - Starts immediately below top bar */}
       <div className={styles.galleryContainer}>
         {filteredItems.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🖼️</div>
-            <p className={styles.emptyTitle}>No jewellery items found</p>
             <p className={styles.emptyMessage}>
               {searchTerm ||
               locationFilter !== "All" ||
               boughtForFilter !== "All"
-                ? "Try changing your filters"
-                : "Add jewellery items with images to see them here"}
+                ? "No items match your filters"
+                : "No jewellery items found"}
             </p>
-            <button
-              onClick={() => navigate("/jewellery/add")}
-              className={styles.addButton}
-            >
-              Add Jewellery
-            </button>
           </div>
         ) : (
           <div className={styles.gridContainer}>
@@ -295,19 +252,17 @@ const GalleryPage: React.FC = () => {
                           {item.verificationStatus !==
                             VerificationStatus.VERIFIED && (
                             <div
-                              className={`${styles.overlayStatus} ${getStatusBadgeClass(item.verificationStatus)}`}
+                              className={`${styles.overlayStatus} ${
+                                item.verificationStatus ===
+                                VerificationStatus.MISSING
+                                  ? styles.missing
+                                  : styles.notVerified
+                              }`}
                             >
                               {item.verificationStatus ===
                               VerificationStatus.MISSING
                                 ? "MISSING"
                                 : "NOT VERIFIED"}
-                            </div>
-                          )}
-
-                          {/* Inactive Badge */}
-                          {!item.active && (
-                            <div className={styles.overlayInactive}>
-                              INACTIVE
                             </div>
                           )}
                         </div>
@@ -328,19 +283,17 @@ const GalleryPage: React.FC = () => {
                         {item.verificationStatus !==
                           VerificationStatus.VERIFIED && (
                           <div
-                            className={`${styles.placeholderStatus} ${getStatusBadgeClass(item.verificationStatus)}`}
+                            className={`${styles.placeholderStatus} ${
+                              item.verificationStatus ===
+                              VerificationStatus.MISSING
+                                ? styles.missing
+                                : styles.notVerified
+                            }`}
                           >
                             {item.verificationStatus ===
                             VerificationStatus.MISSING
                               ? "MISSING"
                               : "NOT VERIFIED"}
-                          </div>
-                        )}
-
-                        {/* Inactive Badge */}
-                        {!item.active && (
-                          <div className={styles.placeholderInactive}>
-                            INACTIVE
                           </div>
                         )}
                       </div>
@@ -353,36 +306,9 @@ const GalleryPage: React.FC = () => {
         )}
       </div>
 
-      {/* Statistics Bar */}
-      <div className={styles.statsBar}>
-        <div className={styles.statsContainer}>
-          <div>
-            <strong>Total:</strong> {filteredItems.length}
-          </div>
-          <div>
-            <strong>With Images:</strong>{" "}
-            {filteredItems.filter((item) => item.imageUrl).length}
-          </div>
-          <div>
-            <strong>Verified:</strong>{" "}
-            {
-              filteredItems.filter(
-                (item) =>
-                  item.verificationStatus === VerificationStatus.VERIFIED,
-              ).length
-            }
-          </div>
-        </div>
-        <div
-          style={{
-            fontSize: "11px",
-            color: "#9ca3af",
-            marginTop: "4px",
-            textAlign: "center",
-          }}
-        >
-          Tap images to view details
-        </div>
+      {/* Simple counter at bottom */}
+      <div className={styles.counter}>
+        {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
       </div>
 
       <JewelleryNavigation />

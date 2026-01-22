@@ -14,17 +14,24 @@ import JewelleryNavigation from "./components/JewelleryNavigation";
 
 const JewelleryHome: React.FC = () => {
   const navigate = useNavigate();
-  const { goldRate } = useJewellerySettings();
+  const { goldRate, settings } = useJewellerySettings();
   const [stats, setStats] = useState({
     totalItems: 0,
     totalWeight: 0,
-    estimatedValue: 0,
-    verifiedCount: 0,
-    missingCount: 0,
-    notVerifiedCount: 0,
-    withImagesCount: 0,
+    buyValue: 0,
+    sellValue: 0,
   });
+  const [personsWeight, setPersonsWeight] = useState<
+    { person: string; totalWeight: number }[]
+  >([]);
+  const [locationWeight, setLocationWeight] = useState<
+    { location: string; totalWeight: number }[]
+  >([]);
   const [loading, setLoading] = useState(true);
+
+  // Get makingTaxPercent and resaleDiscountPercent from settings object
+  const makingTaxPercent = settings?.makingTaxPercent || 0;
+  const resaleDiscountPercent = settings?.resaleDiscountPercent || 0;
 
   // Fetch real data from Firestore
   useEffect(() => {
@@ -35,6 +42,8 @@ const JewelleryHome: React.FC = () => {
         const snapshot = await getDocs(jewelleryRef);
 
         const activeItems: Jewellery[] = [];
+        const personWeightMap: Record<string, number> = {};
+        const locationWeightMap: Record<string, number> = {};
 
         snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
           const data = doc.data();
@@ -57,6 +66,20 @@ const JewelleryHome: React.FC = () => {
 
           if (item.active) {
             activeItems.push(item);
+
+            // Aggregate weight by person (boughtFor)
+            if (item.boughtFor && item.boughtFor.trim() !== "") {
+              const person = item.boughtFor.trim();
+              personWeightMap[person] =
+                (personWeightMap[person] || 0) + item.weight;
+            }
+
+            // Aggregate weight by location
+            if (item.location && item.location.trim() !== "") {
+              const location = item.location.trim();
+              locationWeightMap[location] =
+                (locationWeightMap[location] || 0) + item.weight;
+            }
           }
         });
 
@@ -64,29 +87,32 @@ const JewelleryHome: React.FC = () => {
           (sum, item) => sum + item.weight,
           0,
         );
-        const estimatedValue = totalWeight * goldRate;
-        const verifiedCount = activeItems.filter(
-          (item) => item.verificationStatus === VerificationStatus.VERIFIED,
-        ).length;
-        const missingCount = activeItems.filter(
-          (item) => item.verificationStatus === VerificationStatus.MISSING,
-        ).length;
-        const notVerifiedCount = activeItems.filter(
-          (item) => item.verificationStatus === VerificationStatus.NOT_VERIFIED,
-        ).length;
-        const withImagesCount = activeItems.filter(
-          (item) => item.imageUrl && item.imageUrl.trim() !== "",
-        ).length;
+
+        // Calculate buy value (gold rate + making tax percentage)
+        const goldValue = totalWeight * goldRate;
+        const buyValue = goldValue * (1 + makingTaxPercent / 100);
+
+        // Calculate sell value (gold rate - resale discount percentage)
+        const sellValue = goldValue * (1 - resaleDiscountPercent / 100);
+
+        // Convert personWeightMap to array and sort by weight descending
+        const personsArray = Object.entries(personWeightMap)
+          .map(([person, totalWeight]) => ({ person, totalWeight }))
+          .sort((a, b) => b.totalWeight - a.totalWeight);
+
+        // Convert locationWeightMap to array and sort by weight descending
+        const locationsArray = Object.entries(locationWeightMap)
+          .map(([location, totalWeight]) => ({ location, totalWeight }))
+          .sort((a, b) => b.totalWeight - a.totalWeight);
 
         setStats({
           totalItems: activeItems.length,
           totalWeight,
-          estimatedValue,
-          verifiedCount,
-          missingCount,
-          notVerifiedCount,
-          withImagesCount,
+          buyValue,
+          sellValue,
         });
+        setPersonsWeight(personsArray);
+        setLocationWeight(locationsArray);
       } catch (error) {
         console.error("Error fetching jewellery stats:", error);
       } finally {
@@ -95,7 +121,7 @@ const JewelleryHome: React.FC = () => {
     };
 
     fetchJewelleryStats();
-  }, [goldRate]);
+  }, [goldRate, makingTaxPercent, resaleDiscountPercent]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat("en-IN", {
@@ -105,22 +131,13 @@ const JewelleryHome: React.FC = () => {
     }).format(amount);
   };
 
-  const features = [
-    {
-      id: "add-jewellery",
-      title: "Add Jewellery",
-      description: "Add new jewellery item with details and images",
-      icon: "➕",
-      path: "/jewellery/add",
-    },
-    {
-      id: "quick-actions",
-      title: "Quick Actions",
-      description: "Bulk verification and status updates",
-      icon: "⚡",
-      path: "/jewellery/verification",
-    },
-  ];
+  const formatWeight = (weight: number): string => {
+    return `${weight.toFixed(1)}g`;
+  };
+
+  const formatPercent = (percent: number): string => {
+    return `${percent}%`;
+  };
 
   if (loading) {
     return (
@@ -135,7 +152,7 @@ const JewelleryHome: React.FC = () => {
 
   return (
     <div style={jewelleryStyles.container}>
-      {/* Top Navigation - Added plus icon */}
+      {/* Top Navigation */}
       <div style={jewelleryStyles.topNav}>
         <button
           onClick={() => navigate("/")}
@@ -146,20 +163,6 @@ const JewelleryHome: React.FC = () => {
         </button>
         <div style={jewelleryStyles.navTitle}>Jewellery Management</div>
         <div style={{ display: "flex", gap: "8px" }}>
-          {/* Plus icon for adding jewellery */}
-          <button
-            onClick={() => navigate("/jewellery/add")}
-            style={{
-              ...jewelleryStyles.navButton,
-              padding: "6px 10px",
-              fontSize: "1.2rem",
-              backgroundColor: "#10b981",
-              color: "white",
-            }}
-            title="Add Jewellery"
-          >
-            ➕
-          </button>
           <button
             onClick={() => navigate("/settings")}
             style={{
@@ -176,86 +179,317 @@ const JewelleryHome: React.FC = () => {
 
       {/* ALL SCROLLABLE CONTENT */}
       <div style={jewelleryStyles.contentWrapper}>
-        {/* Stats Overview Card */}
-        <div style={jewelleryStyles.statsCard}>
-          <h3 style={{ margin: "0 0 15px 0", color: "#333" }}>
-            Jewellery Overview
-          </h3>
-          <div style={jewelleryStyles.statsGrid}>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>Total Items</div>
-              <div style={jewelleryStyles.statValue}>{stats.totalItems}</div>
-            </div>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>Total Weight</div>
-              <div style={jewelleryStyles.statValue}>
-                {`${stats.totalWeight.toFixed(1)}g`}
-              </div>
-            </div>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>Estimated Value</div>
-              <div style={jewelleryStyles.statValue}>
-                {formatCurrency(stats.estimatedValue)}
-              </div>
-            </div>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>Verified</div>
-              <div style={{ ...jewelleryStyles.statValue, color: "#10b981" }}>
-                {stats.verifiedCount}
-              </div>
-            </div>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>Not Verified</div>
-              <div style={{ ...jewelleryStyles.statValue, color: "#6b7280" }}>
-                {stats.notVerifiedCount}
-              </div>
-            </div>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>With Images</div>
-              <div style={jewelleryStyles.statValue}>
-                {stats.withImagesCount}
-              </div>
-            </div>
-          </div>
-          {stats.missingCount > 0 && (
+        {/* Three Small Cards for Weight and Values */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "10px",
+            marginBottom: "15px",
+          }}
+        >
+          {/* Total Weight Card */}
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "10px",
+              padding: "15px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              textAlign: "center",
+            }}
+          >
             <div
               style={{
-                marginTop: "15px",
-                padding: "10px",
-                backgroundColor: "#fef2f2",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "#dc2626",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
+                fontSize: "12px",
+                color: "#6b7280",
+                marginBottom: "5px",
               }}
             >
-              ⚠️ {stats.missingCount} items marked as missing
+              Total Weight
+            </div>
+            <div
+              style={{
+                fontSize: "18px",
+                fontWeight: "600",
+                color: "#3b82f6",
+              }}
+            >
+              {formatWeight(stats.totalWeight)}
+            </div>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#9ca3af",
+                marginTop: "5px",
+              }}
+            >
+              {stats.totalItems} items
+            </div>
+          </div>
+
+          {/* Buy Value Card */}
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "10px",
+              padding: "15px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "12px",
+                color: "#6b7280",
+                marginBottom: "5px",
+              }}
+            >
+              Buy Value
+            </div>
+            <div
+              style={{
+                fontSize: "16px",
+                fontWeight: "600",
+                color: "#10b981",
+              }}
+            >
+              {formatCurrency(stats.buyValue)}
+            </div>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#9ca3af",
+                marginTop: "5px",
+              }}
+            >
+              ₹{goldRate}/g + {formatPercent(makingTaxPercent)}
+            </div>
+          </div>
+
+          {/* Sell Value Card */}
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "10px",
+              padding: "15px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "12px",
+                color: "#6b7280",
+                marginBottom: "5px",
+              }}
+            >
+              Sell Value
+            </div>
+            <div
+              style={{
+                fontSize: "16px",
+                fontWeight: "600",
+                color: "#ef4444",
+              }}
+            >
+              {formatCurrency(stats.sellValue)}
+            </div>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#9ca3af",
+                marginTop: "5px",
+              }}
+            >
+              -{formatPercent(resaleDiscountPercent)} resale
+            </div>
+          </div>
+        </div>
+
+        {/* Weight by Person Card */}
+        <div
+          style={{
+            backgroundColor: "white",
+            borderRadius: "10px",
+            padding: "15px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            marginBottom: "15px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "16px",
+              fontWeight: "600",
+              color: "#333",
+              marginBottom: "15px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>Weight by Person</span>
+            <span
+              style={{
+                fontSize: "12px",
+                color: "#6b7280",
+                fontWeight: "normal",
+              }}
+            >
+              {personsWeight.length} persons
+            </span>
+          </div>
+
+          {personsWeight.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "20px",
+                color: "#9ca3af",
+                fontSize: "14px",
+              }}
+            >
+              No person data available
+            </div>
+          ) : (
+            <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+              {personsWeight.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "10px 0",
+                    borderBottom:
+                      index < personsWeight.length - 1
+                        ? "1px solid #f3f4f6"
+                        : "none",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      color: "#4b5563",
+                      flex: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginRight: "10px",
+                    }}
+                    title={item.person}
+                  >
+                    {item.person}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "#111827",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {formatWeight(item.totalWeight)}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
-        {/* Feature Cards */}
-        {features.map((feature) => (
-          <div
-            key={feature.id}
-            style={jewelleryStyles.featureCard}
-            onClick={() => navigate(feature.path)}
-          >
-            <div style={jewelleryStyles.featureIcon}>{feature.icon}</div>
-            <div style={jewelleryStyles.featureTitle}>{feature.title}</div>
-            <div style={jewelleryStyles.featureDescription}>
-              {feature.description}
-            </div>
-          </div>
-        ))}
 
-        {/* Jewellery Navigation - This should NOT be fixed */}
-        {/* Make sure JewelleryNavigation component doesn't have position: fixed */}
+        {/* Weight by Location Card */}
+        <div
+          style={{
+            backgroundColor: "white",
+            borderRadius: "10px",
+            padding: "15px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            marginBottom: "15px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "16px",
+              fontWeight: "600",
+              color: "#333",
+              marginBottom: "15px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>Weight by Location</span>
+            <span
+              style={{
+                fontSize: "12px",
+                color: "#6b7280",
+                fontWeight: "normal",
+              }}
+            >
+              {locationWeight.length} locations
+            </span>
+          </div>
+
+          {locationWeight.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "20px",
+                color: "#9ca3af",
+                fontSize: "14px",
+              }}
+            >
+              No location data available
+            </div>
+          ) : (
+            <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+              {locationWeight.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "10px 0",
+                    borderBottom:
+                      index < locationWeight.length - 1
+                        ? "1px solid #f3f4f6"
+                        : "none",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      color: "#4b5563",
+                      flex: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginRight: "10px",
+                    }}
+                    title={item.location}
+                  >
+                    {item.location}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "#111827",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {formatWeight(item.totalWeight)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Jewellery Navigation */}
         <JewelleryNavigation />
 
-        {/* Bottom spacing for the fixed bottom module navigation */}
-        {/* This creates space at the bottom so content isn't hidden behind the fixed nav */}
+        {/* Bottom spacing */}
         <div style={{ height: "100px" }}></div>
       </div>
     </div>

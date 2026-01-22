@@ -29,6 +29,8 @@ import JewelleryFormWrapper from "../modules/Jewellery/pages/JewelleryFormWrappe
 import GalleryPage from "../modules/Jewellery/pages/GalleryPage";
 // Import the new component for viewing jewellery linked to a bill
 import JewelleryForBill from "../modules/Jewellery/pages/JewelleryForBill";
+// Import the new BatchEditPage component
+import BatchEditPage from "../modules/Jewellery/pages/BatchEditPage"; // Add this import
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -249,6 +251,14 @@ const allRoutes: RouteConfig[] = [
     element: <VerificationPageWrapper />,
     title: "Stock Verification",
     icon: "✅",
+    requiresAuth: true,
+  },
+  // New route for batch editing locations
+  {
+    path: "/jewellery/batch-edit",
+    element: <BatchEditPage />,
+    title: "Batch Edit",
+    icon: "🔄",
     requiresAuth: true,
   },
 

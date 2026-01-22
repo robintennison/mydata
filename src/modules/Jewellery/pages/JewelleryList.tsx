@@ -455,6 +455,25 @@ const JewelleryList: React.FC = () => {
             🎁
           </button>
 
+          {/* Batch Edit Button */}
+          <button
+            onClick={() => navigate("/jewellery/batch-edit")}
+            style={{
+              ...jewelleryStyles.navButton,
+              padding: "5px",
+              fontSize: "14px",
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#f0f9ff",
+            }}
+            title="Batch Edit Locations"
+          >
+            🔄
+          </button>
+
           {/* Add Button */}
           <button
             onClick={() => navigate("/jewellery/add")}

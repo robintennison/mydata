@@ -27,6 +27,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [notes, setNotes] = useState<{ [key: string]: string }>({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
   // Get unique locations
   const locations = Array.from(
@@ -47,6 +48,12 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
       )
     : locationItems;
 
+  // Calculate total weight of filtered items
+  const totalWeight = filteredItems.reduce(
+    (sum, item) => sum + (item.weight || 0),
+    0,
+  );
+
   // Statistics
   const stats = {
     total: filteredItems.length,
@@ -66,6 +73,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
     const itemNotes = notes[id] || "";
     onUpdateVerification(id, status, itemNotes);
     setNotes((prev) => ({ ...prev, [id]: "" }));
+    setExpandedItem(null); // Collapse after update
   };
 
   // Handle bulk action for location
@@ -89,9 +97,88 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
     }
   };
 
+  // Toggle item expansion
+  const toggleExpand = (id: string) => {
+    setExpandedItem(expandedItem === id ? null : id);
+  };
+
+  // Compact status badge
+  const StatusBadge = ({ status }: { status: VerificationStatusType }) => (
+    <div
+      style={{
+        backgroundColor: getStatusColor(status),
+        color: "white",
+        padding: "2px 8px",
+        borderRadius: "12px",
+        fontSize: "10px",
+        fontWeight: "600",
+        minWidth: "60px",
+        textAlign: "center",
+      }}
+    >
+      {status === VerificationStatus.VERIFIED
+        ? "✓"
+        : status === VerificationStatus.MISSING
+          ? "✗"
+          : "⟲"}{" "}
+      {status.split(" ")[0]}
+    </div>
+  );
+
+  // Quick action button
+  const QuickActionButton = ({
+    itemId,
+    status,
+    currentStatus,
+  }: {
+    itemId: string;
+    status: VerificationStatusType;
+    currentStatus: VerificationStatusType;
+  }) => {
+    const isActive = currentStatus === status;
+    const config = {
+      [VerificationStatus.VERIFIED]: {
+        bg: isActive ? "#10b981" : "#d1fae5",
+        color: isActive ? "white" : "#065f46",
+        symbol: "✓",
+      },
+      [VerificationStatus.MISSING]: {
+        bg: isActive ? "#ef4444" : "#fee2e2",
+        color: isActive ? "white" : "#991b1b",
+        symbol: "✗",
+      },
+      [VerificationStatus.NOT_VERIFIED]: {
+        bg: isActive ? "#6b7280" : "#f3f4f6",
+        color: isActive ? "white" : "#374151",
+        symbol: "⟲",
+      },
+    }[status];
+
+    return (
+      <button
+        onClick={() => handleQuickUpdate(itemId, status)}
+        style={{
+          padding: "6px 8px",
+          backgroundColor: config.bg,
+          color: config.color,
+          border: "none",
+          borderRadius: "6px",
+          cursor: "pointer",
+          fontSize: "12px",
+          fontWeight: "600",
+          flex: 1,
+          minWidth: "60px",
+        }}
+        title={status}
+      >
+        {config.symbol}
+      </button>
+    );
+  };
+
   return (
     <div style={jewelleryStyles.container}>
-      {/* Header with back button using navigate */}
+      {/* Header with back button */}
       <div style={jewelleryStyles.topNav}>
         <button
           onClick={() => navigate("/jewellery")}
@@ -106,146 +193,220 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
 
       {/* ALL CONTENT INSIDE SCROLLABLE WRAPPER */}
       <div style={jewelleryStyles.contentWrapper}>
-        <div style={{ padding: "15px 0" }}>
-          <div style={jewelleryStyles.statsCard}>
-            <h3 style={{ margin: "0 0 15px 0", color: "#333" }}>
-              Verification Status
-            </h3>
-            <div style={jewelleryStyles.statsGrid}>
-              <div style={jewelleryStyles.statItem}>
-                <div style={jewelleryStyles.statLabel}>Verified</div>
-                <div style={{ ...jewelleryStyles.statValue, color: "#10b981" }}>
-                  {stats.verified}
-                </div>
+        <div style={{ padding: "10px 0" }}>
+          {/* Compact Stats Grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "8px",
+              marginBottom: "12px",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "white",
+                borderRadius: "8px",
+                padding: "10px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: "11px", color: "#6b7280" }}>Total</div>
+              <div
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  marginTop: "4px",
+                }}
+              >
+                {stats.total}
               </div>
-              <div style={jewelleryStyles.statItem}>
-                <div style={jewelleryStyles.statLabel}>Missing</div>
-                <div style={{ ...jewelleryStyles.statValue, color: "#ef4444" }}>
-                  {stats.missing}
-                </div>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "white",
+                borderRadius: "8px",
+                padding: "10px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: "11px", color: "#6b7280" }}>Verified</div>
+              <div
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  color: "#10b981",
+                  marginTop: "4px",
+                }}
+              >
+                {stats.verified}
               </div>
-              <div style={jewelleryStyles.statItem}>
-                <div style={jewelleryStyles.statLabel}>Not Verified</div>
-                <div style={{ ...jewelleryStyles.statValue, color: "#6b7280" }}>
-                  {stats.notVerified}
-                </div>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "white",
+                borderRadius: "8px",
+                padding: "10px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: "11px", color: "#6b7280" }}>Missing</div>
+              <div
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  color: "#ef4444",
+                  marginTop: "4px",
+                }}
+              >
+                {stats.missing}
+              </div>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "white",
+                borderRadius: "8px",
+                padding: "10px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: "11px", color: "#6b7280" }}>Weight</div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#3b82f6",
+                  marginTop: "4px",
+                }}
+              >
+                {totalWeight.toFixed(1)}g
               </div>
             </div>
           </div>
 
-          {/* Location Filter */}
-          <div style={{ marginTop: "15px", marginBottom: "15px" }}>
-            <label
+          {/* Search and Filter Row */}
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              marginBottom: "12px",
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               style={{
-                display: "block",
-                marginBottom: "5px",
-                fontWeight: "500",
+                flex: 1,
+                padding: "8px 10px",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+                fontSize: "14px",
               }}
-            >
-              Filter by Location:
-            </label>
+            />
+
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
               style={{
-                width: "100%",
-                padding: "10px",
+                padding: "8px 10px",
                 borderRadius: "8px",
                 border: "1px solid #e5e7eb",
                 backgroundColor: "white",
+                fontSize: "14px",
+                minWidth: "120px",
               }}
             >
-              <option value="">All Locations</option>
+              <option value="">All</option>
               {locations.map((location) => (
                 <option key={location} value={location}>
-                  {location}
+                  {location.length > 10
+                    ? location.substring(0, 8) + "..."
+                    : location}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Search Input */}
-          <div style={{ marginBottom: "15px" }}>
-            <input
-              type="text"
-              placeholder="Search by code or description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
-              }}
-            />
-          </div>
-
           {/* Bulk Actions */}
           {selectedLocation && (
-            <div
-              style={{
-                marginBottom: "15px",
-                display: "flex",
-                gap: "10px",
-                flexWrap: "wrap",
-              }}
-            >
+            <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
               <button
                 onClick={() => handleBulkAction(VerificationStatus.VERIFIED)}
                 style={{
-                  padding: "10px 15px",
+                  flex: 1,
+                  padding: "8px",
                   backgroundColor: "#10b981",
                   color: "white",
                   border: "none",
-                  borderRadius: "8px",
+                  borderRadius: "6px",
                   cursor: "pointer",
-                  flex: 1,
-                  minWidth: "200px",
+                  fontSize: "12px",
+                  fontWeight: "500",
                 }}
               >
-                Mark All in {selectedLocation} as Verified
+                ✓ All Verified
               </button>
               <button
                 onClick={() =>
                   handleBulkAction(VerificationStatus.NOT_VERIFIED)
                 }
                 style={{
-                  padding: "10px 15px",
+                  flex: 1,
+                  padding: "8px",
                   backgroundColor: "#6b7280",
                   color: "white",
                   border: "none",
-                  borderRadius: "8px",
+                  borderRadius: "6px",
                   cursor: "pointer",
-                  flex: 1,
-                  minWidth: "200px",
+                  fontSize: "12px",
+                  fontWeight: "500",
                 }}
               >
-                Reset All in {selectedLocation}
+                ⟲ Reset All
               </button>
             </div>
           )}
 
           {/* Items Count */}
           <div
-            style={{ marginBottom: "10px", color: "#6b7280", fontSize: "14px" }}
+            style={{
+              marginBottom: "8px",
+              color: "#6b7280",
+              fontSize: "12px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
           >
-            Showing {filteredItems.length} item
-            {filteredItems.length !== 1 ? "s" : ""}
-            {selectedLocation && ` in ${selectedLocation}`}
+            <span>
+              {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
+              {selectedLocation && ` in ${selectedLocation}`}
+            </span>
+            <span style={{ fontWeight: "500" }}>
+              {totalWeight.toFixed(1)}g total
+            </span>
           </div>
 
-          {/* Items List */}
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
+          {/* Compact Items List */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             {filteredItems.length === 0 ? (
               <div
                 style={{
                   textAlign: "center",
-                  padding: "40px",
+                  padding: "30px",
                   color: "#9ca3af",
                   backgroundColor: "white",
-                  borderRadius: "12px",
+                  borderRadius: "8px",
+                  fontSize: "14px",
                 }}
               >
                 No items found{searchTerm ? " matching your search" : ""}
@@ -256,185 +417,158 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
                   key={item.id}
                   style={{
                     backgroundColor: "white",
-                    borderRadius: "12px",
-                    padding: "15px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
                   }}
                 >
+                  {/* Compact Header Row */}
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: "start",
+                      alignItems: "center",
+                      cursor: "pointer",
                     }}
+                    onClick={() => toggleExpand(item.id)}
                   >
-                    <div>
-                      <div style={{ fontWeight: "600", fontSize: "16px" }}>
-                        {item.code}
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontWeight: "600",
+                            fontSize: "14px",
+                            color: "#111827",
+                          }}
+                        >
+                          {item.code}
+                        </div>
+                        <StatusBadge status={item.verificationStatus} />
                       </div>
+
                       <div
                         style={{
                           color: "#6b7280",
-                          fontSize: "14px",
-                          marginTop: "4px",
+                          fontSize: "12px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {item.description}
                       </div>
+
                       <div
                         style={{
                           display: "flex",
-                          gap: "15px",
-                          marginTop: "8px",
-                          fontSize: "13px",
+                          gap: "12px",
+                          marginTop: "4px",
+                          fontSize: "11px",
+                          color: "#9ca3af",
                         }}
                       >
-                        <span>Weight: {item.weight}g</span>
+                        <span>{item.weight}g</span>
                         {item.location && (
-                          <span>Location: {item.location}</span>
+                          <span
+                            style={{
+                              backgroundColor: "#f3f4f6",
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            {item.location}
+                          </span>
                         )}
                       </div>
                     </div>
 
-                    {/* Status Badge */}
                     <div
                       style={{
-                        backgroundColor: getStatusColor(
-                          item.verificationStatus,
-                        ),
-                        color: "white",
-                        padding: "4px 12px",
-                        borderRadius: "20px",
-                        fontSize: "12px",
-                        fontWeight: "500",
+                        color: "#9ca3af",
+                        fontSize: "16px",
+                        marginLeft: "8px",
                       }}
                     >
-                      {item.verificationStatus}
+                      {expandedItem === item.id ? "▲" : "▼"}
                     </div>
                   </div>
 
-                  {/* Verification Actions */}
-                  <div style={{ marginTop: "15px" }}>
-                    {/* Notes Input */}
-                    <textarea
-                      placeholder="Add verification notes..."
-                      value={notes[item.id] || ""}
-                      onChange={(e) =>
-                        setNotes((prev) => ({
-                          ...prev,
-                          [item.id]: e.target.value,
-                        }))
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "10px",
-                        borderRadius: "8px",
-                        border: "1px solid #e5e7eb",
-                        marginBottom: "10px",
-                        fontSize: "14px",
-                        minHeight: "60px",
-                      }}
-                    />
-
-                    {/* Action Buttons */}
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button
-                        onClick={() =>
-                          handleQuickUpdate(
-                            item.id,
-                            VerificationStatus.VERIFIED,
-                          )
-                        }
-                        style={{
-                          flex: 1,
-                          padding: "10px",
-                          backgroundColor:
-                            item.verificationStatus ===
-                            VerificationStatus.VERIFIED
-                              ? "#10b981"
-                              : "#d1fae5",
-                          color:
-                            item.verificationStatus ===
-                            VerificationStatus.VERIFIED
-                              ? "white"
-                              : "#065f46",
-                          border: "none",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontWeight: "500",
-                        }}
-                      >
-                        ✓ Verified
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          handleQuickUpdate(item.id, VerificationStatus.MISSING)
-                        }
-                        style={{
-                          flex: 1,
-                          padding: "10px",
-                          backgroundColor:
-                            item.verificationStatus ===
-                            VerificationStatus.MISSING
-                              ? "#ef4444"
-                              : "#fee2e2",
-                          color:
-                            item.verificationStatus ===
-                            VerificationStatus.MISSING
-                              ? "white"
-                              : "#991b1b",
-                          border: "none",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontWeight: "500",
-                        }}
-                      >
-                        ✗ Missing
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          handleQuickUpdate(
-                            item.id,
-                            VerificationStatus.NOT_VERIFIED,
-                          )
-                        }
-                        style={{
-                          flex: 1,
-                          padding: "10px",
-                          backgroundColor:
-                            item.verificationStatus ===
-                            VerificationStatus.NOT_VERIFIED
-                              ? "#6b7280"
-                              : "#f3f4f6",
-                          color:
-                            item.verificationStatus ===
-                            VerificationStatus.NOT_VERIFIED
-                              ? "white"
-                              : "#374151",
-                          border: "none",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontWeight: "500",
-                        }}
-                      >
-                        ⟲ Reset
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Last verified info */}
-                  {item.lastVerified > 0 && (
+                  {/* Expandable Content */}
+                  {expandedItem === item.id && (
                     <div
                       style={{
                         marginTop: "10px",
-                        fontSize: "12px",
-                        color: "#9ca3af",
+                        borderTop: "1px solid #f3f4f6",
+                        paddingTop: "10px",
                       }}
                     >
-                      Last verified:{" "}
-                      {new Date(item.lastVerified).toLocaleDateString()}
+                      {/* Quick Actions */}
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "6px",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        <QuickActionButton
+                          itemId={item.id}
+                          status={VerificationStatus.VERIFIED}
+                          currentStatus={item.verificationStatus}
+                        />
+                        <QuickActionButton
+                          itemId={item.id}
+                          status={VerificationStatus.MISSING}
+                          currentStatus={item.verificationStatus}
+                        />
+                        <QuickActionButton
+                          itemId={item.id}
+                          status={VerificationStatus.NOT_VERIFIED}
+                          currentStatus={item.verificationStatus}
+                        />
+                      </div>
+
+                      {/* Notes Input */}
+                      <textarea
+                        placeholder="Add notes..."
+                        value={notes[item.id] || ""}
+                        onChange={(e) =>
+                          setNotes((prev) => ({
+                            ...prev,
+                            [item.id]: e.target.value,
+                          }))
+                        }
+                        style={{
+                          width: "100%",
+                          padding: "8px",
+                          borderRadius: "6px",
+                          border: "1px solid #e5e7eb",
+                          fontSize: "12px",
+                          minHeight: "50px",
+                          resize: "vertical",
+                          marginBottom: "8px",
+                        }}
+                      />
+
+                      {/* Last verified info */}
+                      {item.lastVerified > 0 && (
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#9ca3af",
+                            textAlign: "right",
+                          }}
+                        >
+                          Verified:{" "}
+                          {new Date(item.lastVerified).toLocaleDateString()}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -443,10 +577,10 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
           </div>
         </div>
 
-        {/* Jewellery Navigation - Now inside the scrollable content */}
+        {/* Jewellery Navigation */}
         <JewelleryNavigation />
 
-        {/* Bottom spacing for fixed bottom module navigation */}
+        {/* Bottom spacing */}
         <div style={{ height: "80px" }}></div>
       </div>
     </div>

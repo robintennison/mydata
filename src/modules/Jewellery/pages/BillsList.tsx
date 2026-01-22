@@ -1,96 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  Timestamp,
-  QueryDocumentSnapshot,
-  DocumentData,
-} from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
 import JewelleryNavigation from "../components/JewelleryNavigation";
 
 interface Bill {
   id: string;
-  downloadUrl: string;
-  mimeType: string;
   notes?: string;
-  uploadedAt: number; // Store as timestamp number
-  createdAt?: number;
 }
 
 const BillsList: React.FC = () => {
   const navigate = useNavigate();
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBills = async () => {
       try {
-        console.log("Fetching bills...");
-        setError(null);
-
         const db = getFirestore();
         const billsRef = collection(db, "bills");
         const snapshot = await getDocs(billsRef);
 
-        console.log(`Found ${snapshot.size} bills`);
-
         const billsList: Bill[] = [];
-        snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+        snapshot.forEach((doc) => {
           const data = doc.data();
-          console.log("Bill data:", data);
-
-          // Handle timestamp conversion
-          let uploadedAt = 0;
-          let createdAt = 0;
-
-          if (data.uploadedAt) {
-            if (data.uploadedAt instanceof Timestamp) {
-              uploadedAt = data.uploadedAt.toMillis(); // Firestore Timestamp to milliseconds
-            } else if (typeof data.uploadedAt === "number") {
-              uploadedAt = data.uploadedAt;
-            } else if (data.uploadedAt.toDate) {
-              uploadedAt = data.uploadedAt.toDate().getTime();
-            } else if (data.uploadedAt.seconds) {
-              // Handle Firestore Timestamp object
-              uploadedAt = data.uploadedAt.seconds * 1000;
-            }
-          }
-
-          if (data.createdAt) {
-            if (data.createdAt instanceof Timestamp) {
-              createdAt = data.createdAt.toMillis();
-            } else if (typeof data.createdAt === "number") {
-              createdAt = data.createdAt;
-            } else if (data.createdAt.toDate) {
-              createdAt = data.createdAt.toDate().getTime();
-            } else if (data.createdAt.seconds) {
-              createdAt = data.createdAt.seconds * 1000;
-            }
-          }
-
-          const bill: Bill = {
+          billsList.push({
             id: doc.id,
-            downloadUrl: data.downloadUrl || "",
-            mimeType: data.mimeType || "",
             notes: data.notes || "",
-            uploadedAt: uploadedAt || Date.now(),
-            createdAt: createdAt || uploadedAt || Date.now(),
-          };
-
-          billsList.push(bill);
+          });
         });
 
-        // Sort by uploadedAt (newest first)
-        billsList.sort((a, b) => b.uploadedAt - a.uploadedAt);
+        // Sort bills by notes (alphabetically)
+        billsList.sort((a, b) => {
+          const noteA = (a.notes || "").toLowerCase();
+          const noteB = (b.notes || "").toLowerCase();
+          return noteA.localeCompare(noteB);
+        });
 
         setBills(billsList);
       } catch (error: any) {
         console.error("Error fetching bills:", error);
-        setError(`Error loading bills: ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -99,43 +48,17 @@ const BillsList: React.FC = () => {
     fetchBills();
   }, []);
 
-  const formatDate = (timestamp: number) => {
-    if (!timestamp) return "Unknown date";
-    return new Date(timestamp).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType.includes("pdf")) return "📄";
-    if (mimeType.includes("image")) return "🖼️";
-    return "📎";
-  };
-
-  const handleOpenBill = (e: React.MouseEvent, bill: Bill) => {
-    e.stopPropagation(); // Prevent triggering the row click
-    if (bill.downloadUrl) {
-      window.open(bill.downloadUrl, "_blank");
-    } else {
-      alert("No download URL available");
-    }
-  };
-
   const handleViewLinkedJewellery = (billId: string) => {
     navigate(`/jewellery/bills/${billId}/linked-jewellery`);
   };
 
   const handleEditBill = (e: React.MouseEvent, billId: string) => {
-    e.stopPropagation(); // Prevent triggering the row click
+    e.stopPropagation();
     navigate(`/jewellery/bills/edit/${billId}`);
   };
 
   const handleDeleteBill = (e: React.MouseEvent, billId: string) => {
-    e.stopPropagation(); // Prevent triggering the row click
+    e.stopPropagation();
     if (window.confirm("Delete this bill?")) {
       // TODO: Implement delete
       console.log("Delete bill:", billId);
@@ -164,64 +87,32 @@ const BillsList: React.FC = () => {
         >
           ←
         </button>
-        <div style={jewelleryStyles.navTitle}>Bills & Documents</div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            onClick={() => navigate("/jewellery/bills/add")}
-            style={{
-              ...jewelleryStyles.navButton,
-              padding: "6px 12px",
-              fontSize: "14px",
-            }}
-            title="Add New Bill"
-          >
-            + Add Bill
-          </button>
-        </div>
+        <div style={jewelleryStyles.navTitle}>Bills</div>
+        <button
+          onClick={() => navigate("/jewellery/bills/add")}
+          style={{
+            ...jewelleryStyles.navButton,
+            padding: "6px 12px",
+            fontSize: "14px",
+          }}
+          title="Add New Bill"
+        >
+          + Add
+        </button>
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <div
-          style={{
-            margin: "15px",
-            padding: "10px",
-            backgroundColor: "#fee2e2",
-            border: "1px solid #ef4444",
-            borderRadius: "8px",
-            color: "#991b1b",
-          }}
-        >
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
       {/* Bills List */}
-      <div style={{ padding: "15px" }}>
+      <div style={jewelleryStyles.contentWrapper}>
         {bills.length === 0 ? (
           <div
             style={{
               textAlign: "center",
-              padding: "40px",
+              padding: "40px 20px",
               color: "#9ca3af",
-              backgroundColor: "white",
-              borderRadius: "12px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             }}
           >
             <div style={{ fontSize: "48px", marginBottom: "16px" }}>📄</div>
-            <p style={{ marginBottom: "16px", fontSize: "16px" }}>
-              No bills found.
-            </p>
-            <p
-              style={{
-                marginBottom: "24px",
-                fontSize: "14px",
-                color: "#6b7280",
-              }}
-            >
-              Upload bills to link them to jewellery items.
-            </p>
+            <p style={{ marginBottom: "16px" }}>No bills found.</p>
             <button
               onClick={() => navigate("/jewellery/bills/add")}
               style={{
@@ -234,151 +125,102 @@ const BillsList: React.FC = () => {
                 fontSize: "14px",
               }}
             >
-              Upload your first bill
+              Add your first bill
             </button>
           </div>
         ) : (
           <>
             <div
               style={{
-                fontSize: "13px",
+                fontSize: "11px",
                 color: "#6b7280",
-                marginBottom: "10px",
+                padding: "6px 12px 2px",
+                textAlign: "right",
               }}
             >
-              Showing {bills.length} bills (newest first)
+              {bills.length} bills
             </div>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-            >
+            <div style={{ display: "flex", flexDirection: "column" }}>
               {bills.map((bill) => (
                 <div
                   key={bill.id}
                   style={{
                     backgroundColor: "white",
-                    borderRadius: "12px",
-                    padding: "15px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    cursor: "pointer", // Add cursor pointer for clickable row
+                    padding: "12px",
+                    borderBottom: "1px solid #e5e7eb",
+                    cursor: "pointer",
                   }}
                   onClick={() => handleViewLinkedJewellery(bill.id)}
                 >
+                  {/* Single Row Layout */}
                   <div
                     style={{
                       display: "flex",
+                      alignItems: "center",
                       justifyContent: "space-between",
-                      alignItems: "start",
                     }}
                   >
-                    <div style={{ flex: 1 }}>
-                      <div
+                    {/* Bill Notes */}
+                    <div
+                      style={{
+                        fontWeight: "500",
+                        fontSize: "14px",
+                        color: "#111827",
+                        flex: 1,
+                        minWidth: 0,
+                        paddingRight: "10px",
+                      }}
+                    >
+                      {bill.notes || "No notes"}
+                    </div>
+
+                    {/* Action Icons */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {/* Edit Icon */}
+                      <button
+                        onClick={(e) => handleEditBill(e, bill.id)}
                         style={{
+                          background: "none",
+                          border: "none",
+                          fontSize: "16px",
+                          color: "#3b82f6",
+                          cursor: "pointer",
+                          padding: "6px",
+                          borderRadius: "6px",
                           display: "flex",
                           alignItems: "center",
-                          gap: "10px",
-                          marginBottom: "8px",
                         }}
+                        title="Edit Bill"
                       >
-                        <span style={{ fontSize: "24px" }}>
-                          {getFileIcon(bill.mimeType)}
-                        </span>
-                        <div>
-                          <div style={{ fontWeight: "600", fontSize: "16px" }}>
-                            {bill.mimeType.includes("pdf")
-                              ? "PDF Document"
-                              : bill.mimeType.includes("image")
-                                ? "Image File"
-                                : "Document"}
-                          </div>
-                          <div style={{ fontSize: "12px", color: "#6b7280" }}>
-                            Uploaded: {formatDate(bill.uploadedAt)}
-                          </div>
-                        </div>
-                      </div>
+                        ✏️
+                      </button>
 
-                      {bill.notes && (
-                        <div
-                          style={{
-                            marginTop: "8px",
-                            padding: "8px",
-                            backgroundColor: "#f3f4f6",
-                            borderRadius: "6px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          <strong>Notes:</strong> {bill.notes}
-                        </div>
-                      )}
-
-                      <div
+                      {/* Delete Icon */}
+                      <button
+                        onClick={(e) => handleDeleteBill(e, bill.id)}
                         style={{
-                          marginTop: "12px",
-                          fontSize: "13px",
-                          color: "#6b7280",
+                          background: "none",
+                          border: "none",
+                          fontSize: "16px",
+                          color: "#ef4444",
+                          cursor: "pointer",
+                          padding: "6px",
+                          borderRadius: "6px",
+                          display: "flex",
+                          alignItems: "center",
                         }}
+                        title="Delete Bill"
                       >
-                        <div>File type: {bill.mimeType}</div>
-                        <div
-                          style={{
-                            wordBreak: "break-all",
-                            fontSize: "12px",
-                            marginTop: "4px",
-                          }}
-                        >
-                          URL: {bill.downloadUrl.substring(0, 60)}...
-                        </div>
-                      </div>
+                        🗑️
+                      </button>
                     </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div
-                    style={{ display: "flex", gap: "8px", marginTop: "15px" }}
-                  >
-                    <button
-                      onClick={(e) => handleOpenBill(e, bill)}
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor: "#3b82f6",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        flex: 1,
-                      }}
-                    >
-                      Open Bill
-                    </button>
-                    <button
-                      onClick={(e) => handleEditBill(e, bill.id)}
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor: "#10b981",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        flex: 1,
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={(e) => handleDeleteBill(e, bill.id)}
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor: "#ef4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                      }}
-                    >
-                      Delete
-                    </button>
                   </div>
                 </div>
               ))}
@@ -388,7 +230,7 @@ const BillsList: React.FC = () => {
       </div>
 
       <JewelleryNavigation />
-      <div style={{ height: "20px" }}></div>
+      <div style={{ height: "5px" }}></div>
     </div>
   );
 };

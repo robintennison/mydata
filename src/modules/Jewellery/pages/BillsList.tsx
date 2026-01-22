@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
 import JewelleryNavigation from "../components/JewelleryNavigation";
 
 interface Bill {
   id: string;
   notes?: string;
+  hasLinkedJewellery?: boolean;
+  jewelleryCount?: number;
 }
 
 const BillsList: React.FC = () => {
@@ -15,9 +23,11 @@ const BillsList: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchBills = async () => {
+    const fetchBillsAndCheckLinks = async () => {
       try {
         const db = getFirestore();
+
+        // Fetch all bills
         const billsRef = collection(db, "bills");
         const snapshot = await getDocs(billsRef);
 
@@ -37,7 +47,37 @@ const BillsList: React.FC = () => {
           return noteA.localeCompare(noteB);
         });
 
-        setBills(billsList);
+        // Check each bill for linked jewellery items
+        const billsWithLinkStatus = await Promise.all(
+          billsList.map(async (bill) => {
+            try {
+              // Query jewellery items that have this billId
+              const jewelleryRef = collection(db, "jewellery");
+              const q = query(jewelleryRef, where("billId", "==", bill.id));
+              const jewellerySnapshot = await getDocs(q);
+
+              const jewelleryCount = jewellerySnapshot.size;
+
+              return {
+                ...bill,
+                hasLinkedJewellery: jewelleryCount > 0,
+                jewelleryCount: jewelleryCount,
+              };
+            } catch (error) {
+              console.error(
+                `Error checking jewellery for bill ${bill.id}:`,
+                error,
+              );
+              return {
+                ...bill,
+                hasLinkedJewellery: false,
+                jewelleryCount: 0,
+              };
+            }
+          }),
+        );
+
+        setBills(billsWithLinkStatus);
       } catch (error: any) {
         console.error("Error fetching bills:", error);
       } finally {
@@ -45,7 +85,7 @@ const BillsList: React.FC = () => {
       }
     };
 
-    fetchBills();
+    fetchBillsAndCheckLinks();
   }, []);
 
   const handleViewLinkedJewellery = (billId: string) => {
@@ -138,7 +178,8 @@ const BillsList: React.FC = () => {
                 textAlign: "right",
               }}
             >
-              {bills.length} bills
+              {bills.length} bills •{" "}
+              {bills.filter((b) => b.hasLinkedJewellery).length} with jewellery
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               {bills.map((bill) => (
@@ -148,9 +189,15 @@ const BillsList: React.FC = () => {
                     backgroundColor: "white",
                     padding: "12px",
                     borderBottom: "1px solid #e5e7eb",
-                    cursor: "pointer",
+                    cursor: bill.hasLinkedJewellery ? "pointer" : "default",
+                    borderLeft: bill.hasLinkedJewellery
+                      ? "4px solid #3b82f6"
+                      : "4px solid transparent",
                   }}
-                  onClick={() => handleViewLinkedJewellery(bill.id)}
+                  onClick={() =>
+                    bill.hasLinkedJewellery &&
+                    handleViewLinkedJewellery(bill.id)
+                  }
                 >
                   {/* Single Row Layout */}
                   <div
@@ -160,18 +207,70 @@ const BillsList: React.FC = () => {
                       justifyContent: "space-between",
                     }}
                   >
-                    {/* Bill Notes */}
-                    <div
-                      style={{
-                        fontWeight: "500",
-                        fontSize: "14px",
-                        color: "#111827",
-                        flex: 1,
-                        minWidth: 0,
-                        paddingRight: "10px",
-                      }}
-                    >
-                      {bill.notes || "No notes"}
+                    {/* Bill Info */}
+                    <div style={{ flex: 1, minWidth: 0, paddingRight: "10px" }}>
+                      <div
+                        style={{
+                          fontWeight: "500",
+                          fontSize: "14px",
+                          color: "#111827",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        {bill.notes || "No notes"}
+                      </div>
+
+                      {/* Link Status Indicator */}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "2px",
+                            fontSize: "11px",
+                            padding: "2px 6px",
+                            borderRadius: "12px",
+                            backgroundColor: bill.hasLinkedJewellery
+                              ? "#dbeafe"
+                              : "#f3f4f6",
+                            color: bill.hasLinkedJewellery
+                              ? "#1e40af"
+                              : "#6b7280",
+                          }}
+                        >
+                          {bill.hasLinkedJewellery ? (
+                            <>
+                              <span>🔗</span>
+                              <span>
+                                {bill.jewelleryCount} item
+                                {bill.jewelleryCount !== 1 ? "s" : ""}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span>❌</span>
+                              <span>No jewellery</span>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Bill ID (truncated) */}
+                        <div
+                          style={{
+                            fontSize: "10px",
+                            color: "#9ca3af",
+                            fontFamily: "monospace",
+                          }}
+                        >
+                          {bill.id.substring(0, 8)}...
+                        </div>
+                      </div>
                     </div>
 
                     {/* Action Icons */}
@@ -183,6 +282,31 @@ const BillsList: React.FC = () => {
                         flexShrink: 0,
                       }}
                     >
+                      {/* View Linked Jewellery Button (only if has links) */}
+                      {bill.hasLinkedJewellery && (
+                        <button
+                          onClick={() => handleViewLinkedJewellery(bill.id)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            fontSize: "14px",
+                            color: "#3b82f6",
+                            cursor: "pointer",
+                            padding: "6px",
+                            borderRadius: "6px",
+                            display: "flex",
+                            alignItems: "center",
+                            flexDirection: "column",
+                          }}
+                          title={`View ${bill.jewelleryCount} linked item${bill.jewelleryCount !== 1 ? "s" : ""}`}
+                        >
+                          <span>🔍</span>
+                          <span style={{ fontSize: "9px", marginTop: "2px" }}>
+                            {bill.jewelleryCount}
+                          </span>
+                        </button>
+                      )}
+
                       {/* Edit Icon */}
                       <button
                         onClick={(e) => handleEditBill(e, bill.id)}
@@ -202,21 +326,40 @@ const BillsList: React.FC = () => {
                         ✏️
                       </button>
 
-                      {/* Delete Icon */}
+                      {/* Delete Icon - Show warning if bill has linked jewellery */}
                       <button
-                        onClick={(e) => handleDeleteBill(e, bill.id)}
+                        onClick={(e) => {
+                          if (bill.hasLinkedJewellery) {
+                            if (
+                              window.confirm(
+                                `This bill is linked to ${bill.jewelleryCount} jewellery item${bill.jewelleryCount !== 1 ? "s" : ""}. ` +
+                                  `Deleting it will remove the link from those items. Are you sure you want to delete?`,
+                              )
+                            ) {
+                              handleDeleteBill(e, bill.id);
+                            }
+                          } else {
+                            handleDeleteBill(e, bill.id);
+                          }
+                        }}
                         style={{
                           background: "none",
                           border: "none",
                           fontSize: "16px",
-                          color: "#ef4444",
+                          color: bill.hasLinkedJewellery
+                            ? "#f59e0b"
+                            : "#ef4444",
                           cursor: "pointer",
                           padding: "6px",
                           borderRadius: "6px",
                           display: "flex",
                           alignItems: "center",
                         }}
-                        title="Delete Bill"
+                        title={
+                          bill.hasLinkedJewellery
+                            ? `Delete bill (linked to ${bill.jewelleryCount} item${bill.jewelleryCount !== 1 ? "s" : ""})`
+                            : "Delete bill"
+                        }
                       >
                         🗑️
                       </button>
@@ -224,6 +367,55 @@ const BillsList: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Summary Section */}
+            <div
+              style={{
+                padding: "12px",
+                backgroundColor: "#f8fafc",
+                borderTop: "1px solid #e5e7eb",
+                fontSize: "12px",
+                color: "#64748b",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div>
+                <span style={{ fontWeight: "500" }}>Summary:</span>{" "}
+                {bills.filter((b) => b.hasLinkedJewellery).length} bills with
+                jewellery, {bills.filter((b) => !b.hasLinkedJewellery).length}{" "}
+                without
+              </div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  <div
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: "#3b82f6",
+                      borderRadius: "50%",
+                    }}
+                  ></div>
+                  <span>Has jewellery</span>
+                </div>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  <div
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: "#d1d5db",
+                      borderRadius: "50%",
+                    }}
+                  ></div>
+                  <span>No jewellery</span>
+                </div>
+              </div>
             </div>
           </>
         )}

@@ -3,16 +3,10 @@ import {
   getFirestore,
   collection,
   getDocs,
-  query,
-  orderBy,
-  QueryDocumentSnapshot,
-  DocumentData,
+  doc,
+  getDoc,
 } from "firebase/firestore";
-import {
-  Jewellery,
-  VerificationStatus,
-  VerificationStatusType,
-} from "../models/types";
+import { Jewellery, VerificationStatus } from "../models/types";
 
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
@@ -22,11 +16,11 @@ interface JewelleryFormProps {
 
 interface Bill {
   id: string;
-  notes?: string;
-  uploadedAt: number;
   downloadUrl: string;
   mimeType: string;
-  // Add other bill fields as needed
+  notes: string | null;
+  createdAt: number;
+  uploadedAt: number;
 }
 
 const JewelleryForm: React.FC<JewelleryFormProps> = ({
@@ -41,7 +35,6 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     location: "",
     boughtFor: "",
     purchaseDate: Date.now(),
-    imageUrl: "",
     active: true,
     verificationStatus: VerificationStatus.NOT_VERIFIED,
     verificationNotes: "",
@@ -52,36 +45,107 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
   const [bills, setBills] = useState<Bill[]>([]);
   const [loadingBills, setLoadingBills] = useState(false);
-  const [billsError, setBillsError] = useState<string | null>(null);
+  const [assignedBill, setAssignedBill] = useState<Bill | null>(null);
+  const [loadingAssignedBill, setLoadingAssignedBill] = useState(false);
+  const [showBillDropdown, setShowBillDropdown] = useState(false);
+  const [billError, setBillError] = useState<string | null>(null);
 
-  // Fetch bills from Firestore
+  // Fetch assigned bill details based on billId
+  useEffect(() => {
+    const fetchAssignedBill = async () => {
+      if (!formData.billId) {
+        setAssignedBill(null);
+        setShowBillDropdown(false);
+        setBillError(null);
+        return;
+      }
+
+      try {
+        setLoadingAssignedBill(true);
+        setBillError(null);
+        const db = getFirestore();
+        const billRef = doc(db, "bills", formData.billId);
+        const billDoc = await getDoc(billRef);
+
+        if (billDoc.exists()) {
+          const data = billDoc.data();
+
+          const billData: Bill = {
+            id: billDoc.id,
+            downloadUrl: data.downloadUrl || "",
+            mimeType: data.mimeType || "",
+            notes: data.notes || null,
+            createdAt: data.createdAt || 0,
+            uploadedAt: data.uploadedAt || 0,
+          };
+
+          // Check for alternative URL fields if downloadUrl is empty
+          if (!billData.downloadUrl) {
+            const possibleUrlFields = [
+              "url",
+              "fileUrl",
+              "imageUrl",
+              "pdfUrl",
+              "billUrl",
+              "documentUrl",
+              "attachmentUrl",
+            ];
+
+            for (const field of possibleUrlFields) {
+              if (data[field]) {
+                billData.downloadUrl = data[field];
+                break;
+              }
+            }
+          }
+
+          if (!billData.downloadUrl) {
+            setBillError("Bill has no downloadable content");
+          }
+
+          setAssignedBill(billData);
+          setShowBillDropdown(false);
+        } else {
+          setAssignedBill(null);
+          setBillError("Bill document not found");
+          setShowBillDropdown(true);
+        }
+      } catch (error: any) {
+        console.error("Error fetching assigned bill:", error);
+        setAssignedBill(null);
+        setBillError(`Failed to load bill: ${error.message}`);
+        setShowBillDropdown(true);
+      } finally {
+        setLoadingAssignedBill(false);
+      }
+    };
+
+    fetchAssignedBill();
+  }, [formData.billId]);
+
+  // Fetch all bills for dropdown
   useEffect(() => {
     const fetchBills = async () => {
       try {
         setLoadingBills(true);
-        setBillsError(null);
-
         const db = getFirestore();
         const billsRef = collection(db, "bills");
-
-        // Query bills sorted by uploadedAt (newest first) or notes if available
-        const billsQuery = query(billsRef, orderBy("uploadedAt", "desc"));
-        const snapshot = await getDocs(billsQuery);
+        const snapshot = await getDocs(billsRef);
 
         const billsList: Bill[] = [];
-        snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+        snapshot.forEach((doc) => {
           const data = doc.data();
-          const bill: Bill = {
+          billsList.push({
             id: doc.id,
-            notes: data.notes || "",
-            uploadedAt: data.uploadedAt?.toMillis?.() || data.uploadedAt || 0,
             downloadUrl: data.downloadUrl || "",
             mimeType: data.mimeType || "",
-          };
-          billsList.push(bill);
+            notes: data.notes || null,
+            createdAt: data.createdAt || 0,
+            uploadedAt: data.uploadedAt || 0,
+          });
         });
 
-        // Sort bills by notes for the dropdown (case-insensitive)
+        // Sort bills by notes
         billsList.sort((a, b) => {
           const noteA = (a.notes || "").toLowerCase();
           const noteB = (b.notes || "").toLowerCase();
@@ -91,7 +155,6 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         setBills(billsList);
       } catch (error: any) {
         console.error("Error fetching bills:", error);
-        setBillsError(`Failed to load bills: ${error.message}`);
       } finally {
         setLoadingBills(false);
       }
@@ -99,12 +162,6 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
     fetchBills();
   }, []);
-
-  // Derive status options from VerificationStatus object VALUES
-  const statusOptions = Object.values(VerificationStatus).map((value) => ({
-    value,
-    label: value,
-  }));
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -120,22 +177,11 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       });
     } else if (name === "weight") {
       setFormData({ ...formData, [name]: parseFloat(value) || 0 });
-    } else if (name === "verificationStatus") {
-      const validValues = Object.values(VerificationStatus);
-      if (validValues.includes(value as VerificationStatusType)) {
-        setFormData({ ...formData, [name]: value as VerificationStatusType });
-
-        if (
-          value === VerificationStatus.VERIFIED ||
-          value === VerificationStatus.MISSING
-        ) {
-          setFormData((prev) => ({
-            ...prev,
-            [name]: value as VerificationStatusType,
-            lastVerified: Date.now(),
-          }));
-        }
-      }
+    } else if (name === "purchaseDate") {
+      const date = e.target.value
+        ? new Date(e.target.value).getTime()
+        : Date.now();
+      setFormData({ ...formData, [name]: date });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -143,83 +189,127 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    onSubmit(formData);
+  };
 
-    // Ensure lastVerified is set for verified/missing items
-    const finalData = { ...formData };
-    if (
-      finalData.verificationStatus === VerificationStatus.VERIFIED ||
-      finalData.verificationStatus === VerificationStatus.MISSING
-    ) {
-      finalData.lastVerified = finalData.lastVerified || Date.now();
+  const handleViewBill = () => {
+    if (!assignedBill) return;
+
+    if (assignedBill.downloadUrl) {
+      window.open(assignedBill.downloadUrl, "_blank");
+    } else {
+      alert(`Bill Details:\n
+Bill Notes: ${assignedBill.notes || "No notes"}\n
+File Type: ${assignedBill.mimeType || "Unknown"}\n
+Uploaded: ${formatDate(assignedBill.uploadedAt)}\n
+\nNo bill document URL available.`);
+    }
+  };
+
+  const handleDownloadBill = () => {
+    if (!assignedBill || !assignedBill.downloadUrl) {
+      alert("No bill document available for download.");
+      return;
     }
 
-    onSubmit(finalData);
-  };
+    const link = document.createElement("a");
+    link.href = assignedBill.downloadUrl;
 
-  // Update verification status with notes
-  const updateVerification = (
-    status: VerificationStatusType,
-    notes?: string,
-  ) => {
-    setFormData({
-      ...formData,
-      verificationStatus: status,
-      verificationNotes: notes || "",
-      lastVerified: status === VerificationStatus.NOT_VERIFIED ? 0 : Date.now(),
-    });
-  };
+    let filename = `Bill_${formData.code || "Document"}`;
 
-  // Format date for display
-  const formatDate = (timestamp: number): string => {
-    if (!timestamp) return "";
     try {
-      return new Date(timestamp).toLocaleDateString("en-IN", {
+      const urlObj = new URL(assignedBill.downloadUrl);
+      const pathParts = urlObj.pathname.split("/");
+      const lastPart = pathParts[pathParts.length - 1];
+      if (lastPart && lastPart.includes(".")) {
+        filename = lastPart;
+      }
+    } catch (e) {
+      console.log("Could not parse URL for filename");
+    }
+
+    if (assignedBill.mimeType) {
+      if (
+        assignedBill.mimeType.includes("pdf") &&
+        !filename.toLowerCase().endsWith(".pdf")
+      ) {
+        filename += ".pdf";
+      } else if (
+        assignedBill.mimeType.includes("image") &&
+        !filename.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)
+      ) {
+        if (assignedBill.mimeType.includes("jpeg")) {
+          filename += ".jpg";
+        } else if (assignedBill.mimeType.includes("png")) {
+          filename += ".png";
+        } else if (assignedBill.mimeType.includes("gif")) {
+          filename += ".gif";
+        } else {
+          filename += ".jpg";
+        }
+      }
+    }
+
+    link.download = filename;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const getFileTypeIcon = (mimeType: string): string => {
+    if (mimeType.includes("pdf")) return "📄";
+    if (mimeType.includes("image")) return "🖼️";
+    if (mimeType.includes("text")) return "📝";
+    return "📎";
+  };
+
+  const formatDate = (timestamp: number): string => {
+    if (!timestamp || timestamp === 0) return "N/A";
+
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "short",
         year: "numeric",
       });
     } catch (error) {
-      return "";
+      console.error("Error formatting date:", error);
+      return "Invalid date";
     }
   };
 
-  // Get file icon for bill type
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType.includes("pdf")) return "📄";
-    if (mimeType.includes("image")) return "🖼️";
-    return "📎";
+  const handleChangeBillClick = () => {
+    setShowBillDropdown(true);
   };
 
-  // Get selected bill details
-  const selectedBill = bills.find((bill) => bill.id === formData.billId);
+  const handleCancelChangeBill = () => {
+    setShowBillDropdown(false);
+  };
+
+  const handleAddBillClick = () => {
+    setShowBillDropdown(true);
+  };
 
   return (
     <form
       onSubmit={handleSubmit}
       style={{ maxWidth: "600px", margin: "0 auto" }}
     >
-      <h2>{isEditing ? "Edit Jewellery Item" : "Add New Jewellery Item"}</h2>
+      <h2 style={{ marginBottom: "20px", color: "#374151" }}>
+        {isEditing ? "Edit Jewellery Item" : "Add Jewellery Item"}
+      </h2>
 
-      {/* Basic Information Section */}
-      <div
-        style={{
-          backgroundColor: "#f8fafc",
-          padding: "15px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-        }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: "15px", color: "#374151" }}>
-          Basic Information
-        </h3>
-
-        <div style={{ marginBottom: "15px" }}>
+      {/* Code and Weight in same row */}
+      <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+        <div style={{ flex: 1 }}>
           <label
             style={{
               display: "block",
               marginBottom: "5px",
-              fontWeight: "500",
-              color: "#374151",
+              fontSize: "13px",
+              color: "#6b7280",
             }}
           >
             Code *
@@ -232,7 +322,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
             required
             style={{
               width: "100%",
-              padding: "8px 12px",
+              padding: "8px 10px",
               borderRadius: "6px",
               border: "1px solid #d1d5db",
               fontSize: "14px",
@@ -241,44 +331,16 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           />
         </div>
 
-        <div style={{ marginBottom: "15px" }}>
+        <div style={{ flex: 1 }}>
           <label
             style={{
               display: "block",
               marginBottom: "5px",
-              fontWeight: "500",
-              color: "#374151",
+              fontSize: "13px",
+              color: "#6b7280",
             }}
           >
-            Description
-          </label>
-          <input
-            type="text"
-            name="description"
-            value={formData.description || ""}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
-            placeholder="Description of the jewellery item"
-          />
-        </div>
-
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontWeight: "500",
-              color: "#374151",
-            }}
-          >
-            Weight (grams) *
+            Weight (g) *
           </label>
           <input
             type="number"
@@ -289,7 +351,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
             required
             style={{
               width: "100%",
-              padding: "8px 12px",
+              padding: "8px 10px",
               borderRadius: "6px",
               border: "1px solid #d1d5db",
               fontSize: "14px",
@@ -299,200 +361,372 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         </div>
       </div>
 
-      {/* Bill Information Section */}
-      <div
-        style={{
-          backgroundColor: "#f0f9ff",
-          padding: "15px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-        }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: "15px", color: "#374151" }}>
-          Bill Information
-        </h3>
+      {/* Description */}
+      <div style={{ marginBottom: "15px" }}>
+        <label
+          style={{
+            display: "block",
+            marginBottom: "5px",
+            fontSize: "13px",
+            color: "#6b7280",
+          }}
+        >
+          Description
+        </label>
+        <input
+          type="text"
+          name="description"
+          value={formData.description || ""}
+          onChange={handleChange}
+          style={{
+            width: "100%",
+            padding: "8px 10px",
+            borderRadius: "6px",
+            border: "1px solid #d1d5db",
+            fontSize: "14px",
+            boxSizing: "border-box",
+          }}
+          placeholder="Description"
+        />
+      </div>
 
-        {loadingBills ? (
+      {/* Bill Section */}
+      <div style={{ marginBottom: "15px" }}>
+        <label
+          style={{
+            display: "block",
+            marginBottom: "5px",
+            fontSize: "13px",
+            color: "#6b7280",
+          }}
+        >
+          Bill
+        </label>
+
+        {/* Show assigned bill details when available */}
+        {!showBillDropdown && assignedBill && !loadingAssignedBill && (
           <div
-            style={{ padding: "10px", textAlign: "center", color: "#6b7280" }}
+            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
-            Loading bills...
-          </div>
-        ) : billsError ? (
-          <div
-            style={{
-              padding: "10px",
-              backgroundColor: "#fee2e2",
-              border: "1px solid #ef4444",
-              borderRadius: "6px",
-              color: "#991b1b",
-              marginBottom: "15px",
-            }}
-          >
-            {billsError}
-          </div>
-        ) : bills.length === 0 ? (
-          <div
-            style={{
-              padding: "15px",
-              backgroundColor: "#f3f4f6",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              color: "#6b7280",
-              marginBottom: "15px",
-              textAlign: "center",
-            }}
-          >
-            <p style={{ marginBottom: "10px" }}>
-              No bills found in the system.
-            </p>
-            <a
-              href="/jewellery/bills/add"
+            {/* Bill details card */}
+            <div
               style={{
-                color: "#3b82f6",
-                textDecoration: "none",
-                fontWeight: "500",
+                padding: "15px",
+                backgroundColor: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                borderRadius: "6px",
+                fontSize: "14px",
+                color: "#1e293b",
               }}
             >
-              Add your first bill
-            </a>
-          </div>
-        ) : (
-          <>
-            <div style={{ marginBottom: "15px" }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "5px",
-                  fontWeight: "500",
-                  color: "#374151",
-                }}
-              >
-                Select Bill *
-              </label>
-              <select
-                name="billId"
-                value={formData.billId || ""}
-                onChange={handleChange}
-                required
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
-                  fontSize: "14px",
-                  backgroundColor: "white",
-                  boxSizing: "border-box",
-                }}
-              >
-                <option value="">-- Select a bill --</option>
-                {bills.map((bill) => (
-                  <option key={bill.id} value={bill.id}>
-                    {bill.notes || `Bill ${bill.id.substring(0, 8)}...`}
-                    {bill.uploadedAt && ` (${formatDate(bill.uploadedAt)})`}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Display selected bill details */}
-            {selectedBill && (
               <div
                 style={{
-                  padding: "12px",
-                  backgroundColor: "white",
-                  border: "1px solid #bae6fd",
-                  borderRadius: "6px",
-                  marginTop: "10px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "10px",
                 }}
               >
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "10px",
-                    marginBottom: "8px",
+                    gap: "8px",
                   }}
                 >
-                  <span style={{ fontSize: "20px" }}>
-                    {getFileIcon(selectedBill.mimeType)}
+                  <span style={{ fontSize: "18px" }}>
+                    {getFileTypeIcon(assignedBill.mimeType)}
                   </span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: "500", fontSize: "14px" }}>
-                      {selectedBill.notes || "No notes"}
-                    </div>
-                    {selectedBill.uploadedAt && (
-                      <div style={{ fontSize: "12px", color: "#6b7280" }}>
-                        Uploaded: {formatDate(selectedBill.uploadedAt)}
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      window.open(selectedBill.downloadUrl, "_blank")
-                    }
-                    style={{
-                      padding: "4px 8px",
-                      backgroundColor: "#3b82f6",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      fontSize: "12px",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    View Bill
-                  </button>
+                  <span style={{ fontWeight: "500", fontSize: "15px" }}>
+                    {assignedBill.notes ||
+                      `Bill ${assignedBill.id.substring(0, 8)}...`}
+                  </span>
                 </div>
-                <div style={{ fontSize: "11px", color: "#6b7280" }}>
-                  Bill ID:{" "}
-                  <code
-                    style={{
-                      backgroundColor: "#f3f4f6",
-                      padding: "1px 4px",
-                      borderRadius: "3px",
-                    }}
-                  >
-                    {selectedBill.id}
-                  </code>
+
+                {billError && (
+                  <span style={{ fontSize: "12px", color: "#ef4444" }}>
+                    {billError}
+                  </span>
+                )}
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "8px",
+                  fontSize: "13px",
+                  color: "#475569",
+                }}
+              >
+                <div>
+                  <span style={{ color: "#64748b" }}>File Type:</span>{" "}
+                  {assignedBill.mimeType || "Unknown"}
+                </div>
+                <div>
+                  <span style={{ color: "#64748b" }}>Uploaded:</span>{" "}
+                  {formatDate(assignedBill.uploadedAt)}
+                </div>
+                <div>
+                  <span style={{ color: "#64748b" }}>Status:</span>{" "}
+                  {assignedBill.downloadUrl ? (
+                    <span style={{ color: "#10b981" }}>Available</span>
+                  ) : (
+                    <span style={{ color: "#ef4444" }}>No download URL</span>
+                  )}
                 </div>
               </div>
-            )}
-          </>
+
+              {/* Bill Action Buttons */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  marginTop: "15px",
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ flex: 1, display: "flex", gap: "10px" }}>
+                  {assignedBill.downloadUrl && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleViewBill}
+                        style={{
+                          flex: 1,
+                          padding: "8px 12px",
+                          backgroundColor: "#3b82f6",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "13px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                        }}
+                        title="View Bill"
+                      >
+                        <span>{getFileTypeIcon(assignedBill.mimeType)}</span>
+                        <span>View</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleDownloadBill}
+                        style={{
+                          flex: 1,
+                          padding: "8px 12px",
+                          backgroundColor: "#10b981",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "13px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                        }}
+                        title="Download Bill"
+                      >
+                        <span>📥</span>
+                        <span>Download</span>
+                      </button>
+                    </>
+                  )}
+
+                  {!assignedBill.downloadUrl && (
+                    <div
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        backgroundColor: "#fef3c7",
+                        borderRadius: "6px",
+                        color: "#92400e",
+                        fontSize: "13px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <span>⚠️</span>
+                      <span>No download URL available</span>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleChangeBillClick}
+                  style={{
+                    padding: "8px 15px",
+                    backgroundColor: "#f1f5f9",
+                    color: "#475569",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Change Bill
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
-        <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "10px" }}>
-          <p>
-            Can't find the right bill?{" "}
-            <a href="/jewellery/bills/add" style={{ color: "#3b82f6" }}>
-              Add a new bill
-            </a>
-          </p>
-        </div>
+        {/* Show loading state for assigned bill */}
+        {!showBillDropdown && loadingAssignedBill && (
+          <div
+            style={{
+              padding: "12px",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              backgroundColor: "#f3f4f6",
+              color: "#6b7280",
+              fontSize: "14px",
+              textAlign: "center",
+            }}
+          >
+            Loading bill information...
+          </div>
+        )}
+
+        {/* Show "Add Bill" when no bill is assigned */}
+        {!showBillDropdown &&
+          !assignedBill &&
+          !loadingAssignedBill &&
+          formData.billId === "" && (
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    padding: "12px",
+                    backgroundColor: "#f8fafc",
+                    border: "1px dashed #cbd5e1",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    color: "#64748b",
+                    textAlign: "center",
+                  }}
+                >
+                  No bill assigned to this jewellery item
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAddBillClick}
+                style={{
+                  padding: "8px 15px",
+                  backgroundColor: "#10b981",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  whiteSpace: "nowrap",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <span>+</span>
+                <span>Add Bill</span>
+              </button>
+            </div>
+          )}
+
+        {/* Show dropdown when adding or changing bill */}
+        {showBillDropdown && (
+          <div>
+            {loadingBills ? (
+              <div
+                style={{
+                  padding: "12px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "6px",
+                  backgroundColor: "#f3f4f6",
+                  color: "#6b7280",
+                  fontSize: "14px",
+                  textAlign: "center",
+                }}
+              >
+                Loading available bills...
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: "10px" }}>
+                <select
+                  name="billId"
+                  value={formData.billId || ""}
+                  onChange={handleChange}
+                  style={{
+                    flex: 1,
+                    padding: "8px 10px",
+                    borderRadius: "6px",
+                    border: "1px solid #d1d5db",
+                    fontSize: "14px",
+                    backgroundColor: "white",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <option value="">-- No bill --</option>
+                  {bills.map((bill) => (
+                    <option key={bill.id} value={bill.id}>
+                      {bill.notes || `Bill ${bill.id.substring(0, 8)}...`}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={handleCancelChangeBill}
+                  style={{
+                    padding: "8px 15px",
+                    backgroundColor: "#f3f4f6",
+                    color: "#374151",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            {assignedBill && (
+              <div
+                style={{
+                  marginTop: "8px",
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  fontStyle: "italic",
+                }}
+              >
+                Currently assigned:{" "}
+                {assignedBill.notes ||
+                  `Bill ${assignedBill.id.substring(0, 12)}...`}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Additional Details Section */}
-      <div
-        style={{
-          backgroundColor: "#f8fafc",
-          padding: "15px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-        }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: "15px", color: "#374151" }}>
-          Additional Details
-        </h3>
-
-        <div style={{ marginBottom: "15px" }}>
+      {/* Location and Bought For in same row */}
+      <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+        <div style={{ flex: 1 }}>
           <label
             style={{
               display: "block",
               marginBottom: "5px",
-              fontWeight: "500",
-              color: "#374151",
+              fontSize: "13px",
+              color: "#6b7280",
             }}
           >
             Location
@@ -504,23 +738,23 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
             onChange={handleChange}
             style={{
               width: "100%",
-              padding: "8px 12px",
+              padding: "8px 10px",
               borderRadius: "6px",
               border: "1px solid #d1d5db",
               fontSize: "14px",
               boxSizing: "border-box",
             }}
-            placeholder="e.g., Bank Locker, Home Safe"
+            placeholder="Location"
           />
         </div>
 
-        <div style={{ marginBottom: "15px" }}>
+        <div style={{ flex: 1 }}>
           <label
             style={{
               display: "block",
               marginBottom: "5px",
-              fontWeight: "500",
-              color: "#374151",
+              fontSize: "13px",
+              color: "#6b7280",
             }}
           >
             Bought For
@@ -532,23 +766,26 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
             onChange={handleChange}
             style={{
               width: "100%",
-              padding: "8px 12px",
+              padding: "8px 10px",
               borderRadius: "6px",
               border: "1px solid #d1d5db",
               fontSize: "14px",
               boxSizing: "border-box",
             }}
-            placeholder="e.g., Personal Use, Gift, Investment"
+            placeholder="Purpose"
           />
         </div>
+      </div>
 
-        <div style={{ marginBottom: "15px" }}>
+      {/* Purchase Date and Active checkbox in same row */}
+      <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
+        <div style={{ flex: 1 }}>
           <label
             style={{
               display: "block",
               marginBottom: "5px",
-              fontWeight: "500",
-              color: "#374151",
+              fontSize: "13px",
+              color: "#6b7280",
             }}
           >
             Purchase Date
@@ -561,15 +798,10 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                 ? new Date(formData.purchaseDate).toISOString().split("T")[0]
                 : ""
             }
-            onChange={(e) => {
-              const date = e.target.value
-                ? new Date(e.target.value).getTime()
-                : Date.now();
-              setFormData({ ...formData, purchaseDate: date });
-            }}
+            onChange={handleChange}
             style={{
               width: "100%",
-              padding: "8px 12px",
+              padding: "8px 10px",
               borderRadius: "6px",
               border: "1px solid #d1d5db",
               fontSize: "14px",
@@ -578,245 +810,28 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           />
         </div>
 
-        <div style={{ marginBottom: "15px" }}>
+        <div style={{ flex: 1, display: "flex", alignItems: "flex-end" }}>
           <label
             style={{
-              display: "block",
-              marginBottom: "5px",
-              fontWeight: "500",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "14px",
               color: "#374151",
+              height: "100%",
+              paddingBottom: "8px",
             }}
           >
-            Image URL
-          </label>
-          <input
-            type="text"
-            name="imageUrl"
-            value={formData.imageUrl || ""}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
-            placeholder="URL of jewellery image"
-          />
-        </div>
-      </div>
-
-      {/* Verification Section */}
-      <div
-        style={{
-          backgroundColor: "#fef3c7",
-          padding: "15px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-        }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: "15px", color: "#92400e" }}>
-          Verification
-        </h3>
-
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontWeight: "500",
-              color: "#92400e",
-            }}
-          >
-            Verification Status
-          </label>
-          <select
-            name="verificationStatus"
-            value={
-              formData.verificationStatus || VerificationStatus.NOT_VERIFIED
-            }
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              backgroundColor: "white",
-              boxSizing: "border-box",
-            }}
-          >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {formData.verificationStatus !== VerificationStatus.NOT_VERIFIED && (
-          <div style={{ marginBottom: "15px" }}>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "5px",
-                fontWeight: "500",
-                color: "#92400e",
-              }}
-            >
-              Verification Notes
-            </label>
-            <textarea
-              name="verificationNotes"
-              value={formData.verificationNotes || ""}
+            <input
+              type="checkbox"
+              name="active"
+              checked={formData.active !== false}
               onChange={handleChange}
-              placeholder="Add notes about verification..."
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: "6px",
-                border: "1px solid #d1d5db",
-                fontSize: "14px",
-                minHeight: "80px",
-                boxSizing: "border-box",
-                resize: "vertical",
-              }}
+              style={{ width: "16px", height: "16px" }}
             />
-          </div>
-        )}
-
-        {/* Quick verification buttons */}
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginTop: "15px",
-            flexWrap: "wrap",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() =>
-              updateVerification(
-                VerificationStatus.VERIFIED,
-                formData.verificationNotes,
-              )
-            }
-            style={{
-              padding: "8px 16px",
-              backgroundColor:
-                formData.verificationStatus === VerificationStatus.VERIFIED
-                  ? "#10b981"
-                  : "#e5e7eb",
-              color:
-                formData.verificationStatus === VerificationStatus.VERIFIED
-                  ? "white"
-                  : "#374151",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "14px",
-              flex: 1,
-              minWidth: "140px",
-            }}
-          >
-            Mark as Verified
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              updateVerification(
-                VerificationStatus.MISSING,
-                "Marked as missing",
-              )
-            }
-            style={{
-              padding: "8px 16px",
-              backgroundColor:
-                formData.verificationStatus === VerificationStatus.MISSING
-                  ? "#ef4444"
-                  : "#e5e7eb",
-              color:
-                formData.verificationStatus === VerificationStatus.MISSING
-                  ? "white"
-                  : "#374151",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "14px",
-              flex: 1,
-              minWidth: "140px",
-            }}
-          >
-            Mark as Missing
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              updateVerification(VerificationStatus.NOT_VERIFIED, "")
-            }
-            style={{
-              padding: "8px 16px",
-              backgroundColor:
-                formData.verificationStatus === VerificationStatus.NOT_VERIFIED
-                  ? "#6b7280"
-                  : "#e5e7eb",
-              color:
-                formData.verificationStatus === VerificationStatus.NOT_VERIFIED
-                  ? "white"
-                  : "#374151",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "14px",
-              flex: 1,
-              minWidth: "140px",
-            }}
-          >
-            Reset to Not Verified
-          </button>
-        </div>
-      </div>
-
-      {/* Status Section */}
-      <div
-        style={{
-          backgroundColor: "#f3f4f6",
-          padding: "15px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            marginBottom: "15px",
-          }}
-        >
-          <input
-            type="checkbox"
-            name="active"
-            id="active"
-            checked={formData.active !== false}
-            onChange={handleChange}
-            style={{ width: "18px", height: "18px" }}
-          />
-          <label
-            htmlFor="active"
-            style={{ fontWeight: "500", color: "#374151" }}
-          >
             Active Item
           </label>
         </div>
-        <p style={{ fontSize: "12px", color: "#6b7280", margin: 0 }}>
-          Uncheck this if the item is no longer in your possession or is
-          inactive.
-        </p>
       </div>
 
       {/* Submit Button */}
@@ -824,18 +839,17 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         <button
           type="submit"
           style={{
-            padding: "12px 30px",
+            padding: "10px 30px",
             backgroundColor: "#3b82f6",
             color: "white",
             border: "none",
-            borderRadius: "8px",
+            borderRadius: "6px",
             cursor: "pointer",
             fontSize: "16px",
-            fontWeight: "600",
-            minWidth: "200px",
+            fontWeight: "500",
           }}
         >
-          {isEditing ? "Update Jewellery Item" : "Add Jewellery Item"}
+          {isEditing ? "Update" : "Add Item"}
         </button>
       </div>
     </form>

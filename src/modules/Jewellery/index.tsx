@@ -123,12 +123,19 @@ const JewelleryHome: React.FC = () => {
     fetchJewelleryStats();
   }, [goldRate, makingTaxPercent, resaleDiscountPercent]);
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(amount);
+  // Format value in lakhs without rupee symbol or L suffix (for privacy)
+  const formatValueInLakhs = (amount: number): string => {
+    const valueInLakhs = amount / 100000;
+
+    // Format with 2 decimal places if needed, otherwise show as integer
+    if (valueInLakhs % 1 === 0) {
+      return valueInLakhs.toLocaleString("en-IN");
+    } else {
+      return valueInLakhs.toLocaleString("en-IN", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      });
+    }
   };
 
   const formatWeight = (weight: number): string => {
@@ -253,7 +260,7 @@ const JewelleryHome: React.FC = () => {
                 color: "#10b981",
               }}
             >
-              {formatCurrency(stats.buyValue)}
+              {formatValueInLakhs(stats.buyValue)}
             </div>
             <div
               style={{
@@ -292,7 +299,7 @@ const JewelleryHome: React.FC = () => {
                 color: "#ef4444",
               }}
             >
-              {formatCurrency(stats.sellValue)}
+              {formatValueInLakhs(stats.sellValue)}
             </div>
             <div
               style={{
@@ -351,7 +358,13 @@ const JewelleryHome: React.FC = () => {
               No person data available
             </div>
           ) : (
-            <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+            <div
+              style={{
+                maxHeight: "200px",
+                overflowY: "auto",
+                paddingRight: "8px",
+              }}
+            >
               {personsWeight.map((item, index) => (
                 <div
                   key={index}
@@ -360,6 +373,7 @@ const JewelleryHome: React.FC = () => {
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: "10px 0",
+                    paddingRight: "8px", // Added padding to prevent touching scrollbar
                     borderBottom:
                       index < personsWeight.length - 1
                         ? "1px solid #f3f4f6"
@@ -375,6 +389,7 @@ const JewelleryHome: React.FC = () => {
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                       marginRight: "10px",
+                      paddingRight: "4px", // Added padding for text
                     }}
                     title={item.person}
                   >
@@ -386,6 +401,10 @@ const JewelleryHome: React.FC = () => {
                       fontWeight: "600",
                       color: "#111827",
                       whiteSpace: "nowrap",
+                      paddingLeft: "8px", // Added padding on left
+                      paddingRight: "8px", // Added padding on right
+                      minWidth: "60px", // Ensure minimum width
+                      textAlign: "right",
                     }}
                   >
                     {formatWeight(item.totalWeight)}
@@ -441,7 +460,13 @@ const JewelleryHome: React.FC = () => {
               No location data available
             </div>
           ) : (
-            <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+            <div
+              style={{
+                maxHeight: "200px",
+                overflowY: "auto",
+                paddingRight: "8px",
+              }}
+            >
               {locationWeight.map((item, index) => (
                 <div
                   key={index}
@@ -450,6 +475,7 @@ const JewelleryHome: React.FC = () => {
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: "10px 0",
+                    paddingRight: "8px", // Added padding to prevent touching scrollbar
                     borderBottom:
                       index < locationWeight.length - 1
                         ? "1px solid #f3f4f6"
@@ -465,6 +491,7 @@ const JewelleryHome: React.FC = () => {
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                       marginRight: "10px",
+                      paddingRight: "4px", // Added padding for text
                     }}
                     title={item.location}
                   >
@@ -476,6 +503,10 @@ const JewelleryHome: React.FC = () => {
                       fontWeight: "600",
                       color: "#111827",
                       whiteSpace: "nowrap",
+                      paddingLeft: "8px", // Added padding on left
+                      paddingRight: "8px", // Added padding on right
+                      minWidth: "60px", // Ensure minimum width
+                      textAlign: "right",
                     }}
                   >
                     {formatWeight(item.totalWeight)}

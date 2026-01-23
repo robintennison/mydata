@@ -1,11 +1,10 @@
 // routes/index.tsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-//import { useAuth } from "../contexts/AuthContext"; // Import useAuth
-import ProtectedRoute from "../components/Auth/ProtectedRoute"; // Import ProtectedRoute
-import PublicRoute from "../components/Auth/PublicRoute"; // Import PublicRoute
+import ProtectedRoute from "../components/Auth/ProtectedRoute";
+import PublicRoute from "../components/Auth/PublicRoute";
 
-// Import all page components (keep your existing imports)
+// Import all page components
 import DepositsListPage from "../modules/Banking/pages/DepositsListPage";
 import AddEditDepositPage from "../modules/Banking/pages/AddEditDepositPage";
 import BankingHomePage from "../modules/Banking/pages/BankingHomePage";
@@ -31,10 +30,17 @@ import JewelleryDetail from "../modules/Jewellery/pages/JewelleryDetail";
 import VerificationPageWrapper from "../modules/Jewellery/pages/VerificationPageWrapper";
 import JewelleryFormWrapper from "../modules/Jewellery/pages/JewelleryFormWrapper";
 import GalleryPage from "../modules/Jewellery/pages/GalleryPage";
-// Import the new component for viewing jewellery linked to a bill
 import JewelleryForBill from "../modules/Jewellery/pages/JewelleryForBill";
-// Import the new BatchEditPage component
 import BatchEditPage from "../modules/Jewellery/pages/BatchEditPage";
+
+// Import Online pages
+import CategoryListPage from "../modules/Online/pages/CategoryListPage";
+import CategoryForm from "../modules/Online/pages/CategoryForm";
+import OnlineListPage from "../modules/Online/pages/OnlineListPage";
+import OnlineForm from "../modules/Online/pages/OnlineForm";
+import RenewalListPage from "../modules/Online/pages/RenewalListPage";
+import RenewalForm from "../modules/Online/pages/RenewalForm";
+import OnlineHomepage from "../modules/Online/pages/OnlineHomepage";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -236,7 +242,6 @@ const allRoutes: RouteConfig[] = [
     icon: "✏️",
     requiresAuth: true,
   },
-  // New route for viewing jewellery linked to a bill
   {
     path: "/jewellery/bills/:billId/linked-jewellery",
     element: <JewelleryForBill />,
@@ -257,7 +262,6 @@ const allRoutes: RouteConfig[] = [
     icon: "✅",
     requiresAuth: true,
   },
-  // New route for batch editing locations
   {
     path: "/jewellery/batch-edit",
     element: <BatchEditPage />,
@@ -266,15 +270,81 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
   },
 
+  // Online Module Routes - ADDED THESE
+  {
+    path: "/online/categories",
+    element: <CategoryListPage />,
+    title: "Categories",
+    icon: "📁",
+    requiresAuth: true,
+  },
+  {
+    path: "/online/categories/add",
+    element: <CategoryForm />,
+    title: "Add Category",
+    icon: "➕",
+    requiresAuth: true,
+  },
+  {
+    path: "/online/categories/edit/:id",
+    element: <CategoryForm />,
+    title: "Edit Category",
+    icon: "✏️",
+    requiresAuth: true,
+  },
+  {
+    path: "/online/items",
+    element: <OnlineListPage />,
+    title: "Online Items",
+    icon: "🛒",
+    requiresAuth: true,
+  },
+  {
+    path: "/online/items/add",
+    element: <OnlineForm />,
+    title: "Add Item",
+    icon: "➕",
+    requiresAuth: true,
+  },
+  {
+    path: "/online/items/edit/:id",
+    element: <OnlineForm />,
+    title: "Edit Item",
+    icon: "✏️",
+    requiresAuth: true,
+  },
+  {
+    path: "/online/items/view/:id",
+    element: <OnlineForm />,
+    title: "View Item",
+    requiresAuth: true,
+  },
+  {
+    path: "/online/renewals",
+    element: <RenewalListPage />,
+    title: "Renewals",
+    icon: "🔄",
+    requiresAuth: true,
+  },
+  {
+    path: "/online/renewals/add",
+    element: <RenewalForm />,
+    title: "Add Renewal",
+    icon: "➕",
+    requiresAuth: true,
+  },
+  {
+    path: "/online/renewals/edit/:id",
+    element: <RenewalForm />,
+    title: "Edit Renewal",
+    icon: "✏️",
+    requiresAuth: true,
+  },
+
   // Other Module Routes
   {
     path: "/online",
-    element: (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        <h2>🌐 Online Module</h2>
-        <p>Coming Soon</p>
-      </div>
-    ),
+    element: <OnlineHomepage />, // Change this from the placeholder div to OnlineHomepage
     title: "Online",
     icon: "🌐",
     requiresAuth: true,
@@ -303,6 +373,7 @@ const navigationItems = allRoutes
       route.path !== "/login" &&
       !route.path.includes("/banking/") &&
       !route.path.includes("/jewellery/") &&
+      !route.path.includes("/online/") &&
       route.path !== "/settings" &&
       route.requiresAuth,
   )
@@ -349,6 +420,23 @@ const moduleNavigationItems = {
       module: "jewellery",
       requiresAuth: route.requiresAuth,
     })),
+
+  online: allRoutes
+    .filter(
+      (route: RouteConfig) =>
+        route.title &&
+        route.icon &&
+        route.path.startsWith("/online") &&
+        !route.path.includes(":") &&
+        route.path !== "/online",
+    )
+    .map((route: RouteConfig) => ({
+      path: route.path,
+      title: route.title!,
+      icon: route.icon!,
+      module: "online",
+      requiresAuth: route.requiresAuth,
+    })),
 };
 
 // ==================== HELPER FUNCTIONS ====================
@@ -364,8 +452,6 @@ interface AppRoutesProps {
 }
 
 const AppRoutes: React.FC<AppRoutesProps> = () => {
-  // Remove isAuthenticated prop from here
-
   return (
     <Routes>
       {allRoutes.map((route) => {

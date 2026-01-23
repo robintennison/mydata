@@ -1,4 +1,4 @@
-/* src/components/Layout/Layout.css - Update or add these styles */
+/* src/components/Layout/Layout.css */
 
 .layout {
   display: flex;
@@ -6,16 +6,18 @@
   min-height: 100vh;
   width: 100%;
   position: relative;
-  background-color: var(--color-gray-50, #f9fafb);
+  background-color: var(--color-white, #ffffff); /* White background */
 }
 
 .layout-content {
   flex: 1;
   width: 100%;
-  max-width: 600px; /* Match BottomNav width */
+  max-width: 600px;
   margin: 0 auto;
   padding: var(--spacing-lg, 1.5rem);
-  padding-bottom: calc(var(--spacing-lg, 1.5rem) + 80px); /* Space for bottom nav */
+  padding-bottom: calc(var(--spacing-lg, 1.5rem) + 80px);
+  background-color: var(--color-white, #ffffff); /* Ensure white background */
+  min-height: calc(100vh - 80px);
 }
 
 /* When footer is hidden */
@@ -28,19 +30,42 @@
   padding-top: var(--spacing-lg, 1.5rem);
 }
 
-/* For wider screens, add side padding */
+/* Fix for alignment issues */
 @media (min-width: 601px) {
   .layout-content {
+    position: relative;
+    z-index: 1;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-    min-height: calc(100vh - 70px);
     margin-top: var(--spacing-md, 1rem);
     margin-bottom: var(--spacing-md, 1rem);
     border-radius: 12px;
-    background-color: var(--color-white, #ffffff);
   }
   
   .layout {
-    background: linear-gradient(135deg, var(--color-primary-50, #eff6ff) 0%, var(--color-gray-100, #f3f4f6) 100%);
+    /* Create a subtle gradient background only for larger screens */
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+}
+
+/* For mobile screens */
+@media (max-width: 600px) {
+  .layout-content {
+    max-width: 100%;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  .layout {
+    background-color: var(--color-white, #ffffff);
+  }
+  
+  /* Ensure content inside has proper padding */
+  .layout-content > * {
+    padding-left: var(--spacing-md, 1rem);
+    padding-right: var(--spacing-md, 1rem);
   }
 }
 
@@ -48,7 +73,7 @@
 @media (max-width: 768px) {
   .layout-content {
     padding: var(--spacing-md, 1rem);
-    padding-bottom: calc(var(--spacing-md, 1rem) + 75px); /* Smaller space for mobile nav */
+    padding-bottom: calc(var(--spacing-md, 1rem) + 75px);
   }
   
   .layout-content.no-footer {
@@ -57,19 +82,6 @@
   
   .layout-content.no-header {
     padding-top: var(--spacing-md, 1rem);
-  }
-}
-
-@media (max-width: 600px) {
-  .layout-content {
-    max-width: 100%;
-    border-radius: 0;
-    margin: 0;
-    box-shadow: none;
-  }
-  
-  .layout {
-    background-color: var(--color-white, #ffffff);
   }
 }
 
@@ -86,22 +98,10 @@
   .layout-content.no-header {
     padding-top: var(--spacing-sm, 0.75rem);
   }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .layout {
-    background-color: var(--color-gray-900, #111827);
-  }
   
-  @media (min-width: 601px) {
-    .layout {
-      background: linear-gradient(135deg, var(--color-gray-800, #1f2937) 0%, var(--color-gray-900, #111827) 100%);
-    }
-    
-    .layout-content {
-      background-color: var(--color-gray-800, #1f2937);
-    }
+  .layout-content > * {
+    padding-left: var(--spacing-sm, 0.75rem);
+    padding-right: var(--spacing-sm, 0.75rem);
   }
 }
 
@@ -116,5 +116,6 @@
     padding-bottom: 0;
     max-width: 100%;
     margin: 0;
+    box-shadow: none;
   }
 }

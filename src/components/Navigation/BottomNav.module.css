@@ -8,7 +8,8 @@
   display: flex;
   justify-content: center;
   z-index: 1000;
-  pointer-events: none; /* Allow clicks to pass through container */
+  pointer-events: none;
+  background-color: transparent; /* Ensure no background color */
 }
 
 .bottomNav {
@@ -20,14 +21,24 @@
   justify-content: space-around;
   align-items: center;
   padding: var(--spacing-xs, 0.5rem) 0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
   height: 70px;
-  border-radius: 20px 20px 0 0;
+  border-radius: 16px 16px 0 0;
   margin: 0 auto;
-  pointer-events: auto; /* Re-enable clicks on the nav itself */
+  pointer-events: auto;
   
-  /* Safe area padding for mobile devices */
+  /* Safe area padding */
   padding-bottom: max(var(--spacing-xs, 0.5rem), env(safe-area-inset-bottom, 0px));
+  
+  /* Ensure it sits above page content */
+  position: relative;
+  z-index: 1001;
+}
+
+/* Remove any inherited dark mode styles that might be affecting it */
+.bottomNav:not(.dark-mode) {
+  background-color: var(--color-white, #ffffff) !important;
+  color: var(--color-gray-600, #4b5563) !important;
 }
 
 .navItem {
@@ -45,7 +56,7 @@
   user-select: none;
   outline: none;
   border: none;
-  background: none;
+  background: transparent !important; /* Force transparent background */
   text-decoration: none;
   color: var(--color-gray-600, #4b5563);
   font-family: inherit;
@@ -53,17 +64,17 @@
 }
 
 .navItem:hover {
-  background-color: var(--color-gray-50, #f9fafb);
+  background-color: var(--color-gray-50, #f9fafb) !important;
   transform: translateY(-2px);
 }
 
 .navItem:active {
-  background-color: var(--color-gray-100, #f3f4f6);
+  background-color: var(--color-gray-100, #f3f4f6) !important;
   transform: translateY(0);
 }
 
 .navItem.active {
-  color: var(--color-primary-600, #2563eb);
+  color: var(--color-primary-600, #2563eb) !important;
 }
 
 .navItem.active .icon {
@@ -92,23 +103,11 @@
   white-space: nowrap;
 }
 
-/* Focus styles for accessibility */
+/* Focus styles */
 .navItem:focus-visible {
   outline: 2px solid var(--color-primary-500, #3b82f6);
   outline-offset: 2px;
-  background-color: var(--color-primary-50, #eff6ff);
-}
-
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .navItem:hover {
-    transform: none;
-    background-color: transparent;
-  }
-  
-  .navItem:active {
-    background-color: var(--color-gray-100, #f3f4f6);
-  }
+  background-color: var(--color-primary-50, #eff6ff) !important;
 }
 
 /* Responsive adjustments for tablets */
@@ -116,7 +115,7 @@
   .bottomNav {
     height: 65px;
     padding: var(--spacing-xs, 0.5rem) 0;
-    border-radius: 16px 16px 0 0;
+    border-radius: 12px 12px 0 0;
   }
   
   .icon {
@@ -134,13 +133,20 @@
   }
 }
 
-/* Responsive adjustments for mobile phones */
+/* For screens exactly 600px and below */
+@media (max-width: 600px) {
+  .bottomNav {
+    max-width: 100%;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+}
+
 @media (max-width: 480px) {
   .bottomNav {
     height: 60px;
     padding: var(--spacing-xs, 0.5rem) 0;
-    border-radius: 12px 12px 0 0;
-    max-width: 100%; /* On very small screens, use full width */
   }
   
   .icon {
@@ -163,28 +169,25 @@
   }
 }
 
-/* For screens larger than 600px - center the nav with side margins */
+/* Ensure proper centering on all screen sizes */
 @media (min-width: 601px) {
   .bottomNav {
-    margin: 0 auto;
+    /* Add side margins if needed for perfect centering */
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
   }
 }
 
-/* For very large screens - add subtle side shadows */
-@media (min-width: 601px) and (max-width: 1200px) {
-  .bottomNavContainer {
-    padding: 0 var(--spacing-lg, 1.5rem);
-  }
-}
-
-/* Safe area support for newer iPhones with notches */
+/* Safe area support */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .bottomNav {
     padding-bottom: calc(var(--spacing-xs, 0.5rem) + env(safe-area-inset-bottom, 0px));
   }
 }
 
-/* High contrast mode support */
+/* High contrast mode */
 @media (prefers-contrast: high) {
   .bottomNav {
     border-top: 2px solid var(--color-gray-900, #111827);
@@ -200,7 +203,7 @@
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .navItem,
   .navItem:hover,
@@ -219,80 +222,9 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .bottomNav {
-    background-color: var(--color-gray-900, #111827);
-    border-top-color: var(--color-gray-800, #1f2937);
-  }
-  
-  .navItem {
-    color: var(--color-gray-300, #d1d5db);
-  }
-  
-  .navItem:hover {
-    background-color: var(--color-gray-800, #1f2937);
-  }
-  
-  .navItem:active {
-    background-color: var(--color-gray-700, #374151);
-  }
-  
-  .navItem.active {
-    color: var(--color-primary-400, #60a5fa);
-  }
-  
-  .navItem.active .icon {
-    background-color: var(--color-primary-900, #1e3a8a);
-  }
-  
-  .navItem:focus-visible {
-    background-color: var(--color-primary-900, #1e3a8a);
-    outline-color: var(--color-primary-400, #60a5fa);
-  }
-}
-
-/* Print styles - hide navigation when printing */
+/* Print styles */
 @media print {
   .bottomNavContainer {
     display: none;
-  }
-}
-
-/* Extra small screens (very small phones) */
-@media (max-width: 320px) {
-  .bottomNav {
-    height: 55px;
-    border-radius: 8px 8px 0 0;
-  }
-  
-  .icon {
-    font-size: 1.2rem;
-  }
-  
-  .label {
-    font-size: 0.6rem;
-  }
-  
-  .navItem {
-    padding: 3px 1px;
-    margin: 0 1px;
-  }
-}
-
-/* Landscape mode adjustments */
-@media (max-height: 500px) and (orientation: landscape) {
-  .bottomNav {
-    height: 55px;
-    border-radius: 8px 8px 0 0;
-  }
-  
-  .icon {
-    font-size: 1.2rem;
-    margin-bottom: 1px;
-  }
-  
-  .label {
-    font-size: 0.6rem;
   }
 }

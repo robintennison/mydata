@@ -10,7 +10,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { OnlineItem, Category } from "../types/online.types";
-import styles from "./Online.module.css";
+import { onlineStyles } from "../styles/onlineStyles";
 
 const OnlineForm: React.FC = () => {
   const navigate = useNavigate();
@@ -43,7 +43,7 @@ const OnlineForm: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const db = getFirestore();
-      const categoriesRef = collection(db, "categories");
+      const categoriesRef = collection(db, "online_categories");
       const snapshot = await getDocs(categoriesRef);
 
       const categoriesList: Category[] = [];
@@ -98,8 +98,7 @@ const OnlineForm: React.FC = () => {
   };
 
   const handleImageUpload = async (file: File): Promise<string> => {
-    // TODO: Implement Firebase Storage upload here
-    // For now, return a placeholder URL
+    // TODO: Implement Firebase Storage upload
     return `https://via.placeholder.com/300x200?text=${encodeURIComponent(file.name)}`;
   };
 
@@ -155,9 +154,9 @@ const OnlineForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
+      <div style={onlineStyles.container}>
+        <div style={onlineStyles.loading}>
+          <div style={onlineStyles.spinner}></div>
           <p>Loading item...</p>
         </div>
       </div>
@@ -165,33 +164,38 @@ const OnlineForm: React.FC = () => {
   }
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTopRow}>
-          <div className={styles.headerLeft}>
-            <h1 className={styles.title}>
-              {isEditing ? "Edit Item" : "Add Item"}
-            </h1>
-            <p className={styles.subtitle}>
-              {isEditing ? "Update item details" : "Create a new online item"}
-            </p>
+    <div style={onlineStyles.container}>
+      {/* Top Navigation */}
+      <div style={onlineStyles.topNav}>
+        <button
+          onClick={() => navigate("/online/items")}
+          style={onlineStyles.navButton}
+          title="Back"
+        >
+          ←
+        </button>
+        <div style={onlineStyles.headerLeft}>
+          <div style={onlineStyles.navTitle}>
+            {isEditing ? "Edit Item" : "Add Item"}
+          </div>
+          <div style={onlineStyles.navSubtitle}>
+            {isEditing ? "Update item details" : "Create a new online item"}
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <div className={styles.section}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Item Name *</label>
+      <div style={onlineStyles.section}>
+        <form onSubmit={handleSubmit} style={onlineStyles.form}>
+          <div style={onlineStyles.formGroup}>
+            <label style={onlineStyles.label}>Item Name *</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className={styles.input}
+              style={onlineStyles.input}
               placeholder="Enter item name"
               required
               disabled={saving}
@@ -199,14 +203,14 @@ const OnlineForm: React.FC = () => {
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Category</label>
+          <div style={onlineStyles.formGroup}>
+            <label style={onlineStyles.label}>Category</label>
             <select
               value={formData.category}
               onChange={(e) =>
                 setFormData({ ...formData, category: e.target.value })
               }
-              className={styles.select}
+              style={onlineStyles.select}
               disabled={saving}
             >
               <option value="">Select Category</option>
@@ -218,77 +222,103 @@ const OnlineForm: React.FC = () => {
             </select>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Details</label>
+          <div style={onlineStyles.formGroup}>
+            <label style={onlineStyles.label}>Details</label>
             <textarea
               value={formData.detail}
               onChange={(e) =>
                 setFormData({ ...formData, detail: e.target.value })
               }
-              className={styles.textarea}
+              style={onlineStyles.textarea}
               placeholder="Enter item details"
               rows={4}
               disabled={saving}
             />
           </div>
 
-          <div className={styles.formRow}>
-            <div className={styles.formGroup} style={{ flex: 1 }}>
-              <label className={styles.label}>Image 1</label>
+          <div style={onlineStyles.formRow}>
+            <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
+              <label style={onlineStyles.label}>Image 1</label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImage1File(e.target.files?.[0] || null)}
-                className={styles.fileInput}
+                style={onlineStyles.fileInput}
                 disabled={saving}
               />
               {formData.image1 && !image1File && (
-                <div className={styles.imagePreview}>
+                <div style={{ marginTop: "10px", textAlign: "center" }}>
                   <img
                     src={formData.image1}
                     alt="Preview 1"
-                    className={styles.previewImage}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "150px",
+                      borderRadius: "6px",
+                      border: "1px solid #e5e7eb",
+                    }}
                   />
-                  <span className={styles.currentImage}>Current Image</span>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#6b7280",
+                      marginTop: "5px",
+                    }}
+                  >
+                    Current Image
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className={styles.formGroup} style={{ flex: 1 }}>
-              <label className={styles.label}>Image 2</label>
+            <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
+              <label style={onlineStyles.label}>Image 2</label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImage2File(e.target.files?.[0] || null)}
-                className={styles.fileInput}
+                style={onlineStyles.fileInput}
                 disabled={saving}
               />
               {formData.image2 && !image2File && (
-                <div className={styles.imagePreview}>
+                <div style={{ marginTop: "10px", textAlign: "center" }}>
                   <img
                     src={formData.image2}
                     alt="Preview 2"
-                    className={styles.previewImage}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "150px",
+                      borderRadius: "6px",
+                      border: "1px solid #e5e7eb",
+                    }}
                   />
-                  <span className={styles.currentImage}>Current Image</span>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#6b7280",
+                      marginTop: "5px",
+                    }}
+                  >
+                    Current Image
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
           {/* Form Actions */}
-          <div className={styles.formActions}>
+          <div style={onlineStyles.formActions}>
             <button
               type="button"
               onClick={() => navigate("/online/items")}
-              className={styles.cancelButton}
+              style={onlineStyles.cancelButton}
               disabled={saving}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={styles.submitButton}
+              style={onlineStyles.submitButton}
               disabled={saving}
             >
               {saving ? "Saving..." : isEditing ? "Update" : "Add"}

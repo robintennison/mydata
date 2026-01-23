@@ -8,7 +8,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { OnlineItem, Category } from "../types/online.types";
-import styles from "./Online.module.css";
+import { onlineStyles } from "../styles/onlineStyles";
 
 const OnlineListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ const OnlineListPage: React.FC = () => {
       });
 
       // Fetch categories for display
-      const categoriesRef = collection(db, "categories");
+      const categoriesRef = collection(db, "online_categories");
       const categoriesSnapshot = await getDocs(categoriesRef);
 
       const categoriesList: Category[] = [];
@@ -98,9 +98,9 @@ const OnlineListPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
+      <div style={onlineStyles.container}>
+        <div style={onlineStyles.loading}>
+          <div style={onlineStyles.spinner}></div>
           <p>Loading items...</p>
         </div>
       </div>
@@ -108,84 +108,96 @@ const OnlineListPage: React.FC = () => {
   }
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTopRow}>
-          <div className={styles.headerLeft}>
-            <h1 className={styles.title}>Online Items</h1>
-            <p className={styles.subtitle}>
-              Manage your online purchases and items
-            </p>
+    <div style={onlineStyles.container}>
+      {/* Top Navigation */}
+      <div style={onlineStyles.topNav}>
+        <button
+          onClick={() => navigate("/online")}
+          style={onlineStyles.navButton}
+          title="Back"
+        >
+          ←
+        </button>
+        <div style={onlineStyles.headerLeft}>
+          <div style={onlineStyles.navTitle}>Online Items</div>
+          <div style={onlineStyles.navSubtitle}>
+            Manage your online purchases and items
           </div>
-          <div className={styles.headerRight}>
-            <button
-              className={styles.addButton}
-              onClick={() => navigate("/online/items/add")}
-            >
-              + Add Item
-            </button>
-          </div>
+        </div>
+        <div style={onlineStyles.headerRight}>
+          <button
+            style={onlineStyles.addButton}
+            onClick={() => navigate("/online/items/add")}
+          >
+            + Add Item
+          </button>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className={styles.searchContainer}>
+      <div style={onlineStyles.searchContainer}>
         <input
           type="text"
           placeholder="Search items..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.searchInput}
+          style={onlineStyles.searchInput}
         />
-        <span className={styles.searchIcon}>🔍</span>
+        <span style={onlineStyles.searchIcon}>🔍</span>
       </div>
 
       {/* Items List */}
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.sectionTitle}>
+      <div style={onlineStyles.section}>
+        <div style={onlineStyles.sectionHeader}>
+          <div style={onlineStyles.sectionTitle}>
             Items ({filteredItems.length})
           </div>
         </div>
 
         {filteredItems.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>🛒</div>
-            <div className={styles.emptyText}>No items found</div>
-            <div className={styles.emptySubtext}>
+          <div style={onlineStyles.emptyState}>
+            <div style={onlineStyles.emptyIcon}>🛒</div>
+            <div style={onlineStyles.emptyText}>No items found</div>
+            <div style={onlineStyles.emptySubtext}>
               {searchTerm
                 ? "Try a different search term"
                 : "Add your first item"}
             </div>
           </div>
         ) : (
-          <div className={styles.tableResponsiveContainer}>
-            <table className={styles.responsiveTable}>
+          <div style={onlineStyles.tableResponsiveContainer}>
+            <table style={onlineStyles.responsiveTable}>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Category</th>
-                  <th>Details</th>
-                  <th style={{ width: "150px" }}>Actions</th>
+                  <th style={onlineStyles.tableHeader}>Name</th>
+                  <th style={onlineStyles.tableHeader}>Category</th>
+                  <th style={onlineStyles.tableHeader}>Details</th>
+                  <th style={{ ...onlineStyles.tableHeader, width: "150px" }}>
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredItems.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.name}</td>
-                    <td>{getCategoryName(item.category)}</td>
-                    <td>
-                      <div className={styles.truncateText} title={item.detail}>
+                  <tr key={item.id} style={onlineStyles.tableRow}>
+                    <td style={onlineStyles.tableCell}>{item.name}</td>
+                    <td style={onlineStyles.tableCell}>
+                      {getCategoryName(item.category)}
+                    </td>
+                    <td style={onlineStyles.tableCell}>
+                      <div
+                        style={onlineStyles.truncateText}
+                        title={item.detail}
+                      >
                         {item.detail.length > 50
                           ? `${item.detail.substring(0, 50)}...`
                           : item.detail}
                       </div>
                     </td>
-                    <td>
-                      <div className={styles.actionButtons}>
+                    <td style={onlineStyles.tableCell}>
+                      <div style={onlineStyles.actionButtons}>
                         <button
-                          className={styles.viewButton}
+                          style={onlineStyles.viewButton}
                           onClick={() =>
                             navigate(`/online/items/view/${item.id}`)
                           }
@@ -193,7 +205,7 @@ const OnlineListPage: React.FC = () => {
                           View
                         </button>
                         <button
-                          className={styles.editButton}
+                          style={onlineStyles.editButton}
                           onClick={() =>
                             navigate(`/online/items/edit/${item.id}`)
                           }
@@ -201,7 +213,7 @@ const OnlineListPage: React.FC = () => {
                           Edit
                         </button>
                         <button
-                          className={styles.deleteButton}
+                          style={onlineStyles.deleteButton}
                           onClick={() => handleDelete(item.id, item.name)}
                         >
                           Delete

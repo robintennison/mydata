@@ -9,7 +9,7 @@ import {
   collection,
 } from "firebase/firestore";
 import { Renewal } from "../types/online.types";
-import styles from "./Online.module.css";
+import { onlineStyles } from "../styles/onlineStyles";
 
 const RenewalForm: React.FC = () => {
   const navigate = useNavigate();
@@ -112,9 +112,9 @@ const RenewalForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
+      <div style={onlineStyles.container}>
+        <div style={onlineStyles.loading}>
+          <div style={onlineStyles.spinner}></div>
           <p>Loading renewal...</p>
         </div>
       </div>
@@ -122,33 +122,38 @@ const RenewalForm: React.FC = () => {
   }
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTopRow}>
-          <div className={styles.headerLeft}>
-            <h1 className={styles.title}>
-              {isEditing ? "Edit Renewal" : "Add Renewal"}
-            </h1>
-            <p className={styles.subtitle}>
-              {isEditing ? "Update renewal details" : "Create a new renewal"}
-            </p>
+    <div style={onlineStyles.container}>
+      {/* Top Navigation */}
+      <div style={onlineStyles.topNav}>
+        <button
+          onClick={() => navigate("/online/renewals")}
+          style={onlineStyles.navButton}
+          title="Back"
+        >
+          ←
+        </button>
+        <div style={onlineStyles.headerLeft}>
+          <div style={onlineStyles.navTitle}>
+            {isEditing ? "Edit Renewal" : "Add Renewal"}
+          </div>
+          <div style={onlineStyles.navSubtitle}>
+            {isEditing ? "Update renewal details" : "Create a new renewal"}
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <div className={styles.section}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Name *</label>
+      <div style={onlineStyles.section}>
+        <form onSubmit={handleSubmit} style={onlineStyles.form}>
+          <div style={onlineStyles.formGroup}>
+            <label style={onlineStyles.label}>Name *</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className={styles.input}
+              style={onlineStyles.input}
               placeholder="Enter renewal name"
               required
               disabled={saving}
@@ -156,9 +161,9 @@ const RenewalForm: React.FC = () => {
             />
           </div>
 
-          <div className={styles.formRow}>
-            <div className={styles.formGroup} style={{ flex: 1 }}>
-              <label className={styles.label}>Start Date *</label>
+          <div style={onlineStyles.formRow}>
+            <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
+              <label style={onlineStyles.label}>Start Date *</label>
               <input
                 type="date"
                 value={new Date(formData.startDate).toISOString().split("T")[0]}
@@ -168,14 +173,14 @@ const RenewalForm: React.FC = () => {
                     startDate: new Date(e.target.value).getTime(),
                   })
                 }
-                className={styles.input}
+                style={onlineStyles.input}
                 required
                 disabled={saving}
               />
             </div>
 
-            <div className={styles.formGroup} style={{ flex: 1 }}>
-              <label className={styles.label}>End Date *</label>
+            <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
+              <label style={onlineStyles.label}>End Date *</label>
               <input
                 type="date"
                 value={new Date(formData.endDate).toISOString().split("T")[0]}
@@ -185,21 +190,21 @@ const RenewalForm: React.FC = () => {
                     endDate: new Date(e.target.value).getTime(),
                   })
                 }
-                className={styles.input}
+                style={onlineStyles.input}
                 required
                 disabled={saving}
               />
             </div>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Comments</label>
+          <div style={onlineStyles.formGroup}>
+            <label style={onlineStyles.label}>Comments</label>
             <textarea
               value={formData.comments || ""}
               onChange={(e) =>
                 setFormData({ ...formData, comments: e.target.value })
               }
-              className={styles.textarea}
+              style={onlineStyles.textarea}
               placeholder="Enter any comments or notes"
               rows={3}
               disabled={saving}
@@ -207,18 +212,18 @@ const RenewalForm: React.FC = () => {
           </div>
 
           {/* Form Actions */}
-          <div className={styles.formActions}>
+          <div style={onlineStyles.formActions}>
             <button
               type="button"
               onClick={() => navigate("/online/renewals")}
-              className={styles.cancelButton}
+              style={onlineStyles.cancelButton}
               disabled={saving}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={styles.submitButton}
+              style={onlineStyles.submitButton}
               disabled={saving}
             >
               {saving ? "Saving..." : isEditing ? "Update" : "Add"}

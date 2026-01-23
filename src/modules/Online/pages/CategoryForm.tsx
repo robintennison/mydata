@@ -9,7 +9,7 @@ import {
   collection,
 } from "firebase/firestore";
 import { Category } from "../types/online.types";
-import styles from "./Online.module.css";
+import { onlineStyles } from "../styles/onlineStyles";
 
 const CategoryForm: React.FC = () => {
   const navigate = useNavigate();
@@ -37,14 +37,11 @@ const CategoryForm: React.FC = () => {
     try {
       setLoading(true);
       const db = getFirestore();
-      const categoryRef = doc(db, "online_categories", id); // Corrected collection name
-      console.log(`Fetching category from: online_categories/${id}`);
-
+      const categoryRef = doc(db, "online_categories", id);
       const categoryDoc = await getDoc(categoryRef);
 
       if (categoryDoc.exists()) {
         const data = categoryDoc.data();
-        console.log("Category data:", data);
         setFormData({
           id: categoryDoc.id,
           name: data.name || "",
@@ -52,7 +49,6 @@ const CategoryForm: React.FC = () => {
           updatedAt: data.updatedAt || Date.now(),
         });
       } else {
-        console.log("Category not found in online_categories collection");
         alert("Category not found");
         navigate("/online/categories");
       }
@@ -82,21 +78,13 @@ const CategoryForm: React.FC = () => {
         ...(isEditing ? {} : { createdAt: Date.now() }),
       };
 
-      console.log("Saving category data:", categoryData);
-      console.log("Collection: online_categories");
-
       if (isEditing && id) {
         await setDoc(doc(db, "online_categories", id), categoryData, {
           merge: true,
         });
-        console.log("Category updated successfully");
         alert("Category updated successfully!");
       } else {
-        const docRef = await addDoc(
-          collection(db, "online_categories"),
-          categoryData,
-        );
-        console.log("Category added with ID:", docRef.id);
+        await addDoc(collection(db, "online_categories"), categoryData);
         alert("Category added successfully!");
       }
 
@@ -111,9 +99,9 @@ const CategoryForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
+      <div style={onlineStyles.container}>
+        <div style={onlineStyles.loading}>
+          <div style={onlineStyles.spinner}></div>
           <p>Loading category...</p>
         </div>
       </div>
@@ -121,33 +109,38 @@ const CategoryForm: React.FC = () => {
   }
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTopRow}>
-          <div className={styles.headerLeft}>
-            <h1 className={styles.title}>
-              {isEditing ? "Edit Category" : "Add Category"}
-            </h1>
-            <p className={styles.subtitle}>
-              {isEditing ? "Update category details" : "Create a new category"}
-            </p>
+    <div style={onlineStyles.container}>
+      {/* Top Navigation */}
+      <div style={onlineStyles.topNav}>
+        <button
+          onClick={() => navigate("/online/categories")}
+          style={onlineStyles.navButton}
+          title="Back"
+        >
+          ←
+        </button>
+        <div style={onlineStyles.headerLeft}>
+          <div style={onlineStyles.navTitle}>
+            {isEditing ? "Edit Category" : "Add Category"}
+          </div>
+          <div style={onlineStyles.navSubtitle}>
+            {isEditing ? "Update category details" : "Create a new category"}
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <div className={styles.section}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Category Name *</label>
+      <div style={onlineStyles.section}>
+        <form onSubmit={handleSubmit} style={onlineStyles.form}>
+          <div style={onlineStyles.formGroup}>
+            <label style={onlineStyles.label}>Category Name *</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className={styles.input}
+              style={onlineStyles.input}
               placeholder="Enter category name"
               required
               disabled={saving}
@@ -156,18 +149,18 @@ const CategoryForm: React.FC = () => {
           </div>
 
           {/* Form Actions */}
-          <div className={styles.formActions}>
+          <div style={onlineStyles.formActions}>
             <button
               type="button"
               onClick={() => navigate("/online/categories")}
-              className={styles.cancelButton}
+              style={onlineStyles.cancelButton}
               disabled={saving}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={styles.submitButton}
+              style={onlineStyles.submitButton}
               disabled={saving}
             >
               {saving ? "Saving..." : isEditing ? "Update" : "Add"}

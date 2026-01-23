@@ -1,7 +1,118 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import styles from "./Online.module.css";
+import { onlineStyles } from "../styles/onlineStyles"; // Import shared styles
+import OnlineNavigation from "./OnlineNavigation";
+
+// Extend shared styles for homepage-specific styles
+const homepageStyles = {
+  ...onlineStyles,
+
+  // Homepage-specific styles
+  centeredContainer: {
+    display: "flex",
+    flexDirection: "column" as const,
+    minHeight: "100vh",
+    backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // Stats Cards
+  statsRow: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "10px",
+    padding: "0 15px",
+    marginBottom: "15px",
+  } as React.CSSProperties,
+
+  statsCard: {
+    backgroundColor: "white",
+    borderRadius: "12px",
+    padding: "12px 10px",
+    textAlign: "center" as const,
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+    border: "1px solid #e9ecef",
+    transition: "transform 0.2s, box-shadow 0.2s",
+    cursor: "pointer",
+    display: "flex",
+    flexDirection: "column" as const,
+    justifyContent: "center",
+    minHeight: "80px",
+  } as React.CSSProperties,
+
+  statsLabel: {
+    fontSize: "0.75rem",
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: "6px",
+  } as React.CSSProperties,
+
+  statsValue: {
+    fontSize: "1.1rem",
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: "3px",
+  } as React.CSSProperties,
+
+  statsSubtitle: {
+    fontSize: "0.7rem",
+    color: "#888",
+  } as React.CSSProperties,
+
+  // Info Cards
+  infoGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: "12px",
+    marginTop: "15px",
+  } as React.CSSProperties,
+
+  infoCard: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: "10px",
+    padding: "15px",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    cursor: "pointer",
+  } as React.CSSProperties,
+
+  infoIcon: {
+    fontSize: "24px",
+    color: "#667eea",
+  } as React.CSSProperties,
+
+  infoContent: {
+    flex: 1,
+  } as React.CSSProperties,
+
+  infoTitle: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#2d3748",
+    marginBottom: "4px",
+  } as React.CSSProperties,
+
+  infoText: {
+    fontSize: "12px",
+    color: "#718096",
+    lineHeight: "1.4",
+  } as React.CSSProperties,
+
+  // Badge
+  expiringBadge: {
+    display: "inline-block",
+    backgroundColor: "#fed7d7",
+    color: "#c53030",
+    padding: "2px 8px",
+    borderRadius: "10px",
+    fontSize: "11px",
+    fontWeight: "600",
+    marginTop: "4px",
+  } as React.CSSProperties,
+};
 
 const OnlineHomepage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,7 +136,9 @@ const OnlineHomepage: React.FC = () => {
       const thirtyDaysFromNow = now + 30 * 24 * 60 * 60 * 1000;
 
       // Fetch categories count
-      const categoriesSnapshot = await getDocs(collection(db, "categories"));
+      const categoriesSnapshot = await getDocs(
+        collection(db, "online_categories"),
+      );
       const categoriesCount = categoriesSnapshot.size;
 
       // Fetch online items count
@@ -62,116 +175,48 @@ const OnlineHomepage: React.FC = () => {
     }
   };
 
-  const navigationCards = [
+  const infoCards = [
     {
-      title: "Categories",
-      description: "Manage item categories",
       icon: "📁",
+      title: "Categories",
+      text: "Organize items into categories for better management",
       path: "/online/categories",
-      color: "#4299e1",
       count: counts.categories,
-      quickActions: [
-        {
-          label: "Add Category",
-          type: "path" as const,
-          path: "/online/categories/add",
-        },
-        {
-          label: "View All",
-          type: "path" as const,
-          path: "/online/categories",
-        },
-      ],
+      color: "#4299e1",
     },
     {
-      title: "Online Items",
-      description: "Manage your online purchases and items",
       icon: "🛒",
+      title: "Online Items",
+      text: "Track your online purchases and digital assets",
       path: "/online/items",
-      color: "#48bb78",
       count: counts.items,
-      quickActions: [
-        { label: "Add Item", type: "path" as const, path: "/online/items/add" },
-        { label: "View All", type: "path" as const, path: "/online/items" },
-        { label: "Search Items", type: "path" as const, path: "/online/items" },
-      ],
+      color: "#48bb78",
     },
     {
-      title: "Renewals",
-      description: "Track subscription renewals",
       icon: "🔄",
+      title: "Renewals",
+      text: "Manage subscription renewals and deadlines",
       path: "/online/renewals",
-      color: "#ed8936",
       count: counts.renewals,
+      color: "#ed8936",
       badge:
         counts.expiringSoon > 0 ? `${counts.expiringSoon} expiring soon` : null,
-      quickActions: [
-        {
-          label: "Add Renewal",
-          type: "path" as const,
-          path: "/online/renewals/add",
-        },
-        { label: "View All", type: "path" as const, path: "/online/renewals" },
-        {
-          label: "Expiring Soon",
-          type: "path" as const,
-          path: "/online/renewals",
-        },
-      ],
     },
     {
-      title: "Dashboard",
-      description: "Online module overview",
       icon: "📊",
+      title: "Dashboard",
+      text: "Overview of your online module",
       path: "/online",
-      color: "#9f7aea",
       count: 0,
-      quickActions: [
-        { label: "Refresh", type: "action" as const, action: fetchCounts },
-      ],
-    },
-  ];
-
-  const quickActions = [
-    {
-      label: "Add New Item",
-      icon: "➕",
-      path: "/online/items/add",
-      color: "#48bb78",
-    },
-    {
-      label: "Add Renewal",
-      icon: "📅",
-      path: "/online/renewals/add",
-      color: "#ed8936",
-    },
-    {
-      label: "Add Category",
-      icon: "🏷️",
-      path: "/online/categories/add",
-      color: "#4299e1",
-    },
-    {
-      label: "View All Items",
-      icon: "👁️",
-      path: "/online/items",
       color: "#9f7aea",
     },
   ];
-
-  const handleQuickAction = (action: any) => {
-    if (action.type === "path") {
-      navigate(action.path);
-    } else if (action.type === "action" && action.action) {
-      action.action();
-    }
-  };
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
+      <div style={homepageStyles.centeredContainer}>
+        <div style={homepageStyles.loading}>
+          <div style={homepageStyles.spinner}></div>
           <p>Loading online module...</p>
         </div>
       </div>
@@ -179,20 +224,20 @@ const OnlineHomepage: React.FC = () => {
   }
 
   return (
-    <div className={styles.container}>
+    <div style={homepageStyles.container}>
       {/* Top Navigation */}
-      <div className={styles.topNav}>
+      <div style={homepageStyles.topNav}>
         <button
           onClick={() => navigate("/")}
-          className={styles.navButton}
+          style={homepageStyles.navButton}
           title="Back to Home"
         >
           🏠
         </button>
-        <div className={styles.navTitle}>Online Module</div>
+        <div style={homepageStyles.navTitle}>Online / Dashboard</div>
         <button
           onClick={() => navigate("/settings")}
-          className={styles.navButton}
+          style={homepageStyles.navButton}
           title="Settings"
         >
           ⚙️
@@ -200,189 +245,280 @@ const OnlineHomepage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className={styles.contentWrapper}>
+      <div style={homepageStyles.contentWrapper}>
         {/* Stats Overview */}
-        <div className={styles.statsRow}>
+        <div style={homepageStyles.statsRow}>
           <div
-            className={styles.statCard}
+            style={homepageStyles.statsCard}
             onClick={() => navigate("/online/categories")}
           >
-            <div
-              className={styles.statIcon}
-              style={{ backgroundColor: "#ebf8ff" }}
-            >
-              📁
-            </div>
-            <div className={styles.statContent}>
-              <div className={styles.statTitle}>Categories</div>
-              <div className={styles.statValue}>{counts.categories}</div>
-            </div>
+            <div style={homepageStyles.statsLabel}>Categories</div>
+            <div style={homepageStyles.statsValue}>{counts.categories}</div>
           </div>
 
           <div
-            className={styles.statCard}
+            style={homepageStyles.statsCard}
             onClick={() => navigate("/online/items")}
           >
-            <div
-              className={styles.statIcon}
-              style={{ backgroundColor: "#f0fff4" }}
-            >
-              🛒
-            </div>
-            <div className={styles.statContent}>
-              <div className={styles.statTitle}>Items</div>
-              <div className={styles.statValue}>{counts.items}</div>
-            </div>
+            <div style={homepageStyles.statsLabel}>Items</div>
+            <div style={homepageStyles.statsValue}>{counts.items}</div>
           </div>
 
           <div
-            className={styles.statCard}
+            style={homepageStyles.statsCard}
             onClick={() => navigate("/online/renewals")}
           >
-            <div
-              className={styles.statIcon}
-              style={{ backgroundColor: "#fffaf0" }}
-            >
-              🔄
-            </div>
-            <div className={styles.statContent}>
-              <div className={styles.statTitle}>Renewals</div>
-              <div className={styles.statValue}>{counts.renewals}</div>
-              {counts.expiringSoon > 0 && (
-                <div className={styles.expiringBadge}>
-                  {counts.expiringSoon} soon
-                </div>
-              )}
-            </div>
+            <div style={homepageStyles.statsLabel}>Renewals</div>
+            <div style={homepageStyles.statsValue}>{counts.renewals}</div>
+            {counts.expiringSoon > 0 && (
+              <div style={homepageStyles.expiringBadge}>
+                {counts.expiringSoon} soon
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Module Navigation Cards */}
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div className={styles.sectionTitle}>Navigation</div>
-            <div className={styles.sectionSubtitle}>
-              Select a section to manage
-            </div>
+        {/* Quick Info Grid */}
+        <div style={homepageStyles.section}>
+          <div style={homepageStyles.sectionHeader}>
+            <div style={homepageStyles.sectionTitle}>Quick Overview</div>
           </div>
-
-          <div className={styles.cardsGrid}>
-            {navigationCards.map((card, index) => (
+          <div style={homepageStyles.infoGrid}>
+            {infoCards.map((card, index) => (
               <div
                 key={index}
-                className={styles.moduleCard}
+                style={homepageStyles.infoCard}
                 onClick={() => navigate(card.path)}
               >
                 <div
-                  className={styles.cardIcon}
-                  style={{ backgroundColor: card.color + "20" }}
+                  style={{
+                    ...homepageStyles.infoIcon,
+                    color: card.color,
+                  }}
                 >
-                  <span style={{ fontSize: "28px", color: card.color }}>
-                    {card.icon}
-                  </span>
+                  {card.icon}
                 </div>
-                <div className={styles.cardContent}>
-                  <div className={styles.cardHeader}>
-                    <h3 className={styles.cardTitle}>{card.title}</h3>
-                    {card.count > 0 && (
-                      <span className={styles.cardCount}>{card.count}</span>
-                    )}
-                  </div>
-                  <p className={styles.cardDescription}>{card.description}</p>
+                <div style={homepageStyles.infoContent}>
+                  <div style={homepageStyles.infoTitle}>{card.title}</div>
+                  <div style={homepageStyles.infoText}>{card.text}</div>
                   {card.badge && (
-                    <div className={styles.cardBadge}>{card.badge}</div>
+                    <div
+                      style={{
+                        marginTop: "4px",
+                        fontSize: "11px",
+                        fontWeight: "600",
+                        color: "#c05621",
+                        backgroundColor: "#feebc8",
+                        padding: "2px 6px",
+                        borderRadius: "8px",
+                        display: "inline-block",
+                      }}
+                    >
+                      {card.badge}
+                    </div>
                   )}
-
-                  {/* Quick Action Buttons */}
-                  <div className={styles.quickActionButtons}>
-                    {card.quickActions.map((action, idx) => (
-                      <button
-                        key={idx}
-                        className={styles.quickActionBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleQuickAction(action);
-                        }}
-                      >
-                        {action.label}
-                      </button>
-                    ))}
-                  </div>
                 </div>
+                {card.count > 0 && (
+                  <div
+                    style={{
+                      backgroundColor: card.color,
+                      color: "white",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {card.count}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div className={styles.sectionTitle}>Quick Actions</div>
-            <div className={styles.sectionSubtitle}>
-              Frequent actions for faster access
-            </div>
+        <div style={homepageStyles.section}>
+          <div style={homepageStyles.sectionHeader}>
+            <div style={homepageStyles.sectionTitle}>Quick Actions</div>
           </div>
-          <div className={styles.quickActionGrid}>
-            {quickActions.map((action, index) => (
-              <button
-                key={index}
-                className={styles.quickActionCard}
-                onClick={() => navigate(action.path)}
-                style={{ borderColor: action.color }}
-              >
-                <span
-                  className={styles.actionIcon}
-                  style={{ color: action.color }}
-                >
-                  {action.icon}
-                </span>
-                <span className={styles.actionLabel}>{action.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Activity (Placeholder) */}
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div className={styles.sectionTitle}>Recent Activity</div>
-            <button className={styles.refreshButton} onClick={fetchCounts}>
-              🔄 Refresh
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              marginTop: "10px",
+            }}
+          >
+            <button
+              onClick={() => navigate("/online/items/add")}
+              style={{
+                width: "100%",
+                padding: "12px",
+                backgroundColor: "#48bb78",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              <span>➕</span>
+              <span>Add New Item</span>
+            </button>
+            <button
+              onClick={() => navigate("/online/renewals/add")}
+              style={{
+                width: "100%",
+                padding: "12px",
+                backgroundColor: "#ed8936",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              <span>📅</span>
+              <span>Add Renewal</span>
+            </button>
+            <button
+              onClick={() => navigate("/online/categories/add")}
+              style={{
+                width: "100%",
+                padding: "12px",
+                backgroundColor: "#4299e1",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              <span>🏷️</span>
+              <span>Add Category</span>
             </button>
           </div>
-          <div className={styles.recentActivity}>
-            <div className={styles.activityItem}>
-              <span className={styles.activityIcon}>📁</span>
-              <div className={styles.activityText}>
-                <strong>{counts.categories}</strong> categories available
-              </div>
-            </div>
-            <div className={styles.activityItem}>
-              <span className={styles.activityIcon}>🛒</span>
-              <div className={styles.activityText}>
-                <strong>{counts.items}</strong> online items tracked
-              </div>
-            </div>
-            <div className={styles.activityItem}>
-              <span className={styles.activityIcon}>🔄</span>
-              <div className={styles.activityText}>
-                <strong>{counts.renewals}</strong> renewals being tracked
-              </div>
-            </div>
-            {counts.expiringSoon > 0 && (
-              <div className={styles.activityItem}>
-                <span className={styles.activityIcon}>⚠️</span>
-                <div className={styles.activityText}>
-                  <strong>{counts.expiringSoon}</strong> renewals expiring soon
+        </div>
+
+        {/* Tips Section */}
+        <div style={homepageStyles.section}>
+          <div style={homepageStyles.sectionHeader}>
+            <div style={homepageStyles.sectionTitle}>Tips</div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "12px",
+                padding: "12px",
+                backgroundColor: "#f0fff4",
+                borderRadius: "8px",
+                border: "1px solid #c6f6d5",
+              }}
+            >
+              <span style={{ fontSize: "18px", color: "#38a169" }}>💡</span>
+              <div>
+                <div
+                  style={{
+                    fontWeight: "600",
+                    color: "#276749",
+                    fontSize: "14px",
+                  }}
+                >
+                  Organize with Categories
+                </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#718096",
+                    marginTop: "4px",
+                  }}
+                >
+                  Create categories first to better organize your online items
                 </div>
               </div>
-            )}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "12px",
+                padding: "12px",
+                backgroundColor: "#fffaf0",
+                borderRadius: "8px",
+                border: "1px solid #feebc8",
+              }}
+            >
+              <span style={{ fontSize: "18px", color: "#d69e2e" }}>⏰</span>
+              <div>
+                <div
+                  style={{
+                    fontWeight: "600",
+                    color: "#975a16",
+                    fontSize: "14px",
+                  }}
+                >
+                  Track Renewals
+                </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#718096",
+                    marginTop: "4px",
+                  }}
+                >
+                  Add renewals to never miss subscription deadlines
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
+        {/* Online Navigation Component */}
+        <OnlineNavigation />
+
         {/* Bottom spacing */}
-        <div className={styles.bottomSpacing}></div>
+        <div style={{ height: "20px" }}></div>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        button:hover {
+          opacity: 0.9;
+          transform: translateY(-1px);
+        }
+        
+        button:active {
+          transform: translateY(0);
+        }
+      `}</style>
     </div>
   );
 };

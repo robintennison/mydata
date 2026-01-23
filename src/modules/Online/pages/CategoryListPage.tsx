@@ -8,7 +8,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { Category } from "../types/online.types";
-import styles from "./Online.module.css";
+import { onlineStyles } from "../styles/onlineStyles";
 
 const CategoryListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,17 +24,13 @@ const CategoryListPage: React.FC = () => {
     try {
       setLoading(true);
       const db = getFirestore();
-      const categoriesRef = collection(db, "online_categories"); // Corrected collection name
-      console.log("Fetching from collection: online_categories");
+      const categoriesRef = collection(db, "online_categories");
 
       const snapshot = await getDocs(categoriesRef);
-      console.log("Snapshot size:", snapshot.size);
 
       const categoriesList: Category[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        console.log(`Document ${doc.id}:`, data);
-
         categoriesList.push({
           id: doc.id,
           name: data.name || "",
@@ -43,8 +39,6 @@ const CategoryListPage: React.FC = () => {
         });
       });
 
-      console.log("Categories list:", categoriesList);
-      // Sort by name
       categoriesList.sort((a, b) => a.name.localeCompare(b.name));
       setCategories(categoriesList);
     } catch (error) {
@@ -59,7 +53,7 @@ const CategoryListPage: React.FC = () => {
     if (window.confirm(`Are you sure you want to delete category "${name}"?`)) {
       try {
         const db = getFirestore();
-        await deleteDoc(doc(db, "online_categories", id)); // Corrected collection name
+        await deleteDoc(doc(db, "online_categories", id));
         setCategories(categories.filter((cat) => cat.id !== id));
       } catch (error) {
         console.error("Error deleting category:", error);
@@ -74,9 +68,9 @@ const CategoryListPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
+      <div style={onlineStyles.container}>
+        <div style={onlineStyles.loading}>
+          <div style={onlineStyles.spinner}></div>
           <p>Loading categories...</p>
         </div>
       </div>
@@ -84,72 +78,81 @@ const CategoryListPage: React.FC = () => {
   }
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTopRow}>
-          <div className={styles.headerLeft}>
-            <h1 className={styles.title}>Categories</h1>
-            <p className={styles.subtitle}>Manage your item categories</p>
+    <div style={onlineStyles.container}>
+      {/* Top Navigation */}
+      <div style={onlineStyles.topNav}>
+        <button
+          onClick={() => navigate("/online")}
+          style={onlineStyles.navButton}
+          title="Back"
+        >
+          ←
+        </button>
+        <div style={onlineStyles.headerLeft}>
+          <div style={onlineStyles.navTitle}>Categories</div>
+          <div style={onlineStyles.navSubtitle}>
+            Manage your item categories
           </div>
-          <div className={styles.headerRight}>
-            <button
-              className={styles.addButton}
-              onClick={() => navigate("/online/categories/add")}
-            >
-              + Add Category
-            </button>
-          </div>
+        </div>
+        <div style={onlineStyles.headerRight}>
+          <button
+            style={onlineStyles.addButton}
+            onClick={() => navigate("/online/categories/add")}
+          >
+            + Add Category
+          </button>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className={styles.searchContainer}>
+      <div style={onlineStyles.searchContainer}>
         <input
           type="text"
           placeholder="Search categories..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.searchInput}
+          style={onlineStyles.searchInput}
         />
-        <span className={styles.searchIcon}>🔍</span>
+        <span style={onlineStyles.searchIcon}>🔍</span>
       </div>
 
       {/* Categories List */}
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.sectionTitle}>
+      <div style={onlineStyles.section}>
+        <div style={onlineStyles.sectionHeader}>
+          <div style={onlineStyles.sectionTitle}>
             Categories ({filteredCategories.length})
           </div>
         </div>
 
         {filteredCategories.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>📁</div>
-            <div className={styles.emptyText}>No categories found</div>
-            <div className={styles.emptySubtext}>
+          <div style={onlineStyles.emptyState}>
+            <div style={onlineStyles.emptyIcon}>📁</div>
+            <div style={onlineStyles.emptyText}>No categories found</div>
+            <div style={onlineStyles.emptySubtext}>
               {searchTerm
                 ? "Try a different search term"
                 : "Add your first category"}
             </div>
           </div>
         ) : (
-          <div className={styles.tableResponsiveContainer}>
-            <table className={styles.responsiveTable}>
+          <div style={onlineStyles.tableResponsiveContainer}>
+            <table style={onlineStyles.responsiveTable}>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th style={{ width: "100px" }}>Actions</th>
+                  <th style={onlineStyles.tableHeader}>Name</th>
+                  <th style={{ ...onlineStyles.tableHeader, width: "100px" }}>
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCategories.map((category) => (
-                  <tr key={category.id}>
-                    <td>{category.name}</td>
-                    <td>
-                      <div className={styles.actionButtons}>
+                  <tr key={category.id} style={onlineStyles.tableRow}>
+                    <td style={onlineStyles.tableCell}>{category.name}</td>
+                    <td style={onlineStyles.tableCell}>
+                      <div style={onlineStyles.actionButtons}>
                         <button
-                          className={styles.editButton}
+                          style={onlineStyles.editButton}
                           onClick={() =>
                             navigate(`/online/categories/edit/${category.id}`)
                           }
@@ -157,7 +160,7 @@ const CategoryListPage: React.FC = () => {
                           Edit
                         </button>
                         <button
-                          className={styles.deleteButton}
+                          style={onlineStyles.deleteButton}
                           onClick={() =>
                             handleDelete(category.id, category.name)
                           }

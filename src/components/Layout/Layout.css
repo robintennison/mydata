@@ -1,0 +1,120 @@
+/* src/components/Layout/Layout.css - Update or add these styles */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  background-color: var(--color-gray-50, #f9fafb);
+}
+
+.layout-content {
+  flex: 1;
+  width: 100%;
+  max-width: 600px; /* Match BottomNav width */
+  margin: 0 auto;
+  padding: var(--spacing-lg, 1.5rem);
+  padding-bottom: calc(var(--spacing-lg, 1.5rem) + 80px); /* Space for bottom nav */
+}
+
+/* When footer is hidden */
+.layout-content.no-footer {
+  padding-bottom: var(--spacing-lg, 1.5rem);
+}
+
+/* When header is hidden */
+.layout-content.no-header {
+  padding-top: var(--spacing-lg, 1.5rem);
+}
+
+/* For wider screens, add side padding */
+@media (min-width: 601px) {
+  .layout-content {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    min-height: calc(100vh - 70px);
+    margin-top: var(--spacing-md, 1rem);
+    margin-bottom: var(--spacing-md, 1rem);
+    border-radius: 12px;
+    background-color: var(--color-white, #ffffff);
+  }
+  
+  .layout {
+    background: linear-gradient(135deg, var(--color-primary-50, #eff6ff) 0%, var(--color-gray-100, #f3f4f6) 100%);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .layout-content {
+    padding: var(--spacing-md, 1rem);
+    padding-bottom: calc(var(--spacing-md, 1rem) + 75px); /* Smaller space for mobile nav */
+  }
+  
+  .layout-content.no-footer {
+    padding-bottom: var(--spacing-md, 1rem);
+  }
+  
+  .layout-content.no-header {
+    padding-top: var(--spacing-md, 1rem);
+  }
+}
+
+@media (max-width: 600px) {
+  .layout-content {
+    max-width: 100%;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+  
+  .layout {
+    background-color: var(--color-white, #ffffff);
+  }
+}
+
+@media (max-width: 480px) {
+  .layout-content {
+    padding: var(--spacing-sm, 0.75rem);
+    padding-bottom: calc(var(--spacing-sm, 0.75rem) + 70px);
+  }
+  
+  .layout-content.no-footer {
+    padding-bottom: var(--spacing-sm, 0.75rem);
+  }
+  
+  .layout-content.no-header {
+    padding-top: var(--spacing-sm, 0.75rem);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .layout {
+    background-color: var(--color-gray-900, #111827);
+  }
+  
+  @media (min-width: 601px) {
+    .layout {
+      background: linear-gradient(135deg, var(--color-gray-800, #1f2937) 0%, var(--color-gray-900, #111827) 100%);
+    }
+    
+    .layout-content {
+      background-color: var(--color-gray-800, #1f2937);
+    }
+  }
+}
+
+/* Print styles */
+@media print {
+  .layout {
+    background-color: white;
+  }
+  
+  .layout-content {
+    padding: 0;
+    padding-bottom: 0;
+    max-width: 100%;
+    margin: 0;
+  }
+}

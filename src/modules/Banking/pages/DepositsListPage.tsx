@@ -113,19 +113,8 @@ const DepositsListPage: React.FC = () => {
   // Calculate total amount like Android
   const totalAmount = filteredDeposits.reduce(
     (sum, dep) => sum + dep.amount,
-    0
+    0,
   );
-
-  // const handleDelete = async (id: string) => {
-  //   try {
-  //     await handleDeleteDeposit(id);
-  //     setLocalDeposits((prev) => prev.filter((dep) => dep.id !== id));
-  //     setDepositToDelete(null);
-  //   } catch (error) {
-  //     console.error("Error deleting deposit:", error);
-  //     alert("Failed to delete deposit. Please try again.");
-  //   }
-  // };
 
   const getAccountName = (accountId: string): string => {
     const account = accounts.find((acc) => acc.id === accountId);
@@ -524,7 +513,8 @@ const DepositsListPage: React.FC = () => {
                         alignItems: "center",
                         padding: "10px 12px",
                         minHeight: "48px",
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
+                        backgroundColor:
+                          index % 2 === 0 ? "#ffffff" : "#f9fafb",
                         borderBottom:
                           index < filteredDeposits.length - 1
                             ? "1px solid #f3f4f6"

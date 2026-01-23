@@ -1,12 +1,9 @@
 // src/App.tsx
-import { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
-import { auth } from "./lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import type { User } from "firebase/auth";
 import { AppRoutes } from "./routes";
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { ErrorProvider } from "./contexts/ErrorContext";
+import { AuthProvider } from "./contexts/AuthContext"; // Add this import
 
 // Import global styles
 import "./shared/styles/design-tokens.css";
@@ -15,37 +12,18 @@ import "./shared/styles/utilities.css";
 
 // Import App-specific CSS
 import "./App.css";
-import styles from "./App.module.css"; // Create this file
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Connecting to Firebase...</p>
-      </div>
-    );
-  }
-
-  const isAuthenticated = !!user;
-
+  // Remove the Firebase auth state from here - AuthContext handles it now
   return (
     <ErrorProvider>
       <SettingsProvider>
         <BrowserRouter>
-          <AppRoutes isAuthenticated={isAuthenticated} user={user} />
+          <AuthProvider>
+            {" "}
+            {/* Wrap everything with AuthProvider */}
+            <AppRoutes /> {/* Remove isAuthenticated and user props */}
+          </AuthProvider>
         </BrowserRouter>
       </SettingsProvider>
     </ErrorProvider>

@@ -283,3 +283,131 @@
     transform: rotate(360deg);
   }
 }
+
+/* Add these styles to your existing CSS file */
+
+/* Header Right Section */
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Logout Button */
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+}
+
+.logoutButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4090 100%);
+}
+
+.logoutButton:active {
+  transform: translateY(0);
+}
+
+.logoutIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.logoutText {
+  display: block;
+}
+
+/* Maturity count badge */
+.maturityCount {
+  margin-left: 8px;
+  background: #667eea;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Empty state icon */
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* Days until maturity */
+.maturityDays {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+/* Enhanced maturity card */
+.maturityCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.maturityCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  border-color: #667eea;
+}
+
+.maturityLeft {
+  flex: 1;
+}
+
+.maturityDate {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.maturityAccount {
+  font-size: 13px;
+  color: #666;
+  margin: 4px 0;
+}
+
+.maturityRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.maturityAmount {
+  font-weight: 700;
+  color: #1976d2;
+  font-size: 16px;
+}
+
+.maturityStatus {
+  font-size: 24px;
+  line-height: 1;
+}

@@ -1,7 +1,11 @@
+// routes/index.tsx
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+//import { useAuth } from "../contexts/AuthContext"; // Import useAuth
+import ProtectedRoute from "../components/Auth/ProtectedRoute"; // Import ProtectedRoute
+import PublicRoute from "../components/Auth/PublicRoute"; // Import PublicRoute
 
-// Import all page components
+// Import all page components (keep your existing imports)
 import DepositsListPage from "../modules/Banking/pages/DepositsListPage";
 import AddEditDepositPage from "../modules/Banking/pages/AddEditDepositPage";
 import BankingHomePage from "../modules/Banking/pages/BankingHomePage";
@@ -11,7 +15,7 @@ import EditAccountPage from "../modules/Banking/pages/EditAccountPage";
 import DepositSummaryPage from "../modules/Banking/pages/DepositSummaryPage";
 import SettingsPage from "../modules/SettingsPage";
 import Layout from "../components/Layout/Layout";
-import LoginForm from "../components/Auth/LoginForm";
+import LoginForm from "../components/Auth/Login";
 import MyDataHomepage from "../MyDataHomepage";
 
 // Import History pages
@@ -30,7 +34,7 @@ import GalleryPage from "../modules/Jewellery/pages/GalleryPage";
 // Import the new component for viewing jewellery linked to a bill
 import JewelleryForBill from "../modules/Jewellery/pages/JewelleryForBill";
 // Import the new BatchEditPage component
-import BatchEditPage from "../modules/Jewellery/pages/BatchEditPage"; // Add this import
+import BatchEditPage from "../modules/Jewellery/pages/BatchEditPage";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -298,7 +302,9 @@ const navigationItems = allRoutes
       !route.path.includes(":") &&
       route.path !== "/login" &&
       !route.path.includes("/banking/") &&
-      !route.path.includes("/jewellery/"),
+      !route.path.includes("/jewellery/") &&
+      route.path !== "/settings" &&
+      route.requiresAuth,
   )
   .map((route: RouteConfig) => ({
     path: route.path,
@@ -352,67 +358,81 @@ const getRouteByPath = (path: string) =>
 const routeExists = (path: string) =>
   allRoutes.some((route) => route.path === path);
 
-// ==================== PRIVATE ROUTE COMPONENT ====================
-interface PrivateRouteProps {
-  children: React.ReactNode;
-  isAuthenticated: boolean;
-  redirectTo?: string;
-}
-
-const PrivateRoute: React.FC<PrivateRouteProps> = ({
-  children,
-  isAuthenticated,
-  redirectTo = "/login",
-}) => {
-  if (!isAuthenticated) {
-    return <Navigate to={redirectTo} replace />;
-  }
-  return <>{children}</>;
-};
-
 // ==================== APP ROUTES COMPONENT ====================
 interface AppRoutesProps {
-  isAuthenticated: boolean;
-  user?: any;
+  // Remove isAuthenticated and user props since we use AuthContext
 }
 
-const AppRoutes: React.FC<AppRoutesProps> = ({ isAuthenticated }) => {
+const AppRoutes: React.FC<AppRoutesProps> = () => {
+  // Remove isAuthenticated prop from here
+
   return (
-    <Layout hideFooter={false}>
-      <Routes>
-        {allRoutes.map((route) => {
-          const routeElement = route.requiresAuth ? (
-            <PrivateRoute isAuthenticated={isAuthenticated} redirectTo="/login">
-              {route.element}
-            </PrivateRoute>
-          ) : (
-            route.element
-          );
-
+    <Routes>
+      {allRoutes.map((route) => {
+        // Special handling for login page - use PublicRoute
+        if (route.path === "/login") {
           return (
-            <Route key={route.path} path={route.path} element={routeElement} />
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                <PublicRoute>
+                  <Layout hideFooter={route.hideFooter}>{route.element}</Layout>
+                </PublicRoute>
+              }
+            />
           );
-        })}
+        }
 
-        {/* 404 Route */}
-        <Route
-          path="*"
-          element={
-            <div style={{ padding: "40px", textAlign: "center" }}>
-              <h1>404 - Page Not Found</h1>
-              <p>The page you're looking for doesn't exist.</p>
-            </div>
-          }
-        />
-      </Routes>
-    </Layout>
+        // For all other routes, check if they require auth
+        const routeElement = route.requiresAuth ? (
+          <ProtectedRoute>
+            <Layout hideFooter={route.hideFooter}>{route.element}</Layout>
+          </ProtectedRoute>
+        ) : (
+          <Layout hideFooter={route.hideFooter}>{route.element}</Layout>
+        );
+
+        return (
+          <Route key={route.path} path={route.path} element={routeElement} />
+        );
+      })}
+
+      {/* 404 Route - Show layout for authenticated users */}
+      <Route
+        path="*"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <div style={{ padding: "40px", textAlign: "center" }}>
+                <h1>404 - Page Not Found</h1>
+                <p>The page you're looking for doesn't exist.</p>
+                <button
+                  onClick={() => (window.location.href = "/")}
+                  style={{
+                    marginTop: "20px",
+                    padding: "10px 20px",
+                    backgroundColor: "#667eea",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Go Home
+                </button>
+              </div>
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 };
 
 // ==================== EXPORTS ====================
 export {
   AppRoutes,
-  PrivateRoute,
   allRoutes,
   navigationItems,
   moduleNavigationItems,

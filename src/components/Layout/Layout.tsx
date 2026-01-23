@@ -1,25 +1,27 @@
-import React from 'react';
-import styles from './Layout.module.css';
-import BottomNav from '../Navigation/BottomNav';
+// components/Layout/Layout.tsx
+import React from "react";
+import Header from "./Header";
+import BottomNav from "../Navigation/BottomNav";
+import "./Layout.css";
 
 interface LayoutProps {
   children: React.ReactNode;
   hideFooter?: boolean;
+  hideHeader?: boolean;
 }
 
 const Layout: React.FC<LayoutProps> = ({
   children,
-  hideFooter = false
+  hideFooter = false,
+  hideHeader = false,
 }) => {
   return (
-    <div className={styles.layout}>
-      <div className={styles.main}>
-        <main className={styles.content}>
-          {children}
-        </main>
+    <div className="layout">
+      {!hideHeader && <Header />}
 
-        {!hideFooter && <BottomNav />}
-      </div>
+      <main className="layout-content">{children}</main>
+
+      {!hideFooter && <BottomNav />}
     </div>
   );
 };

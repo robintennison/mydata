@@ -15,19 +15,6 @@ const MyDataHomepage: React.FC = () => {
   const { settings } = useSettings();
   const { accounts, deposits, adjustments, loading } = useBankingData();
 
-  // Handle logout
-  const handleLogout = () => {
-    // Clear any auth tokens or user data from localStorage/sessionStorage
-    localStorage.removeItem("authToken");
-    sessionStorage.removeItem("userData");
-
-    // Redirect to login page
-    navigate("/login");
-
-    // Optional: Clear any other app state
-    window.location.reload(); // Full refresh to clear state
-  };
-
   // Memoize calculations for better performance
   const { totalBalance, totalDeposits, upcomingMaturities } = useMemo(() => {
     if (loading || accounts.length === 0) {
@@ -87,7 +74,7 @@ const MyDataHomepage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Header with Settings Button and Logout */}
+      {/* Header with Settings Button Only */}
       <div className={styles.header}>
         <div className={styles.headerTopRow}>
           <div className={styles.headerLeft}>
@@ -97,9 +84,9 @@ const MyDataHomepage: React.FC = () => {
             </p>
           </div>
 
-          {/* Header Right Section with Settings and Logout */}
+          {/* Header Right Section with Settings Only */}
           <div className={styles.headerRight}>
-            {/* Settings Button */}
+            {/* Settings Button Only */}
             <button
               className={styles.settingsButton}
               onClick={() => navigate("/settings")}
@@ -109,26 +96,6 @@ const MyDataHomepage: React.FC = () => {
               {settings?.showDelete && (
                 <span className={styles.editBadge}>✏️</span>
               )}
-            </button>
-
-            {/* Logout Button */}
-            <button
-              className={styles.logoutButton}
-              onClick={handleLogout}
-              title="Logout"
-            >
-              <svg
-                className={styles.logoutIcon}
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-              >
-                <path
-                  fill="currentColor"
-                  d="M14.08,15.59L16.67,13H7V11H16.67L14.08,8.41L15.5,7L20.5,12L15.5,17L14.08,15.59M19,3A2,2 0 0,1 21,5V9.67L19,7.67V5H5V19H19V16.33L21,14.33V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5C3,3.89 3.89,3 5,3H19Z"
-                />
-              </svg>
-              <span className={styles.logoutText}>Logout</span>
             </button>
           </div>
         </div>

@@ -10,11 +10,24 @@ import {
 import { Renewal } from "../types/online.types";
 import { onlineStyles } from "../styles/onlineStyles";
 
+// Sort options as const object instead of enum
+const RenewalSortOption = {
+  NAME_ASC: "Name (A-Z)",
+  NAME_DESC: "Name (Z-A)",
+  DATE_ASC: "Date (Soonest)",
+  DATE_DESC: "Date (Latest)",
+} as const;
+
+type RenewalSortOptionType = keyof typeof RenewalSortOption;
+
 const RenewalListPage: React.FC = () => {
   const navigate = useNavigate();
   const [renewals, setRenewals] = useState<Renewal[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] =
+    useState<RenewalSortOptionType>("DATE_ASC");
+  const [sortExpanded, setSortExpanded] = useState(false);
 
   useEffect(() => {
     fetchRenewals();
@@ -30,18 +43,52 @@ const RenewalListPage: React.FC = () => {
       const renewalsList: Renewal[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
+
+        // Handle Firebase Timestamp conversion
+        const convertToTimestamp = (field: any): number => {
+          if (!field) return Date.now();
+
+          // If it's a Firebase Timestamp object
+          if (field && typeof field === "object" && "toDate" in field) {
+            return field.toDate().getTime();
+          }
+
+          // If it's already a number
+          if (typeof field === "number") {
+            return field;
+          }
+
+          // If it's a string, try to parse it
+          if (typeof field === "string") {
+            const parsed = Date.parse(field);
+            return isNaN(parsed) ? Date.now() : parsed;
+          }
+
+          return Date.now();
+        };
+
         renewalsList.push({
           id: doc.id,
           name: data.name || "",
-          startDate: data.startDate || Date.now(),
-          endDate: data.endDate || Date.now(),
+          startDate: convertToTimestamp(data.startDate),
+          endDate: convertToTimestamp(data.endDate),
           comments: data.comments || "",
-          createdAt: data.createdAt || Date.now(),
-          updatedAt: data.updatedAt || Date.now(),
+          createdAt: convertToTimestamp(data.createdAt),
+          updatedAt: convertToTimestamp(data.updatedAt),
         });
       });
 
-      // Sort by end date (soonest first)
+      // Debug: log first renewal to see what we got
+      if (renewalsList.length > 0) {
+        console.log("First renewal data:", renewalsList[0]);
+        console.log("End date as number:", renewalsList[0].endDate);
+        console.log(
+          "Formatted date:",
+          new Date(renewalsList[0].endDate).toString(),
+        );
+      }
+
+      // Initial sort by end date (soonest first)
       renewalsList.sort((a, b) => a.endDate - b.endDate);
       setRenewals(renewalsList);
     } catch (error) {
@@ -66,20 +113,44 @@ const RenewalListPage: React.FC = () => {
   };
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    try {
+      const date = new Date(timestamp);
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn("Invalid date for timestamp:", timestamp);
+        return "-";
+      }
+
+      return date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error, "timestamp:", timestamp);
+      return "-";
+    }
   };
 
-  const getDaysUntil = (endDate: number) => {
-    const now = Date.now();
-    const diff = endDate - now;
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  // Sort renewals based on selected option
+  const sortedRenewals = () => {
+    switch (sortOption) {
+      case "NAME_ASC":
+        return [...renewals].sort((a, b) => a.name.localeCompare(b.name));
+      case "NAME_DESC":
+        return [...renewals].sort((a, b) => b.name.localeCompare(a.name));
+      case "DATE_ASC":
+        return [...renewals].sort((a, b) => a.endDate - b.endDate);
+      case "DATE_DESC":
+        return [...renewals].sort((a, b) => b.endDate - a.endDate);
+      default:
+        return renewals;
+    }
   };
 
-  const filteredRenewals = renewals.filter(
+  // Filter renewals based on search
+  const filteredRenewals = sortedRenewals().filter(
     (renewal) =>
       renewal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (renewal.comments &&
@@ -99,147 +170,432 @@ const RenewalListPage: React.FC = () => {
 
   return (
     <div style={onlineStyles.container}>
-      {/* Top Navigation */}
-      <div style={onlineStyles.topNav}>
-        <button
-          onClick={() => navigate("/online")}
-          style={onlineStyles.navButton}
-          title="Back"
+      {/* Top Navigation - Matching Kotlin Design */}
+      <div
+        style={{
+          ...onlineStyles.topNav,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0",
+          height: "56px",
+          backgroundColor: "#ffffff",
+          borderBottom: "1px solid #e9ecef",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+        }}
+      >
+        {/* Left: Home and Back buttons */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
+          }}
         >
-          ←
-        </button>
-        <div style={onlineStyles.headerLeft}>
-          <div style={onlineStyles.navTitle}>Renewals</div>
-          <div style={onlineStyles.navSubtitle}>
-            Manage your subscription renewals
-          </div>
-        </div>
-        <div style={onlineStyles.headerRight}>
           <button
-            style={onlineStyles.addButton}
-            onClick={() => navigate("/online/renewals/add")}
+            onClick={() => navigate("/online")}
+            style={{
+              ...onlineStyles.navButton,
+              border: "none",
+              backgroundColor: "transparent",
+              borderRadius: "0",
+              width: "48px",
+              height: "100%",
+            }}
+            title="Home"
           >
-            + Add Renewal
+            🏠
+          </button>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              ...onlineStyles.navButton,
+              border: "none",
+              backgroundColor: "transparent",
+              borderRadius: "0",
+              width: "48px",
+              height: "100%",
+            }}
+            title="Back"
+          >
+            ←
+          </button>
+        </div>
+
+        {/* Center: Search bar integrated in top nav */}
+        <div
+          style={{
+            flex: 1,
+            position: "relative",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: "100%",
+              height: "100%",
+              padding: "0 40px 0 16px",
+              border: "none",
+              fontSize: "0.9rem",
+              backgroundColor: "transparent",
+              outline: "none",
+            }}
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              style={{
+                position: "absolute",
+                right: "32px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                color: "#a0aec0",
+                cursor: "pointer",
+                fontSize: "0.8rem",
+                width: "20px",
+                height: "20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Right: Sort and Settings */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          {/* Sort Dropdown */}
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={() => setSortExpanded(!sortExpanded)}
+              style={{
+                ...onlineStyles.navButton,
+                border: "none",
+                backgroundColor: "transparent",
+                borderRadius: "0",
+                width: "48px",
+                height: "100%",
+                color: "#667eea",
+              }}
+              title="Sort options"
+            >
+              ↓
+            </button>
+
+            {sortExpanded && (
+              <>
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 99,
+                  }}
+                  onClick={() => setSortExpanded(false)}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    right: 0,
+                    backgroundColor: "white",
+                    border: "1px solid #e9ecef",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    zIndex: 100,
+                    width: "200px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "12px 16px",
+                      fontSize: "0.8rem",
+                      fontWeight: "600",
+                      color: "#718096",
+                      borderBottom: "1px solid #e9ecef",
+                      backgroundColor: "#f8f9fa",
+                    }}
+                  >
+                    Sort by:
+                  </div>
+                  {Object.entries(RenewalSortOption).map(([key, value]) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setSortOption(key as RenewalSortOptionType);
+                        setSortExpanded(false);
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        width: "100%",
+                        padding: "12px 16px",
+                        border: "none",
+                        backgroundColor:
+                          key === sortOption ? "#f0f4ff" : "white",
+                        cursor: "pointer",
+                        fontSize: "0.9rem",
+                        color: key === sortOption ? "#667eea" : "#333",
+                        textAlign: "left",
+                      }}
+                    >
+                      {key === sortOption && <span>✓</span>}
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Settings button */}
+          <button
+            onClick={() => navigate("/settings")}
+            style={{
+              ...onlineStyles.navButton,
+              border: "none",
+              backgroundColor: "transparent",
+              borderRadius: "0",
+              width: "48px",
+              height: "100%",
+            }}
+            title="Settings"
+          >
+            ⚙️
           </button>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div style={onlineStyles.searchContainer}>
-        <input
-          type="text"
-          placeholder="Search renewals..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={onlineStyles.searchInput}
-        />
-        <span style={onlineStyles.searchIcon}>🔍</span>
-      </div>
+      {/* Floating Add Button */}
+      <button
+        onClick={() => navigate("/online/renewals/add")}
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          width: "56px",
+          height: "56px",
+          borderRadius: "50%",
+          backgroundColor: "#667eea",
+          color: "white",
+          border: "none",
+          fontSize: "1.5rem",
+          cursor: "pointer",
+          boxShadow: "0 4px 12px rgba(102, 126, 234, 0.3)",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+        title="Add Renewal"
+      >
+        +
+      </button>
 
-      {/* Renewals List */}
-      <div style={onlineStyles.section}>
-        <div style={onlineStyles.sectionHeader}>
-          <div style={onlineStyles.sectionTitle}>
-            Renewals ({filteredRenewals.length})
-          </div>
-        </div>
-
+      {/* Compact Renewals List */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "0" }}>
         {filteredRenewals.length === 0 ? (
-          <div style={onlineStyles.emptyState}>
+          <div
+            style={{
+              ...onlineStyles.emptyState,
+              padding: "60px 20px",
+            }}
+          >
             <div style={onlineStyles.emptyIcon}>🔄</div>
-            <div style={onlineStyles.emptyText}>No renewals found</div>
+            <div style={onlineStyles.emptyText}>
+              {searchTerm ? "No matching renewals found" : "No renewals yet"}
+            </div>
             <div style={onlineStyles.emptySubtext}>
-              {searchTerm
-                ? "Try a different search term"
-                : "Add your first renewal"}
+              {!searchTerm && "Add your first renewal"}
             </div>
           </div>
         ) : (
-          <div style={onlineStyles.tableResponsiveContainer}>
-            <table style={onlineStyles.responsiveTable}>
-              <thead>
-                <tr>
-                  <th style={onlineStyles.tableHeader}>Name</th>
-                  <th style={onlineStyles.tableHeader}>Start Date</th>
-                  <th style={onlineStyles.tableHeader}>End Date</th>
-                  <th style={onlineStyles.tableHeader}>Days Left</th>
-                  <th style={onlineStyles.tableHeader}>Comments</th>
-                  <th style={{ ...onlineStyles.tableHeader, width: "150px" }}>
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRenewals.map((renewal) => {
-                  const daysLeft = getDaysUntil(renewal.endDate);
-                  const isExpiringSoon = daysLeft <= 30;
-                  const isExpired = daysLeft < 0;
-                  const rowStyle = isExpired
-                    ? { ...onlineStyles.tableRow, ...onlineStyles.expiredRow }
-                    : isExpiringSoon
-                      ? { ...onlineStyles.tableRow, ...onlineStyles.warningRow }
-                      : onlineStyles.tableRow;
+          <div style={{ padding: "8px" }}>
+            {filteredRenewals.map((renewal) => (
+              <div
+                key={renewal.id}
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  margin: "0 8px 8px 8px",
+                  borderRadius: "8px",
+                  border: "1px solid #e9ecef",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+                onClick={() => navigate(`/online/renewals/view/${renewal.id}`)}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = "#ebf8ff";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = "#f8f9fa";
+                }}
+              >
+                <div
+                  style={{
+                    padding: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    minHeight: "48px",
+                  }}
+                >
+                  {/* Left side - Content */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: "0.95rem",
+                        fontWeight: "500",
+                        color: "#333",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      {renewal.name}
+                    </div>
 
-                  return (
-                    <tr key={renewal.id} style={rowStyle}>
-                      <td style={onlineStyles.tableCell}>{renewal.name}</td>
-                      <td style={onlineStyles.tableCell}>
-                        {formatDate(renewal.startDate)}
-                      </td>
-                      <td style={onlineStyles.tableCell}>
-                        {formatDate(renewal.endDate)}
-                      </td>
-                      <td style={onlineStyles.tableCell}>
-                        <span
-                          style={
-                            isExpired
-                              ? onlineStyles.expiredBadge
-                              : isExpiringSoon
-                                ? onlineStyles.warningBadge
-                                : onlineStyles.normalBadge
-                          }
-                        >
-                          {isExpired ? "Expired" : `${daysLeft} days`}
-                        </span>
-                      </td>
-                      <td style={onlineStyles.tableCell}>
-                        <div
-                          style={onlineStyles.truncateText}
-                          title={renewal.comments}
-                        >
-                          {renewal.comments && renewal.comments.length > 50
-                            ? `${renewal.comments.substring(0, 50)}...`
-                            : renewal.comments || "-"}
-                        </div>
-                      </td>
-                      <td style={onlineStyles.tableCell}>
-                        <div style={onlineStyles.actionButtons}>
-                          <button
-                            style={onlineStyles.editButton}
-                            onClick={() =>
-                              navigate(`/online/renewals/edit/${renewal.id}`)
-                            }
-                          >
-                            Edit
-                          </button>
-                          <button
-                            style={onlineStyles.deleteButton}
-                            onClick={() =>
-                              handleDelete(renewal.id, renewal.name)
-                            }
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    {renewal.comments && (
+                      <div
+                        style={{
+                          fontSize: "0.8rem",
+                          color: "#718096",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {renewal.comments}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Center - End Date */}
+                  <div
+                    style={{
+                      marginLeft: "8px",
+                      fontSize: "0.85rem",
+                      color: "#666",
+                      whiteSpace: "nowrap",
+                      padding: "0 12px",
+                    }}
+                  >
+                    {formatDate(renewal.endDate)}
+                  </div>
+
+                  {/* Right side - Action buttons */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <button
+                      style={{
+                        padding: "8px",
+                        backgroundColor: "#4299e1",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "0.75rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/online/renewals/edit/${renewal.id}`);
+                      }}
+                      title="Edit"
+                    >
+                      ✏️
+                    </button>
+
+                    <button
+                      style={{
+                        padding: "8px",
+                        backgroundColor: "#f56565",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "0.75rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(renewal.id, renewal.name);
+                      }}
+                      title="Delete"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        button:hover {
+          opacity: 0.8;
+        }
+        
+        input:focus {
+          outline: none;
+        }
+        
+        /* Hide scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+          width: 4px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 2px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: #a8a8a8;
+        }
+      `}</style>
     </div>
   );
 };

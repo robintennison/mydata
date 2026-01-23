@@ -6,7 +6,7 @@ import styles from "./MyDataHomepage.module.css";
 import {
   calculateTotalBalance,
   calculateTotalDeposits,
-  getUpcomingMaturities,
+  getNextMaturities,
 } from "./modules/Banking/utils/bankingCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 
@@ -34,26 +34,32 @@ const MyDataHomepage: React.FC = () => {
         adjustments,
         settings?.showInactive,
       ),
-      upcomingMaturities: getUpcomingMaturities(deposits, 30, 5),
+      upcomingMaturities: getNextMaturities(deposits, 5),
     };
   }, [accounts, deposits, adjustments, settings?.showInactive, loading]);
 
-  // Format lakhs for display - REMOVED "L" suffix
+  // Format lakhs for display
   const formatLakhs = (amount: number): string => {
-    return (amount / 100000).toFixed(2); // Just the number, no "L"
+    return (amount / 100000).toFixed(2);
   };
 
-  const formatDate = (timestamp: number): string => {
+  const formatDateShort = (timestamp: number): string => {
     return new Date(timestamp).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
     });
   };
 
   const getAccountName = (accountId: string) => {
     const account = accounts.find((a) => a.id === accountId);
     return account ? account.acctCode : "Unknown";
+  };
+
+  // Get first 5 characters of comments or empty string
+  const getShortComments = (comments: string): string => {
+    if (!comments || comments.trim().length === 0) return "-";
+    return comments.substring(0, 5) + (comments.length > 5 ? "..." : "");
   };
 
   // Calculate active deposits count
@@ -167,66 +173,112 @@ const MyDataHomepage: React.FC = () => {
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>📅</div>
             <div className={styles.emptyText}>No upcoming maturities</div>
-            <div className={styles.emptySubtext}>Next 30 days are clear</div>
+            <div className={styles.emptySubtext}>No active deposits found</div>
           </div>
         ) : (
-          <div className={styles.maturitiesList}>
-            {upcomingMaturities.map((deposit) => {
-              const daysUntil = Math.ceil(
-                (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-              );
+          <div className={styles.tableResponsiveContainer}>
+            {/* Desktop Table View */}
+            <table className={styles.responsiveTable}>
+              <thead>
+                <tr>
+                  <th>Account</th>
+                  <th>Amount (L)</th>
+                  <th>Comments</th>
+                  <th>Maturity Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcomingMaturities.map((deposit) => {
+                  const daysUntil = Math.ceil(
+                    (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
+                  );
+                  const isImmediate = daysUntil <= 1;
 
-              return (
-                <div
-                  key={deposit.id}
-                  className={styles.maturityCard}
-                  onClick={() =>
-                    navigate(`/banking/deposits/edit/${deposit.id}`)
-                  }
-                >
-                  <div className={styles.maturityLeft}>
-                    <div className={styles.maturityDate}>
-                      {formatDate(deposit.endDate)}
-                    </div>
-                    <div className={styles.maturityAccount}>
-                      {getAccountName(deposit.accountId)}
-                    </div>
-                    <div className={styles.maturityDays}>
-                      {daysUntil === 0
-                        ? "Today"
-                        : `${daysUntil} day${daysUntil !== 1 ? "s" : ""}`}
-                    </div>
-                  </div>
-                  <div className={styles.maturityRight}>
-                    <div className={styles.maturityAmount}>
-                      {formatLakhs(deposit.amount)}
-                    </div>
-                    <div
-                      className={styles.maturityStatus}
-                      style={{ color: deposit.active ? "#34a853" : "#ea4335" }}
+                  return (
+                    <tr
+                      key={deposit.id}
+                      className={isImmediate ? styles.immediateRow : ""}
+                      onClick={() =>
+                        navigate(`/banking/deposits/edit/${deposit.id}`)
+                      }
+                      style={{ cursor: "pointer" }}
                     >
-                      ●
+                      <td>{getAccountName(deposit.accountId)}</td>
+                      <td>{formatLakhs(deposit.amount)}</td>
+                      <td>{getShortComments(deposit.comments || "")}</td>
+                      <td>
+                        <div className={styles.dateCell}>
+                          <span className={styles.dateText}>
+                            {formatDateShort(deposit.endDate)}
+                          </span>
+                          {isImmediate && (
+                            <span className={styles.immediateBadge}>
+                              {daysUntil === 0 ? "Today" : "Tomorrow"}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {/* Mobile Card View - Only shows on mobile */}
+            <div className={styles.mobileCardView}>
+              {upcomingMaturities.map((deposit) => {
+                const daysUntil = Math.ceil(
+                  (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
+                );
+                const isImmediate = daysUntil <= 1;
+
+                return (
+                  <div
+                    key={deposit.id}
+                    className={`${styles.mobileCard} ${isImmediate ? styles.immediateRow : ""}`}
+                    onClick={() =>
+                      navigate(`/banking/deposits/edit/${deposit.id}`)
+                    }
+                  >
+                    <div className={styles.mobileCardRow}>
+                      <span className={styles.mobileCardLabel}>Account:</span>
+                      <span className={styles.mobileCardValue}>
+                        {getAccountName(deposit.accountId)}
+                      </span>
+                    </div>
+                    <div className={styles.mobileCardRow}>
+                      <span className={styles.mobileCardLabel}>Amount:</span>
+                      <span className={styles.mobileCardValue}>
+                        {formatLakhs(deposit.amount)} L
+                      </span>
+                    </div>
+                    <div className={styles.mobileCardRow}>
+                      <span className={styles.mobileCardLabel}>Comments:</span>
+                      <span className={styles.mobileCardValue}>
+                        {getShortComments(deposit.comments || "")}
+                      </span>
+                    </div>
+                    <div className={styles.mobileCardRow}>
+                      <span className={styles.mobileCardLabel}>Maturity:</span>
+                      <span className={styles.mobileCardValue}>
+                        <div className={styles.dateCell}>
+                          <span className={styles.dateText}>
+                            {formatDateShort(deposit.endDate)}
+                          </span>
+                          {isImmediate && (
+                            <span className={styles.immediateBadge}>
+                              {daysUntil === 0 ? "Today" : "Tomorrow"}
+                            </span>
+                          )}
+                        </div>
+                      </span>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
-      </div>
-
-      {/* Placeholder Section for Future Features - Compact */}
-      <div className={styles.section}>
-        <div className={styles.sectionHeader} style={{ marginBottom: "15px" }}>
-          <div className={styles.sectionTitle}>Coming Soon</div>
-        </div>
-        <div className={styles.placeholderCard}>
-          <div className={styles.placeholderTitle}>Advanced Analytics</div>
-          <div className={styles.placeholderText}>
-            Investment insights, growth projections, and performance reports
-            coming soon.
-          </div>
-        </div>
       </div>
     </div>
   );

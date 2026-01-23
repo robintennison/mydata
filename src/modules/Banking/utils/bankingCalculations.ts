@@ -66,3 +66,42 @@ export const getUpcomingMaturities = (
         .sort((a, b) => a.endDate - b.endDate)
         .slice(0, limit);
 };
+
+/**
+ * Gets the next N upcoming maturities regardless of timeframe.
+ * Returns deposits in ascending order (closest first).
+ */
+export const getNextMaturities = (
+    deposits: Deposit[],
+    limit: number = 5
+): Deposit[] => {
+    const today = Date.now();
+
+    return deposits
+        .filter(
+            (deposit) =>
+                deposit.active !== false &&
+                deposit.endDate > today
+        )
+        .sort((a, b) => a.endDate - b.endDate)
+        .slice(0, limit);
+};
+
+/**
+ * Gets the next N upcoming maturities in descending order (farthest first).
+ */
+export const getNextMaturitiesDescending = (
+    deposits: Deposit[],
+    limit: number = 5
+): Deposit[] => {
+    const today = Date.now();
+
+    return deposits
+        .filter(
+            (deposit) =>
+                deposit.active !== false &&
+                deposit.endDate > today
+        )
+        .sort((a, b) => b.endDate - a.endDate)
+        .slice(0, limit);
+};

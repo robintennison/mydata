@@ -75,9 +75,19 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const { setError } = useError();
-  const settingsRef = doc(firestore, "settings", "app");
+  const [hasPermissionError, setHasPermissionError] = useState(false);
 
   useEffect(() => {
+    // Don't try to load settings if we already know we don't have permission
+    if (hasPermissionError) {
+      console.log("Using default settings due to previous permission error");
+      setSettings(defaultSettings);
+      setLoading(false);
+      return;
+    }
+
+    const settingsRef = doc(firestore, "settings", "app");
+
     const unsubscribe = onSnapshot(
       settingsRef,
       (docSnapshot) => {
@@ -96,9 +106,12 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
             EMW_interest: data.EMW_interest ?? 5,
             EMW_Date: data.EMW_Date || "2044-10",
           });
+          setHasPermissionError(false); // Reset if we succeed
         } else {
+          // Only try to create default settings if we have permission
           setDoc(settingsRef, defaultSettings).catch(() => {
-            setError("Failed to initialize settings.");
+            // If we can't create, just use defaults without error
+            setSettings(defaultSettings);
           });
           setSettings(defaultSettings);
         }
@@ -106,16 +119,44 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       },
       (error) => {
         console.error("Firebase onSnapshot error:", error);
-        setError("Firebase connection error.");
+
+        // Check if it's a permission error
+        if (error.code === "permission-denied") {
+          console.log(
+            "Permission denied for settings - using defaults without Firestore",
+          );
+          setHasPermissionError(true); // Mark that we don't have permission
+          setSettings(defaultSettings);
+          // DON'T set error for permission-denied - it's expected before login
+        } else if (
+          error.code === "unavailable" ||
+          error.message.includes("network")
+        ) {
+          console.log("Firebase unavailable - using default settings");
+          setSettings(defaultSettings);
+          setError("Firebase connection error.");
+        } else {
+          // Only show error for unexpected errors
+          setError("Firebase connection error.");
+        }
         setLoading(false);
       },
     );
 
     return () => unsubscribe();
-  }, [setError]);
+  }, [setError, hasPermissionError]); // Add hasPermissionError to dependencies
 
   const updateSettings = async (updates: Partial<Settings>) => {
+    // If we had permission errors, don't try to update Firestore
+    if (hasPermissionError) {
+      console.log("Cannot update settings: No Firestore permission");
+      // Still update local state for better UX
+      setSettings((prev) => (prev ? { ...prev, ...updates } : null));
+      return;
+    }
+
     try {
+      const settingsRef = doc(firestore, "settings", "app");
       await updateDoc(settingsRef, updates);
     } catch (error) {
       console.error("Error updating settings:", error);
@@ -127,7 +168,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     const trimmed = location.trim();
     if (!trimmed) return;
 
+    if (hasPermissionError) {
+      console.log("Cannot add location: No Firestore permission");
+      // Update local state
+      setSettings((prev) =>
+        prev
+          ? {
+              ...prev,
+              locations: [...prev.locations, trimmed],
+            }
+          : null,
+      );
+      return;
+    }
+
     try {
+      const settingsRef = doc(firestore, "settings", "app");
       await updateDoc(settingsRef, {
         locations: arrayUnion(trimmed),
       });
@@ -138,7 +194,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   };
 
   const removeLocation = async (location: string) => {
+    if (hasPermissionError) {
+      console.log("Cannot remove location: No Firestore permission");
+      // Update local state
+      setSettings((prev) =>
+        prev
+          ? {
+              ...prev,
+              locations: prev.locations.filter((l) => l !== location),
+            }
+          : null,
+      );
+      return;
+    }
+
     try {
+      const settingsRef = doc(firestore, "settings", "app");
       await updateDoc(settingsRef, {
         locations: arrayRemove(location),
       });
@@ -152,7 +223,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     const trimmed = purpose.trim();
     if (!trimmed) return;
 
+    if (hasPermissionError) {
+      console.log("Cannot add boughtFor: No Firestore permission");
+      // Update local state
+      setSettings((prev) =>
+        prev
+          ? {
+              ...prev,
+              boughtFor: [...prev.boughtFor, trimmed],
+            }
+          : null,
+      );
+      return;
+    }
+
     try {
+      const settingsRef = doc(firestore, "settings", "app");
       await updateDoc(settingsRef, {
         boughtFor: arrayUnion(trimmed),
       });
@@ -163,7 +249,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   };
 
   const removeBoughtFor = async (purpose: string) => {
+    if (hasPermissionError) {
+      console.log("Cannot remove boughtFor: No Firestore permission");
+      // Update local state
+      setSettings((prev) =>
+        prev
+          ? {
+              ...prev,
+              boughtFor: prev.boughtFor.filter((p) => p !== purpose),
+            }
+          : null,
+      );
+      return;
+    }
+
     try {
+      const settingsRef = doc(firestore, "settings", "app");
       await updateDoc(settingsRef, {
         boughtFor: arrayRemove(purpose),
       });
@@ -176,7 +277,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   return (
     <SettingsContext.Provider
       value={{
-        settings,
+        settings: settings || defaultSettings, // Always return settings
         loading,
         updateSettings,
         addLocation,

@@ -2,6 +2,7 @@
 import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import styles from "../../App.module.css";
+import HeaderNav from "../Navigation/HeaderNav";
 
 const Header: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
@@ -29,6 +30,7 @@ const Header: React.FC = () => {
         </div>
 
         <div className={styles.headerActions}>
+          <HeaderNav />
           <button
             className={styles.logoutButton}
             onClick={handleLogout}

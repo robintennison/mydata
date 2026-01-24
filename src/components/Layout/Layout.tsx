@@ -1,8 +1,8 @@
 // components/Layout/Layout.tsx
 import React from "react";
 import Header from "./Header";
-import BottomNav from "../Navigation/BottomNav";
 import "./Layout.css";
+import BottomNav from "../Navigation/BottomNav";
 
 interface LayoutProps {
   children: React.ReactNode;

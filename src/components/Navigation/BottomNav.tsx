@@ -3,21 +3,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import styles from "./BottomNav.module.css";
-
-interface NavItem {
-  path: string;
-  label: string;
-  icon: string;
-  requiresAuth: boolean;
-}
-
-const navItems: NavItem[] = [
-  { path: "/", label: "Home", icon: "🏠", requiresAuth: true },
-  { path: "/banking", label: "Banking", icon: "🏦", requiresAuth: true },
-  { path: "/jewellery", label: "Jewellery", icon: "💎", requiresAuth: true },
-  { path: "/online", label: "Online", icon: "🌐", requiresAuth: true },
-  // Removed: { path: "/properties", label: "Properties", icon: "🏢", requiresAuth: true },
-];
+import { navItems } from "../../lib/navigation";
 
 const BottomNav: React.FC = () => {
   const navigate = useNavigate();

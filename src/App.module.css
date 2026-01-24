@@ -9,6 +9,10 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  background-color: var(--color-white);
 }
 
 /* Updated loading styles */
@@ -100,7 +104,7 @@
 .header {
   background-color: var(--color-primary-600);
   color: var(--color-white);
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: var(--spacing-md) 0;
   box-shadow: 0 2px 10px rgba(66, 133, 244, 0.3);
   position: sticky;
   top: 0;
@@ -111,9 +115,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  max-width: 600px;
   margin: 0 auto;
   width: 100%;
+  padding: 0 var(--spacing-md);
 }
 
 .logoContainer {
@@ -170,10 +175,10 @@
 
 .main {
   flex: 1;
-  max-width: 1200px;
+  max-width: 600px;
   width: 100%;
   margin: 0 auto;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-md);
 }
 
 .footer {
@@ -185,9 +190,43 @@
   margin-top: auto;
 }
 
+.footerContent {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Desktop view with shadow and rounded corners */
+@media (min-width: 601px) {
+  .container {
+    background-color: var(--color-gray-200);
+    padding: 20px 0;
+  }
+  
+  .app {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    min-height: calc(100vh - 40px);
+  }
+}
+
+/* Mobile view - full width */
+@media (max-width: 600px) {
+  .app {
+    max-width: 100%;
+    border-radius: 0;
+  }
+  
+  .container {
+    padding: 0;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .headerContent {
+  .headerContent,
+  .main,
+  .footerContent {
     padding: 0 var(--spacing-md);
   }
   
@@ -226,4 +265,59 @@
   .loadingContainer p {
     font-size: 1rem;
   }
+  
+  .headerContent,
+  .main {
+    padding: 0 var(--spacing-sm);
+  }
+
+  /* Add this to your App.module.css */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  background-color: var(--color-white);
+  /* Add bottom padding to account for fixed BottomNav */
+  padding-bottom: 70px;
+}
+
+.main {
+  flex: 1;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-md);
+  /* Remove any bottom padding here since .app has it */
+}
+
+.bottomNavContainer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+  background-color: transparent;
+  width: 100%;
+  max-width: 600px;
+}
+.bottomNav {
+  width: 100%;
+  background-color: var(--color-white, #ffffff);
+  border-top: 1px solid var(--color-gray-200, #e5e7eb);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--spacing-xs, 0.5rem) 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+  height: 70px;
+  border-radius: 16px 16px 0 0;
+  pointer-events: auto;
+  padding-bottom: max(var(--spacing-xs, 0.5rem), env(safe-area-inset-bottom, 0px));
+}
 }

@@ -1,12 +1,10 @@
 // components/Layout/Header.tsx
 import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
-//import { useNavigate } from "react-router-dom";
 import styles from "../../App.module.css";
 
 const Header: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
-  //const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -26,7 +24,7 @@ const Header: React.FC = () => {
         <div className={styles.logoContainer}>
           <div className={styles.logo}>
             <span className={styles.logoIcon}>💰</span>
-            <span>MyData Finance</span>
+            <span>MyData</span>
           </div>
         </div>
 

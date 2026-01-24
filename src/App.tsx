@@ -4,6 +4,7 @@ import { AppRoutes } from "./routes";
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { ErrorProvider } from "./contexts/ErrorContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import BottomNav from "./components/Navigation/BottomNav";
 
 // Import global styles
 import "./shared/styles/design-tokens.css";
@@ -11,13 +12,24 @@ import "./shared/styles/base.css";
 import "./shared/styles/utilities.css";
 import "./App.css";
 
+// Import the CSS module
+import styles from "./App.module.css";
+
 function App() {
   return (
     <ErrorProvider>
       <SettingsProvider>
         <BrowserRouter>
           <AuthProvider>
-            <AppRoutes />
+            <div className={styles.container}>
+              <div className={styles.app}>
+                {/* REMOVE Header here - it's already in AppRoutes */}
+                <main className={styles.main}>
+                  <AppRoutes />
+                </main>
+                <BottomNav />
+              </div>
+            </div>
           </AuthProvider>
         </BrowserRouter>
       </SettingsProvider>

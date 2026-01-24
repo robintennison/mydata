@@ -1,126 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { onlineStyles } from "../styles/onlineStyles"; // Import shared styles
-import OnlineNavigation from "./OnlineNavigation";
+import { onlineStyles } from "../styles/onlineStyles";
+import OnlineListTab from "./OnlineListTab"; // Add this import
+import RenewalListTab from "./RenewalListTab"; // Add this import
+import CategoryListTab from "./CategoryListTab"; // Add this import
 
-// Extend shared styles for homepage-specific styles
-const homepageStyles = {
-  ...onlineStyles,
-
-  // Homepage-specific styles
-  centeredContainer: {
-    display: "flex",
-    flexDirection: "column" as const,
-    minHeight: "100vh",
-    backgroundColor: "#f5f5f5",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  // Stats Cards
-  statsRow: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "10px",
-    padding: "0 15px",
-    marginBottom: "15px",
-  } as React.CSSProperties,
-
-  statsCard: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: "12px 10px",
-    textAlign: "center" as const,
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
-    border: "1px solid #e9ecef",
-    transition: "transform 0.2s, box-shadow 0.2s",
-    cursor: "pointer",
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "center",
-    minHeight: "80px",
-  } as React.CSSProperties,
-
-  statsLabel: {
-    fontSize: "0.75rem",
-    fontWeight: "600",
-    color: "#666",
-    marginBottom: "6px",
-  } as React.CSSProperties,
-
-  statsValue: {
-    fontSize: "1.1rem",
-    fontWeight: "700",
-    color: "#333",
-    marginBottom: "3px",
-  } as React.CSSProperties,
-
-  statsSubtitle: {
-    fontSize: "0.7rem",
-    color: "#888",
-  } as React.CSSProperties,
-
-  // Info Cards
-  infoGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
-    gap: "12px",
-    marginTop: "15px",
-  } as React.CSSProperties,
-
-  infoCard: {
-    backgroundColor: "#f8f9fa",
-    borderRadius: "10px",
-    padding: "15px",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    cursor: "pointer",
-  } as React.CSSProperties,
-
-  infoIcon: {
-    fontSize: "24px",
-    color: "#667eea",
-  } as React.CSSProperties,
-
-  infoContent: {
-    flex: 1,
-  } as React.CSSProperties,
-
-  infoTitle: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#2d3748",
-    marginBottom: "4px",
-  } as React.CSSProperties,
-
-  infoText: {
-    fontSize: "12px",
-    color: "#718096",
-    lineHeight: "1.4",
-  } as React.CSSProperties,
-
-  // Badge
-  expiringBadge: {
-    display: "inline-block",
-    backgroundColor: "#fed7d7",
-    color: "#c53030",
-    padding: "2px 8px",
-    borderRadius: "10px",
-    fontSize: "11px",
-    fontWeight: "600",
-    marginTop: "4px",
-  } as React.CSSProperties,
+// Tab components
+const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
+  switch (activeTab) {
+    case "items":
+      return <OnlineListTab />;
+    case "renewals":
+      return <RenewalListTab />;
+    case "categories":
+      return <CategoryListTab />;
+    default:
+      return <OnlineListTab />;
+  }
 };
 
 const OnlineHomepage: React.FC = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<
+    "items" | "renewals" | "categories"
+  >("items");
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({
-    categories: 0,
     items: 0,
     renewals: 0,
+    categories: 0,
     expiringSoon: 0,
   });
 
@@ -175,48 +84,25 @@ const OnlineHomepage: React.FC = () => {
     }
   };
 
-  const infoCards = [
-    {
-      icon: "📁",
-      title: "Categories",
-      text: "Organize items into categories for better management",
-      path: "/online/categories",
-      count: counts.categories,
-      color: "#4299e1",
-    },
-    {
-      icon: "🛒",
-      title: "Online Items",
-      text: "Track your online purchases and digital assets",
-      path: "/online/items",
-      count: counts.items,
-      color: "#48bb78",
-    },
-    {
-      icon: "🔄",
-      title: "Renewals",
-      text: "Manage subscription renewals and deadlines",
-      path: "/online/renewals",
-      count: counts.renewals,
-      color: "#ed8936",
-      badge:
-        counts.expiringSoon > 0 ? `${counts.expiringSoon} expiring soon` : null,
-    },
-    {
-      icon: "📊",
-      title: "Dashboard",
-      text: "Overview of your online module",
-      path: "/online",
-      count: 0,
-      color: "#9f7aea",
-    },
-  ];
+  const handleAddClick = () => {
+    switch (activeTab) {
+      case "items":
+        navigate("/online/items/add");
+        break;
+      case "renewals":
+        navigate("/online/renewals/add");
+        break;
+      case "categories":
+        navigate("/online/categories/add");
+        break;
+    }
+  };
 
   if (loading) {
     return (
-      <div style={homepageStyles.centeredContainer}>
-        <div style={homepageStyles.loading}>
-          <div style={homepageStyles.spinner}></div>
+      <div style={onlineStyles.container}>
+        <div style={onlineStyles.loading}>
+          <div style={onlineStyles.spinner}></div>
           <p>Loading online module...</p>
         </div>
       </div>
@@ -224,284 +110,198 @@ const OnlineHomepage: React.FC = () => {
   }
 
   return (
-    <div style={homepageStyles.container}>
-      {/* Top Navigation */}
-      <div style={homepageStyles.topNav}>
+    <div style={onlineStyles.container}>
+      {/* Top Navigation with Add button */}
+      <div style={onlineStyles.topNav}>
         <button
           onClick={() => navigate("/")}
-          style={homepageStyles.navButton}
+          style={onlineStyles.navButton}
           title="Back to Home"
         >
           🏠
         </button>
-        <div style={homepageStyles.navTitle}>Online / Dashboard</div>
+        <div style={onlineStyles.navTitle}>Online</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Add button - changes color based on active tab */}
+          <button
+            onClick={handleAddClick}
+            style={{
+              ...onlineStyles.navButton,
+              backgroundColor:
+                activeTab === "items"
+                  ? "#48bb78"
+                  : activeTab === "renewals"
+                    ? "#ed8936"
+                    : "#4299e1",
+              color: "white",
+              border: "none",
+              fontSize: "1.2rem",
+              width: "40px",
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            title={`Add ${activeTab === "items" ? "Item" : activeTab === "renewals" ? "Renewal" : "Category"}`}
+          >
+            +
+          </button>
+          <button
+            onClick={() => navigate("/settings")}
+            style={onlineStyles.navButton}
+            title="Settings"
+          >
+            ⚙️
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div
+        style={{
+          display: "flex",
+          backgroundColor: "white",
+          borderBottom: "1px solid #e9ecef",
+          padding: "0 15px",
+        }}
+      >
         <button
-          onClick={() => navigate("/settings")}
-          style={homepageStyles.navButton}
-          title="Settings"
+          onClick={() => setActiveTab("items")}
+          style={{
+            flex: 1,
+            padding: "15px 0",
+            backgroundColor: "transparent",
+            border: "none",
+            borderBottom:
+              activeTab === "items"
+                ? "2px solid #48bb78"
+                : "2px solid transparent",
+            color: activeTab === "items" ? "#48bb78" : "#666",
+            fontWeight: activeTab === "items" ? "600" : "500",
+            fontSize: "0.95rem",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            position: "relative",
+          }}
         >
-          ⚙️
+          Items
+          {counts.items > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: "8px",
+                right: "15px",
+                backgroundColor: "#48bb78",
+                color: "white",
+                fontSize: "0.7rem",
+                padding: "2px 6px",
+                borderRadius: "10px",
+                minWidth: "20px",
+                textAlign: "center",
+              }}
+            >
+              {counts.items}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("renewals")}
+          style={{
+            flex: 1,
+            padding: "15px 0",
+            backgroundColor: "transparent",
+            border: "none",
+            borderBottom:
+              activeTab === "renewals"
+                ? "2px solid #ed8936"
+                : "2px solid transparent",
+            color: activeTab === "renewals" ? "#ed8936" : "#666",
+            fontWeight: activeTab === "renewals" ? "600" : "500",
+            fontSize: "0.95rem",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            position: "relative",
+          }}
+        >
+          Renewals
+          {counts.renewals > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: "8px",
+                right: "15px",
+                backgroundColor:
+                  counts.expiringSoon > 0 ? "#ed8936" : "#4299e1",
+                color: "white",
+                fontSize: "0.7rem",
+                padding: "2px 6px",
+                borderRadius: "10px",
+                minWidth: "20px",
+                textAlign: "center",
+              }}
+            >
+              {counts.renewals}
+              {counts.expiringSoon > 0 && (
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: "0.6rem",
+                    marginTop: "1px",
+                    color: "#fffaf0",
+                  }}
+                >
+                  {counts.expiringSoon} soon
+                </span>
+              )}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("categories")}
+          style={{
+            flex: 1,
+            padding: "15px 0",
+            backgroundColor: "transparent",
+            border: "none",
+            borderBottom:
+              activeTab === "categories"
+                ? "2px solid #4299e1"
+                : "2px solid transparent",
+            color: activeTab === "categories" ? "#4299e1" : "#666",
+            fontWeight: activeTab === "categories" ? "600" : "500",
+            fontSize: "0.95rem",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            position: "relative",
+          }}
+        >
+          Categories
+          {counts.categories > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: "8px",
+                right: "15px",
+                backgroundColor: "#9f7aea",
+                color: "white",
+                fontSize: "0.7rem",
+                padding: "2px 6px",
+                borderRadius: "10px",
+                minWidth: "20px",
+                textAlign: "center",
+              }}
+            >
+              {counts.categories}
+            </span>
+          )}
         </button>
       </div>
 
-      {/* Main Content */}
-      <div style={homepageStyles.contentWrapper}>
-        {/* Stats Overview */}
-        <div style={homepageStyles.statsRow}>
-          <div
-            style={homepageStyles.statsCard}
-            onClick={() => navigate("/online/categories")}
-          >
-            <div style={homepageStyles.statsLabel}>Categories</div>
-            <div style={homepageStyles.statsValue}>{counts.categories}</div>
-          </div>
-
-          <div
-            style={homepageStyles.statsCard}
-            onClick={() => navigate("/online/items")}
-          >
-            <div style={homepageStyles.statsLabel}>Items</div>
-            <div style={homepageStyles.statsValue}>{counts.items}</div>
-          </div>
-
-          <div
-            style={homepageStyles.statsCard}
-            onClick={() => navigate("/online/renewals")}
-          >
-            <div style={homepageStyles.statsLabel}>Renewals</div>
-            <div style={homepageStyles.statsValue}>{counts.renewals}</div>
-            {counts.expiringSoon > 0 && (
-              <div style={homepageStyles.expiringBadge}>
-                {counts.expiringSoon} soon
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Info Grid */}
-        <div style={homepageStyles.section}>
-          <div style={homepageStyles.sectionHeader}>
-            <div style={homepageStyles.sectionTitle}>Quick Overview</div>
-          </div>
-          <div style={homepageStyles.infoGrid}>
-            {infoCards.map((card, index) => (
-              <div
-                key={index}
-                style={homepageStyles.infoCard}
-                onClick={() => navigate(card.path)}
-              >
-                <div
-                  style={{
-                    ...homepageStyles.infoIcon,
-                    color: card.color,
-                  }}
-                >
-                  {card.icon}
-                </div>
-                <div style={homepageStyles.infoContent}>
-                  <div style={homepageStyles.infoTitle}>{card.title}</div>
-                  <div style={homepageStyles.infoText}>{card.text}</div>
-                  {card.badge && (
-                    <div
-                      style={{
-                        marginTop: "4px",
-                        fontSize: "11px",
-                        fontWeight: "600",
-                        color: "#c05621",
-                        backgroundColor: "#feebc8",
-                        padding: "2px 6px",
-                        borderRadius: "8px",
-                        display: "inline-block",
-                      }}
-                    >
-                      {card.badge}
-                    </div>
-                  )}
-                </div>
-                {card.count > 0 && (
-                  <div
-                    style={{
-                      backgroundColor: card.color,
-                      color: "white",
-                      padding: "2px 8px",
-                      borderRadius: "12px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                    }}
-                  >
-                    {card.count}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div style={homepageStyles.section}>
-          <div style={homepageStyles.sectionHeader}>
-            <div style={homepageStyles.sectionTitle}>Quick Actions</div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "10px",
-              marginTop: "10px",
-            }}
-          >
-            <button
-              onClick={() => navigate("/online/items/add")}
-              style={{
-                width: "100%",
-                padding: "12px",
-                backgroundColor: "#48bb78",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "500",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-              }}
-            >
-              <span>➕</span>
-              <span>Add New Item</span>
-            </button>
-            <button
-              onClick={() => navigate("/online/renewals/add")}
-              style={{
-                width: "100%",
-                padding: "12px",
-                backgroundColor: "#ed8936",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "500",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-              }}
-            >
-              <span>📅</span>
-              <span>Add Renewal</span>
-            </button>
-            <button
-              onClick={() => navigate("/online/categories/add")}
-              style={{
-                width: "100%",
-                padding: "12px",
-                backgroundColor: "#4299e1",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "500",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-              }}
-            >
-              <span>🏷️</span>
-              <span>Add Category</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Tips Section */}
-        <div style={homepageStyles.section}>
-          <div style={homepageStyles.sectionHeader}>
-            <div style={homepageStyles.sectionTitle}>Tips</div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "12px",
-                padding: "12px",
-                backgroundColor: "#f0fff4",
-                borderRadius: "8px",
-                border: "1px solid #c6f6d5",
-              }}
-            >
-              <span style={{ fontSize: "18px", color: "#38a169" }}>💡</span>
-              <div>
-                <div
-                  style={{
-                    fontWeight: "600",
-                    color: "#276749",
-                    fontSize: "14px",
-                  }}
-                >
-                  Organize with Categories
-                </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#718096",
-                    marginTop: "4px",
-                  }}
-                >
-                  Create categories first to better organize your online items
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "12px",
-                padding: "12px",
-                backgroundColor: "#fffaf0",
-                borderRadius: "8px",
-                border: "1px solid #feebc8",
-              }}
-            >
-              <span style={{ fontSize: "18px", color: "#d69e2e" }}>⏰</span>
-              <div>
-                <div
-                  style={{
-                    fontWeight: "600",
-                    color: "#975a16",
-                    fontSize: "14px",
-                  }}
-                >
-                  Track Renewals
-                </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#718096",
-                    marginTop: "4px",
-                  }}
-                >
-                  Add renewals to never miss subscription deadlines
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Online Navigation Component */}
-        <OnlineNavigation />
-
-        {/* Bottom spacing */}
-        <div style={{ height: "20px" }}></div>
+      {/* Tab Content */}
+      <div style={{ flex: 1, overflow: "hidden" }}>
+        <TabContent activeTab={activeTab} />
       </div>
 
       <style>{`
@@ -512,11 +312,11 @@ const OnlineHomepage: React.FC = () => {
         
         button:hover {
           opacity: 0.9;
-          transform: translateY(-1px);
         }
         
-        button:active {
-          transform: translateY(0);
+        /* Tab button hover effect */
+        div > button[style*="background-color: transparent"]:hover {
+          background-color: #f8f9fa;
         }
       `}</style>
     </div>

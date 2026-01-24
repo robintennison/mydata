@@ -38,10 +38,8 @@ const BankingHomePage: React.FC = () => {
         });
         break;
       case "history":
-        // Navigate to add history form with callback to return to tabs
-        navigate("/banking/history/add", {
-          state: { returnTo: "/banking", activeTab: "history" },
-        });
+        // History doesn't have add function - removed per requirement
+        // No action needed
         break;
       case "summary":
         // Summary doesn't typically have add function
@@ -56,12 +54,9 @@ const BankingHomePage: React.FC = () => {
   };
 
   // Check if current tab should show Add button
+  // REMOVED history from the condition as per requirement
   const shouldShowAddButton = () => {
-    return (
-      activeTab === "accounts" ||
-      activeTab === "deposits" ||
-      activeTab === "history"
-    );
+    return activeTab === "accounts" || activeTab === "deposits";
   };
 
   // Get button title based on active tab
@@ -71,8 +66,6 @@ const BankingHomePage: React.FC = () => {
         return "Add New Account";
       case "deposits":
         return "Add New Deposit";
-      case "history":
-        return "Add History Record";
       default:
         return "Add";
     }

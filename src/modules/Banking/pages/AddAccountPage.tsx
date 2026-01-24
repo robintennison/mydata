@@ -1,403 +1,352 @@
+// src/modules/banking/AddAccountPage.tsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { useBankingData } from "../hooks/useBankingData";
-import { useBankingOperations } from "../hooks/useBankingOperations";
-import { accountsPageStyles } from "../styles/AccountsPageStyles";
+import { addAccountPageStyles as styles } from "../styles/AddAccountPage.styles";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { firestore } from "../../../lib/firebase";
 
-const AccountsPage: React.FC = () => {
+const AddAccountPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { settings } = useSettings();
-  const { accounts, loading } = useBankingData();
-  const { handleDeleteAccount } = useBankingOperations();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [accountToDelete, setAccountToDelete] = useState<any>(null);
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-    }).format(amount);
+  // Get return path and active tab from location state or use defaults
+  const returnTo = location.state?.returnTo || "/banking";
+  const activeTab = location.state?.activeTab || "accounts";
+
+  const [formData, setFormData] = useState({
+    acctCode: "",
+    bankName: "",
+    accountNumber: "",
+    savingsAmount: "",
+    mpin: "",
+    isActive: true,
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Handle form input changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    // Clear error when user starts typing
+    if (error) setError(null);
   };
 
-  // Helper function to check if account is active
-  const isAccountActive = (account: any): boolean => {
-    if (account.isActive !== undefined) {
-      return account.isActive === true;
+  // Handle checkbox change for isActive
+  const handleIsActiveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      isActive: e.target.checked,
+    }));
+  };
+
+  // Validate form data
+  const validateForm = (): boolean => {
+    if (!formData.acctCode.trim()) {
+      setError("Account code is required");
+      return false;
     }
+
+    if (!formData.bankName.trim()) {
+      setError("Bank name is required");
+      return false;
+    }
+
+    if (!formData.accountNumber.trim()) {
+      setError("Account number is required");
+      return false;
+    }
+
+    const savingsAmount = parseFloat(formData.savingsAmount);
+    if (isNaN(savingsAmount) || savingsAmount < 0) {
+      setError("Please enter a valid savings amount (0 or more)");
+      return false;
+    }
+
+    if (
+      formData.mpin &&
+      (formData.mpin.length < 4 || formData.mpin.length > 6)
+    ) {
+      setError("MPIN must be 4-6 digits if provided");
+      return false;
+    }
+
     return true;
   };
 
-  // Calculate total savings for active accounts only (for stats display)
-  const totalSavings = accounts.reduce((sum, account) => {
-    if (settings?.showInactive) {
-      return sum + account.savingsAmount;
-    }
-    return sum + (isAccountActive(account) ? account.savingsAmount : 0);
-  }, 0);
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  // Filter accounts based on search and showInactive setting
-  const filteredAccounts = accounts.filter((account) => {
-    const matchesSearch = account.acctCode
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    if (settings?.showInactive !== undefined) {
-      if (settings.showInactive) {
-        return matchesSearch && !isAccountActive(account);
-      } else {
-        return matchesSearch && isAccountActive(account);
-      }
+    if (!validateForm()) {
+      return;
     }
 
-    return matchesSearch;
-  });
+    setIsSubmitting(true);
+    setError(null);
 
-  // Count active and inactive accounts for stats
-  const activeAccountsCount = accounts.filter((account) =>
-    isAccountActive(account)
-  ).length;
-  const inactiveAccountsCount = accounts.filter(
-    (account) => !isAccountActive(account)
-  ).length;
+    try {
+      const accountData = {
+        acctCode: formData.acctCode.trim(),
+        bankName: formData.bankName.trim(),
+        accountNumber: formData.accountNumber.trim(),
+        savingsAmount: parseFloat(formData.savingsAmount) || 0,
+        mpin: formData.mpin || "", // Optional field
+        isActive: formData.isActive,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
 
-  const handleDeleteClick = (account: any) => {
-    setAccountToDelete(account);
-    setShowDeleteDialog(true);
-  };
+      // Add to Firestore
+      const accountsRef = collection(firestore, "accounts");
+      await addDoc(accountsRef, accountData);
 
-  const confirmDelete = () => {
-    if (accountToDelete) {
-      handleDeleteAccount(accountToDelete.id);
-      setShowDeleteDialog(false);
-      setAccountToDelete(null);
+      // Success - navigate back to banking with accounts tab active
+      navigate(returnTo, {
+        state: { activeTab },
+        replace: true,
+      });
+    } catch (err: any) {
+      console.error("Error adding account:", err);
+      setError(`Failed to add account: ${err.message || "Unknown error"}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div style={accountsPageStyles.container}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100vh",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              border: "3px solid #f3f3f3",
-              borderTop: "3px solid #4285f4",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          ></div>
-          <p style={{ marginTop: "10px" }}>Loading accounts...</p>
-        </div>
-      </div>
-    );
-  }
+  // Handle cancel/back
+  const handleCancel = () => {
+    navigate(returnTo, {
+      state: { activeTab },
+      replace: true,
+    });
+  };
 
   return (
-    <div style={accountsPageStyles.container}>
-      {/* Main Content */}
-      <div style={{ width: "100%" }}>
-        {/* Search Bar */}
-        <div style={{ padding: "15px" }}>
-          <div style={accountsPageStyles.searchInputContainer}>
-            <input
-              type="text"
-              placeholder={`Search ${
-                settings?.showInactive ? "inactive" : "active"
-              } accounts...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                padding: "10px 15px",
-                border: "1px solid #e9ecef",
-                borderRadius: "8px",
-                fontSize: "0.95rem",
-                ...accountsPageStyles.searchInput,
-              }}
-            />
-            <div style={accountsPageStyles.searchIcon}>🔍</div>
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm("")}
-                style={accountsPageStyles.clearSearchButton}
-              >
-                ×
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Stats Card */}
-        <div style={{ padding: "0 15px", marginBottom: "15px" }}>
-          <div style={accountsPageStyles.statsCard}>
-            <div style={accountsPageStyles.statsLabel}>Total Savings</div>
-            <div style={accountsPageStyles.statsValue}>
-              {formatCurrency(totalSavings)}
-            </div>
-            <div style={{ fontSize: "0.8rem", color: "#4285f4" }}>
-              Showing {filteredAccounts.length} of {accounts.length} accounts
-              {settings?.showInactive !== undefined && (
-                <div style={{ fontSize: "0.7rem", marginTop: "4px" }}>
-                  ({activeAccountsCount} active, {inactiveAccountsCount}{" "}
-                  inactive)
-                </div>
-              )}
-            </div>
-            <div style={accountsPageStyles.statusIndicators}>
-              <div
-                style={{
-                  ...accountsPageStyles.statusIndicator,
-                  color: settings?.showDelete ? "#10b981" : "#6c757d",
-                }}
-              >
-                <span>Edit/Delete:</span>
-                <span
-                  style={{
-                    ...accountsPageStyles.statusText,
-                    color: settings?.showDelete ? "#10b981" : "#dc2626",
-                  }}
-                >
-                  {settings?.showDelete ? "ENABLED" : "DISABLED"}
-                </span>
-              </div>
-              <div
-                style={{
-                  ...accountsPageStyles.statusIndicator,
-                  color: settings?.showInactive ? "#f59e0b" : "#10b981",
-                }}
-              >
-                <span>Showing:</span>
-                <span
-                  style={{
-                    ...accountsPageStyles.statusText,
-                    color: settings?.showInactive ? "#f59e0b" : "#10b981",
-                  }}
-                >
-                  {settings?.showInactive ? "INACTIVE" : "ACTIVE"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Accounts List */}
-        <div style={{ padding: "0 15px" }}>
-          {filteredAccounts.length === 0 ? (
-            <div style={accountsPageStyles.emptyState}>
-              <div style={accountsPageStyles.emptyStateIcon}>🏦</div>
-              <div>
-                {searchTerm
-                  ? "No matching accounts found"
-                  : `No ${
-                      settings?.showInactive ? "inactive" : "active"
-                    } accounts found`}
-              </div>
-              <div style={{ fontSize: "0.9rem", marginTop: "5px" }}>
-                {searchTerm
-                  ? "Try adjusting your search terms"
-                  : settings?.showInactive
-                  ? "All accounts are currently active"
-                  : 'Tap "+" to add an account'}
-              </div>
-            </div>
-          ) : (
-            <div style={accountsPageStyles.accountsListCard}>
-              {/* Table Header */}
-              <div style={accountsPageStyles.tableHeader}>
-                <div style={accountsPageStyles.tableHeaderCell(2)}>Account</div>
-                <div style={accountsPageStyles.tableHeaderCell(1, "right")}>
-                  Savings
-                </div>
-                <div style={accountsPageStyles.tableHeaderCell(1)}>MPIN</div>
-                <div style={accountsPageStyles.tableHeaderCell(1, "center")}>
-                  Status
-                </div>
-                <div style={accountsPageStyles.tableHeaderCell(0.8, "center")}>
-                  Actions
-                </div>
-              </div>
-
-              {/* Accounts Rows */}
-              <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
-                {filteredAccounts.map((account, index) => {
-                  const isActive = isAccountActive(account);
-                  return (
-                    <div
-                      key={account.id}
-                      style={accountsPageStyles.tableRow(
-                        index === filteredAccounts.length - 1,
-                        isActive
-                      )}
-                    >
-                      <div style={accountsPageStyles.tableHeaderCell(2)}>
-                        <div style={accountsPageStyles.accountCode(isActive)}>
-                          {account.acctCode}
-                          {!isActive && (
-                            <span style={accountsPageStyles.inactiveLabel}>
-                              (inactive)
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div
-                        style={accountsPageStyles.tableHeaderCell(1, "right")}
-                      >
-                        <div style={accountsPageStyles.savingsAmount(isActive)}>
-                          {formatCurrency(account.savingsAmount)}
-                        </div>
-                      </div>
-                      <div style={accountsPageStyles.tableHeaderCell(1)}>
-                        <div style={accountsPageStyles.mpinText(isActive)}>
-                          {account.mpin || "••••"}
-                        </div>
-                      </div>
-                      <div
-                        style={accountsPageStyles.tableHeaderCell(1, "center")}
-                      >
-                        <div style={accountsPageStyles.statusBadge(isActive)}>
-                          {isActive ? "ACTIVE" : "INACTIVE"}
-                        </div>
-                      </div>
-                      <div style={accountsPageStyles.actionsContainer}>
-                        <button
-                          onClick={() =>
-                            navigate(`/banking/accounts/edit/${account.id}`)
-                          }
-                          style={accountsPageStyles.editButton(
-                            !!settings?.showDelete
-                          )}
-                          title={
-                            settings?.showDelete
-                              ? "Edit Account"
-                              : "Edit disabled in settings"
-                          }
-                          disabled={!settings?.showDelete}
-                        >
-                          ✏️
-                        </button>
-                        {settings?.showDelete && (
-                          <button
-                            onClick={() => handleDeleteClick(account)}
-                            style={accountsPageStyles.deleteButton}
-                            title="Delete Account"
-                          >
-                            🗑️
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Add Account Button */}
-          {!settings?.showInactive && (
-            <div style={{ marginTop: "20px" }}>
-              <button
-                onClick={() => navigate("/banking/accounts/add")}
-                style={accountsPageStyles.actionButton}
-              >
-                <span style={{ fontSize: "1.2rem", marginRight: "8px" }}>
-                  +
-                </span>
-                <span>Add New Account</span>
-              </button>
-            </div>
-          )}
-
-          {/* View Toggle Button */}
-          <div style={{ marginTop: "15px" }}>
-            <button
-              onClick={() => navigate("/settings")}
-              style={accountsPageStyles.viewToggleButton(
-                !!settings?.showInactive
-              )}
-            >
-              <span style={{ fontSize: "1.2rem", marginRight: "8px" }}>
-                {settings?.showInactive ? "✅" : "👁️"}
-              </span>
-              <span>
-                {settings?.showInactive
-                  ? "View Active Accounts"
-                  : "View Inactive Accounts"}
-              </span>
-            </button>
-          </div>
-
-          {/* Settings Info Box */}
-          {!settings?.showDelete && (
-            <div style={accountsPageStyles.settingsInfoBox}>
-              <span style={{ fontSize: "1rem" }}>ℹ️</span>
-              <div>
-                <div style={{ fontWeight: "600" }}>Edit/Delete Disabled</div>
-                <div>
-                  Go to{" "}
-                  <button
-                    onClick={() => navigate("/settings")}
-                    style={accountsPageStyles.settingsLink}
-                  >
-                    Settings
-                  </button>{" "}
-                  to enable edit/delete functionality
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+    <div style={styles.container}>
+      {/* Header */}
+      <div style={styles.header}>
+        <button
+          onClick={handleCancel}
+          style={styles.backButton}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "#f1f5f9")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "#ffffff")
+          }
+          title="Go Back"
+          disabled={isSubmitting}
+        >
+          ←
+        </button>
+        <h1 style={styles.headerTitle}>Add New Account</h1>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      {showDeleteDialog && accountToDelete && (
-        <div style={accountsPageStyles.deleteDialogOverlay}>
-          <div style={accountsPageStyles.deleteDialog}>
-            <h3 style={accountsPageStyles.deleteDialogTitle}>
-              Delete Account?
-            </h3>
-            <p style={accountsPageStyles.deleteDialogMessage}>
-              Are you sure you want to delete account{" "}
-              <span style={{ fontWeight: "600" }}>
-                {accountToDelete.acctCode}
-              </span>
-              ? This action cannot be undone.
-            </p>
-            <div style={accountsPageStyles.deleteDialogButtons}>
-              <button
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setAccountToDelete(null);
-                }}
-                style={accountsPageStyles.deleteDialogButton(true)}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                style={accountsPageStyles.deleteDialogButton()}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+      {/* Error Message */}
+      {error && (
+        <div style={styles.errorContainer}>
+          <div style={styles.errorIcon}>⚠️</div>
+          <div style={styles.errorText}>{error}</div>
+          <button onClick={() => setError(null)} style={styles.errorClose}>
+            ✕
+          </button>
         </div>
       )}
 
-      {/* Bottom spacing */}
-      <div style={accountsPageStyles.bottomSpacing}></div>
+      {/* Form */}
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={styles.formContent}>
+          {/* Account Code */}
+          <div style={styles.formGroup}>
+            <label style={styles.label} htmlFor="acctCode">
+              Account Code *
+            </label>
+            <input
+              type="text"
+              id="acctCode"
+              name="acctCode"
+              value={formData.acctCode}
+              onChange={handleChange}
+              style={styles.input}
+              placeholder="e.g., HDFC, SBI, ICICI"
+              disabled={isSubmitting}
+              required
+            />
+            <div style={styles.helperText}>
+              Short code to identify the account
+            </div>
+          </div>
+
+          {/* Bank Name */}
+          <div style={styles.formGroup}>
+            <label style={styles.label} htmlFor="bankName">
+              Bank Name *
+            </label>
+            <input
+              type="text"
+              id="bankName"
+              name="bankName"
+              value={formData.bankName}
+              onChange={handleChange}
+              style={styles.input}
+              placeholder="e.g., HDFC Bank, State Bank of India"
+              disabled={isSubmitting}
+              required
+            />
+            <div style={styles.helperText}>Full name of the bank</div>
+          </div>
+
+          {/* Account Number */}
+          <div style={styles.formGroup}>
+            <label style={styles.label} htmlFor="accountNumber">
+              Account Number *
+            </label>
+            <input
+              type="text"
+              id="accountNumber"
+              name="accountNumber"
+              value={formData.accountNumber}
+              onChange={handleChange}
+              style={styles.input}
+              placeholder="e.g., 1234567890"
+              disabled={isSubmitting}
+              required
+            />
+            <div style={styles.helperText}>Bank account number</div>
+          </div>
+
+          {/* Savings Amount */}
+          <div style={styles.formGroup}>
+            <label style={styles.label} htmlFor="savingsAmount">
+              Initial Savings Amount *
+            </label>
+            <div style={styles.amountContainer}>
+              <span style={styles.currencySymbol}>₹</span>
+              <input
+                type="number"
+                id="savingsAmount"
+                name="savingsAmount"
+                value={formData.savingsAmount}
+                onChange={handleChange}
+                style={styles.amountInput}
+                placeholder="0"
+                step="0.01"
+                min="0"
+                disabled={isSubmitting}
+                required
+              />
+            </div>
+            <div style={styles.helperText}>
+              Enter amount in rupees. Use 0 for new account.
+            </div>
+          </div>
+
+          {/* MPIN (Optional) */}
+          <div style={styles.formGroup}>
+            <label style={styles.label} htmlFor="mpin">
+              MPIN (Optional)
+            </label>
+            <input
+              type="password"
+              id="mpin"
+              name="mpin"
+              value={formData.mpin}
+              onChange={handleChange}
+              style={styles.input}
+              placeholder="••••"
+              maxLength={6}
+              disabled={isSubmitting}
+            />
+            <div style={styles.helperText}>
+              4-6 digit PIN for account access (optional)
+            </div>
+          </div>
+
+          {/* Active Status */}
+          <div style={styles.checkboxGroup}>
+            <label style={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={handleIsActiveChange}
+                style={styles.checkbox}
+                disabled={isSubmitting}
+              />
+              <span style={styles.checkboxText}>Account is active</span>
+            </label>
+            <div style={styles.helperText}>
+              Uncheck to create an inactive account
+            </div>
+          </div>
+
+          {/* Form Buttons */}
+          <div style={styles.buttonGroup}>
+            <button
+              type="button"
+              onClick={handleCancel}
+              style={styles.cancelButton}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              style={{
+                ...styles.submitButton,
+                opacity: isSubmitting ? 0.6 : 1,
+                cursor: isSubmitting ? "not-allowed" : "pointer",
+              }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <div style={styles.spinnerSmall}></div>
+                  <span style={{ marginLeft: "8px" }}>Adding...</span>
+                </>
+              ) : (
+                "Add Account"
+              )}
+            </button>
+          </div>
+
+          {/* Settings Info */}
+          {!settings?.showDelete && (
+            <div style={styles.infoBox}>
+              <span style={styles.infoIcon}>ℹ️</span>
+              <div style={styles.infoContent}>
+                <div style={styles.infoTitle}>Edit/Delete Disabled</div>
+                <div style={styles.infoText}>
+                  You won't be able to edit or delete this account until you
+                  enable it in{" "}
+                  <button
+                    type="button"
+                    onClick={() => navigate("/settings")}
+                    style={styles.settingsLink}
+                  >
+                    Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </form>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default AccountsPage;
+export default AddAccountPage;

@@ -13,7 +13,6 @@ import {
 } from "firebase/firestore";
 import { Jewellery } from "../models/types";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
-import JewelleryNavigation from "../components/JewelleryNavigation";
 
 // Interface for Bill data
 interface Bill {
@@ -601,9 +600,6 @@ const JewelleryForBill: React.FC = () => {
             </div>
           )}
         </div>
-
-        {/* Jewellery Navigation */}
-        <JewelleryNavigation />
 
         {/* Minimal bottom spacing */}
         <div style={{ height: "5px" }}></div>

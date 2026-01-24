@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
-import JewelleryNavigation from "../components/JewelleryNavigation";
 import { Jewellery } from "../models/types";
 
 const JewelleryStats: React.FC = () => {
@@ -158,7 +157,6 @@ const JewelleryStats: React.FC = () => {
         </div>
       </div>
 
-      <JewelleryNavigation />
       <div style={{ height: "20px" }}></div>
     </div>
   );

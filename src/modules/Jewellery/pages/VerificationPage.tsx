@@ -6,7 +6,6 @@ import {
   VerificationStatusType,
 } from "../models/types";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
-import JewelleryNavigation from "../components/JewelleryNavigation";
 
 interface VerificationPageProps {
   jewelleryItems: Jewellery[];
@@ -744,8 +743,6 @@ const VerificationPage: React.FC<VerificationPageProps> = ({
           </div>
         </div>
 
-        {/* Navigation */}
-        <JewelleryNavigation />
         <div style={{ height: "80px" }}></div>
       </div>
     </div>

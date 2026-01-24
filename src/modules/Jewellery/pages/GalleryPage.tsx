@@ -7,7 +7,6 @@ import {
   QueryDocumentSnapshot,
   DocumentData,
 } from "firebase/firestore";
-import JewelleryNavigation from "../components/JewelleryNavigation";
 import { Jewellery, VerificationStatus } from "../models/types";
 import styles from "./GalleryPage.module.css";
 
@@ -310,8 +309,6 @@ const GalleryPage: React.FC = () => {
       <div className={styles.counter}>
         {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
       </div>
-
-      <JewelleryNavigation />
     </div>
   );
 };

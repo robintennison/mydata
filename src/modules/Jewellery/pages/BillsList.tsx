@@ -8,7 +8,6 @@ import {
   where,
 } from "firebase/firestore";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
-import JewelleryNavigation from "../components/JewelleryNavigation";
 
 interface Bill {
   id: string;
@@ -421,7 +420,6 @@ const BillsList: React.FC = () => {
         )}
       </div>
 
-      <JewelleryNavigation />
       <div style={{ height: "5px" }}></div>
     </div>
   );

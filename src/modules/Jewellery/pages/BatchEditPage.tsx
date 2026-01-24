@@ -9,7 +9,6 @@ import {
 } from "firebase/firestore";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
-import JewelleryNavigation from "../components/JewelleryNavigation";
 
 interface BatchEditPageProps {}
 
@@ -581,7 +580,6 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
             <strong>Selected:</strong> {selectedItems.size}
           </div>
         </div>
-        <JewelleryNavigation />
       </div>
 
       <style>

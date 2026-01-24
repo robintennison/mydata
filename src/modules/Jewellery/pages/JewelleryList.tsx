@@ -12,7 +12,6 @@ import {
 } from "firebase/firestore";
 import { Jewellery } from "../models/types";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
-import JewelleryNavigation from "../components/JewelleryNavigation";
 import { useJewellerySettings } from "../hooks/useSettingsData";
 
 // Interface for Bill data
@@ -1094,8 +1093,6 @@ const JewelleryList: React.FC = () => {
           )}
         </div>
 
-        {/* Jewellery Navigation */}
-        <JewelleryNavigation />
 
         {/* Minimal bottom spacing */}
         <div style={{ height: "5px" }}></div>

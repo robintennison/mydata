@@ -10,7 +10,12 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { Jewellery, VerificationStatus } from "./models/types";
-import JewelleryNavigation from "./components/JewelleryNavigation";
+import ListTab from "./pages/ListTab";
+import BillsTab from "./pages/BillsTab";
+import GalleryTab from "./pages/GalleryTab";
+import VerificationTab from "./pages/VerificationTab";
+
+type TabType = "list" | "bills" | "gallery" | "verification";
 
 const JewelleryHome: React.FC = () => {
   const navigate = useNavigate();
@@ -28,6 +33,7 @@ const JewelleryHome: React.FC = () => {
     { location: string; totalWeight: number }[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabType>("list");
 
   // Get makingTaxPercent and resaleDiscountPercent from settings object
   const makingTaxPercent = settings?.makingTaxPercent || 0;
@@ -157,6 +163,22 @@ const JewelleryHome: React.FC = () => {
     );
   }
 
+  // Render the active tab content
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "list":
+        return <ListTab />;
+      case "bills":
+        return <BillsTab compact={false} />;
+      case "gallery":
+        return <GalleryTab compact={false} />;
+      case "verification":
+        return <VerificationTab compact={false} />;
+      default:
+        return <ListTab />;
+    }
+  };
+
   return (
     <div style={jewelleryStyles.container}>
       {/* Top Navigation */}
@@ -184,341 +206,457 @@ const JewelleryHome: React.FC = () => {
         </div>
       </div>
 
-      {/* ALL SCROLLABLE CONTENT */}
+      {/* Tab Navigation */}
+      <div
+        style={{
+          display: "flex",
+          backgroundColor: "white",
+          borderBottom: "1px solid #e5e7eb",
+          overflowX: "auto",
+        }}
+      >
+        <button
+          onClick={() => setActiveTab("list")}
+          style={{
+            padding: "14px 16px",
+            border: "none",
+            backgroundColor: activeTab === "list" ? "#f3f4f6" : "transparent",
+            color: activeTab === "list" ? "#111827" : "#6b7280",
+            fontSize: "14px",
+            fontWeight: activeTab === "list" ? "600" : "400",
+            borderBottom: activeTab === "list" ? "2px solid #3b82f6" : "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>📋</span>
+          <span>List</span>
+          {activeTab === "list" && stats.totalItems > 0 && (
+            <span
+              style={{
+                fontSize: "11px",
+                backgroundColor: "#d1d5db",
+                color: "#374151",
+                padding: "2px 6px",
+                borderRadius: "10px",
+                marginLeft: "4px",
+              }}
+            >
+              {stats.totalItems}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("gallery")}
+          style={{
+            padding: "14px 16px",
+            border: "none",
+            backgroundColor:
+              activeTab === "gallery" ? "#f3f4f6" : "transparent",
+            color: activeTab === "gallery" ? "#111827" : "#6b7280",
+            fontSize: "14px",
+            fontWeight: activeTab === "gallery" ? "600" : "400",
+            borderBottom:
+              activeTab === "gallery" ? "2px solid #3b82f6" : "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>🖼️</span>
+          <span>Gallery</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("bills")}
+          style={{
+            padding: "14px 16px",
+            border: "none",
+            backgroundColor: activeTab === "bills" ? "#f3f4f6" : "transparent",
+            color: activeTab === "bills" ? "#111827" : "#6b7280",
+            fontSize: "14px",
+            fontWeight: activeTab === "bills" ? "600" : "400",
+            borderBottom: activeTab === "bills" ? "2px solid #3b82f6" : "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>📄</span>
+          <span>Bills</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("verification")}
+          style={{
+            padding: "14px 16px",
+            border: "none",
+            backgroundColor:
+              activeTab === "verification" ? "#f3f4f6" : "transparent",
+            color: activeTab === "verification" ? "#111827" : "#6b7280",
+            fontSize: "14px",
+            fontWeight: activeTab === "verification" ? "600" : "400",
+            borderBottom:
+              activeTab === "verification" ? "2px solid #3b82f6" : "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>✓</span>
+          <span>Verification</span>
+        </button>
+      </div>
+
+      {/* Tab Content Area */}
       <div style={jewelleryStyles.contentWrapper}>
-        {/* Three Small Cards for Weight and Values */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "10px",
-            marginBottom: "15px",
-          }}
-        >
-          {/* Total Weight Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "10px",
-              padding: "15px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              textAlign: "center",
-            }}
-          >
+        {/* Show summary cards only on List tab */}
+        {activeTab === "list" && (
+          <>
+            {/* Three Small Cards for Weight and Values */}
             <div
               style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "5px",
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "10px",
+                marginBottom: "15px",
               }}
             >
-              Total Weight
-            </div>
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#3b82f6",
-              }}
-            >
-              {formatWeight(stats.totalWeight)}
-            </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#9ca3af",
-                marginTop: "5px",
-              }}
-            >
-              {stats.totalItems} items
-            </div>
-          </div>
-
-          {/* Buy Value Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "10px",
-              padding: "15px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "5px",
-              }}
-            >
-              Buy Value
-            </div>
-            <div
-              style={{
-                fontSize: "16px",
-                fontWeight: "600",
-                color: "#10b981",
-              }}
-            >
-              {formatValueInLakhs(stats.buyValue)}
-            </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#9ca3af",
-                marginTop: "5px",
-              }}
-            >
-              ₹{goldRate}/g + {formatPercent(makingTaxPercent)}
-            </div>
-          </div>
-
-          {/* Sell Value Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "10px",
-              padding: "15px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "5px",
-              }}
-            >
-              Sell Value
-            </div>
-            <div
-              style={{
-                fontSize: "16px",
-                fontWeight: "600",
-                color: "#ef4444",
-              }}
-            >
-              {formatValueInLakhs(stats.sellValue)}
-            </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#9ca3af",
-                marginTop: "5px",
-              }}
-            >
-              -{formatPercent(resaleDiscountPercent)} resale
-            </div>
-          </div>
-        </div>
-
-        {/* Weight by Person Card */}
-        <div
-          style={{
-            backgroundColor: "white",
-            borderRadius: "10px",
-            padding: "15px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            marginBottom: "15px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "16px",
-              fontWeight: "600",
-              color: "#333",
-              marginBottom: "15px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span>Weight by Person</span>
-            <span
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                fontWeight: "normal",
-              }}
-            >
-              {personsWeight.length} persons
-            </span>
-          </div>
-
-          {personsWeight.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "20px",
-                color: "#9ca3af",
-                fontSize: "14px",
-              }}
-            >
-              No person data available
-            </div>
-          ) : (
-            <div
-              style={{
-                maxHeight: "200px",
-                overflowY: "auto",
-                paddingRight: "8px",
-              }}
-            >
-              {personsWeight.map((item, index) => (
+              {/* Total Weight Card */}
+              <div
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: "10px",
+                  padding: "15px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  textAlign: "center",
+                }}
+              >
                 <div
-                  key={index}
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "10px 0",
-                    paddingRight: "8px", // Added padding to prevent touching scrollbar
-                    borderBottom:
-                      index < personsWeight.length - 1
-                        ? "1px solid #f3f4f6"
-                        : "none",
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    marginBottom: "5px",
                   }}
                 >
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#4b5563",
-                      flex: 1,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      marginRight: "10px",
-                      paddingRight: "4px", // Added padding for text
-                    }}
-                    title={item.person}
-                  >
-                    {item.person}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "#111827",
-                      whiteSpace: "nowrap",
-                      paddingLeft: "8px", // Added padding on left
-                      paddingRight: "8px", // Added padding on right
-                      minWidth: "60px", // Ensure minimum width
-                      textAlign: "right",
-                    }}
-                  >
-                    {formatWeight(item.totalWeight)}
-                  </div>
+                  Total Weight
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Weight by Location Card */}
-        <div
-          style={{
-            backgroundColor: "white",
-            borderRadius: "10px",
-            padding: "15px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            marginBottom: "15px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "16px",
-              fontWeight: "600",
-              color: "#333",
-              marginBottom: "15px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span>Weight by Location</span>
-            <span
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                fontWeight: "normal",
-              }}
-            >
-              {locationWeight.length} locations
-            </span>
-          </div>
-
-          {locationWeight.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "20px",
-                color: "#9ca3af",
-                fontSize: "14px",
-              }}
-            >
-              No location data available
-            </div>
-          ) : (
-            <div
-              style={{
-                maxHeight: "200px",
-                overflowY: "auto",
-                paddingRight: "8px",
-              }}
-            >
-              {locationWeight.map((item, index) => (
                 <div
-                  key={index}
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "10px 0",
-                    paddingRight: "8px", // Added padding to prevent touching scrollbar
-                    borderBottom:
-                      index < locationWeight.length - 1
-                        ? "1px solid #f3f4f6"
-                        : "none",
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color: "#3b82f6",
                   }}
                 >
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#4b5563",
-                      flex: 1,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      marginRight: "10px",
-                      paddingRight: "4px", // Added padding for text
-                    }}
-                    title={item.location}
-                  >
-                    {item.location}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "#111827",
-                      whiteSpace: "nowrap",
-                      paddingLeft: "8px", // Added padding on left
-                      paddingRight: "8px", // Added padding on right
-                      minWidth: "60px", // Ensure minimum width
-                      textAlign: "right",
-                    }}
-                  >
-                    {formatWeight(item.totalWeight)}
-                  </div>
+                  {formatWeight(stats.totalWeight)}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#9ca3af",
+                    marginTop: "5px",
+                  }}
+                >
+                  {stats.totalItems} items
+                </div>
+              </div>
 
-        {/* Jewellery Navigation */}
-        <JewelleryNavigation />
+              {/* Buy Value Card */}
+              <div
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: "10px",
+                  padding: "15px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  textAlign: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Buy Value
+                </div>
+                <div
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    color: "#10b981",
+                  }}
+                >
+                  {formatValueInLakhs(stats.buyValue)}
+                </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#9ca3af",
+                    marginTop: "5px",
+                  }}
+                >
+                  ₹{goldRate}/g + {formatPercent(makingTaxPercent)}
+                </div>
+              </div>
+
+              {/* Sell Value Card */}
+              <div
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: "10px",
+                  padding: "15px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  textAlign: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Sell Value
+                </div>
+                <div
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    color: "#ef4444",
+                  }}
+                >
+                  {formatValueInLakhs(stats.sellValue)}
+                </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#9ca3af",
+                    marginTop: "5px",
+                  }}
+                >
+                  -{formatPercent(resaleDiscountPercent)} resale
+                </div>
+              </div>
+            </div>
+
+            {/* Weight Distribution Cards - Only on List tab */}
+            <div
+              style={{
+                backgroundColor: "white",
+                borderRadius: "10px",
+                padding: "15px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                marginBottom: "15px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  color: "#333",
+                  marginBottom: "15px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span>Weight by Person</span>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    fontWeight: "normal",
+                  }}
+                >
+                  {personsWeight.length} persons
+                </span>
+              </div>
+
+              {personsWeight.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "20px",
+                    color: "#9ca3af",
+                    fontSize: "14px",
+                  }}
+                >
+                  No person data available
+                </div>
+              ) : (
+                <div
+                  style={{
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                    paddingRight: "8px",
+                  }}
+                >
+                  {personsWeight.map((item, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "10px 0",
+                        paddingRight: "8px",
+                        borderBottom:
+                          index < personsWeight.length - 1
+                            ? "1px solid #f3f4f6"
+                            : "none",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          color: "#4b5563",
+                          flex: 1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          marginRight: "10px",
+                          paddingRight: "4px",
+                        }}
+                        title={item.person}
+                      >
+                        {item.person}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          color: "#111827",
+                          whiteSpace: "nowrap",
+                          paddingLeft: "8px",
+                          paddingRight: "8px",
+                          minWidth: "60px",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatWeight(item.totalWeight)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "white",
+                borderRadius: "10px",
+                padding: "15px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                marginBottom: "15px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  color: "#333",
+                  marginBottom: "15px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span>Weight by Location</span>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    fontWeight: "normal",
+                  }}
+                >
+                  {locationWeight.length} locations
+                </span>
+              </div>
+
+              {locationWeight.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "20px",
+                    color: "#9ca3af",
+                    fontSize: "14px",
+                  }}
+                >
+                  No location data available
+                </div>
+              ) : (
+                <div
+                  style={{
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                    paddingRight: "8px",
+                  }}
+                >
+                  {locationWeight.map((item, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "10px 0",
+                        paddingRight: "8px",
+                        borderBottom:
+                          index < locationWeight.length - 1
+                            ? "1px solid #f3f4f6"
+                            : "none",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          color: "#4b5563",
+                          flex: 1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          marginRight: "10px",
+                          paddingRight: "4px",
+                        }}
+                        title={item.location}
+                      >
+                        {item.location}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          color: "#111827",
+                          whiteSpace: "nowrap",
+                          paddingLeft: "8px",
+                          paddingRight: "8px",
+                          minWidth: "60px",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatWeight(item.totalWeight)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Render the active tab content */}
+        {renderTabContent()}
 
         {/* Bottom spacing */}
         <div style={{ height: "100px" }}></div>

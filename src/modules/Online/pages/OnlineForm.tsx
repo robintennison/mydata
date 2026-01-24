@@ -78,7 +78,7 @@ const OnlineForm: React.FC = () => {
           id: itemDoc.id,
           name: data.name || "",
           detail: data.detail || "",
-          category: data.category || "",
+          category: data.category || "", // This should be the category name
           image1: data.image1 || "",
           image2: data.image2 || "",
           createdAt: data.createdAt || Date.now(),
@@ -128,7 +128,7 @@ const OnlineForm: React.FC = () => {
       const itemData = {
         name: formData.name.trim(),
         detail: formData.detail.trim(),
-        category: formData.category,
+        category: formData.category, // This will now be the category name
         image1: image1Url,
         image2: image2Url,
         updatedAt: Date.now(),
@@ -215,7 +215,9 @@ const OnlineForm: React.FC = () => {
             >
               <option value="">Select Category</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
+                <option key={cat.id} value={cat.name}>
+                  {" "}
+                  {/* CHANGED HERE: value={cat.name} instead of value={cat.id} */}
                   {cat.name}
                 </option>
               ))}

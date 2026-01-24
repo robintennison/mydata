@@ -523,41 +523,7 @@ const BankingHomePage: React.FC = () => {
 
   return (
     <div style={bankingHomeStyles.centeredContainer}>
-      {/* Top Navigation */}
-      <div style={bankingHomeStyles.topNav}>
-        <button
-          onClick={() => navigate("/")}
-          style={bankingHomeStyles.navButton}
-          title="Back to Home"
-        >
-          🏠
-        </button>
-        <div style={bankingHomeStyles.navTitle}>Banking</div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          {shouldShowAddButton() && (
-            <button
-              onClick={handleAddClick}
-              style={styles.addButton}
-              title={getAddButtonTitle()}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#059669")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#10b981")
-              }
-            >
-              ➕
-            </button>
-          )}
-          <button
-            onClick={() => navigate("/settings")}
-            style={bankingHomeStyles.navButton}
-            title="Settings"
-          >
-            ⚙️
-          </button>
-        </div>
-      </div>
+      {/* REMOVED: Top Navigation header - now in main Layout Header */}
 
       {/* Tabs Navigation */}
       <div style={styles.tabsContainer}>
@@ -624,6 +590,23 @@ const BankingHomePage: React.FC = () => {
         {activeTab === "summary" && <SummaryTab />}
       </div>
 
+      {/* Add button - now positioned relative to the content */}
+      {shouldShowAddButton() && (
+        <button
+          onClick={handleAddClick}
+          style={styles.addButton}
+          title={getAddButtonTitle()}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "#059669")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "#10b981")
+          }
+        >
+          ➕
+        </button>
+      )}
+
       {/* Bottom spacing */}
       <div style={{ height: "20px" }}></div>
     </div>
@@ -677,21 +660,25 @@ const styles = {
     overflowY: "auto" as const,
   },
   addButton: {
+    position: "fixed" as const,
+    bottom: "20px",
+    right: "20px",
     backgroundColor: "#10b981",
     color: "#ffffff",
     border: "none",
-    borderRadius: "6px",
-    padding: "8px 12px",
-    fontSize: "14px",
+    borderRadius: "50%",
+    padding: "16px",
+    fontSize: "20px",
     fontWeight: 600,
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    minWidth: "36px",
-    minHeight: "36px",
-    transition: "background-color 0.2s",
-    marginLeft: "auto",
+    width: "56px",
+    height: "56px",
+    transition: "background-color 0.2s, transform 0.2s",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+    zIndex: 100,
   },
 };
 

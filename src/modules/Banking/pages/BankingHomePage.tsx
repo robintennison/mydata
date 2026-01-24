@@ -1,12 +1,15 @@
 // src/modules/BankingHomePage.tsx
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
-import BankingNavigation from "./BankingNavigation";
-import DepositPieChart from "./DepositPieChart";
-import SavingsPieChart from "./SavingsPieChart";
+
+// Import the tab components
+import AccountsTab from "./AccountsTab";
+import DepositsTab from "./DepositsTab";
+import HistoryTab from "./HistoryTab";
+import SummaryTab from "./SummaryTab";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,15 +17,20 @@ const BankingHomePage: React.FC = () => {
     useBankingData();
   const { settings: appSettings } = useSettings();
 
+  // State for active tab
+  const [activeTab, setActiveTab] = useState<
+    "dashboard" | "accounts" | "deposits" | "history" | "summary"
+  >("dashboard");
+
   // Format numbers in lakhs with 2 decimals (no currency symbol or "L" label)
   const formatLakhs = (amount: number): string => {
     return (amount / 100000).toFixed(2);
   };
 
-  // Calculate totals
+  // Calculate totals for dashboard tab
   const totalSavings = accounts.reduce(
     (sum, account) => sum + account.savingsAmount,
-    0
+    0,
   );
 
   // Apply filtering based on settings (same as Android)
@@ -60,7 +68,7 @@ const BankingHomePage: React.FC = () => {
   const calculateEMW = (
     currentBalance: number,
     targetDate: Date,
-    annualInterestRate: number = 5
+    annualInterestRate: number = 5,
   ): number => {
     if (currentBalance <= 0) return 0;
 
@@ -132,7 +140,7 @@ const BankingHomePage: React.FC = () => {
   const emwAmount = calculateEMW(
     totalBankBalance,
     emwSettings.targetDate,
-    emwSettings.interestRate
+    emwSettings.interestRate,
   );
 
   // Calculate actual withdrawal rate from last 6 months history
@@ -185,6 +193,274 @@ const BankingHomePage: React.FC = () => {
 
   const lastMonthWithdrawal = calculateLastMonthWithdrawal();
 
+  // Dashboard content component
+  const DashboardContent = () => (
+    <>
+      {/* Top 3 Cards in Single Row */}
+      <div style={bankingHomeStyles.sectionPadding}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "10px",
+            marginBottom: "15px",
+          }}
+        >
+          {/* Total Savings Card */}
+          <div style={bankingHomeStyles.statsCard}>
+            <div style={bankingHomeStyles.statsLabel}>Savings</div>
+            <div
+              style={{
+                ...bankingHomeStyles.statsValue,
+                fontSize: "0.95rem", // Reduced font size
+              }}
+            >
+              {formatLakhs(totalSavings)}
+            </div>
+          </div>
+
+          {/* Total Deposits Card */}
+          <div style={bankingHomeStyles.statsCard}>
+            <div style={bankingHomeStyles.statsLabel}>Deposits</div>
+            <div
+              style={{
+                ...bankingHomeStyles.statsValue,
+                fontSize: "0.95rem", // Reduced font size
+              }}
+            >
+              {formatLakhs(totalDeposits)}
+            </div>
+          </div>
+
+          {/* Total Bank Balance Card - Changed to match other cards */}
+          <div style={bankingHomeStyles.statsCard}>
+            <div style={bankingHomeStyles.statsLabel}>Total</div>{" "}
+            {/* Changed from "Total Balance" */}
+            <div
+              style={{
+                ...bankingHomeStyles.statsValue,
+                fontSize: "0.95rem", // Reduced font size
+              }}
+            >
+              {formatLakhs(totalBankBalance)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* EMW Section - Single Row */}
+      <div style={bankingHomeStyles.sectionPadding}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "10px",
+            marginBottom: "15px",
+          }}
+        >
+          {/* EMW Card */}
+          <div style={bankingHomeStyles.statsCard}>
+            <div
+              style={{
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                color: "#1e40af",
+                marginBottom: "5px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <span
+                style={{
+                  backgroundColor: "#3b82f6",
+                  color: "white",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  fontSize: "0.7rem",
+                }}
+              >
+                EMW
+              </span>
+              <span>Monthly</span>
+            </div>
+            <div
+              style={{
+                fontSize: "1rem",
+                fontWeight: 700,
+                color: "#1e40af",
+              }}
+            >
+              {formatLakhs(emwAmount)}
+            </div>
+            <div
+              style={{
+                fontSize: "0.7rem",
+                color: "#6b7280",
+                marginTop: "2px",
+              }}
+            >
+              {emwSettings.interestRate}% interest
+            </div>
+          </div>
+
+          {/* Actual Rate Card */}
+          <div style={bankingHomeStyles.statsCard}>
+            <div
+              style={{
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                color: "#64748b",
+                marginBottom: "5px",
+              }}
+            >
+              Actual (6m)
+            </div>
+            <div
+              style={{
+                fontSize: "1rem",
+                fontWeight: 700,
+                color:
+                  actualWithdrawalData.monthlyRate >= emwAmount
+                    ? "#dc2626"
+                    : "#059669",
+              }}
+            >
+              {formatLakhs(actualWithdrawalData.monthlyRate)}
+            </div>
+            <div
+              style={{
+                fontSize: "0.7rem",
+                color: "#6b7280",
+                marginTop: "2px",
+              }}
+            >
+              avg/month
+            </div>
+          </div>
+
+          {/* Last Month Card */}
+          <div style={bankingHomeStyles.statsCard}>
+            <div
+              style={{
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                color: "#64748b",
+                marginBottom: "5px",
+              }}
+            >
+              Last Month
+            </div>
+            <div
+              style={{
+                fontSize: "1rem",
+                fontWeight: 700,
+                color: lastMonthWithdrawal >= 0 ? "#dc2626" : "#059669",
+              }}
+            >
+              {lastMonthWithdrawal >= 0 ? "-" : "+"}
+              {formatLakhs(Math.abs(lastMonthWithdrawal))}
+            </div>
+            <div
+              style={{
+                fontSize: "0.7rem",
+                color: "#6b7280",
+                marginTop: "2px",
+              }}
+            >
+              {lastMonthWithdrawal >= 0 ? "withdrawal" : "deposit"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent History - Already sorted newest first */}
+      <div
+        style={{
+          padding: "0 0 15px 0",
+        }}
+      >
+        <div style={bankingHomeStyles.card}>
+          <div style={bankingHomeStyles.cardTitle}>
+            <span>📅</span>
+            <span>Recent History</span>
+          </div>
+
+          {last6Months.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "12px",
+                color: "#6c757d",
+                fontSize: "12px",
+              }}
+            >
+              No history data available
+            </div>
+          ) : (
+            <div>
+              {last6Months.map((record, index) => {
+                const date = new Date(record.month + "-01");
+                const monthName = date.toLocaleDateString("en-IN", {
+                  month: "short",
+                  year: "2-digit",
+                });
+
+                const totalBalance = record.savings + record.totalDeposits;
+                const prevRecord = index > 0 ? last6Months[index - 1] : null;
+                const prevBalance = prevRecord
+                  ? prevRecord.savings + prevRecord.totalDeposits
+                  : 0;
+                const monthlyChange = prevRecord
+                  ? prevBalance - totalBalance
+                  : 0;
+
+                return (
+                  <div
+                    key={record.month}
+                    style={{
+                      ...bankingHomeStyles.historyItem,
+                      borderBottom:
+                        index < last6Months.length - 1
+                          ? "1px solid #eee"
+                          : "none",
+                    }}
+                  >
+                    <div>
+                      <div style={bankingHomeStyles.historyMonth}>
+                        {monthName}
+                      </div>
+                      {monthlyChange !== 0 && (
+                        <div
+                          style={{
+                            ...bankingHomeStyles.monthlyChange,
+                            color: monthlyChange > 0 ? "#dc2626" : "#059669",
+                          }}
+                        >
+                          {monthlyChange > 0 ? "▼" : "▲"}{" "}
+                          {formatLakhs(Math.abs(monthlyChange))}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={bankingHomeStyles.historyBalance}>
+                        {formatLakhs(totalBalance)}
+                      </div>
+                      <div style={bankingHomeStyles.historyDetails}>
+                        <span>S: {formatLakhs(record.savings)}</span>
+                        <span>D: {formatLakhs(record.totalDeposits)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
   if (loading) {
     return (
       <div style={bankingHomeStyles.centeredContainer}>
@@ -198,7 +474,6 @@ const BankingHomePage: React.FC = () => {
 
   return (
     <div style={bankingHomeStyles.centeredContainer}>
-
       {/* Top Navigation */}
       <div style={bankingHomeStyles.topNav}>
         <button
@@ -208,7 +483,7 @@ const BankingHomePage: React.FC = () => {
         >
           🏠
         </button>
-        <div style={bankingHomeStyles.navTitle}>Banking / Dashboard</div>
+        <div style={bankingHomeStyles.navTitle}>Banking</div>
         <button
           onClick={() => navigate("/settings")}
           style={bankingHomeStyles.navButton}
@@ -218,290 +493,123 @@ const BankingHomePage: React.FC = () => {
         </button>
       </div>
 
-      {/* ALL CONTENT INSIDE THIS DIV - This ensures centering */}
-      <div style={bankingHomeStyles.contentWrapper}>
-        {/* Top 3 Cards in Single Row */}
-        <div style={bankingHomeStyles.sectionPadding}>
-          <div
+      {/* Tabs Navigation */}
+      <div style={styles.tabsContainer}>
+        <div style={styles.tabsList}>
+          <button
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "10px",
-              marginBottom: "15px",
+              ...styles.tabButton,
+              ...(activeTab === "dashboard" ? styles.activeTab : {}),
             }}
+            onClick={() => setActiveTab("dashboard")}
+            title="Dashboard"
           >
-            {/* Total Savings Card */}
-            <div style={bankingHomeStyles.statsCard}>
-              <div style={bankingHomeStyles.statsLabel}>Savings</div>
-              <div
-                style={{
-                  ...bankingHomeStyles.statsValue,
-                  fontSize: "0.95rem", // Reduced font size
-                }}
-              >
-                {formatLakhs(totalSavings)}
-              </div>
-            </div>
-
-            {/* Total Deposits Card */}
-            <div style={bankingHomeStyles.statsCard}>
-              <div style={bankingHomeStyles.statsLabel}>Deposits</div>
-              <div
-                style={{
-                  ...bankingHomeStyles.statsValue,
-                  fontSize: "0.95rem", // Reduced font size
-                }}
-              >
-                {formatLakhs(totalDeposits)}
-              </div>
-            </div>
-
-            {/* Total Bank Balance Card - Changed to match other cards */}
-            <div style={bankingHomeStyles.statsCard}>
-              <div style={bankingHomeStyles.statsLabel}>Total</div>{" "}
-              {/* Changed from "Total Balance" */}
-              <div
-                style={{
-                  ...bankingHomeStyles.statsValue,
-                  fontSize: "0.95rem", // Reduced font size
-                }}
-              >
-                {formatLakhs(totalBankBalance)}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* EMW Section - Single Row */}
-        <div style={bankingHomeStyles.sectionPadding}>
-          <div
+            📊 Dashboard
+          </button>
+          <button
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "10px",
-              marginBottom: "15px",
+              ...styles.tabButton,
+              ...(activeTab === "accounts" ? styles.activeTab : {}),
             }}
+            onClick={() => setActiveTab("accounts")}
+            title="Accounts"
           >
-            {/* EMW Card */}
-            <div style={bankingHomeStyles.statsCard}>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  color: "#1e40af",
-                  marginBottom: "5px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <span
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "white",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    fontSize: "0.7rem",
-                  }}
-                >
-                  EMW
-                </span>
-                <span>Monthly</span>
-              </div>
-              <div
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 700,
-                  color: "#1e40af",
-                }}
-              >
-                {formatLakhs(emwAmount)}
-              </div>
-              <div
-                style={{
-                  fontSize: "0.7rem",
-                  color: "#6b7280",
-                  marginTop: "2px",
-                }}
-              >
-                {emwSettings.interestRate}% interest
-              </div>
-            </div>
-
-            {/* Actual Rate Card */}
-            <div style={bankingHomeStyles.statsCard}>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  color: "#64748b",
-                  marginBottom: "5px",
-                }}
-              >
-                Actual (6m)
-              </div>
-              <div
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 700,
-                  color:
-                    actualWithdrawalData.monthlyRate >= emwAmount
-                      ? "#dc2626"
-                      : "#059669",
-                }}
-              >
-                {formatLakhs(actualWithdrawalData.monthlyRate)}
-              </div>
-              <div
-                style={{
-                  fontSize: "0.7rem",
-                  color: "#6b7280",
-                  marginTop: "2px",
-                }}
-              >
-                avg/month
-              </div>
-            </div>
-
-            {/* Last Month Card */}
-            <div style={bankingHomeStyles.statsCard}>
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  color: "#64748b",
-                  marginBottom: "5px",
-                }}
-              >
-                Last Month
-              </div>
-              <div
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 700,
-                  color: lastMonthWithdrawal >= 0 ? "#dc2626" : "#059669",
-                }}
-              >
-                {lastMonthWithdrawal >= 0 ? "-" : "+"}
-                {formatLakhs(Math.abs(lastMonthWithdrawal))}
-              </div>
-              <div
-                style={{
-                  fontSize: "0.7rem",
-                  color: "#6b7280",
-                  marginTop: "2px",
-                }}
-              >
-                {lastMonthWithdrawal >= 0 ? "withdrawal" : "deposit"}
-              </div>
-            </div>
-          </div>
+            👥 Accounts
+          </button>
+          <button
+            style={{
+              ...styles.tabButton,
+              ...(activeTab === "deposits" ? styles.activeTab : {}),
+            }}
+            onClick={() => setActiveTab("deposits")}
+            title="Deposits"
+          >
+            💰 Deposits
+          </button>
+          <button
+            style={{
+              ...styles.tabButton,
+              ...(activeTab === "history" ? styles.activeTab : {}),
+            }}
+            onClick={() => setActiveTab("history")}
+            title="History"
+          >
+            📅 History
+          </button>
+          <button
+            style={{
+              ...styles.tabButton,
+              ...(activeTab === "summary" ? styles.activeTab : {}),
+            }}
+            onClick={() => setActiveTab("summary")}
+            title="Summary"
+          >
+            📈 Summary
+          </button>
         </div>
-
-        {/* Savings Distribution Chart */}
-        <SavingsPieChart accounts={accounts} />
-
-        {/* Deposit Distribution Chart */}
-        <DepositPieChart
-          accounts={accounts}
-          deposits={deposits}
-          adjustments={adjustments}
-          showInactive={settings.showInactive}
-        />
-
-        {/* Recent History - Already sorted newest first */}
-        <div
-          style={{
-            padding: "0 0 15px 0",
-          }}
-        >
-          <div style={bankingHomeStyles.card}>
-            <div style={bankingHomeStyles.cardTitle}>
-              <span>📅</span>
-              <span>Recent History</span>
-            </div>
-
-            {last6Months.length === 0 ? (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "12px",
-                  color: "#6c757d",
-                  fontSize: "12px",
-                }}
-              >
-                No history data available
-              </div>
-            ) : (
-              <div>
-                {last6Months.map((record, index) => {
-                  const date = new Date(record.month + "-01");
-                  const monthName = date.toLocaleDateString("en-IN", {
-                    month: "short",
-                    year: "2-digit",
-                  });
-
-                  const totalBalance = record.savings + record.totalDeposits;
-                  const prevRecord = index > 0 ? last6Months[index - 1] : null;
-                  const prevBalance = prevRecord
-                    ? prevRecord.savings + prevRecord.totalDeposits
-                    : 0;
-                  const monthlyChange = prevRecord
-                    ? prevBalance - totalBalance
-                    : 0;
-
-                  return (
-                    <div
-                      key={record.month}
-                      style={{
-                        ...bankingHomeStyles.historyItem,
-                        borderBottom:
-                          index < last6Months.length - 1
-                            ? "1px solid #eee"
-                            : "none",
-                      }}
-                    >
-                      <div>
-                        <div style={bankingHomeStyles.historyMonth}>
-                          {monthName}
-                        </div>
-                        {monthlyChange !== 0 && (
-                          <div
-                            style={{
-                              ...bankingHomeStyles.monthlyChange,
-                              color: monthlyChange > 0 ? "#dc2626" : "#059669",
-                            }}
-                          >
-                            {monthlyChange > 0 ? "▼" : "▲"}{" "}
-                            {formatLakhs(Math.abs(monthlyChange))}
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={bankingHomeStyles.historyBalance}>
-                          {formatLakhs(totalBalance)}
-                        </div>
-                        <div style={bankingHomeStyles.historyDetails}>
-                          <span>S: {formatLakhs(record.savings)}</span>
-                          <span>D: {formatLakhs(record.totalDeposits)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Use the extracted BankingNavigation component */}
-        <BankingNavigation />
-
-        {/* Bottom spacing */}
-        <div style={{ height: "20px" }}></div>
       </div>
+
+      {/* Tab Content */}
+      <div style={styles.tabContent}>
+        {activeTab === "dashboard" && <DashboardContent />}
+        {activeTab === "accounts" && <AccountsTab />}
+        {activeTab === "deposits" && <DepositsTab />}
+        {activeTab === "history" && <HistoryTab />}
+        {activeTab === "summary" && <SummaryTab />}
+      </div>
+
+      {/* Bottom spacing */}
+      <div style={{ height: "20px" }}></div>
     </div>
   );
+};
+
+// Tab styles
+const styles = {
+  tabsContainer: {
+    width: "100%",
+    backgroundColor: "#ffffff",
+    borderBottom: "1px solid #e5e7eb",
+    position: "sticky" as const,
+    top: 0,
+    zIndex: 10,
+  },
+  tabsList: {
+    display: "flex",
+    overflowX: "auto" as const,
+    padding: "0 8px",
+    gap: "2px",
+  },
+  tabButton: {
+    flex: "1 1 0",
+    minWidth: "0",
+    padding: "12px 8px",
+    backgroundColor: "transparent",
+    border: "none",
+    borderBottom: "3px solid transparent",
+    fontSize: "0.85rem",
+    fontWeight: 600,
+    color: "#6b7280",
+    cursor: "pointer",
+    whiteSpace: "nowrap" as const,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "4px",
+    transition: "all 0.2s ease",
+  },
+  activeTab: {
+    color: "#3b82f6",
+    borderBottomColor: "#3b82f6",
+    backgroundColor: "#f0f9ff",
+  },
+  tabContent: {
+    flex: 1,
+    width: "100%",
+    maxWidth: "800px",
+    padding: "16px",
+    overflowY: "auto" as const,
+  },
 };
 
 export default BankingHomePage;

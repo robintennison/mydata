@@ -5,10 +5,8 @@ import ProtectedRoute from "../components/Auth/ProtectedRoute";
 import PublicRoute from "../components/Auth/PublicRoute";
 
 // Import all page components
-import DepositsListPage from "../modules/Banking/pages/DepositsListPage";
 import AddEditDepositPage from "../modules/Banking/pages/AddEditDepositPage";
 import BankingHomePage from "../modules/Banking/pages/BankingHomePage";
-import AccountsPage from "../modules/Banking/pages/AccountsPage";
 import AddAccountPage from "../modules/Banking/pages/AddAccountPage";
 import EditAccountPage from "../modules/Banking/pages/EditAccountPage";
 import DepositSummaryPage from "../modules/Banking/pages/DepositSummaryPage";
@@ -18,7 +16,6 @@ import LoginForm from "../components/Auth/Login";
 import MyDataHomepage from "../MyDataHomepage";
 
 // Import History pages
-import HistoryListPage from "../modules/Banking/pages/HistoryListPage";
 import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage";
 
 // Import Jewellery pages
@@ -96,14 +93,7 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
-  {
-    path: "/banking/accounts",
-    element: <AccountsPage />,
-    title: "Accounts",
-    icon: "💳",
-    requiresAuth: true,
-    needsUserData: true,
-  },
+
   {
     path: "/banking/accounts/add",
     element: <AddAccountPage />,
@@ -119,22 +109,7 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
-  {
-    path: "/banking/deposits",
-    element: <DepositsListPage />,
-    title: "Deposits",
-    icon: "💰",
-    requiresAuth: true,
-    needsUserData: true,
-  },
-  {
-    path: "/banking/deposits/list",
-    element: <DepositsListPage />,
-    title: "Deposits List",
-    icon: "📋",
-    requiresAuth: true,
-    needsUserData: true,
-  },
+
   {
     path: "/banking/deposits/add",
     element: <AddEditDepositPage />,
@@ -151,14 +126,7 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
-  {
-    path: "/banking/history",
-    element: <HistoryListPage />,
-    title: "History",
-    icon: "📅",
-    requiresAuth: true,
-    needsUserData: true,
-  },
+
   {
     path: "/banking/history/add",
     element: <EditHistoryPage />,

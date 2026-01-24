@@ -13,7 +13,6 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
-import BankingNavigation from "./BankingNavigation";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { depositSummaryStyles as styles } from "../styles/DepositSummaryPage.styles";
 
@@ -90,7 +89,7 @@ const DepositSummaryPage: React.FC = () => {
 
     // Filter out inactive deposits
     const filteredDeposits = deposits.filter(
-      (deposit) => deposit.active !== false
+      (deposit) => deposit.active !== false,
     );
 
     const newSummaries = accounts.map((account) => {
@@ -123,7 +122,7 @@ const DepositSummaryPage: React.FC = () => {
 
     // Sort by account code
     return newSummaries.sort((a, b) =>
-      a.accountCode.localeCompare(b.accountCode)
+      a.accountCode.localeCompare(b.accountCode),
     );
   };
 
@@ -137,7 +136,7 @@ const DepositSummaryPage: React.FC = () => {
   const startEditing = (
     accountId: string,
     savings: number,
-    deposits: number
+    deposits: number,
   ) => {
     setEditingAccountId(accountId);
     setSaveError(null);
@@ -158,7 +157,7 @@ const DepositSummaryPage: React.FC = () => {
   // Update account savings in 'accounts' collection
   const updateAccountSavings = async (
     accountId: string,
-    savingsRupees: number
+    savingsRupees: number,
   ) => {
     try {
       const accountRef = doc(firestore, "accounts", accountId);
@@ -170,7 +169,7 @@ const DepositSummaryPage: React.FC = () => {
     } catch (error: any) {
       console.error("Firestore update error:", error);
       throw new Error(
-        `Failed to update savings: ${error.message || "Unknown error"}`
+        `Failed to update savings: ${error.message || "Unknown error"}`,
       );
     }
   };
@@ -191,7 +190,7 @@ const DepositSummaryPage: React.FC = () => {
     } catch (error: any) {
       console.error("Firestore add adjustment error:", error);
       throw new Error(
-        `Failed to add adjustment: ${error.message || "Unknown error"}`
+        `Failed to add adjustment: ${error.message || "Unknown error"}`,
       );
     }
   };
@@ -251,7 +250,7 @@ const DepositSummaryPage: React.FC = () => {
     } catch (error: any) {
       console.error("Error saving edits:", error);
       setSaveError(
-        error.message || "Failed to save changes. Please try again."
+        error.message || "Failed to save changes. Please try again.",
       );
     } finally {
       setIsSaving(false);
@@ -282,15 +281,15 @@ const DepositSummaryPage: React.FC = () => {
         await updateDoc(historyRef, historyData);
         alert(
           `✓ History updated for ${currentMonth}!\nSavings: ${formatLakhs(
-            rupeesToLakhs(totalSavings)
-          )}\nDeposits: ${formatLakhs(rupeesToLakhs(totalDeposits))}`
+            rupeesToLakhs(totalSavings),
+          )}\nDeposits: ${formatLakhs(rupeesToLakhs(totalDeposits))}`,
         );
       } else {
         await setDoc(historyRef, historyData);
         alert(
           `✓ History created for ${currentMonth}!\nSavings: ${formatLakhs(
-            rupeesToLakhs(totalSavings)
-          )}\nDeposits: ${formatLakhs(rupeesToLakhs(totalDeposits))}`
+            rupeesToLakhs(totalSavings),
+          )}\nDeposits: ${formatLakhs(rupeesToLakhs(totalDeposits))}`,
         );
       }
 
@@ -306,11 +305,11 @@ const DepositSummaryPage: React.FC = () => {
   // Calculate totals
   const totalSavings = summaries.reduce(
     (sum, summary) => sum + summary.savings,
-    0
+    0,
   );
   const totalDeposits = summaries.reduce(
     (sum, summary) => sum + summary.deposits,
-    0
+    0,
   );
 
   if (loading) {
@@ -571,7 +570,7 @@ const DepositSummaryPage: React.FC = () => {
                               startEditing(
                                 summary.accountId,
                                 summary.savings,
-                                summary.deposits
+                                summary.deposits,
                               )
                             }
                             style={{
@@ -671,7 +670,7 @@ const DepositSummaryPage: React.FC = () => {
           </>
         )}
       </div>
-      <BankingNavigation />
+
       {/* Bottom spacing */}
       <div style={{ height: "10px" }}></div>
 

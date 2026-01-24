@@ -123,7 +123,7 @@ const RenewalForm: React.FC = () => {
 
   return (
     <div style={onlineStyles.container}>
-      {/* Top Navigation */}
+      {/* Top Navigation with Save button */}
       <div style={onlineStyles.topNav}>
         <button
           onClick={() => navigate("/online/renewals")}
@@ -140,11 +140,25 @@ const RenewalForm: React.FC = () => {
             {isEditing ? "Update renewal details" : "Create a new renewal"}
           </div>
         </div>
+        <div style={onlineStyles.headerRight}>
+          <button
+            type="submit"
+            form="renewal-form" // Connect to the form
+            style={onlineStyles.addButton}
+            disabled={saving}
+          >
+            {saving ? "Saving..." : isEditing ? "Update" : "Save"}
+          </button>
+        </div>
       </div>
 
       {/* Form */}
       <div style={onlineStyles.section}>
-        <form onSubmit={handleSubmit} style={onlineStyles.form}>
+        <form
+          id="renewal-form"
+          onSubmit={handleSubmit}
+          style={onlineStyles.form}
+        >
           <div style={onlineStyles.formGroup}>
             <label style={onlineStyles.label}>Name *</label>
             <input
@@ -211,8 +225,13 @@ const RenewalForm: React.FC = () => {
             />
           </div>
 
-          {/* Form Actions */}
-          <div style={onlineStyles.formActions}>
+          {/* Form Actions - Removed the bottom buttons */}
+          <div
+            style={{
+              ...onlineStyles.formActions,
+              display: "none", // Hide bottom buttons since we have top button
+            }}
+          >
             <button
               type="button"
               onClick={() => navigate("/online/renewals")}

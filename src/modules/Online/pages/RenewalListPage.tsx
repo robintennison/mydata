@@ -275,7 +275,7 @@ const RenewalListPage: React.FC = () => {
           )}
         </div>
 
-        {/* Right: Sort and Settings */}
+        {/* Right: Sort, Add, and Settings buttons */}
         <div
           style={{
             display: "flex",
@@ -283,6 +283,24 @@ const RenewalListPage: React.FC = () => {
             height: "100%",
           }}
         >
+          {/* Add button - PLUS icon */}
+          <button
+            onClick={() => navigate("/online/renewals/add")}
+            style={{
+              ...onlineStyles.navButton,
+              border: "none",
+              backgroundColor: "transparent",
+              borderRadius: "0",
+              width: "48px",
+              height: "100%",
+              fontSize: "1.2rem",
+              color: "#667eea",
+            }}
+            title="Add Renewal"
+          >
+            +
+          </button>
+
           {/* Sort Dropdown */}
           <div style={{ position: "relative" }}>
             <button
@@ -388,32 +406,6 @@ const RenewalListPage: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Floating Add Button */}
-      <button
-        onClick={() => navigate("/online/renewals/add")}
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
-          width: "56px",
-          height: "56px",
-          borderRadius: "50%",
-          backgroundColor: "#667eea",
-          color: "white",
-          border: "none",
-          fontSize: "1.5rem",
-          cursor: "pointer",
-          boxShadow: "0 4px 12px rgba(102, 126, 234, 0.3)",
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-        title="Add Renewal"
-      >
-        +
-      </button>
 
       {/* Compact Renewals List */}
       <div style={{ flex: 1, overflowY: "auto", padding: "0" }}>

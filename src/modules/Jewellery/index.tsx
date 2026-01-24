@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { jewelleryStyles } from "./styles/jewelleryStyles";
 import { useJewellerySettings } from "./hooks/useSettingsData";
 import {
@@ -18,7 +17,7 @@ import VerificationTab from "./pages/VerificationTab";
 type TabType = "dashboard" | "list" | "gallery" | "bills" | "verification";
 
 const JewelleryHome: React.FC = () => {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const { goldRate, settings } = useJewellerySettings();
   const [stats, setStats] = useState({
     totalItems: 0,
@@ -169,129 +168,132 @@ const JewelleryHome: React.FC = () => {
       case "dashboard":
         return (
           <>
-            {/* Three Small Cards for Weight and Values */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "10px",
-                marginBottom: "15px",
-              }}
-            >
-              {/* Total Weight Card */}
+            {/* ADDED: Padding container for stat cards */}
+            <div style={{ padding: "15px 15px 0 15px" }}>
+              {/* Three Small Cards for Weight and Values */}
               <div
                 style={{
-                  backgroundColor: "white",
-                  borderRadius: "10px",
-                  padding: "15px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  textAlign: "center",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "10px",
+                  marginBottom: "15px",
                 }}
               >
+                {/* Total Weight Card */}
                 <div
                   style={{
-                    fontSize: "12px",
-                    color: "#6b7280",
-                    marginBottom: "5px",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    padding: "15px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    textAlign: "center",
                   }}
                 >
-                  Total Weight
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#6b7280",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Total Weight
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: "600",
+                      color: "#3b82f6",
+                    }}
+                  >
+                    {formatWeight(stats.totalWeight)}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#9ca3af",
+                      marginTop: "5px",
+                    }}
+                  >
+                    {stats.totalItems} items
+                  </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: "600",
-                    color: "#3b82f6",
-                  }}
-                >
-                  {formatWeight(stats.totalWeight)}
-                </div>
-                <div
-                  style={{
-                    fontSize: "11px",
-                    color: "#9ca3af",
-                    marginTop: "5px",
-                  }}
-                >
-                  {stats.totalItems} items
-                </div>
-              </div>
 
-              {/* Buy Value Card */}
-              <div
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: "10px",
-                  padding: "15px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  textAlign: "center",
-                }}
-              >
+                {/* Buy Value Card */}
                 <div
                   style={{
-                    fontSize: "12px",
-                    color: "#6b7280",
-                    marginBottom: "5px",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    padding: "15px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    textAlign: "center",
                   }}
                 >
-                  Buy Value
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#6b7280",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Buy Value
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      color: "#10b981",
+                    }}
+                  >
+                    {formatValueInLakhs(stats.buyValue)}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#9ca3af",
+                      marginTop: "5px",
+                    }}
+                  >
+                    ₹{goldRate}/g + {formatPercent(makingTaxPercent)}
+                  </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    color: "#10b981",
-                  }}
-                >
-                  {formatValueInLakhs(stats.buyValue)}
-                </div>
-                <div
-                  style={{
-                    fontSize: "11px",
-                    color: "#9ca3af",
-                    marginTop: "5px",
-                  }}
-                >
-                  ₹{goldRate}/g + {formatPercent(makingTaxPercent)}
-                </div>
-              </div>
 
-              {/* Sell Value Card */}
-              <div
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: "10px",
-                  padding: "15px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  textAlign: "center",
-                }}
-              >
+                {/* Sell Value Card */}
                 <div
                   style={{
-                    fontSize: "12px",
-                    color: "#6b7280",
-                    marginBottom: "5px",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    padding: "15px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    textAlign: "center",
                   }}
                 >
-                  Sell Value
-                </div>
-                <div
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    color: "#ef4444",
-                  }}
-                >
-                  {formatValueInLakhs(stats.sellValue)}
-                </div>
-                <div
-                  style={{
-                    fontSize: "11px",
-                    color: "#9ca3af",
-                    marginTop: "5px",
-                  }}
-                >
-                  -{formatPercent(resaleDiscountPercent)} resale
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#6b7280",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Sell Value
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      color: "#ef4444",
+                    }}
+                  >
+                    {formatValueInLakhs(stats.sellValue)}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#9ca3af",
+                      marginTop: "5px",
+                    }}
+                  >
+                    -{formatPercent(resaleDiscountPercent)} resale
+                  </div>
                 </div>
               </div>
             </div>
@@ -303,7 +305,7 @@ const JewelleryHome: React.FC = () => {
                 borderRadius: "10px",
                 padding: "15px",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                marginBottom: "15px",
+                margin: "15px",
               }}
             >
               <div
@@ -404,7 +406,7 @@ const JewelleryHome: React.FC = () => {
                 borderRadius: "10px",
                 padding: "15px",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                marginBottom: "15px",
+                margin: "15px",
               }}
             >
               <div
@@ -500,9 +502,15 @@ const JewelleryHome: React.FC = () => {
             </div>
 
             {/* Compact Summary Cards for other modules */}
-            <BillsTab compact={true} />
-            <GalleryTab compact={true} />
-            <VerificationTab compact={true} />
+            <div style={{ margin: "15px" }}>
+              <BillsTab compact={true} />
+            </div>
+            <div style={{ margin: "15px" }}>
+              <GalleryTab compact={true} />
+            </div>
+            <div style={{ margin: "15px" }}>
+              <VerificationTab compact={true} />
+            </div>
           </>
         );
       case "list":
@@ -520,30 +528,7 @@ const JewelleryHome: React.FC = () => {
 
   return (
     <div style={jewelleryStyles.container}>
-      {/* Top Navigation */}
-      <div style={jewelleryStyles.topNav}>
-        <button
-          onClick={() => navigate("/")}
-          style={jewelleryStyles.navButton}
-          title="Back to Home"
-        >
-          ←
-        </button>
-        <div style={jewelleryStyles.navTitle}>Jewellery Management</div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            onClick={() => navigate("/settings")}
-            style={{
-              ...jewelleryStyles.navButton,
-              padding: "6px 10px",
-              fontSize: "1.2rem",
-            }}
-            title="Settings"
-          >
-            ⚙️
-          </button>
-        </div>
-      </div>
+      {/* REMOVED: Top Navigation header - now in main Layout Header */}
 
       {/* Tab Navigation - Compact with smaller text */}
       <div
@@ -557,12 +542,12 @@ const JewelleryHome: React.FC = () => {
         <button
           onClick={() => setActiveTab("dashboard")}
           style={{
-            padding: "14px 12px" /* Reduced horizontal padding */,
+            padding: "14px 8px" /* Reduced padding for more compact look */,
             border: "none",
             backgroundColor:
               activeTab === "dashboard" ? "#f3f4f6" : "transparent",
             color: activeTab === "dashboard" ? "#111827" : "#6b7280",
-            fontSize: "13px" /* Smaller font size */,
+            fontSize: "12px" /* Even smaller font size */,
             fontWeight: activeTab === "dashboard" ? "600" : "400",
             borderBottom:
               activeTab === "dashboard" ? "2px solid #3b82f6" : "none",
@@ -570,7 +555,7 @@ const JewelleryHome: React.FC = () => {
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "4px" /* Reduced gap */,
+            gap: "3px" /* Minimal gap */,
             flex: 1 /* Make all tabs equal width */,
             justifyContent: "center",
             minWidth: 0 /* Allow shrinking */,
@@ -584,18 +569,18 @@ const JewelleryHome: React.FC = () => {
         <button
           onClick={() => setActiveTab("list")}
           style={{
-            padding: "14px 12px",
+            padding: "14px 8px",
             border: "none",
             backgroundColor: activeTab === "list" ? "#f3f4f6" : "transparent",
             color: activeTab === "list" ? "#111827" : "#6b7280",
-            fontSize: "13px",
+            fontSize: "12px",
             fontWeight: activeTab === "list" ? "600" : "400",
             borderBottom: activeTab === "list" ? "2px solid #3b82f6" : "none",
             cursor: "pointer",
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "4px",
+            gap: "3px",
             flex: 1,
             justifyContent: "center",
             minWidth: 0,
@@ -604,18 +589,17 @@ const JewelleryHome: React.FC = () => {
         >
           <span>📋</span>
           <span>List</span>
-          {/* Removed the item count badge */}
         </button>
 
         <button
           onClick={() => setActiveTab("gallery")}
           style={{
-            padding: "14px 12px",
+            padding: "14px 8px",
             border: "none",
             backgroundColor:
               activeTab === "gallery" ? "#f3f4f6" : "transparent",
             color: activeTab === "gallery" ? "#111827" : "#6b7280",
-            fontSize: "13px",
+            fontSize: "12px",
             fontWeight: activeTab === "gallery" ? "600" : "400",
             borderBottom:
               activeTab === "gallery" ? "2px solid #3b82f6" : "none",
@@ -623,7 +607,7 @@ const JewelleryHome: React.FC = () => {
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "4px",
+            gap: "3px",
             flex: 1,
             justifyContent: "center",
             minWidth: 0,
@@ -637,18 +621,18 @@ const JewelleryHome: React.FC = () => {
         <button
           onClick={() => setActiveTab("bills")}
           style={{
-            padding: "14px 12px",
+            padding: "14px 8px",
             border: "none",
             backgroundColor: activeTab === "bills" ? "#f3f4f6" : "transparent",
             color: activeTab === "bills" ? "#111827" : "#6b7280",
-            fontSize: "13px",
+            fontSize: "12px",
             fontWeight: activeTab === "bills" ? "600" : "400",
             borderBottom: activeTab === "bills" ? "2px solid #3b82f6" : "none",
             cursor: "pointer",
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "4px",
+            gap: "3px",
             flex: 1,
             justifyContent: "center",
             minWidth: 0,
@@ -662,12 +646,12 @@ const JewelleryHome: React.FC = () => {
         <button
           onClick={() => setActiveTab("verification")}
           style={{
-            padding: "14px 12px",
+            padding: "14px 8px",
             border: "none",
             backgroundColor:
               activeTab === "verification" ? "#f3f4f6" : "transparent",
             color: activeTab === "verification" ? "#111827" : "#6b7280",
-            fontSize: "13px",
+            fontSize: "12px",
             fontWeight: activeTab === "verification" ? "600" : "400",
             borderBottom:
               activeTab === "verification" ? "2px solid #3b82f6" : "none",
@@ -675,7 +659,7 @@ const JewelleryHome: React.FC = () => {
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "4px",
+            gap: "3px",
             flex: 1,
             justifyContent: "center",
             minWidth: 0,
@@ -692,7 +676,7 @@ const JewelleryHome: React.FC = () => {
         {renderTabContent()}
 
         {/* Bottom spacing */}
-        <div style={{ height: "100px" }}></div>
+        <div style={{ height: "80px" }}></div>
       </div>
     </div>
   );

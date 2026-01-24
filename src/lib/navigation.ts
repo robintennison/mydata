@@ -6,9 +6,8 @@ interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { path: "/", label: "Home", icon: "🏠", requiresAuth: true },
+  //{ path: "/", label: "Home", icon: "🏠", requiresAuth: true },
   { path: "/banking", label: "Banking", icon: "🏦", requiresAuth: true },
   { path: "/jewellery", label: "Jewellery", icon: "💎", requiresAuth: true },
   { path: "/online", label: "Online", icon: "🌐", requiresAuth: true },
-  // Removed: { path: "/properties", label: "Properties", icon: "🏢", requiresAuth: true },
 ];

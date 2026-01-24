@@ -5,7 +5,7 @@
   justify-content: center;
   align-items: center;
   gap: var(--spacing-md, 1rem);
-  padding: var(--spacing-xs, 0.5rem) 0;
+  padding: var(--spacing-xxs, 0.25rem) 0;
   background-color: transparent;
 }
 

@@ -545,24 +545,24 @@ const JewelleryHome: React.FC = () => {
         </div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation - Compact with smaller text */}
       <div
         style={{
           display: "flex",
           backgroundColor: "white",
           borderBottom: "1px solid #e5e7eb",
-          overflowX: "auto",
+          /* Remove overflowX: auto to prevent scrollbar */
         }}
       >
         <button
           onClick={() => setActiveTab("dashboard")}
           style={{
-            padding: "14px 16px",
+            padding: "14px 12px" /* Reduced horizontal padding */,
             border: "none",
             backgroundColor:
               activeTab === "dashboard" ? "#f3f4f6" : "transparent",
             color: activeTab === "dashboard" ? "#111827" : "#6b7280",
-            fontSize: "14px",
+            fontSize: "13px" /* Smaller font size */,
             fontWeight: activeTab === "dashboard" ? "600" : "400",
             borderBottom:
               activeTab === "dashboard" ? "2px solid #3b82f6" : "none",
@@ -570,57 +570,52 @@ const JewelleryHome: React.FC = () => {
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "6px",
+            gap: "4px" /* Reduced gap */,
+            flex: 1 /* Make all tabs equal width */,
+            justifyContent: "center",
+            minWidth: 0 /* Allow shrinking */,
           }}
+          title="Dashboard"
         >
           <span>📊</span>
-          <span>Dashboard</span>
+          <span>Dash</span> {/* Changed from "Dashboard" to "Dash" */}
         </button>
 
         <button
           onClick={() => setActiveTab("list")}
           style={{
-            padding: "14px 16px",
+            padding: "14px 12px",
             border: "none",
             backgroundColor: activeTab === "list" ? "#f3f4f6" : "transparent",
             color: activeTab === "list" ? "#111827" : "#6b7280",
-            fontSize: "14px",
+            fontSize: "13px",
             fontWeight: activeTab === "list" ? "600" : "400",
             borderBottom: activeTab === "list" ? "2px solid #3b82f6" : "none",
             cursor: "pointer",
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "6px",
+            gap: "4px",
+            flex: 1,
+            justifyContent: "center",
+            minWidth: 0,
           }}
+          title="List"
         >
           <span>📋</span>
           <span>List</span>
-          {stats.totalItems > 0 && (
-            <span
-              style={{
-                fontSize: "11px",
-                backgroundColor: "#d1d5db",
-                color: "#374151",
-                padding: "2px 6px",
-                borderRadius: "10px",
-                marginLeft: "4px",
-              }}
-            >
-              {stats.totalItems}
-            </span>
-          )}
+          {/* Removed the item count badge */}
         </button>
 
         <button
           onClick={() => setActiveTab("gallery")}
           style={{
-            padding: "14px 16px",
+            padding: "14px 12px",
             border: "none",
             backgroundColor:
               activeTab === "gallery" ? "#f3f4f6" : "transparent",
             color: activeTab === "gallery" ? "#111827" : "#6b7280",
-            fontSize: "14px",
+            fontSize: "13px",
             fontWeight: activeTab === "gallery" ? "600" : "400",
             borderBottom:
               activeTab === "gallery" ? "2px solid #3b82f6" : "none",
@@ -628,8 +623,12 @@ const JewelleryHome: React.FC = () => {
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "6px",
+            gap: "4px",
+            flex: 1,
+            justifyContent: "center",
+            minWidth: 0,
           }}
+          title="Gallery"
         >
           <span>🖼️</span>
           <span>Gallery</span>
@@ -638,19 +637,23 @@ const JewelleryHome: React.FC = () => {
         <button
           onClick={() => setActiveTab("bills")}
           style={{
-            padding: "14px 16px",
+            padding: "14px 12px",
             border: "none",
             backgroundColor: activeTab === "bills" ? "#f3f4f6" : "transparent",
             color: activeTab === "bills" ? "#111827" : "#6b7280",
-            fontSize: "14px",
+            fontSize: "13px",
             fontWeight: activeTab === "bills" ? "600" : "400",
             borderBottom: activeTab === "bills" ? "2px solid #3b82f6" : "none",
             cursor: "pointer",
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "6px",
+            gap: "4px",
+            flex: 1,
+            justifyContent: "center",
+            minWidth: 0,
           }}
+          title="Bills"
         >
           <span>📄</span>
           <span>Bills</span>
@@ -659,12 +662,12 @@ const JewelleryHome: React.FC = () => {
         <button
           onClick={() => setActiveTab("verification")}
           style={{
-            padding: "14px 16px",
+            padding: "14px 12px",
             border: "none",
             backgroundColor:
               activeTab === "verification" ? "#f3f4f6" : "transparent",
             color: activeTab === "verification" ? "#111827" : "#6b7280",
-            fontSize: "14px",
+            fontSize: "13px",
             fontWeight: activeTab === "verification" ? "600" : "400",
             borderBottom:
               activeTab === "verification" ? "2px solid #3b82f6" : "none",
@@ -672,11 +675,15 @@ const JewelleryHome: React.FC = () => {
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "6px",
+            gap: "4px",
+            flex: 1,
+            justifyContent: "center",
+            minWidth: 0,
           }}
+          title="Verification"
         >
           <span>✓</span>
-          <span>Verification</span>
+          <span>Verify</span> {/* Changed from "Verification" to "Verify" */}
         </button>
       </div>
 

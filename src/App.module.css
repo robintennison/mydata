@@ -101,15 +101,17 @@
   transform: translateY(0);
 }
 
+/* HEADER STYLES */
 .header {
   background-color: var(--color-white);
   color: var(--color-gray-900);
-  padding: var(--spacing-md) 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  border-bottom: 1px solid var(--color-gray-200); /* Clean separation */
+  padding: 8px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--color-gray-200);
   position: sticky;
   top: 0;
   z-index: 1000;
+  height: 56px;
 }
 
 .headerContent {
@@ -119,63 +121,163 @@
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
-  padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-md, 16px);
+  height: 100%;
+  gap: 8px;
 }
 
-.logoContainer {
+/* Left section - MyData home button */
+.headerLeft {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  min-width: 36px;
 }
 
-.logo {
-  margin: 0;
+.homeButton {
+  background: none;
+  border: none;
+  color: var(--color-primary-600);
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.homeButton:hover {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Center section - Module Navigation */
+.headerCenter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+}
+
+.moduleNav {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
+}
+
+.moduleButton {
+  background: transparent;
+  border: none;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  min-width: 50px;
+  min-height: 50px;
+  opacity: 0.8;
+}
+
+.moduleButton:hover {
+  background-color: var(--color-gray-100);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.moduleButton.activeModule {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-600);
+  opacity: 1;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.moduleIcon {
   font-size: 1.5rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  line-height: 1;
 }
 
-.logoIcon {
-  font-size: 1.8rem;
+.moduleLabel {
+  display: none; /* Hide text labels as requested */
 }
 
+/* Right section - Actions */
 .headerActions {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 8px;
 }
 
+/* Settings button */
+.settingsButton {
+  background: none;
+  border: none;
+  color: var(--color-gray-700);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  width: 40px;
+  height: 40px;
+}
+
+.settingsButton:hover {
+  background-color: var(--color-gray-100);
+  transform: translateY(-1px);
+}
+
+/* Logout button - Icon only */
 .logoutButton {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-white);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  font-size: 0.9rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-error-600);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 8px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  justify-content: center;
+  font-weight: 500;
+  width: 40px;
+  height: 40px;
+  gap: 0; /* Remove gap since no text */
 }
 
 .logoutButton:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(239, 68, 68, 0.2);
   transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
 .logoutButton:active {
   transform: translateY(0);
 }
 
-.logoutText {
-  /* Added for Header.tsx change */
+.logoutIcon {
+  font-size: 1.2rem;
 }
 
-.logoutIcon {
-  font-size: 1.2rem; /* Increased size to match HeaderNav icons */
+.logoutText {
+  display: none; /* Hide text as requested */
 }
 
 .main {
@@ -184,6 +286,7 @@
   width: 100%;
   margin: 0 auto;
   padding: var(--spacing-lg) var(--spacing-md);
+  padding-bottom: 20px;
 }
 
 /* Desktop view with shadow and rounded corners */
@@ -215,30 +318,73 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .header {
+    height: 52px;
+    padding: 6px 0;
+  }
+  
   .headerContent,
   .main {
     padding: 0 var(--spacing-md);
   }
   
-  .logo {
+  .moduleNav {
+    gap: 10px;
+  }
+  
+  .moduleButton {
+    padding: 6px 8px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .moduleIcon {
     font-size: 1.3rem;
   }
   
-  .logoutButton .logoutText {
-    display: none; /* Hide logout text on small screens */
+  .homeButton {
+    font-size: 1.2rem;
+    padding: 6px 8px;
   }
   
-  .logoutButton {
-    padding: var(--spacing-xs);
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .logoutButton,
+  .settingsButton {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+  
+  .logoutIcon {
+    font-size: 1.1rem;
   }
   
   .main {
     padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 600px) {
+  .homeButton {
+    font-size: 1.1rem;
+    padding: 6px;
+  }
+  
+  .moduleNav {
+    gap: 8px;
+  }
+  
+  .moduleButton {
+    padding: 6px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+  
+  .moduleIcon {
+    font-size: 1.4rem; /* Slightly larger on mobile for better tap targets */
+  }
+  
+  .headerActions {
+    gap: 6px;
   }
 }
 
@@ -256,8 +402,83 @@
     font-size: 1rem;
   }
   
+  .header {
+    height: 48px;
+  }
+  
   .headerContent,
   .main {
     padding: 0 var(--spacing-sm);
+  }
+  
+  .homeButton {
+    font-size: 1rem;
+    padding: 5px 8px;
+  }
+  
+  .moduleNav {
+    gap: 6px;
+  }
+  
+  .moduleButton {
+    padding: 5px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+  
+  .moduleIcon {
+    font-size: 1.3rem;
+  }
+  
+  .logoutButton,
+  .settingsButton {
+    width: 32px;
+    height: 32px;
+    padding: 5px;
+  }
+  
+  .logoutIcon {
+    font-size: 1rem;
+  }
+  
+  .settingsButton {
+    font-size: 1.1rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .header {
+    height: 44px;
+  }
+  
+  .homeButton {
+    font-size: 0.95rem;
+    padding: 4px 6px;
+  }
+  
+  .moduleNav {
+    gap: 4px;
+  }
+  
+  .moduleButton {
+    padding: 4px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+  
+  .moduleIcon {
+    font-size: 1.2rem;
+  }
+  
+  .logoutButton,
+  .settingsButton {
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+  }
+  
+  .logoutIcon {
+    font-size: 0.9rem;
   }
 }

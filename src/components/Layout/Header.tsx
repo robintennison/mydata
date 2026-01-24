@@ -1,13 +1,33 @@
 // components/Layout/Header.tsx
 import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import styles from "../../App.module.css";
-import HeaderNav from "../Navigation/HeaderNav";
 
 const Header: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Define all icons in one place
+  const NAV_ICONS = {
+    // Module icons
+    BANKING: "🏦",
+    JEWELLERY: "💎",
+    ONLINE: "🌐",
+
+    // Header action icons
+    BACK: "←",
+    SETTINGS: "⚙️",
+    LOGOUT: "↪️",
+  };
+
+  // Module navigation items
+  const MODULE_ITEMS = [
+    { path: "/banking", label: "Banking", icon: NAV_ICONS.BANKING },
+    { path: "/jewellery", label: "Jewellery", icon: NAV_ICONS.JEWELLERY },
+    { path: "/online", label: "Online", icon: NAV_ICONS.ONLINE },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -17,6 +37,10 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleHomeClick = () => {
+    navigate("/");
+  };
+
   if (!isAuthenticated) {
     return null;
   }
@@ -24,43 +48,60 @@ const Header: React.FC = () => {
   return (
     <header className={styles.header}>
       <div className={styles.headerContent}>
-        <div className={styles.logoContainer}>
-          <div className={styles.logo}>
-            <span onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-              MyData
-            </span>
+        {/* Left side: MyData clickable header */}
+        <div className={styles.headerLeft}>
+          <button
+            className={styles.homeButton}
+            onClick={handleHomeClick}
+            aria-label="Go to Home"
+            title="Go to Home"
+          >
+            MyData
+          </button>
+        </div>
+
+        {/* Center: Module Navigation */}
+        <div className={styles.headerCenter}>
+          <div className={styles.moduleNav}>
+            {MODULE_ITEMS.map((item) => {
+              const isActive =
+                location.pathname === item.path ||
+                (item.path !== "/" && location.pathname.startsWith(item.path));
+
+              return (
+                <button
+                  key={item.path}
+                  className={`${styles.moduleButton} ${isActive ? styles.activeModule : ""}`}
+                  onClick={() => navigate(item.path)}
+                  aria-label={item.label}
+                  title={item.label}
+                >
+                  <span className={styles.moduleIcon}>{item.icon}</span>
+                  {/* Removed the module label text below icons */}
+                </button>
+              );
+            })}
           </div>
         </div>
 
+        {/* Right side: Actions */}
         <div className={styles.headerActions}>
-          <HeaderNav />
+          <button
+            className={styles.settingsButton}
+            onClick={() => navigate("/settings")}
+            aria-label="Settings"
+            title="Settings"
+          >
+            {NAV_ICONS.SETTINGS}
+          </button>
           <button
             className={styles.logoutButton}
             onClick={handleLogout}
             aria-label="Logout"
+            title="Logout"
           >
-            {/* Choose one of these more visible icons: */}
-
-            {/* Option 1: Power button (most recognizable) */}
-            {/*<span className={styles.logoutIcon}>🔌</span>*/}
-            <span className={styles.logoutIcon}>↪️</span>
-
-            {/* Option 2: Exit sign */}
-            {/* <span className={styles.logoutIcon}>🚶‍♂️</span> */}
-
-            {/* Option 3: Door with arrow */}
-            {/* <span className={styles.logoutIcon}>🚪➡️</span> */}
-
-            {/* Option 4: Simple "X" */}
-            {/* <span className={styles.logoutIcon}>✕</span> */}
-
-            {/* Option 5: Logout text with arrow */}
-            {/* <span className={styles.logoutIcon}>↪️</span> */}
-
-            {/* Option 6: Power symbol (Unicode) */}
-            <span className={styles.logoutIcon}>⏻</span>
-
-            <span className={styles.logoutText}>Logout</span>
+            <span className={styles.logoutIcon}>{NAV_ICONS.LOGOUT}</span>
+            {/* Removed the "Logout" text */}
           </button>
         </div>
       </div>

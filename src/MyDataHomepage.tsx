@@ -153,35 +153,10 @@ const MyDataHomepage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Header with Settings Button Only */}
-      <div className={styles.header}>
-        <div className={styles.headerTopRow}>
-          <div className={styles.headerLeft}>
-            <h1 className={styles.title}>MyData / Dashboard</h1>
-            <p className={styles.subtitle}>
-              Personal Finance & Assets Overview
-            </p>
-          </div>
+      {/* Page title text removed - Now goes directly to content */}
 
-          {/* Header Right Section with Settings Only */}
-          <div className={styles.headerRight}>
-            {/* Settings Button Only */}
-            <button
-              className={styles.settingsButton}
-              onClick={() => navigate("/settings")}
-              title="Settings"
-            >
-              ⚙️
-              {settings?.showDelete && (
-                <span className={styles.editBadge}>✏️</span>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Compact Top Stats Cards */}
-      <div className={styles.statsRow}>
+      {/* Compact Top Stats Cards - Added top padding */}
+      <div className={styles.statsRow} style={{ paddingTop: "10px" }}>
         {/* Card 1: Total Balance */}
         <div className={styles.statCard} onClick={() => navigate("/banking")}>
           <div className={styles.cardTitle}>Total Balance</div>

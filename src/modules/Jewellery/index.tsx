@@ -15,7 +15,7 @@ import BillsTab from "./pages/BillsTab";
 import GalleryTab from "./pages/GalleryTab";
 import VerificationTab from "./pages/VerificationTab";
 
-type TabType = "list" | "bills" | "gallery" | "verification";
+type TabType = "dashboard" | "list" | "gallery" | "bills" | "verification";
 
 const JewelleryHome: React.FC = () => {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ const JewelleryHome: React.FC = () => {
     { location: string; totalWeight: number }[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>("list");
+  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
 
   // Get makingTaxPercent and resaleDiscountPercent from settings object
   const makingTaxPercent = settings?.makingTaxPercent || 0;
@@ -166,162 +166,8 @@ const JewelleryHome: React.FC = () => {
   // Render the active tab content
   const renderTabContent = () => {
     switch (activeTab) {
-      case "list":
-        return <ListTab />;
-      case "bills":
-        return <BillsTab compact={false} />;
-      case "gallery":
-        return <GalleryTab compact={false} />;
-      case "verification":
-        return <VerificationTab compact={false} />;
-      default:
-        return <ListTab />;
-    }
-  };
-
-  return (
-    <div style={jewelleryStyles.container}>
-      {/* Top Navigation */}
-      <div style={jewelleryStyles.topNav}>
-        <button
-          onClick={() => navigate("/")}
-          style={jewelleryStyles.navButton}
-          title="Back to Home"
-        >
-          ←
-        </button>
-        <div style={jewelleryStyles.navTitle}>Jewellery Management</div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            onClick={() => navigate("/settings")}
-            style={{
-              ...jewelleryStyles.navButton,
-              padding: "6px 10px",
-              fontSize: "1.2rem",
-            }}
-            title="Settings"
-          >
-            ⚙️
-          </button>
-        </div>
-      </div>
-
-      {/* Tab Navigation */}
-      <div
-        style={{
-          display: "flex",
-          backgroundColor: "white",
-          borderBottom: "1px solid #e5e7eb",
-          overflowX: "auto",
-        }}
-      >
-        <button
-          onClick={() => setActiveTab("list")}
-          style={{
-            padding: "14px 16px",
-            border: "none",
-            backgroundColor: activeTab === "list" ? "#f3f4f6" : "transparent",
-            color: activeTab === "list" ? "#111827" : "#6b7280",
-            fontSize: "14px",
-            fontWeight: activeTab === "list" ? "600" : "400",
-            borderBottom: activeTab === "list" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <span>📋</span>
-          <span>List</span>
-          {activeTab === "list" && stats.totalItems > 0 && (
-            <span
-              style={{
-                fontSize: "11px",
-                backgroundColor: "#d1d5db",
-                color: "#374151",
-                padding: "2px 6px",
-                borderRadius: "10px",
-                marginLeft: "4px",
-              }}
-            >
-              {stats.totalItems}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab("gallery")}
-          style={{
-            padding: "14px 16px",
-            border: "none",
-            backgroundColor:
-              activeTab === "gallery" ? "#f3f4f6" : "transparent",
-            color: activeTab === "gallery" ? "#111827" : "#6b7280",
-            fontSize: "14px",
-            fontWeight: activeTab === "gallery" ? "600" : "400",
-            borderBottom:
-              activeTab === "gallery" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <span>🖼️</span>
-          <span>Gallery</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("bills")}
-          style={{
-            padding: "14px 16px",
-            border: "none",
-            backgroundColor: activeTab === "bills" ? "#f3f4f6" : "transparent",
-            color: activeTab === "bills" ? "#111827" : "#6b7280",
-            fontSize: "14px",
-            fontWeight: activeTab === "bills" ? "600" : "400",
-            borderBottom: activeTab === "bills" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <span>📄</span>
-          <span>Bills</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("verification")}
-          style={{
-            padding: "14px 16px",
-            border: "none",
-            backgroundColor:
-              activeTab === "verification" ? "#f3f4f6" : "transparent",
-            color: activeTab === "verification" ? "#111827" : "#6b7280",
-            fontSize: "14px",
-            fontWeight: activeTab === "verification" ? "600" : "400",
-            borderBottom:
-              activeTab === "verification" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <span>✓</span>
-          <span>Verification</span>
-        </button>
-      </div>
-
-      {/* Tab Content Area */}
-      <div style={jewelleryStyles.contentWrapper}>
-        {/* Show summary cards only on List tab */}
-        {activeTab === "list" && (
+      case "dashboard":
+        return (
           <>
             {/* Three Small Cards for Weight and Values */}
             <div
@@ -450,7 +296,7 @@ const JewelleryHome: React.FC = () => {
               </div>
             </div>
 
-            {/* Weight Distribution Cards - Only on List tab */}
+            {/* Weight Distribution Cards */}
             <div
               style={{
                 backgroundColor: "white",
@@ -652,10 +498,190 @@ const JewelleryHome: React.FC = () => {
                 </div>
               )}
             </div>
-          </>
-        )}
 
-        {/* Render the active tab content */}
+            {/* Compact Summary Cards for other modules */}
+            <BillsTab compact={true} />
+            <GalleryTab compact={true} />
+            <VerificationTab compact={true} />
+          </>
+        );
+      case "list":
+        return <ListTab />;
+      case "gallery":
+        return <GalleryTab compact={false} />;
+      case "bills":
+        return <BillsTab compact={false} />;
+      case "verification":
+        return <VerificationTab compact={false} />;
+      default:
+        return <ListTab />;
+    }
+  };
+
+  return (
+    <div style={jewelleryStyles.container}>
+      {/* Top Navigation */}
+      <div style={jewelleryStyles.topNav}>
+        <button
+          onClick={() => navigate("/")}
+          style={jewelleryStyles.navButton}
+          title="Back to Home"
+        >
+          ←
+        </button>
+        <div style={jewelleryStyles.navTitle}>Jewellery Management</div>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            onClick={() => navigate("/settings")}
+            style={{
+              ...jewelleryStyles.navButton,
+              padding: "6px 10px",
+              fontSize: "1.2rem",
+            }}
+            title="Settings"
+          >
+            ⚙️
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div
+        style={{
+          display: "flex",
+          backgroundColor: "white",
+          borderBottom: "1px solid #e5e7eb",
+          overflowX: "auto",
+        }}
+      >
+        <button
+          onClick={() => setActiveTab("dashboard")}
+          style={{
+            padding: "14px 16px",
+            border: "none",
+            backgroundColor:
+              activeTab === "dashboard" ? "#f3f4f6" : "transparent",
+            color: activeTab === "dashboard" ? "#111827" : "#6b7280",
+            fontSize: "14px",
+            fontWeight: activeTab === "dashboard" ? "600" : "400",
+            borderBottom:
+              activeTab === "dashboard" ? "2px solid #3b82f6" : "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>📊</span>
+          <span>Dashboard</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("list")}
+          style={{
+            padding: "14px 16px",
+            border: "none",
+            backgroundColor: activeTab === "list" ? "#f3f4f6" : "transparent",
+            color: activeTab === "list" ? "#111827" : "#6b7280",
+            fontSize: "14px",
+            fontWeight: activeTab === "list" ? "600" : "400",
+            borderBottom: activeTab === "list" ? "2px solid #3b82f6" : "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>📋</span>
+          <span>List</span>
+          {stats.totalItems > 0 && (
+            <span
+              style={{
+                fontSize: "11px",
+                backgroundColor: "#d1d5db",
+                color: "#374151",
+                padding: "2px 6px",
+                borderRadius: "10px",
+                marginLeft: "4px",
+              }}
+            >
+              {stats.totalItems}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("gallery")}
+          style={{
+            padding: "14px 16px",
+            border: "none",
+            backgroundColor:
+              activeTab === "gallery" ? "#f3f4f6" : "transparent",
+            color: activeTab === "gallery" ? "#111827" : "#6b7280",
+            fontSize: "14px",
+            fontWeight: activeTab === "gallery" ? "600" : "400",
+            borderBottom:
+              activeTab === "gallery" ? "2px solid #3b82f6" : "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>🖼️</span>
+          <span>Gallery</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("bills")}
+          style={{
+            padding: "14px 16px",
+            border: "none",
+            backgroundColor: activeTab === "bills" ? "#f3f4f6" : "transparent",
+            color: activeTab === "bills" ? "#111827" : "#6b7280",
+            fontSize: "14px",
+            fontWeight: activeTab === "bills" ? "600" : "400",
+            borderBottom: activeTab === "bills" ? "2px solid #3b82f6" : "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>📄</span>
+          <span>Bills</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("verification")}
+          style={{
+            padding: "14px 16px",
+            border: "none",
+            backgroundColor:
+              activeTab === "verification" ? "#f3f4f6" : "transparent",
+            color: activeTab === "verification" ? "#111827" : "#6b7280",
+            fontSize: "14px",
+            fontWeight: activeTab === "verification" ? "600" : "400",
+            borderBottom:
+              activeTab === "verification" ? "2px solid #3b82f6" : "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <span>✓</span>
+          <span>Verification</span>
+        </button>
+      </div>
+
+      {/* Tab Content Area */}
+      <div style={jewelleryStyles.contentWrapper}>
         {renderTabContent()}
 
         {/* Bottom spacing */}

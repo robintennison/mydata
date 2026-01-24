@@ -6,6 +6,7 @@ import { useBankingData } from "../hooks/useBankingData";
 
 const EditHistoryPage: React.FC = () => {
   const navigate = useNavigate();
+  //const location = useLocation();
   const { month } = useParams();
   const { loading, history } = useBankingData(); // You'll need to create or modify your hook
 
@@ -35,8 +36,21 @@ const EditHistoryPage: React.FC = () => {
 
       // TODO: Save to Firebase
       console.log("Updating history record:", updatedRecord);
-      navigate("/banking/history");
+
+      // ALWAYS navigate back to banking with history tab active
+      navigate("/banking", {
+        state: { activeTab: "history" },
+        replace: true,
+      });
     }
+  };
+
+  const handleCancel = () => {
+    // ALWAYS navigate back to banking with history tab active
+    navigate("/banking", {
+      state: { activeTab: "history" },
+      replace: true,
+    });
   };
 
   const canSave = formMonth && formTotalDeposits && formSavings;
@@ -59,7 +73,7 @@ const EditHistoryPage: React.FC = () => {
         <div style={bankingStyles.headerTopRow}>
           <div style={bankingStyles.headerLeft}>
             <button
-              onClick={() => navigate(-1)}
+              onClick={handleCancel}
               style={styles.backButton}
               title="Go Back"
             >

@@ -1,6 +1,6 @@
 // src/modules/banking/AddAccountPage.tsx
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { addAccountPageStyles as styles } from "../styles/AddAccountPage.styles";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
@@ -8,12 +8,7 @@ import { firestore } from "../../../lib/firebase";
 
 const AddAccountPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { settings } = useSettings();
-
-  // Get return path and active tab from location state or use defaults
-  const returnTo = location.state?.returnTo || "/banking";
-  const activeTab = location.state?.activeTab || "accounts";
 
   const [formData, setFormData] = useState({
     acctCode: "",
@@ -107,9 +102,9 @@ const AddAccountPage: React.FC = () => {
       const accountsRef = collection(firestore, "accounts");
       await addDoc(accountsRef, accountData);
 
-      // Success - navigate back to banking with accounts tab active
-      navigate(returnTo, {
-        state: { activeTab },
+      // Success - ALWAYS navigate back to banking with accounts tab active
+      navigate("/banking", {
+        state: { activeTab: "accounts" }, // Force accounts tab
         replace: true,
       });
     } catch (err: any) {
@@ -122,8 +117,9 @@ const AddAccountPage: React.FC = () => {
 
   // Handle cancel/back
   const handleCancel = () => {
-    navigate(returnTo, {
-      state: { activeTab },
+    // On cancel, also go to accounts tab
+    navigate("/banking", {
+      state: { activeTab: "accounts" }, // Force accounts tab
       replace: true,
     });
   };

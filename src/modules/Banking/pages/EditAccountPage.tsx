@@ -105,6 +105,12 @@ const EditAccountPage: React.FC = () => {
 
       console.log("Updating account with data:", accountData);
       await handleSaveAccount(accountData);
+
+      // Success - ALWAYS navigate back to banking with accounts tab active
+      navigate("/banking", {
+        state: { activeTab: "accounts" }, // Force accounts tab
+        replace: true,
+      });
     } catch (err) {
       console.error("Update error:", err);
       setError("Failed to update account. Please try again.");
@@ -117,6 +123,11 @@ const EditAccountPage: React.FC = () => {
 
     try {
       await handleDeleteAccount(id);
+      // After delete, ALWAYS navigate back to banking with accounts tab active
+      navigate("/banking", {
+        state: { activeTab: "accounts" }, // Force accounts tab
+        replace: true,
+      });
     } catch (err) {
       console.error("Delete error:", err);
       setError("Failed to delete account. Please try again.");
@@ -135,12 +146,16 @@ const EditAccountPage: React.FC = () => {
 
     if (hasChanges) {
       const confirmLeave = window.confirm(
-        "You have unsaved changes. Are you sure you want to leave?"
+        "You have unsaved changes. Are you sure you want to leave?",
       );
       if (!confirmLeave) return;
     }
 
-    navigate("/banking/accounts");
+    // ALWAYS navigate back to banking with accounts tab active
+    navigate("/banking", {
+      state: { activeTab: "accounts" }, // Force accounts tab
+      replace: true,
+    });
   };
 
   if (dataLoading) {
@@ -161,7 +176,9 @@ const EditAccountPage: React.FC = () => {
         <div style={{ padding: "15px 4px", position: "relative" }}>
           <p>The account you're looking for doesn't exist.</p>
           <button
-            onClick={() => navigate("/banking/accounts")}
+            onClick={() =>
+              navigate("/banking", { state: { activeTab: "accounts" } })
+            }
             style={bankingStyles.primaryButton}
           >
             Back to Accounts
@@ -173,7 +190,6 @@ const EditAccountPage: React.FC = () => {
 
   return (
     <div style={bankingStyles.container}>
-
       {/* Top Navigation */}
       <div style={bankingStyles.topNav}>
         <button

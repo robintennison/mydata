@@ -1,3 +1,4 @@
+// src/modules/banking/AddEditDepositPage.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
@@ -15,6 +16,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 }) => {
   const { depositId } = useParams();
   const navigate = useNavigate();
+  //const location = useLocation();
   const { accounts, deposits, loading: dataLoading } = useBankingData();
   const { handleSaveDeposit, handleDeleteDeposit } = useBankingOperations();
 
@@ -108,7 +110,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
     const dateStr = prompt(
       `Enter ${field === "startDate" ? "start" : "end"} date (YYYY-MM-DD):`,
-      defaultDate
+      defaultDate,
     );
 
     if (dateStr) {
@@ -139,7 +141,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
       };
 
       await handleSaveDeposit(depositToSave);
-      navigate("/banking/deposits");
+      // Success - ALWAYS navigate back to banking with deposits tab active
+      navigate("/banking", {
+        state: { activeTab: "deposits" },
+        replace: true,
+      });
     } catch (error) {
       console.error("Error saving deposit:", error);
       alert("Failed to save deposit. Please try again.");
@@ -153,13 +159,25 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
     setDeleting(true);
     try {
       await handleDeleteDeposit(depositId);
-      navigate("/banking/deposits");
+      // After delete, ALWAYS navigate back to banking with deposits tab active
+      navigate("/banking", {
+        state: { activeTab: "deposits" },
+        replace: true,
+      });
     } catch (error) {
       console.error("Error deleting deposit:", error);
       alert("Failed to delete deposit. Please try again.");
       setDeleting(false);
       setShowDeleteConfirm(false);
     }
+  };
+
+  const handleCancel = () => {
+    // ALWAYS navigate back to banking with deposits tab active
+    navigate("/banking", {
+      state: { activeTab: "deposits" },
+      replace: true,
+    });
   };
 
   if (dataLoading && isEdit) {
@@ -175,11 +193,10 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
   return (
     <div ref={containerRef} style={bankingStyles.container}>
-
       {/* Top Navigation */}
       <div style={bankingStyles.topNav}>
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleCancel}
           style={bankingStyles.navButton}
           title="Back"
           disabled={saving || deleting}
@@ -256,8 +273,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   dataLoading
                     ? "Loading accounts..."
                     : localAccounts.length > 0
-                    ? "Select account"
-                    : "No accounts available"
+                      ? "Select account"
+                      : "No accounts available"
                 }
                 style={{
                   ...bankingStyles.input,
@@ -668,8 +685,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 saving || deleting
                   ? "#94a3b8"
                   : !formData.accountId || formData.amount <= 0
-                  ? "#cbd5e1"
-                  : "#10b981",
+                    ? "#cbd5e1"
+                    : "#10b981",
               color: "#fff",
               fontSize: "1rem",
               fontWeight: 600,

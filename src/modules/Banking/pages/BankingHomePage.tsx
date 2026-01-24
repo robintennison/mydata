@@ -22,6 +22,62 @@ const BankingHomePage: React.FC = () => {
     "dashboard" | "accounts" | "deposits" | "history" | "summary"
   >("dashboard");
 
+  // Handle Add button click
+  const handleAddClick = () => {
+    switch (activeTab) {
+      case "accounts":
+        // Navigate to add account form with callback to return to tabs
+        navigate("/banking/accounts/add", {
+          state: { returnTo: "/banking", activeTab: "accounts" },
+        });
+        break;
+      case "deposits":
+        // Navigate to add deposit form with callback to return to tabs
+        navigate("/banking/deposits/add", {
+          state: { returnTo: "/banking", activeTab: "deposits" },
+        });
+        break;
+      case "history":
+        // Navigate to add history form with callback to return to tabs
+        navigate("/banking/history/add", {
+          state: { returnTo: "/banking", activeTab: "history" },
+        });
+        break;
+      case "summary":
+        // Summary doesn't typically have add function
+        alert("Use edit buttons in the summary table to modify values");
+        break;
+      case "dashboard":
+      default:
+        // Dashboard doesn't have add function
+        alert("Select Accounts or Deposits tab to add items");
+        break;
+    }
+  };
+
+  // Check if current tab should show Add button
+  const shouldShowAddButton = () => {
+    return (
+      activeTab === "accounts" ||
+      activeTab === "deposits" ||
+      activeTab === "history"
+    );
+  };
+
+  // Get button title based on active tab
+  const getAddButtonTitle = () => {
+    switch (activeTab) {
+      case "accounts":
+        return "Add New Account";
+      case "deposits":
+        return "Add New Deposit";
+      case "history":
+        return "Add History Record";
+      default:
+        return "Add";
+    }
+  };
+
   // Format numbers in lakhs with 2 decimals (no currency symbol or "L" label)
   const formatLakhs = (amount: number): string => {
     return (amount / 100000).toFixed(2);
@@ -484,13 +540,30 @@ const BankingHomePage: React.FC = () => {
           🏠
         </button>
         <div style={bankingHomeStyles.navTitle}>Banking</div>
-        <button
-          onClick={() => navigate("/settings")}
-          style={bankingHomeStyles.navButton}
-          title="Settings"
-        >
-          ⚙️
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          {shouldShowAddButton() && (
+            <button
+              onClick={handleAddClick}
+              style={styles.addButton}
+              title={getAddButtonTitle()}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#059669")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#10b981")
+              }
+            >
+              ➕
+            </button>
+          )}
+          <button
+            onClick={() => navigate("/settings")}
+            style={bankingHomeStyles.navButton}
+            title="Settings"
+          >
+            ⚙️
+          </button>
+        </div>
       </div>
 
       {/* Tabs Navigation */}
@@ -564,7 +637,7 @@ const BankingHomePage: React.FC = () => {
   );
 };
 
-// Tab styles
+// Tab and button styles
 const styles = {
   tabsContainer: {
     width: "100%",
@@ -609,6 +682,23 @@ const styles = {
     maxWidth: "800px",
     padding: "16px",
     overflowY: "auto" as const,
+  },
+  addButton: {
+    backgroundColor: "#10b981",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "6px",
+    padding: "8px 12px",
+    fontSize: "14px",
+    fontWeight: 600,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: "36px",
+    minHeight: "36px",
+    transition: "background-color 0.2s",
+    marginLeft: "auto",
   },
 };
 

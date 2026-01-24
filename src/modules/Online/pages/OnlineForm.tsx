@@ -86,12 +86,12 @@ const OnlineForm: React.FC = () => {
         });
       } else {
         alert("Item not found");
-        navigate("/online/items");
+        navigate("/online"); // CHANGED: from "/online/items" to "/online"
       }
     } catch (error) {
       console.error("Error fetching item:", error);
       alert("Failed to load item");
-      navigate("/online/items");
+      navigate("/online"); // CHANGED: from "/online/items" to "/online"
     } finally {
       setLoading(false);
     }
@@ -143,7 +143,7 @@ const OnlineForm: React.FC = () => {
         alert("Item added successfully!");
       }
 
-      navigate("/online/items");
+      navigate("/online"); // CHANGED: from "/online/items" to "/online"
     } catch (error) {
       console.error("Error saving item:", error);
       alert("Failed to save item");
@@ -168,7 +168,7 @@ const OnlineForm: React.FC = () => {
       {/* Top Navigation */}
       <div style={onlineStyles.topNav}>
         <button
-          onClick={() => navigate("/online/items")}
+          onClick={() => navigate("/online")} // CHANGED: from "/online/items" to "/online"
           style={onlineStyles.navButton}
           title="Back"
         >
@@ -312,7 +312,7 @@ const OnlineForm: React.FC = () => {
           <div style={onlineStyles.formActions}>
             <button
               type="button"
-              onClick={() => navigate("/online/items")}
+              onClick={() => navigate("/online")} // CHANGED: from "/online/items" to "/online"
               style={onlineStyles.cancelButton}
               disabled={saving}
             >

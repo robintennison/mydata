@@ -50,12 +50,12 @@ const CategoryForm: React.FC = () => {
         });
       } else {
         alert("Category not found");
-        navigate("/online/categories");
+        navigate("/online"); // CHANGED: from "/online/categories" to "/online"
       }
     } catch (error) {
       console.error("Error fetching category:", error);
       alert("Failed to load category");
-      navigate("/online/categories");
+      navigate("/online"); // CHANGED: from "/online/categories" to "/online"
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ const CategoryForm: React.FC = () => {
         alert("Category added successfully!");
       }
 
-      navigate("/online/categories");
+      navigate("/online"); // CHANGED: from "/online/categories" to "/online"
     } catch (error) {
       console.error("Error saving category:", error);
       alert("Failed to save category");
@@ -113,7 +113,7 @@ const CategoryForm: React.FC = () => {
       {/* Top Navigation */}
       <div style={onlineStyles.topNav}>
         <button
-          onClick={() => navigate("/online/categories")}
+          onClick={() => navigate("/online")} // CHANGED: from "/online/categories" to "/online"
           style={onlineStyles.navButton}
           title="Back"
         >
@@ -152,7 +152,7 @@ const CategoryForm: React.FC = () => {
           <div style={onlineStyles.formActions}>
             <button
               type="button"
-              onClick={() => navigate("/online/categories")}
+              onClick={() => navigate("/online")} // CHANGED: from "/online/categories" to "/online"
               style={onlineStyles.cancelButton}
               disabled={saving}
             >

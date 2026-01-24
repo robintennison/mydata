@@ -34,13 +34,11 @@ import JewelleryForBill from "../modules/Jewellery/pages/JewelleryForBill";
 import BatchEditPage from "../modules/Jewellery/pages/BatchEditPage";
 
 // Import Online pages
-import CategoryListPage from "../modules/Online/pages/CategoryListPage";
 import CategoryForm from "../modules/Online/pages/CategoryForm";
-import OnlineListPage from "../modules/Online/pages/OnlineListPage";
 import OnlineForm from "../modules/Online/pages/OnlineForm";
-import RenewalListPage from "../modules/Online/pages/RenewalListPage";
 import RenewalForm from "../modules/Online/pages/RenewalForm";
 import OnlineHomepage from "../modules/Online/pages/OnlineHomepage";
+//import OnlineViewPage from "../modules/Online/pages/OnlineViewPage"; // Add this if you have it
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -270,12 +268,12 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
   },
 
-  // Online Module Routes - ADDED THESE
+  // Online Module Routes - UPDATED FOR TABS
   {
-    path: "/online/categories",
-    element: <CategoryListPage />,
-    title: "Categories",
-    icon: "📁",
+    path: "/online",
+    element: <OnlineHomepage />,
+    title: "Online",
+    icon: "🌐",
     requiresAuth: true,
   },
   {
@@ -293,13 +291,6 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
   },
   {
-    path: "/online/items",
-    element: <OnlineListPage />,
-    title: "Online Items",
-    icon: "🛒",
-    requiresAuth: true,
-  },
-  {
     path: "/online/items/add",
     element: <OnlineForm />,
     title: "Add Item",
@@ -313,19 +304,12 @@ const allRoutes: RouteConfig[] = [
     icon: "✏️",
     requiresAuth: true,
   },
-  {
-    path: "/online/items/view/:id",
-    element: <OnlineForm />,
-    title: "View Item",
-    requiresAuth: true,
-  },
-  {
-    path: "/online/renewals",
-    element: <RenewalListPage />,
-    title: "Renewals",
-    icon: "🔄",
-    requiresAuth: true,
-  },
+  // {
+  //   path: "/online/items/view/:id",
+  //   element: <OnlineViewPage />,
+  //   title: "View Item",
+  //   requiresAuth: true,
+  // },
   {
     path: "/online/renewals/add",
     element: <RenewalForm />,
@@ -340,27 +324,17 @@ const allRoutes: RouteConfig[] = [
     icon: "✏️",
     requiresAuth: true,
   },
+  {
+    path: "/online/renewals/view/:id",
+    element: <RenewalForm />, // You might want a separate view page for renewals
+    title: "View Renewal",
+    requiresAuth: true,
+  },
 
-  // Other Module Routes
-  {
-    path: "/online",
-    element: <OnlineHomepage />, // Change this from the placeholder div to OnlineHomepage
-    title: "Online",
-    icon: "🌐",
-    requiresAuth: true,
-  },
-  {
-    path: "/properties",
-    element: (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        <h2>🏠 Properties Module</h2>
-        <p>Coming Soon</p>
-      </div>
-    ),
-    title: "Properties",
-    icon: "🏠",
-    requiresAuth: true,
-  },
+  // REMOVED: Old Online list page routes
+  // "/online/categories", "/online/items", "/online/renewals" - Now handled by tabs
+
+  // REMOVED: Properties module entirely
 ];
 
 // ==================== NAVIGATION ITEMS ====================

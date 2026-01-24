@@ -56,12 +56,12 @@ const RenewalForm: React.FC = () => {
         });
       } else {
         alert("Renewal not found");
-        navigate("/online/renewals");
+        navigate("/online"); // CHANGED: from "/online/renewals" to "/online"
       }
     } catch (error) {
       console.error("Error fetching renewal:", error);
       alert("Failed to load renewal");
-      navigate("/online/renewals");
+      navigate("/online"); // CHANGED: from "/online/renewals" to "/online"
     } finally {
       setLoading(false);
     }
@@ -101,7 +101,7 @@ const RenewalForm: React.FC = () => {
         alert("Renewal added successfully!");
       }
 
-      navigate("/online/renewals");
+      navigate("/online"); // CHANGED: from "/online/renewals" to "/online"
     } catch (error) {
       console.error("Error saving renewal:", error);
       alert("Failed to save renewal");
@@ -126,7 +126,7 @@ const RenewalForm: React.FC = () => {
       {/* Top Navigation with Save button */}
       <div style={onlineStyles.topNav}>
         <button
-          onClick={() => navigate("/online/renewals")}
+          onClick={() => navigate("/online")} // CHANGED: from "/online/renewals" to "/online"
           style={onlineStyles.navButton}
           title="Back"
         >
@@ -234,7 +234,7 @@ const RenewalForm: React.FC = () => {
           >
             <button
               type="button"
-              onClick={() => navigate("/online/renewals")}
+              onClick={() => navigate("/online")} // CHANGED: from "/online/renewals" to "/online"
               style={onlineStyles.cancelButton}
               disabled={saving}
             >

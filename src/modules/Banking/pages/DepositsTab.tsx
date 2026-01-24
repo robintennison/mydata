@@ -31,7 +31,6 @@ const DepositsTab: React.FC = () => {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("account");
   const [localDeposits, setLocalDeposits] = useState<Deposit[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
 
   // Refs for dropdowns
   const filterDropdownRef = useRef<HTMLDivElement>(null);
@@ -57,20 +56,7 @@ const DepositsTab: React.FC = () => {
 
   // Filter deposits exactly like Android app with proper account filtering and sorting
   const filteredDeposits = localDeposits
-    .filter((dep) => {
-      // Search filter
-      if (searchTerm) {
-        const accountName = getAccountName(dep.accountId).toLowerCase();
-        const comments = dep.comments?.toLowerCase() || "";
-        const amount = formatInLakhs(dep.amount);
-        return (
-          accountName.includes(searchTerm.toLowerCase()) ||
-          comments.includes(searchTerm.toLowerCase()) ||
-          amount.includes(searchTerm)
-        );
-      }
-      return true;
-    })
+
     .filter((dep) => {
       if (filterAccount === "All") return true;
       // Get account name for filtering
@@ -130,43 +116,20 @@ const DepositsTab: React.FC = () => {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Search and Filter Row */}
+      {/* REMOVED: Search and Filter Row - replaced with just filter and sort buttons */}
+
+      {/* Filter and Sort Row */}
       <div
         style={{
           padding: "10px 15px",
           backgroundColor: "white",
           borderBottom: "1px solid #e9ecef",
           display: "flex",
-          gap: "10px",
+          justifyContent: "space-between",
           alignItems: "center",
+          gap: "10px",
         }}
       >
-        {/* Search Input */}
-        <div style={{ flex: 1, position: "relative" }}>
-          <input
-            type="text"
-            placeholder="Search deposits..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              ...bankingStyles.searchInput,
-              padding: "10px 35px 10px 12px",
-              fontSize: "0.9rem",
-            }}
-          />
-          <span
-            style={{
-              position: "absolute",
-              right: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#a0aec0",
-            }}
-          >
-            🔍
-          </span>
-        </div>
-
         {/* Filter Button */}
         <div style={{ position: "relative" }}>
           <button
@@ -216,7 +179,7 @@ const DepositsTab: React.FC = () => {
                 style={{
                   position: "absolute",
                   top: "100%",
-                  right: 0,
+                  left: 0,
                   backgroundColor: "#ffffff",
                   border: "1px solid #e0e0e0",
                   borderRadius: "8px",
@@ -454,18 +417,14 @@ const DepositsTab: React.FC = () => {
                 marginBottom: "8px",
               }}
             >
-              {searchTerm
-                ? "No matching deposits found"
-                : filterAccount !== "All"
-                  ? `No deposits for ${filterAccount}`
-                  : settings?.showInactive
-                    ? "No deposits available"
-                    : "No active deposits available"}
+              {filterAccount !== "All"
+                ? `No deposits for ${filterAccount}`
+                : settings?.showInactive
+                  ? "No deposits available"
+                  : "No active deposits available"}
             </div>
             <div style={{ fontSize: "14px", color: "#9ca3af" }}>
-              {!searchTerm &&
-                filterAccount === "All" &&
-                "Add your first deposit"}
+              {filterAccount === "All" && "Add your first deposit"}
             </div>
           </div>
         ) : (

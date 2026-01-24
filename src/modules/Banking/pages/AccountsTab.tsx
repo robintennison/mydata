@@ -12,7 +12,6 @@ const AccountsTab: React.FC = () => {
   const { handleDeleteAccount } = useBankingOperations();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState("");
 
   // Format currency without rupee symbol, in lakhs without 'L' suffix
   const formatCurrency = (amount: number): string => {
@@ -38,17 +37,11 @@ const AccountsTab: React.FC = () => {
 
   // Filter accounts based on showInactive setting
   const filteredAccounts = accounts.filter((account) => {
-    // First filter by search term
-    const matchesSearch =
-      searchTerm === "" ||
-      account.acctCode.toLowerCase().includes(searchTerm.toLowerCase());
-
-    // Then filter by showInactive setting
     if (settings?.showInactive) {
-      return matchesSearch;
+      return true; // Show all accounts
     }
     // If showInactive is false or undefined, show only active accounts
-    return matchesSearch && isAccountActive(account);
+    return isAccountActive(account);
   });
 
   // Sort accounts by acctCode in ascending order
@@ -96,39 +89,7 @@ const AccountsTab: React.FC = () => {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Search Bar */}
-      <div
-        style={{
-          padding: "10px 15px",
-          backgroundColor: "white",
-          borderBottom: "1px solid #e9ecef",
-        }}
-      >
-        <div style={{ position: "relative" }}>
-          <input
-            type="text"
-            placeholder="Search accounts..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              ...bankingStyles.searchInput,
-              padding: "10px 35px 10px 12px",
-              fontSize: "0.9rem",
-            }}
-          />
-          <span
-            style={{
-              position: "absolute",
-              right: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#a0aec0",
-            }}
-          >
-            🔍
-          </span>
-        </div>
-      </div>
+      {/* REMOVED: Search Bar section */}
 
       {/* Accounts List */}
       <div style={{ flex: 1, overflowY: "auto", padding: "10px 0" }}>
@@ -153,17 +114,12 @@ const AccountsTab: React.FC = () => {
                 marginBottom: "8px",
               }}
             >
-              {searchTerm
-                ? "No matching accounts found"
-                : settings?.showInactive
-                  ? "No accounts found"
-                  : "No active accounts found"}
+              {settings?.showInactive
+                ? "No accounts found"
+                : "No active accounts found"}
             </div>
             <div style={{ fontSize: "14px", color: "#9ca3af" }}>
-              {!searchTerm &&
-                (settings?.showInactive
-                  ? "Add your first account"
-                  : "Add your first account")}
+              Add your first account to get started
             </div>
           </div>
         ) : (

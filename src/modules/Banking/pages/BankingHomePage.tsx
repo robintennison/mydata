@@ -523,8 +523,6 @@ const BankingHomePage: React.FC = () => {
 
   return (
     <div style={bankingHomeStyles.centeredContainer}>
-      {/* REMOVED: Top Navigation header - now in main Layout Header */}
-
       {/* Tabs Navigation */}
       <div style={styles.tabsContainer}>
         <div style={styles.tabsList}>
@@ -536,7 +534,7 @@ const BankingHomePage: React.FC = () => {
             onClick={() => setActiveTab("dashboard")}
             title="Dashboard"
           >
-            📊 Dashboard
+            📊 Dash
           </button>
           <button
             style={{
@@ -546,7 +544,7 @@ const BankingHomePage: React.FC = () => {
             onClick={() => setActiveTab("accounts")}
             title="Accounts"
           >
-            👥 Accounts
+            👥 Acct
           </button>
           <button
             style={{
@@ -556,7 +554,7 @@ const BankingHomePage: React.FC = () => {
             onClick={() => setActiveTab("deposits")}
             title="Deposits"
           >
-            💰 Deposits
+            💰 Depo
           </button>
           <button
             style={{
@@ -566,7 +564,7 @@ const BankingHomePage: React.FC = () => {
             onClick={() => setActiveTab("history")}
             title="History"
           >
-            📅 History
+            📅 Hist
           </button>
           <button
             style={{
@@ -576,7 +574,7 @@ const BankingHomePage: React.FC = () => {
             onClick={() => setActiveTab("summary")}
             title="Summary"
           >
-            📈 Summary
+            📈 Summ
           </button>
         </div>
       </div>
@@ -626,17 +624,17 @@ const styles = {
   tabsList: {
     display: "flex",
     overflowX: "auto" as const,
-    padding: "0 8px",
-    gap: "2px",
+    padding: "0 4px", // Reduced padding for mobile
+    gap: "1px", // Reduced gap for mobile
   },
   tabButton: {
     flex: "1 1 0",
     minWidth: "0",
-    padding: "12px 8px",
+    padding: "10px 4px", // Reduced padding for mobile
     backgroundColor: "transparent",
     border: "none",
     borderBottom: "3px solid transparent",
-    fontSize: "0.85rem",
+    fontSize: "0.75rem", // Smaller font for mobile
     fontWeight: 600,
     color: "#6b7280",
     cursor: "pointer",
@@ -644,7 +642,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "4px",
+    gap: "3px",
     transition: "all 0.2s ease",
   },
   activeTab: {

@@ -47,7 +47,6 @@ export interface RouteConfig {
   needsUserData?: boolean;
   children?: RouteConfig[];
   isIndex?: boolean;
-  hideFooter?: boolean;
 }
 
 export interface NavigationItem {
@@ -74,7 +73,6 @@ const allRoutes: RouteConfig[] = [
     element: <LoginForm />,
     title: "Login",
     requiresAuth: false,
-    hideFooter: true,
   },
   {
     path: "/settings",
@@ -405,7 +403,7 @@ const AppRoutes: React.FC<AppRoutesProps> = () => {
               path={route.path}
               element={
                 <PublicRoute>
-                  <Layout hideFooter={route.hideFooter}>{route.element}</Layout>
+                  <Layout>{route.element}</Layout>
                 </PublicRoute>
               }
             />
@@ -415,10 +413,10 @@ const AppRoutes: React.FC<AppRoutesProps> = () => {
         // For all other routes, check if they require auth
         const routeElement = route.requiresAuth ? (
           <ProtectedRoute>
-            <Layout hideFooter={route.hideFooter}>{route.element}</Layout>
+            <Layout>{route.element}</Layout>
           </ProtectedRoute>
         ) : (
-          <Layout hideFooter={route.hideFooter}>{route.element}</Layout>
+          <Layout>{route.element}</Layout>
         );
 
         return (

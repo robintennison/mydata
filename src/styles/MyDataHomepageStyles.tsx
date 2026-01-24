@@ -1,4 +1,3 @@
-// src/styles/MyDataHomepageStyles.tsx
 import type { CSSProperties } from "react";
 
 // Base styles - more compact version
@@ -209,46 +208,6 @@ export const myDataHomepageStyles: Record<string, CSSProperties> = {
     color: "#666",
     lineHeight: 1.4,
   },
-  // Footer styles (for other pages)
-  footer: {
-    position: "fixed",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "white",
-    borderTop: "1px solid #e9ecef",
-    padding: "10px 15px",
-    zIndex: 100,
-    maxWidth: "500px",
-    margin: "0 auto",
-    boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
-  },
-  navGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "5px",
-  },
-  navItem: {
-    textAlign: "center",
-    cursor: "pointer",
-    padding: "8px 5px",
-    borderRadius: "8px",
-    transition: "all 0.2s",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  navIcon: {
-    fontSize: "1.4rem",
-    marginBottom: "4px",
-    transition: "transform 0.2s",
-  },
-  navItemName: {
-    fontSize: "0.7rem",
-    fontWeight: 500,
-    color: "#666",
-  },
 };
 
 // Helper functions for dynamic styles
@@ -282,14 +241,6 @@ export const myDataHomepageGlobalStyles = `
     transform: scale(1.1);
   }
   
-  /* Footer hover effects */
-  .footerNavItem:hover {
-    background-color: #f8f9fa;
-  }
-  
-  .footerNavItem:hover .footerNavIcon {
-    transform: scale(1.1);
-  }
 `;
 
 // Helper function to inject global styles

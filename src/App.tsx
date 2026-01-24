@@ -4,7 +4,6 @@ import { AppRoutes } from "./routes";
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { ErrorProvider } from "./contexts/ErrorContext";
 import { AuthProvider } from "./contexts/AuthContext";
-import BottomNav from "./components/Navigation/BottomNav";
 
 // Import global styles
 import "./shared/styles/design-tokens.css";
@@ -27,7 +26,6 @@ function App() {
                 <main className={styles.main}>
                   <AppRoutes />
                 </main>
-                <BottomNav />
               </div>
             </div>
           </AuthProvider>

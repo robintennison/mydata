@@ -122,36 +122,67 @@ const AccountsTab: React.FC = () => {
           </div>
         ) : (
           <div>
-            {/* Table Header - REMOVED padding from outer div */}
+            {/* Table Header - NEW 2-column layout */}
             <div
               style={{
                 display: "flex",
-                padding: "8px 4px", // Reduced padding
+                padding: "8px 4px",
                 backgroundColor: "#f9fafb",
                 borderBottom: "1px solid #e9ecef",
                 fontWeight: "600",
-                fontSize: "12px", // Slightly smaller font
+                fontSize: "12px",
                 color: "#374151",
+                alignItems: "center",
               }}
             >
-              <div style={{ flex: 4, padding: "0 4px" }}>Account</div>
-              <div style={{ flex: 3, textAlign: "right", padding: "0 4px" }}>
-                Savings
+              <div
+                style={{
+                  flex: 4,
+                  padding: "0 4px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                Account
               </div>
-              <div style={{ flex: 3, padding: "0 4px" }}>MPIN</div>
-              {settings?.showDelete && <div style={{ width: "32px" }}></div>}
+              <div
+                style={{
+                  flex: 3,
+                  padding: "0 4px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                MPIN
+              </div>
+              {settings?.showDelete && (
+                <div
+                  style={{
+                    width: "32px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                ></div>
+              )}
             </div>
 
-            {/* Accounts Rows - REMOVED padding from outer div */}
+            {/* Accounts Rows - NEW 2-column layout */}
             <div>
               {sortedAccounts.map((account) => {
                 const isActive = isAccountActive(account);
+                const accountCode = account.acctCode || "";
+                // Limit account code to 20 characters
+                const truncatedAccountCode =
+                  accountCode.length > 20
+                    ? `${accountCode.substring(0, 20)}...`
+                    : accountCode;
+
                 return (
                   <div
                     key={account.id}
                     style={{
                       backgroundColor: "white",
-                      borderBottom: "1px solid #f3f4f6", // Changed to bottom border only
+                      borderBottom: "1px solid #f3f4f6",
                       cursor: "pointer",
                     }}
                     onClick={() =>
@@ -160,31 +191,47 @@ const AccountsTab: React.FC = () => {
                   >
                     <div
                       style={{
-                        padding: "8px 4px", // Reduced padding
+                        padding: "8px 4px",
                         display: "flex",
                         alignItems: "center",
-                        minHeight: "40px", // Reduced min-height
+                        minHeight: "40px",
                       }}
                     >
-                      <div style={{ flex: 4, minWidth: 0, padding: "0 4px" }}>
+                      {/* Account Column with Savings inline - NEW layout */}
+                      <div
+                        style={{
+                          flex: 4,
+                          minWidth: 0,
+                          padding: "0 4px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px", // Space between account code and savings
+                        }}
+                      >
+                        {/* Account Code (20 chars max) */}
                         <div
                           style={{
                             fontWeight: "500",
                             color: isActive ? "#1e293b" : "#6c757d",
-                            fontSize: "13px", // Slightly smaller font
+                            fontSize: "13px",
                             textDecoration: isActive ? "none" : "line-through",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
+                            flexShrink: 1,
+                            minWidth: "0", // Allow shrinking
                           }}
+                          title={
+                            accountCode.length > 20 ? accountCode : undefined
+                          }
                         >
-                          {account.acctCode}
+                          {truncatedAccountCode}
                           {!isActive && (
                             <span
                               style={{
-                                fontSize: "10px", // Smaller
+                                fontSize: "10px",
                                 color: "#dc2626",
-                                marginLeft: "4px", // Reduced margin
+                                marginLeft: "4px",
                                 fontWeight: "normal",
                               }}
                             >
@@ -192,46 +239,59 @@ const AccountsTab: React.FC = () => {
                             </span>
                           )}
                         </div>
-                      </div>
-                      <div
-                        style={{
-                          flex: 3,
-                          textAlign: "right",
-                          padding: "0 4px",
-                        }}
-                      >
+
+                        {/* Savings Amount - now inline with account code */}
                         <div
                           style={{
-                            fontSize: "13px", // Slightly smaller
+                            fontSize: "13px",
                             fontWeight: "600",
                             color: isActive ? "#4285f4" : "#6c757d",
+                            flexShrink: 0, // Don't shrink the amount
+                            whiteSpace: "nowrap",
+                            marginLeft: "auto", // Push to the right side of available space
                           }}
                         >
                           {formatCurrency(account.savingsAmount)}
                         </div>
                       </div>
-                      <div style={{ flex: 3, padding: "0 4px" }}>
+
+                      {/* MPIN Column - CHANGED: font color to black */}
+                      <div
+                        style={{
+                          flex: 3,
+                          padding: "0 4px",
+                          display: "flex",
+                          alignItems: "center",
+                          height: "100%",
+                          justifyContent: "center",
+                        }}
+                      >
                         <div
                           style={{
                             fontFamily: "'Courier New', monospace",
-                            fontSize: "12px", // Slightly smaller
-                            color: isActive ? "#475569" : "#9ca3af",
+                            fontSize: "12px",
+                            color: isActive ? "#000000" : "#9ca3af", // CHANGED: from "#475569" to "#000000"
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
+                            textAlign: "center",
+                            fontWeight: "500", // Added for better visibility
                           }}
                         >
                           {account.mpin || "••••"}
                         </div>
                       </div>
-                      {/* Edit icon only if showDelete is enabled */}
+
+                      {/* Edit Button Column */}
                       {settings?.showDelete && (
                         <div
                           style={{
-                            width: "32px", // Smaller width
+                            width: "32px",
                             display: "flex",
                             justifyContent: "flex-end",
                             paddingRight: "2px",
+                            alignItems: "center",
+                            height: "100%",
                           }}
                         >
                           <button
@@ -240,17 +300,17 @@ const AccountsTab: React.FC = () => {
                               navigate(`/banking/accounts/edit/${account.id}`);
                             }}
                             style={{
-                              padding: "2px", // Reduced padding
+                              padding: "2px",
                               background: "none",
                               border: "none",
                               cursor: "pointer",
                               color: "#6b7280",
-                              fontSize: "14px", // Smaller icon
+                              fontSize: "14px",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              width: "28px", // Smaller
-                              height: "28px", // Smaller
+                              width: "28px",
+                              height: "28px",
                             }}
                             title="Edit Account"
                           >
@@ -264,10 +324,10 @@ const AccountsTab: React.FC = () => {
               })}
             </div>
 
-            {/* Total Savings Footer - REMOVED margin and padding */}
+            {/* Total Savings Footer */}
             <div
               style={{
-                padding: "8px 4px", // Reduced padding
+                padding: "8px 4px",
                 backgroundColor: "#f3f4f6",
                 borderTop: "1px solid #e9ecef",
                 display: "flex",
@@ -275,7 +335,13 @@ const AccountsTab: React.FC = () => {
                 alignItems: "center",
               }}
             >
-              <div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                }}
+              >
                 <div style={{ fontSize: "11px", color: "#6b7280" }}>
                   {settings?.showInactive
                     ? `${sortedAccounts.length} of ${accounts.length} accounts`
@@ -283,7 +349,7 @@ const AccountsTab: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    fontSize: "10px", // Smaller
+                    fontSize: "10px",
                     color: "#94a3b8",
                     marginTop: "1px",
                   }}
@@ -292,10 +358,18 @@ const AccountsTab: React.FC = () => {
                   inactive)
                 </div>
               </div>
-              <div style={{ textAlign: "right" }}>
+              <div
+                style={{
+                  textAlign: "right",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "flex-end",
+                }}
+              >
                 <div
                   style={{
-                    fontSize: "10px", // Smaller
+                    fontSize: "10px",
                     color: "#64748b",
                     fontWeight: "600",
                     textTransform: "uppercase",
@@ -306,7 +380,7 @@ const AccountsTab: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    fontSize: "14px", // Smaller
+                    fontSize: "14px",
                     fontWeight: "700",
                     color: "#4285f4",
                   }}

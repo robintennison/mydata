@@ -13,7 +13,7 @@ export const jewelleryStyles = {
     flex: 1,
     display: "flex",
     flexDirection: "column" as const,
-    maxWidth: "500px",
+    maxWidth: "100%", // Changed from 500px to fill the Layout container (which is 600px)
     margin: "0 auto",
     width: "100%",
   },

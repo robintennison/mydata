@@ -169,14 +169,14 @@ const JewelleryHome: React.FC = () => {
         return (
           <>
             {/* ADDED: Padding container for stat cards */}
-            <div style={{ padding: "15px 15px 0 15px" }}>
+            <div style={{ padding: "8px 4px 0 4px" }}>
               {/* Three Small Cards for Weight and Values */}
               <div
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: "10px",
-                  marginBottom: "15px",
+                  gap: "6px",
+                  marginBottom: "8px",
                 }}
               >
                 {/* Total Weight Card */}
@@ -184,23 +184,23 @@ const JewelleryHome: React.FC = () => {
                   style={{
                     backgroundColor: "white",
                     borderRadius: "10px",
-                    padding: "15px",
+                    padding: "12px 4px",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                     textAlign: "center",
                   }}
                 >
                   <div
                     style={{
-                      fontSize: "12px",
+                      fontSize: "11px",
                       color: "#6b7280",
-                      marginBottom: "5px",
+                      marginBottom: "4px",
                     }}
                   >
                     Total Weight
                   </div>
                   <div
                     style={{
-                      fontSize: "18px",
+                      fontSize: "16px",
                       fontWeight: "600",
                       color: "#3b82f6",
                     }}
@@ -209,9 +209,9 @@ const JewelleryHome: React.FC = () => {
                   </div>
                   <div
                     style={{
-                      fontSize: "11px",
+                      fontSize: "10px",
                       color: "#9ca3af",
-                      marginTop: "5px",
+                      marginTop: "4px",
                     }}
                   >
                     {stats.totalItems} items
@@ -223,23 +223,23 @@ const JewelleryHome: React.FC = () => {
                   style={{
                     backgroundColor: "white",
                     borderRadius: "10px",
-                    padding: "15px",
+                    padding: "12px 4px",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                     textAlign: "center",
                   }}
                 >
                   <div
                     style={{
-                      fontSize: "12px",
+                      fontSize: "11px",
                       color: "#6b7280",
-                      marginBottom: "5px",
+                      marginBottom: "4px",
                     }}
                   >
                     Buy Value
                   </div>
                   <div
                     style={{
-                      fontSize: "16px",
+                      fontSize: "14px",
                       fontWeight: "600",
                       color: "#10b981",
                     }}
@@ -248,9 +248,9 @@ const JewelleryHome: React.FC = () => {
                   </div>
                   <div
                     style={{
-                      fontSize: "11px",
+                      fontSize: "10px",
                       color: "#9ca3af",
-                      marginTop: "5px",
+                      marginTop: "4px",
                     }}
                   >
                     ₹{goldRate}/g + {formatPercent(makingTaxPercent)}
@@ -262,23 +262,23 @@ const JewelleryHome: React.FC = () => {
                   style={{
                     backgroundColor: "white",
                     borderRadius: "10px",
-                    padding: "15px",
+                    padding: "12px 4px",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                     textAlign: "center",
                   }}
                 >
                   <div
                     style={{
-                      fontSize: "12px",
+                      fontSize: "11px",
                       color: "#6b7280",
-                      marginBottom: "5px",
+                      marginBottom: "4px",
                     }}
                   >
                     Sell Value
                   </div>
                   <div
                     style={{
-                      fontSize: "16px",
+                      fontSize: "14px",
                       fontWeight: "600",
                       color: "#ef4444",
                     }}
@@ -287,9 +287,9 @@ const JewelleryHome: React.FC = () => {
                   </div>
                   <div
                     style={{
-                      fontSize: "11px",
+                      fontSize: "10px",
                       color: "#9ca3af",
-                      marginTop: "5px",
+                      marginTop: "4px",
                     }}
                   >
                     -{formatPercent(resaleDiscountPercent)} resale
@@ -303,17 +303,17 @@ const JewelleryHome: React.FC = () => {
               style={{
                 backgroundColor: "white",
                 borderRadius: "10px",
-                padding: "15px",
+                padding: "12px", // Restored internal padding
                 boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                margin: "15px",
+                margin: "0 4px 8px 4px",
               }}
             >
               <div
                 style={{
-                  fontSize: "16px",
+                  fontSize: "14px",
                   fontWeight: "600",
                   color: "#333",
-                  marginBottom: "15px",
+                  marginBottom: "10px",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -322,7 +322,7 @@ const JewelleryHome: React.FC = () => {
                 <span>Weight by Person</span>
                 <span
                   style={{
-                    fontSize: "12px",
+                    fontSize: "11px",
                     color: "#6b7280",
                     fontWeight: "normal",
                   }}
@@ -335,9 +335,9 @@ const JewelleryHome: React.FC = () => {
                 <div
                   style={{
                     textAlign: "center",
-                    padding: "20px",
+                    padding: "15px",
                     color: "#9ca3af",
-                    fontSize: "14px",
+                    fontSize: "13px",
                   }}
                 >
                   No person data available
@@ -347,7 +347,7 @@ const JewelleryHome: React.FC = () => {
                   style={{
                     maxHeight: "200px",
                     overflowY: "auto",
-                    paddingRight: "8px",
+                    paddingRight: "2px",
                   }}
                 >
                   {personsWeight.map((item, index) => (
@@ -357,8 +357,8 @@ const JewelleryHome: React.FC = () => {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        padding: "10px 0",
-                        paddingRight: "8px",
+                        padding: "8px 0",
+                        paddingRight: "4px",
                         borderBottom:
                           index < personsWeight.length - 1
                             ? "1px solid #f3f4f6"
@@ -367,13 +367,13 @@ const JewelleryHome: React.FC = () => {
                     >
                       <div
                         style={{
-                          fontSize: "14px",
+                          fontSize: "13px",
                           color: "#4b5563",
                           flex: 1,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
-                          marginRight: "10px",
+                          marginRight: "8px",
                           paddingRight: "4px",
                         }}
                         title={item.person}
@@ -382,13 +382,13 @@ const JewelleryHome: React.FC = () => {
                       </div>
                       <div
                         style={{
-                          fontSize: "14px",
+                          fontSize: "13px",
                           fontWeight: "600",
                           color: "#111827",
                           whiteSpace: "nowrap",
-                          paddingLeft: "8px",
-                          paddingRight: "8px",
-                          minWidth: "60px",
+                          paddingLeft: "4px",
+                          paddingRight: "4px",
+                          minWidth: "50px",
                           textAlign: "right",
                         }}
                       >
@@ -404,17 +404,17 @@ const JewelleryHome: React.FC = () => {
               style={{
                 backgroundColor: "white",
                 borderRadius: "10px",
-                padding: "15px",
+                padding: "12px", // Restored internal padding
                 boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                margin: "15px",
+                margin: "0 4px 8px 4px",
               }}
             >
               <div
                 style={{
-                  fontSize: "16px",
+                  fontSize: "14px",
                   fontWeight: "600",
                   color: "#333",
-                  marginBottom: "15px",
+                  marginBottom: "10px",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -423,7 +423,7 @@ const JewelleryHome: React.FC = () => {
                 <span>Weight by Location</span>
                 <span
                   style={{
-                    fontSize: "12px",
+                    fontSize: "11px",
                     color: "#6b7280",
                     fontWeight: "normal",
                   }}
@@ -436,9 +436,9 @@ const JewelleryHome: React.FC = () => {
                 <div
                   style={{
                     textAlign: "center",
-                    padding: "20px",
+                    padding: "15px",
                     color: "#9ca3af",
-                    fontSize: "14px",
+                    fontSize: "13px",
                   }}
                 >
                   No location data available
@@ -448,7 +448,7 @@ const JewelleryHome: React.FC = () => {
                   style={{
                     maxHeight: "200px",
                     overflowY: "auto",
-                    paddingRight: "8px",
+                    paddingRight: "2px",
                   }}
                 >
                   {locationWeight.map((item, index) => (
@@ -458,8 +458,8 @@ const JewelleryHome: React.FC = () => {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        padding: "10px 0",
-                        paddingRight: "8px",
+                        padding: "8px 0",
+                        paddingRight: "4px",
                         borderBottom:
                           index < locationWeight.length - 1
                             ? "1px solid #f3f4f6"
@@ -468,13 +468,13 @@ const JewelleryHome: React.FC = () => {
                     >
                       <div
                         style={{
-                          fontSize: "14px",
+                          fontSize: "13px",
                           color: "#4b5563",
                           flex: 1,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
-                          marginRight: "10px",
+                          marginRight: "8px",
                           paddingRight: "4px",
                         }}
                         title={item.location}
@@ -483,13 +483,13 @@ const JewelleryHome: React.FC = () => {
                       </div>
                       <div
                         style={{
-                          fontSize: "14px",
+                          fontSize: "13px",
                           fontWeight: "600",
                           color: "#111827",
                           whiteSpace: "nowrap",
-                          paddingLeft: "8px",
-                          paddingRight: "8px",
-                          minWidth: "60px",
+                          paddingLeft: "4px",
+                          paddingRight: "4px",
+                          minWidth: "50px",
                           textAlign: "right",
                         }}
                       >
@@ -502,13 +502,13 @@ const JewelleryHome: React.FC = () => {
             </div>
 
             {/* Compact Summary Cards for other modules */}
-            <div style={{ margin: "15px" }}>
+            <div style={{ margin: "0 4px 8px 4px" }}>
               <BillsTab compact={true} />
             </div>
-            <div style={{ margin: "15px" }}>
+            <div style={{ margin: "0 4px 8px 4px" }}>
               <GalleryTab compact={true} />
             </div>
-            <div style={{ margin: "15px" }}>
+            <div style={{ margin: "0 4px 8px 4px" }}>
               <VerificationTab compact={true} />
             </div>
           </>
@@ -675,7 +675,7 @@ const JewelleryHome: React.FC = () => {
       <div
         style={{
           ...jewelleryStyles.contentWrapper,
-          padding: "8px 4px", // Custom minimal padding
+          padding: "8px 2px", // Custom minimal padding
         }}
       >
         {renderTabContent()}

@@ -700,9 +700,9 @@ const ListTab: React.FC = () => {
 
 const styles = {
   container: {
-    padding: "16px",
-    maxWidth: "800px",
-    margin: "0 auto",
+    padding: "0", // Removed internal padding
+    maxWidth: "100%", // Let it fill the parent
+    margin: "0",
   },
   loadingContainer: {
     display: "flex",
@@ -725,7 +725,7 @@ const styles = {
     color: "#6b7280",
   },
   searchContainer: {
-    marginBottom: "16px",
+    marginBottom: "8px", // Reduced from 16px
   },
   searchInputContainer: {
     position: "relative" as React.CSSProperties["position"],
@@ -762,7 +762,7 @@ const styles = {
     padding: "0",
   },
   filterRow: {
-    marginBottom: "12px",
+    marginBottom: "8px", // Reduced from 12px
   },
   filterButtons: {
     display: "flex" as const,

@@ -24,9 +24,7 @@ import JewelleryList from "../modules/Jewellery/pages/JewelleryList";
 import BillsList from "../modules/Jewellery/pages/BillsList";
 import BillForm from "../modules/Jewellery/pages/BillForm";
 import JewelleryDetail from "../modules/Jewellery/pages/JewelleryDetail";
-import VerificationPageWrapper from "../modules/Jewellery/pages/VerificationPageWrapper";
 import JewelleryFormWrapper from "../modules/Jewellery/pages/JewelleryFormWrapper";
-import GalleryPage from "../modules/Jewellery/pages/GalleryPage";
 import JewelleryForBill from "../modules/Jewellery/pages/JewelleryForBill";
 import BatchEditPage from "../modules/Jewellery/pages/BatchEditPage";
 
@@ -212,20 +210,7 @@ const allRoutes: RouteConfig[] = [
     title: "Linked Jewellery",
     requiresAuth: true,
   },
-  {
-    path: "/jewellery/gallery",
-    element: <GalleryPage />,
-    title: "Gallery",
-    icon: "🖼️",
-    requiresAuth: true,
-  },
-  {
-    path: "/jewellery/verification",
-    element: <VerificationPageWrapper />,
-    title: "Stock Verification",
-    icon: "✅",
-    requiresAuth: true,
-  },
+
   {
     path: "/jewellery/batch-edit",
     element: <BatchEditPage />,

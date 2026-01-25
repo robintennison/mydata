@@ -1,20 +1,4 @@
-/* src/index.css - Add at the top */
-/* DIAGNOSTIC: Show container hierarchy */
-.debug-container {
-  position: relative;
-}
 
-.debug-container::before {
-  content: attr(data-name);
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: rgba(0,0,0,0.7);
-  color: white;
-  font-size: 10px;
-  padding: 2px 4px;
-  z-index: 9999;
-}
 /* src/index.css */
 * {
   box-sizing: border-box;

@@ -20,29 +20,10 @@ function App() {
       <SettingsProvider>
         <BrowserRouter>
           <AuthProvider>
-            {/* DIAGNOSTIC: Add colored borders to identify containers */}
-            <div
-              className={styles.container}
-              style={{
-                border: "3px solid red",
-                minHeight: "100vh",
-                position: "relative",
-              }}
-            >
-              <div
-                className={styles.app}
-                style={{
-                  border: "3px solid blue",
-                  position: "relative",
-                }}
-              >
-                <main
-                  className={styles.main}
-                  style={{
-                    border: "3px solid green",
-                    position: "relative",
-                  }}
-                >
+            {/* REMOVED DIAGNOSTIC BORDERS */}
+            <div className={styles.container}>
+              <div className={styles.app}>
+                <main className={styles.main}>
                   <AppRoutes />
                 </main>
               </div>

@@ -13,7 +13,7 @@ export const onlineStyles = {
     flex: 1,
     display: "flex",
     flexDirection: "column" as const,
-    maxWidth: "500px",
+    maxWidth: "100%", // Changed from 500px to fill the Layout container
     margin: "0 auto",
     width: "100%",
   },
@@ -125,8 +125,8 @@ export const onlineStyles = {
   section: {
     backgroundColor: "white",
     borderRadius: "12px",
-    margin: "0 10px 10px 10px",
-    padding: "10px",
+    margin: "0 4px 8px 4px", // Reduced margins for edge-to-edge look
+    padding: "8px", // Reduced padding
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
     border: "1px solid #e9ecef",
   } as CSSProperties,

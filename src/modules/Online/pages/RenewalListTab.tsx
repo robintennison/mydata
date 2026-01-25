@@ -116,12 +116,15 @@ const RenewalListTab: React.FC = () => {
   }
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column" }}>
       <div
         style={{
-          padding: "10px 15px",
+          padding: "8px",
           backgroundColor: "white",
           borderBottom: "1px solid #e9ecef",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
         }}
       >
         <div style={{ position: "relative" }}>
@@ -150,7 +153,7 @@ const RenewalListTab: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "10px 0" }}>
+      <div style={{ flex: 1, padding: "8px 0" }}>
         {filteredRenewals.length === 0 ? (
           <div style={onlineStyles.emptyState}>
             <div style={onlineStyles.emptyIcon}>🔄</div>
@@ -162,13 +165,13 @@ const RenewalListTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "0 8px" }}>
+          <div style={{ padding: "0" }}>
             {filteredRenewals.map((renewal) => (
               <div
                 key={renewal.id}
                 style={{
                   backgroundColor: "#f8f9fa",
-                  margin: "0 8px 8px 8px",
+                  margin: "0 8px 8px 8px", // Matched margin to search padding (8px)
                   borderRadius: "8px",
                   border: "1px solid #e9ecef",
                   cursor: "pointer",

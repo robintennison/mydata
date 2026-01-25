@@ -88,13 +88,16 @@ const OnlineListTab: React.FC = () => {
   }
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column" }}>
       {/* Search Bar */}
       <div
         style={{
-          padding: "10px 15px",
+          padding: "8px",
           backgroundColor: "white",
           borderBottom: "1px solid #e9ecef",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
         }}
       >
         <div style={{ position: "relative" }}>
@@ -124,7 +127,7 @@ const OnlineListTab: React.FC = () => {
       </div>
 
       {/* Items List */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "10px 0" }}>
+      <div style={{ flex: 1, padding: "8px 0" }}>
         {filteredItems.length === 0 ? (
           <div style={onlineStyles.emptyState}>
             <div style={onlineStyles.emptyIcon}>🛒</div>
@@ -136,13 +139,13 @@ const OnlineListTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "0 8px" }}>
+          <div style={{ padding: "0" }}>
             {filteredItems.map((item) => (
               <div
                 key={item.id}
                 style={{
                   backgroundColor: "white",
-                  margin: "0 8px 8px 8px",
+                  margin: "0 8px 8px 8px", // Matched margin to search padding (8px)
                   borderRadius: "8px",
                   border: "1px solid #e9ecef",
                   cursor: "pointer",

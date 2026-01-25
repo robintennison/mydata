@@ -23,6 +23,11 @@ interface AccountSummary {
   depositsInLakhs: string;
 }
 
+// Add the same formatter function as in DepositsTab
+const formatInLakhs = (amount: number): string => {
+  return (amount / 100000).toFixed(2); // Just the number with 2 decimals
+};
+
 const SummaryTab: React.FC = () => {
   const { loading, accounts, deposits, adjustments } = useBankingData();
   const { settings } = useSettings();
@@ -40,11 +45,6 @@ const SummaryTab: React.FC = () => {
   // Convert rupees to lakhs
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
   const lakhsToRupees = (lakhs: number): number => lakhs * 100000;
-
-  // Format lakhs for display
-  const formatLakhs = (lakhs: number): string => {
-    return lakhs.toFixed(2);
-  };
 
   // Get current month in "YYYY-MM" format
   useEffect(() => {
@@ -103,17 +103,17 @@ const SummaryTab: React.FC = () => {
       // Total deposits = base deposits + adjustments
       const totalDeposits = baseDeposits + adjustmentsTotal;
 
-      // Convert to lakhs for display
-      const savingsLakhs = rupeesToLakhs(account.savingsAmount);
-      const depositsLakhs = rupeesToLakhs(totalDeposits);
+      // Use the same formatter as DepositsTab
+      const savingsFormatted = formatInLakhs(account.savingsAmount);
+      const depositsFormatted = formatInLakhs(totalDeposits);
 
       return {
         accountId: account.id,
         accountCode: (account as any).acctCode || account.id,
         savings: account.savingsAmount,
         deposits: totalDeposits,
-        savingsInLakhs: formatLakhs(savingsLakhs),
-        depositsInLakhs: formatLakhs(depositsLakhs),
+        savingsInLakhs: savingsFormatted,
+        depositsInLakhs: depositsFormatted,
       };
     });
 
@@ -277,16 +277,16 @@ const SummaryTab: React.FC = () => {
       if (historyDoc.exists()) {
         await updateDoc(historyRef, historyData);
         alert(
-          `✓ History updated for ${currentMonth}!\nSavings: ${formatLakhs(
-            rupeesToLakhs(totalSavings),
-          )}\nDeposits: ${formatLakhs(rupeesToLakhs(totalDeposits))}`,
+          `✓ History updated for ${currentMonth}!\nSavings: ${formatInLakhs(
+            totalSavings,
+          )}\nDeposits: ${formatInLakhs(totalDeposits)}`,
         );
       } else {
         await setDoc(historyRef, historyData);
         alert(
-          `✓ History created for ${currentMonth}!\nSavings: ${formatLakhs(
-            rupeesToLakhs(totalSavings),
-          )}\nDeposits: ${formatLakhs(rupeesToLakhs(totalDeposits))}`,
+          `✓ History created for ${currentMonth}!\nSavings: ${formatInLakhs(
+            totalSavings,
+          )}\nDeposits: ${formatInLakhs(totalDeposits)}`,
         );
       }
 
@@ -319,7 +319,9 @@ const SummaryTab: React.FC = () => {
   }
 
   return (
-    <div style={styles.container}>
+    <div style={{ padding: "0 4px" }}>
+      {" "}
+      {/* Match DepositsTab horizontal padding */}
       {/* Error Message */}
       {saveError && (
         <div style={styles.errorContainer}>
@@ -330,7 +332,6 @@ const SummaryTab: React.FC = () => {
           </button>
         </div>
       )}
-
       {accounts.length === 0 ? (
         <div style={styles.emptyState}>
           <div style={styles.emptyIcon}>📊</div>
@@ -343,7 +344,7 @@ const SummaryTab: React.FC = () => {
         <>
           {/* Summary Table */}
           <div style={styles.tableContainer}>
-            {/* Table Header */}
+            {/* Table Header - Match DepositsTab styling */}
             <div style={styles.tableHeader}>
               <div
                 style={{
@@ -385,7 +386,7 @@ const SummaryTab: React.FC = () => {
               </div>
             </div>
 
-            {/* Table Rows */}
+            {/* Table Rows - Match DepositsTab styling */}
             <div>
               {summaries.map((summary, index) => {
                 const isEditing = editingAccountId === summary.accountId;
@@ -401,9 +402,19 @@ const SummaryTab: React.FC = () => {
                         index < summaries.length - 1
                           ? "1px solid #f3f4f6"
                           : "none",
+                      cursor: "pointer", // Match DepositsTab clickable rows
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isEditing)
+                        e.currentTarget.style.backgroundColor = "#f8f9fa";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isEditing)
+                        e.currentTarget.style.backgroundColor =
+                          index % 2 === 0 ? "#ffffff" : "#f9fafb";
                     }}
                   >
-                    {/* Account Code */}
+                    {/* Account Code - Match DepositsTab account styling */}
                     <div
                       style={{
                         ...styles.tableCell,
@@ -417,7 +428,7 @@ const SummaryTab: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Savings Amount */}
+                    {/* Savings Amount - Match DepositsTab amount styling */}
                     <div
                       style={{
                         ...styles.tableCell,
@@ -440,13 +451,15 @@ const SummaryTab: React.FC = () => {
                           />
                         </div>
                       ) : (
-                        <div style={styles.amountDisplay}>
+                        <div
+                          style={{ ...styles.amountDisplay, color: "#1976d2" }}
+                        >
                           {summary.savingsInLakhs}
                         </div>
                       )}
                     </div>
 
-                    {/* Deposits Amount */}
+                    {/* Deposits Amount - Match DepositsTab amount styling */}
                     <div
                       style={{
                         ...styles.tableCell,
@@ -469,13 +482,15 @@ const SummaryTab: React.FC = () => {
                           />
                         </div>
                       ) : (
-                        <div style={styles.amountDisplay}>
+                        <div
+                          style={{ ...styles.amountDisplay, color: "#1976d2" }}
+                        >
                           {summary.depositsInLakhs}
                         </div>
                       )}
                     </div>
 
-                    {/* Action Column */}
+                    {/* Action Column - Match DepositsTab button styling */}
                     <div
                       style={{
                         ...styles.tableCell,
@@ -535,7 +550,7 @@ const SummaryTab: React.FC = () => {
                           ✏️
                         </button>
                       ) : (
-                        <div style={{ width: "32px", height: "32px" }}></div>
+                        <div style={{ width: "28px", height: "28px" }}></div>
                       )}
                     </div>
                   </div>
@@ -543,7 +558,7 @@ const SummaryTab: React.FC = () => {
               })}
             </div>
 
-            {/* Totals Row */}
+            {/* Totals Row - Match DepositsTab footer styling */}
             <div style={styles.totalsRow}>
               <div
                 style={{
@@ -560,9 +575,10 @@ const SummaryTab: React.FC = () => {
                   flex: 1,
                   textAlign: "right",
                   paddingRight: "12px",
+                  color: "#1976d2", // Match DepositsTab total color
                 }}
               >
-                {formatLakhs(rupeesToLakhs(totalSavings))}
+                {formatInLakhs(totalSavings)}
               </div>
               <div
                 style={{
@@ -570,9 +586,10 @@ const SummaryTab: React.FC = () => {
                   flex: 1,
                   textAlign: "right",
                   paddingRight: "12px",
+                  color: "#1976d2", // Match DepositsTab total color
                 }}
               >
-                {formatLakhs(rupeesToLakhs(totalDeposits))}
+                {formatInLakhs(totalDeposits)}
               </div>
               <div
                 style={{
@@ -587,6 +604,18 @@ const SummaryTab: React.FC = () => {
             </div>
           </div>
 
+          {/* Summary Count Info - Like DepositsTab */}
+          <div
+            style={{
+              fontSize: "11px",
+              color: "#6b7280",
+              textAlign: "center",
+              margin: "8px 0",
+            }}
+          >
+            {summaries.length} account{summaries.length !== 1 ? "s" : ""}
+          </div>
+
           {/* History Update Section */}
           <div style={styles.historySection}>
             <button
@@ -598,6 +627,7 @@ const SummaryTab: React.FC = () => {
                     ? "not-allowed"
                     : "pointer",
                 opacity: isUpdatingHistory || !currentMonth ? 0.6 : 1,
+                fontSize: "14px", // Match DepositsTab button font
               }}
               disabled={isUpdatingHistory || !currentMonth}
             >
@@ -617,11 +647,17 @@ const SummaryTab: React.FC = () => {
           </div>
         </>
       )}
-
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        
+        /* Optional: Add the same input focus style as DepositsTab */
+        input:focus {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+          outline: none;
         }
       `}</style>
     </div>

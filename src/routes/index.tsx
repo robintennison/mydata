@@ -9,7 +9,6 @@ import AddEditDepositPage from "../modules/Banking/pages/AddEditDepositPage";
 import BankingHomePage from "../modules/Banking/pages/BankingHomePage";
 import AddAccountPage from "../modules/Banking/pages/AddAccountPage";
 import EditAccountPage from "../modules/Banking/pages/EditAccountPage";
-import DepositSummaryPage from "../modules/Banking/pages/DepositSummaryPage";
 import SettingsPage from "../modules/SettingsPage";
 import Layout from "../components/Layout/Layout";
 import LoginForm from "../components/Auth/Login";
@@ -138,14 +137,6 @@ const allRoutes: RouteConfig[] = [
     element: <EditHistoryPage />,
     title: "Edit History",
     icon: "✏️",
-    requiresAuth: true,
-    needsUserData: true,
-  },
-  {
-    path: "/banking/summary",
-    element: <DepositSummaryPage />,
-    title: "Summary",
-    icon: "📊",
     requiresAuth: true,
     needsUserData: true,
   },

@@ -94,7 +94,7 @@ export const summaryTabStyles = {
     maxWidth: "300px",
   },
 
-  // Table
+  // Table - Match DepositsTab fonts
   tableContainer: {
     backgroundColor: "#ffffff",
     borderRadius: "8px",
@@ -105,11 +105,11 @@ export const summaryTabStyles = {
   tableHeader: {
     display: "flex",
     backgroundColor: "#f9fafb",
-    borderBottom: "1px solid #e5e7eb",
-    padding: "8px 0",
+    borderBottom: "1px solid #e9ecef", // Match DepositsTab border
+    padding: "6px 4px", // Match DepositsTab padding
     fontWeight: 600,
     color: "#374151",
-    fontSize: "14px",
+    fontSize: "11px", // Match DepositsTab font size
   },
   headerCell: {
     padding: "0 4px",
@@ -118,15 +118,16 @@ export const summaryTabStyles = {
   },
   tableRow: {
     display: "flex",
-    padding: "8px 0",
+    padding: "6px 4px", // Match DepositsTab padding
     alignItems: "center",
-    minHeight: "44px",
+    minHeight: "36px", // Match DepositsTab min-height
+    borderBottom: "1px solid #f3f4f6", // Add border like DepositsTab
   },
   tableCell: {
     padding: "0 4px",
     display: "flex",
     alignItems: "center",
-    fontSize: "14px",
+    fontSize: "12px", // Match DepositsTab font size
   },
   accountCode: {
     fontWeight: 600,
@@ -134,14 +135,15 @@ export const summaryTabStyles = {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap" as const,
+    fontSize: "12px", // Match DepositsTab font size
   },
   amountDisplay: {
     fontWeight: 600,
     color: "#111827",
-    fontSize: "14px",
+    fontSize: "12px", // Match DepositsTab font size
   },
 
-  // Edit Input
+  // Edit Input - Match DepositsTab style
   editInputContainer: {
     display: "flex",
     justifyContent: "flex-end",
@@ -152,14 +154,14 @@ export const summaryTabStyles = {
     padding: "6px 8px",
     border: "1px solid #d1d5db",
     borderRadius: "4px",
-    fontSize: "14px",
+    fontSize: "12px", // Match DepositsTab font size
     textAlign: "right" as const,
     backgroundColor: "#ffffff",
     outline: "none",
     maxWidth: "120px",
   },
 
-  // Action Buttons
+  // Action Buttons - Smaller to match DepositsTab
   actionButtons: {
     display: "flex",
     gap: "4px",
@@ -169,12 +171,12 @@ export const summaryTabStyles = {
     color: "#ffffff",
     border: "none",
     borderRadius: "4px",
-    padding: "6px 8px",
-    fontSize: "12px",
+    padding: "4px 6px", // Reduced to match DepositsTab compactness
+    fontSize: "10px", // Smaller to match DepositsTab
     fontWeight: 600,
     cursor: "pointer",
-    minWidth: "32px",
-    minHeight: "32px",
+    minWidth: "28px", // Smaller
+    minHeight: "28px", // Smaller
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -184,12 +186,12 @@ export const summaryTabStyles = {
     color: "#ffffff",
     border: "none",
     borderRadius: "4px",
-    padding: "6px 8px",
-    fontSize: "12px",
+    padding: "4px 6px", // Reduced
+    fontSize: "10px", // Smaller
     fontWeight: 600,
     cursor: "pointer",
-    minWidth: "32px",
-    minHeight: "32px",
+    minWidth: "28px", // Smaller
+    minHeight: "28px", // Smaller
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -199,25 +201,25 @@ export const summaryTabStyles = {
     color: "#ffffff",
     border: "none",
     borderRadius: "4px",
-    padding: "6px 8px",
-    fontSize: "12px",
+    padding: "4px 6px", // Reduced
+    fontSize: "10px", // Smaller
     cursor: "pointer",
-    minWidth: "32px",
-    minHeight: "32px",
+    minWidth: "28px", // Smaller
+    minHeight: "28px", // Smaller
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
 
-  // Totals
+  // Totals - Match DepositsTab footer styling
   totalsRow: {
     display: "flex",
-    backgroundColor: "#f3f4f6",
-    borderTop: "1px solid #e5e7eb",
-    padding: "16px 0",
+    backgroundColor: "#f3f4f6", // Match DepositsTab footer background
+    borderTop: "1px solid #e9ecef", // Match DepositsTab border
+    padding: "8px 4px", // Match DepositsTab padding
     fontWeight: 700,
     color: "#111827",
-    fontSize: "14px",
+    fontSize: "14px", // Slightly larger for totals like DepositsTab
   },
   totalsCell: {
     padding: "0 4px",
@@ -248,7 +250,7 @@ export const summaryTabStyles = {
     transition: "background-color 0.2s",
   },
   historyNote: {
-    fontSize: "12px",
+    fontSize: "12px", // Match DepositsTab note font size
     color: "#6b7280",
     marginTop: "8px",
     textAlign: "center" as const,
@@ -262,5 +264,28 @@ export const summaryTabStyles = {
     width: "16px",
     height: "16px",
     animation: "spin 1s linear infinite",
+  },
+
+  // Add new styles to match DepositsTab
+  numericCell: {
+    fontSize: "12px", // Match DepositsTab
+    color: "#666",
+    fontFamily: "monospace", // Match DepositsTab date styling
+  },
+  
+  // Match DepositsTab summary styling
+  summaryInfo: {
+    fontSize: "11px", // Match DepositsTab info font
+    color: "#6b7280",
+    textAlign: "center" as const,
+  },
+
+  // Optional: Add cursor pointer for clickable rows like DepositsTab
+  clickableRow: {
+    cursor: "pointer",
+    backgroundColor: "white",
+  },
+  clickableRowHover: {
+    backgroundColor: "#f8f9fa", // Light hover effect like DepositsTab
   },
 };

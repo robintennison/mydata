@@ -372,6 +372,6 @@ export const bankingHomeStyles = {
   } as React.CSSProperties,
 
   sectionPadding: {
-    padding: "15px 0",
+    padding: "0 0 16px 0",
   } as React.CSSProperties,
 };

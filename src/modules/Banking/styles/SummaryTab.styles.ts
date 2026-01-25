@@ -1,7 +1,7 @@
 // src/modules/banking/styles/SummaryTab.styles.ts
 export const summaryTabStyles = {
   container: {
-    padding: "16px",
+    padding: "0",
     maxWidth: "1200px",
     margin: "0 auto",
   },
@@ -106,7 +106,7 @@ export const summaryTabStyles = {
     display: "flex",
     backgroundColor: "#f9fafb",
     borderBottom: "1px solid #e5e7eb",
-    padding: "12px 0",
+    padding: "8px 0",
     fontWeight: 600,
     color: "#374151",
     fontSize: "14px",
@@ -118,9 +118,9 @@ export const summaryTabStyles = {
   },
   tableRow: {
     display: "flex",
-    padding: "12px 0",
+    padding: "8px 0",
     alignItems: "center",
-    minHeight: "56px",
+    minHeight: "44px",
   },
   tableCell: {
     padding: "0 4px",

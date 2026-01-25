@@ -95,13 +95,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
       )
     : locationItems;
 
-  // Filter to only show active items that need verification
-  const itemsNeedingVerification = filteredItems.filter(
-    (item) =>
-      item.active && item.verificationStatus !== VerificationStatus.VERIFIED,
-  );
-
-  // Statistics
+  // Statistics - Now based on all filtered items
   const stats = {
     totalItems: filteredItems.length,
     verified: filteredItems.filter(
@@ -112,11 +106,55 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
       (item) =>
         item.verificationStatus === VerificationStatus.MISSING && item.active,
     ).length,
-    notVerified: itemsNeedingVerification.length,
+    notVerified: filteredItems.filter(
+      (item) =>
+        item.verificationStatus === VerificationStatus.NOT_VERIFIED &&
+        item.active,
+    ).length,
     totalWeight: filteredItems.reduce(
       (sum, item) => sum + (item.weight || 0),
       0,
     ),
+  };
+
+  // Format last verified date
+  const formatLastVerified = (timestamp: number) => {
+    if (!timestamp || timestamp === 0) return "Never";
+
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    // If less than 1 day, show hours
+    if (diffDays === 0) {
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHours === 0) {
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        return `${diffMinutes}m ago`;
+      }
+      return `${diffHours}h ago`;
+    }
+
+    // If less than 7 days, show days
+    if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    }
+
+    // If same year, show month and day
+    if (date.getFullYear() === now.getFullYear()) {
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    }
+
+    // Otherwise show full date
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   // Handle verification update
@@ -674,7 +712,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
         )}
       </div>
 
-      {/* Items List - Optimized for minimal vertical space */}
+      {/* Items List - Show ALL items now */}
       <div
         style={{
           maxHeight: "500px",
@@ -682,7 +720,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           padding: "0 15px",
         }}
       >
-        {itemsNeedingVerification.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -690,10 +728,10 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
               color: "#9ca3af",
             }}
           >
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>✓</div>
-            <p>All items are verified!</p>
+            <div style={{ fontSize: "48px", marginBottom: "16px" }}>📦</div>
+            <p>No jewellery items found</p>
             <button
-              onClick={() => navigate("/jewellery/verification")}
+              onClick={() => navigate("/jewellery")}
               style={{
                 padding: "8px 16px",
                 backgroundColor: "#3b82f6",
@@ -705,16 +743,20 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                 marginTop: "12px",
               }}
             >
-              View All Items
+              Add Jewellery Items
             </button>
           </div>
         ) : (
-          itemsNeedingVerification.slice(0, 5).map((item) => {
+          filteredItems.slice(0, 10).map((item) => {
+            // Increased to 10 items since we're showing all
             const isUpdating = activeUpdate === item.id;
             const isExpanded = expandedNotesId === item.id;
             const hasNotes =
               item.verificationNotes &&
               item.verificationNotes.trim().length > 0;
+            const lastVerifiedText = formatLastVerified(item.lastVerified);
+            const isRecentlyVerified =
+              item.verificationStatus === VerificationStatus.VERIFIED;
 
             return (
               <div
@@ -733,6 +775,37 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                     minHeight: "40px",
                   }}
                 >
+                  {/* Jewellery Image - First item */}
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      backgroundColor: "#f3f4f6",
+                      borderRadius: "6px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.code}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <span style={{ color: "#9ca3af", fontSize: "20px" }}>
+                        💎
+                      </span>
+                    )}
+                  </div>
+
                   {/* Status Indicator (small circle) */}
                   <div
                     style={{
@@ -747,8 +820,8 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                   {/* Item Code and Weight */}
                   <div
                     style={{
-                      minWidth: "100px",
-                      maxWidth: "120px",
+                      minWidth: "80px", // Reduced slightly
+                      maxWidth: "100px",
                       overflow: "hidden",
                     }}
                   >
@@ -806,6 +879,31 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       <span>{item.location || "No location"}</span>
                       {item.boughtFor && <span>•</span>}
                       {item.boughtFor && <span>{item.boughtFor}</span>}
+                    </div>
+                  </div>
+
+                  {/* Last Verified Date */}
+                  <div
+                    style={{
+                      minWidth: "70px",
+                      maxWidth: "90px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: isRecentlyVerified ? "#10b981" : "#6b7280",
+                        fontWeight: isRecentlyVerified ? "500" : "normal",
+                        backgroundColor: isRecentlyVerified
+                          ? "#f0fdf4"
+                          : "transparent",
+                        padding: "2px 6px",
+                        borderRadius: "3px",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {lastVerifiedText}
                     </div>
                   </div>
 
@@ -1041,7 +1139,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           })
         )}
 
-        {itemsNeedingVerification.length > 5 && (
+        {filteredItems.length > 10 && (
           <div
             style={{
               textAlign: "center",
@@ -1061,7 +1159,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                 fontSize: "14px",
               }}
             >
-              View {itemsNeedingVerification.length - 5} more items
+              View {filteredItems.length - 10} more items
             </button>
           </div>
         )}

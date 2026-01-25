@@ -31,9 +31,10 @@ ChartJS.register(
 
 interface HistoryChartProps {
   history: any[];
+  compact?: boolean;
 }
 
-const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
+const HistoryChart: React.FC<HistoryChartProps> = ({ history, compact = false }) => {
   const [chartData, setChartData] = useState<ChartData<"line"> | null>(null);
 
   // Format month for chart display
@@ -91,7 +92,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
           backgroundColor: "rgba(33, 150, 243, 0.1)",
           fill: true,
           tension: 0.3,
-          pointRadius: 3,
+          pointRadius: compact ? 2 : 3,
           pointHoverRadius: 5,
           borderWidth: 2,
           pointBackgroundColor: "#2196F3",
@@ -103,7 +104,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
           backgroundColor: "rgba(76, 175, 80, 0.1)",
           fill: true,
           tension: 0.3,
-          pointRadius: 5,
+          pointRadius: compact ? 3 : 5,
           pointHoverRadius: 7,
           borderWidth: 2,
           pointBackgroundColor: "#4CAF50",
@@ -114,7 +115,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
     };
 
     setChartData(data);
-  }, [history]);
+  }, [history, compact]);
 
   // Chart options - optimized for mobile viewing
   const chartOptions: ChartOptions<"line"> = {
@@ -123,25 +124,27 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
     plugins: {
       legend: {
         position: "top",
+        // Hide legend in compact mode to save space, or make it smaller
+        display: !compact,
         labels: {
           font: {
-            size: 11,
+            size: 10,
           },
-          padding: 8,
-          boxWidth: 10,
+          padding: 4,
+          boxWidth: 8,
         },
       },
       tooltip: {
         mode: "index",
         intersect: false,
         backgroundColor: "rgba(0, 0, 0, 0.8)",
-        padding: 8,
+        padding: 6,
         cornerRadius: 4,
         titleFont: {
-          size: 11,
+          size: 10,
         },
         bodyFont: {
-          size: 11,
+          size: 10,
         },
         callbacks: {
           label: (context) => {
@@ -162,42 +165,43 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
         backgroundColor: "rgba(255, 255, 255, 0.8)",
         borderRadius: 4,
         padding: {
-          top: 4,
-          bottom: 4,
-          left: 6,
-          right: 6,
+          top: 2,
+          bottom: 2,
+          left: 4,
+          right: 4,
         },
         font: {
-          size: 10,
+          size: 9,
           weight: "bold",
         },
         formatter: (value) => {
           return `${value.toFixed(2)}`;
         },
         align: "top",
-        offset: 8,
+        offset: 4,
       },
     },
     scales: {
       x: {
         grid: {
           color: "rgba(0, 0, 0, 0.05)",
+          drawTicks: !compact,
         },
         ticks: {
           font: {
-            size: 10,
+            size: 9,
           },
           maxRotation: 0,
-          padding: 4,
+          padding: 2,
         },
         title: {
-          display: true,
+          display: !compact,
           text: "Months",
           font: {
-            size: 11,
+            size: 10,
             weight: 500,
           },
-          padding: { top: 8, bottom: 4 },
+          padding: { top: 4, bottom: 2 },
         },
       },
       y: {
@@ -207,9 +211,10 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
         },
         ticks: {
           font: {
-            size: 10,
+            size: 9,
           },
-          padding: 4,
+          padding: 2,
+          display: !compact, // Hide y-axis labels in compact mode to save width
           callback: function (value) {
             if (value === null || value === undefined) return "";
             if (typeof value === "number") return `${value}`;
@@ -217,13 +222,13 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
           },
         },
         title: {
-          display: true,
+          display: !compact,
           text: "Amount",
           font: {
-            size: 11,
+            size: 10,
             weight: 500,
           },
-          padding: { top: 4, bottom: 8 },
+          padding: { top: 2, bottom: 4 },
         },
       },
     },
@@ -231,16 +236,33 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
       intersect: false,
       mode: "index",
     },
+    layout: {
+      padding: compact ? 0 : undefined
+    }
   };
 
+  const sectionStyle = compact 
+    ? { ...styles.chartSection, padding: "0", margin: "0", border: "none", boxShadow: "none" }
+    : styles.chartSection;
+
+  const headerStyle = compact
+    ? { ...styles.sectionHeader, padding: "8px 4px 4px 4px", marginBottom: "4px" }
+    : styles.sectionHeader;
+
+  const chartWrapperStyle = compact
+    ? { ...styles.chartWrapper, height: "160px", marginTop: "0" }
+    : styles.chartWrapper;
+
   return (
-    <div style={styles.chartSection}>
-      <div style={styles.sectionHeader}>
-        <div style={styles.sectionTitle}>
-          <span style={styles.sectionIcon}>📈</span>
-          Last 6 Months Trend
+    <div style={sectionStyle}>
+      {!compact && (
+        <div style={headerStyle}>
+          <div style={styles.sectionTitle}>
+            <span style={styles.sectionIcon}>📈</span>
+            Last 6 Months Trend
+          </div>
         </div>
-      </div>
+      )}
 
       {history.length < 2 ? (
         <div style={styles.emptyChart}>
@@ -255,7 +277,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history }) => {
           </div>
         </div>
       ) : chartData ? (
-        <div style={styles.chartWrapper}>
+        <div style={chartWrapperStyle}>
           <Line
             data={chartData}
             options={chartOptions}

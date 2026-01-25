@@ -7,17 +7,17 @@
   background-color: #f5f7fa;
   min-height: calc(100vh - 80px);
   padding-bottom: 100px;
-  padding: 0 8px; /* Add side padding and prevent overflow */
+  padding: 0 8px;
   box-sizing: border-box;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow-x: hidden;
 }
 
 .header {
   background-color: #ffffff;
   color: #1a202c;
-  padding: 20px 12px; /* Reduced padding */
+  padding: 20px 12px;
   border-bottom: 1px solid #edf2f7;
-  margin-bottom: 16px; /* Reduced margin */
+  margin-bottom: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -32,7 +32,7 @@
 }
 
 .title {
-  font-size: 1.3rem; /* Reduced from 1.5rem */
+  font-size: 1.3rem;
   font-weight: 800;
   margin: 0 0 4px 0;
   color: #1a202c;
@@ -40,7 +40,7 @@
 }
 
 .subtitle {
-  font-size: 0.8rem; /* Reduced from 0.875rem */
+  font-size: 0.8rem;
   color: #718096;
   margin: 0;
   font-weight: 500;
@@ -49,15 +49,15 @@
 .statsRow {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px; /* Reduced from 10px */
+  gap: 8px;
   padding: 0;
-  margin-bottom: 16px; /* Reduced from 20px */
+  margin-bottom: 16px;
 }
 
 .statCard {
   background-color: white;
-  border-radius: 10px; /* Reduced from 12px */
-  padding: 10px 8px; /* Reduced padding */
+  border-radius: 10px;
+  padding: 10px 8px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   border: 1px solid #e9ecef;
@@ -66,303 +66,226 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 70px; /* Reduced from 80px */
+  min-height: 70px;
 }
 
 .cardTitle {
-  font-size: 0.7rem; /* Reduced from 0.75rem */
+  font-size: 0.7rem;
   font-weight: 600;
   color: #666;
-  margin-bottom: 4px; /* Reduced from 6px */
+  margin-bottom: 4px;
 }
 
 .cardValue {
-  font-size: 1rem; /* Reduced from 1.1rem */
+  font-size: 1rem;
   font-weight: 700;
   color: #333;
-  margin-bottom: 2px; /* Reduced from 3px */
+  margin-bottom: 2px;
 }
 
 .cardSubtitle {
-  font-size: 0.65rem; /* Reduced from 0.7rem */
+  font-size: 0.65rem;
   color: #888;
 }
 
 .section {
   background-color: white;
-  border-radius: 10px; /* Reduced from 12px */
-  margin: 10px 0; /* Reduced from 12px */
-  padding: 12px; /* Reduced from 15px */
+  border-radius: 10px;
+  margin: 10px 0;
+  padding: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   border: 1px solid #e9ecef;
-  margin-bottom: 12px; /* Reduced from 15px */
+  margin-bottom: 12px;
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px; /* Added margin bottom */
+  margin-bottom: 10px;
 }
 
 .sectionTitle {
-  font-size: 0.9rem; /* Reduced from 1rem */
+  font-size: 0.9rem;
   font-weight: 600;
   color: #333;
+}
+
+.maturityCount {
+  font-size: 0.75rem;
+  color: #666;
+  margin-left: 4px;
+  font-weight: normal;
 }
 
 .viewAllButton {
   background-color: transparent;
   color: #4285f4;
   border: 1px solid #4285f4;
-  border-radius: 5px; /* Reduced from 6px */
-  padding: 3px 8px; /* Reduced padding */
-  font-size: 0.7rem; /* Reduced from 0.75rem */
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
 }
 
-/* ========== UPDATED TABLE STYLES ========== */
+/* ========== COMPACT TABLE STYLES ========== */
 
-/* Table Responsive Container */
-.tableResponsiveContainer {
-  width: 100%;
-  border-radius: 6px; /* Reduced from 8px */
-  border: 1px solid #e9ecef;
-  margin-top: 10px; /* Reduced from 12px */
-  margin-bottom: 16px; /* Reduced from 20px */
-  box-sizing: border-box;
-  /* REMOVED overflow-x: auto and max-width: 100vw to prevent scrolling */
+.compactTable {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-/* Responsive Table - FIXED FOR 600px CONTAINER */
-.responsiveTable {
-  width: 100%; /* Changed from min-width: 600px to 100% */
-  border-collapse: collapse;
-  font-size: 0.75rem; /* Reduced from 0.9rem */
-  table-layout: fixed; /* Added for fixed column widths */
-}
-
-.responsiveTable th {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  color: #333;
-  text-align: left;
-  padding: 8px 6px; /* Reduced from 14px 16px */
-  border-bottom: 1px solid #dee2e6; /* Reduced from 2px */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.7rem; /* Added for smaller header text */
-  /* REMOVED position: sticky to save space */
-}
-
-.responsiveTable td {
-  padding: 6px; /* Reduced from 12px 16px */
-  border-bottom: 1px solid #e9ecef;
-  vertical-align: middle;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.7rem; /* Reduced font size */
-}
-
-/* Set specific column widths to fit within 600px */
-.responsiveTable th:nth-child(1),
-.responsiveTable td:nth-child(1) {
-  width: 25%; /* Account column */
-}
-
-.responsiveTable th:nth-child(2),
-.responsiveTable td:nth-child(2) {
-  width: 20%; /* Amount column */
-}
-
-.responsiveTable th:nth-child(3),
-.responsiveTable td:nth-child(3) {
-  width: 30%; /* Comments column */
-}
-
-.responsiveTable th:nth-child(4),
-.responsiveTable td:nth-child(4) {
-  width: 25%; /* Maturity Date column */
-}
-
-/* Allow word breaking in comments column */
-.responsiveTable td:nth-child(3) {
-  white-space: normal;
-  word-break: break-word;
-}
-
-.responsiveTable tr:hover {
-  background-color: #f8f9fa;
-}
-
-.responsiveTable tr:last-child td {
-  border-bottom: none;
-}
-
-/* Zebra striping for better readability */
-.responsiveTable tbody tr:nth-child(even) {
-  background-color: #fcfcfc;
-}
-
-/* Immediate maturity row styling */
-.immediateRow {
-  background-color: #fff8e1 !important;
-  border-left: 2px solid #ff9800; /* Reduced from 3px */
-}
-
-.immediateRow:hover {
-  background-color: #ffecb3 !important;
-}
-
-.dateCell {
+.compactRow {
   display: flex;
   align-items: center;
-  gap: 4px; /* Reduced from 8px */
-  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 8px;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 12px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  min-height: 36px;
+  justify-content: space-between;
 }
 
-.dateText {
-  font-family: 'Monaco', 'Consolas', monospace;
-  font-size: 11px; /* Reduced from 13px */
+.compactCell {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  text-align: center;
+}
+
+.compactCellValue {
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* For maturity table - equal spacing */
+.compactRow > div:nth-child(1) { flex: 1; min-width: 0; } /* Account */
+.compactRow > div:nth-child(2) { flex: 1; min-width: 0; } /* Amount */
+.compactRow > div:nth-child(3) { flex: 1; min-width: 0; } /* Comments */
+.compactRow > div:nth-child(4) { flex: 1; min-width: 0; } /* Date */
+
+/* For renewal table - equal spacing */
+.compactRow > div:nth-child(1) { flex: 2; min-width: 0; } /* Name */
+.compactRow > div:nth-child(2) { flex: 1; min-width: 0; } /* Comments */
+.compactRow > div:nth-child(3) { flex: 1; min-width: 0; } /* Date */
+
+/* Immediate row styling */
+.immediateRow {
+  background-color: #fff7ed;
+  border-color: #fdba74;
 }
 
 .immediateBadge {
-  background-color: #ff9800;
+  background-color: #dc2626;
   color: white;
-  padding: 1px 4px; /* Reduced from 2px 8px */
-  border-radius: 8px; /* Reduced from 10px */
-  font-size: 9px; /* Reduced from 11px */
-  font-weight: 600;
-  text-transform: uppercase;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+  white-space: nowrap;
 }
 
-/* Mobile card view - hidden by default */
-.mobileCardView {
-  display: none;
+/* ========== EMPTY STATE STYLES ========== */
+
+.emptyState {
+  text-align: center;
+  padding: 12px 8px;
+  color: #6c757d;
 }
 
-@media (max-width: 768px) {
-  .mobileCardView {
-    display: block;
-  }
-  
-  .responsiveTable {
-    display: none;
-  }
-  
-  .mobileCard {
-    background-color: white;
-    border-radius: 8px; /* Reduced from 10px */
-    padding: 12px; /* Reduced from 16px */
-    margin-bottom: 10px; /* Reduced from 12px */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    border: 1px solid #e9ecef;
-  }
-  
-  .mobileCardRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 0; /* Reduced from 8px */
-    border-bottom: 1px solid #f0f0f0;
-  }
-  
-  .mobileCardRow:last-child {
-    border-bottom: none;
-  }
-  
-  .mobileCardLabel {
-    font-weight: 600;
-    color: #666;
-    font-size: 0.75rem; /* Reduced from 0.85rem */
-    min-width: 100px; /* Reduced from 120px */
-  }
-  
-  .mobileCardValue {
-    font-size: 0.8rem; /* Reduced from 0.9rem */
-    text-align: right;
-    word-break: break-word;
-    flex: 1;
-    margin-left: 8px; /* Reduced from 12px */
-  }
+.emptyIcon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  opacity: 0.5;
 }
 
-/* Compact view for smaller mobile screens */
-@media (max-width: 480px) {
-  .mobileCard {
-    padding: 10px; /* Reduced from 12px */
-  }
-  
-  .mobileCardRow {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 4px 0; /* Reduced from 6px */
-  }
-  
-  .mobileCardLabel {
-    min-width: auto;
-    margin-bottom: 2px; /* Reduced from 4px */
-    font-size: 0.7rem; /* Reduced from 0.8rem */
-  }
-  
-  .mobileCardValue {
-    text-align: left;
-    font-size: 0.75rem; /* Reduced from 0.85rem */
-    width: 100%;
-    margin-left: 0;
+.emptyText {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.emptySubtext {
+  font-size: 0.7rem;
+}
+
+/* ========== LOADING STYLES ========== */
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  background-color: #f8fafc;
+  color: #374151;
+  margin: 0;
+  padding: 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* Remove scrollbar styles since we don't want scrolling */
+/* ========== REMOVED OLD TABLE STYLES ========== */
+
+/* Remove these old styles since we're using compact tables */
+.responsiveTable,
+.mobileCardView,
+.tableResponsiveContainer {
+  display: none !important;
+}
+
+/* Also remove related styles */
 .tableResponsiveContainer::-webkit-scrollbar,
 .tableResponsiveContainer::-webkit-scrollbar-track,
 .tableResponsiveContainer::-webkit-scrollbar-thumb {
   display: none;
 }
 
-/* Adjust other elements for better fit */
-.emptyState {
-  text-align: center;
-  padding: 12px 8px; /* Reduced padding */
-  color: #6c757d;
+/* Remove mobile card view styles */
+@media (max-width: 768px) {
+  .mobileCardView {
+    display: none;
+  }
+  
+  .responsiveTable {
+    display: none;
+  }
 }
 
-.emptyIcon {
-  font-size: 36px; /* Reduced from 48px */
-  margin-bottom: 12px; /* Reduced from 16px */
-  opacity: 0.5;
+/* Remove compact view for smaller mobile screens */
+@media (max-width: 480px) {
+  .mobileCard {
+    display: none;
+  }
 }
 
-.emptyText {
-  font-size: 0.8rem; /* Reduced from 0.9rem */
-  font-weight: 500;
-  margin-bottom: 2px; /* Reduced from 3px */
-}
-
-.emptySubtext {
-  font-size: 0.7rem; /* Reduced from 0.75rem */
-}
-
-.placeholderCard {
-  background-color: #f0f7ff;
-  border-radius: 8px; /* Reduced from 10px */
-  padding: 12px; /* Reduced from 15px */
-  text-align: center;
-  border: 1px dashed #c2e0ff; /* Reduced from 2px */
-}
-
-.placeholderTitle {
-  font-size: 0.9rem; /* Reduced from 1rem */
-  font-weight: 600;
-  color: #4285f4;
-  margin-bottom: 6px; /* Reduced from 8px */
-}
-
+/* Remove placeholder card styles if not needed */
+.placeholderCard,
+.placeholderTitle,
 .placeholderText {
-  font-size: 0.75rem; /* Reduced from 0.8rem */
-  color: #666;
-  line-height: 1.3; /* Reduced from 1.4 */
+  display: none;
 }

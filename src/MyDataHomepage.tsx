@@ -110,7 +110,7 @@ const MyDataHomepage: React.FC = () => {
       .slice(0, 5);
   }, [renewals]);
 
-  // Format lakhs for display
+  // Format lakhs for display (without L suffix)
   const formatLakhs = (amount: number): string => {
     return (amount / 100000).toFixed(2);
   };
@@ -125,12 +125,12 @@ const MyDataHomepage: React.FC = () => {
 
   const getAccountName = (accountId: string) => {
     const account = accounts.find((a) => a.id === accountId);
-    return account ? account.acctCode : "Unknown";
+    return account ? account.acctCode : "";
   };
 
   // Get first 5 characters of comments or empty string
   const getShortComments = (comments: string): string => {
-    if (!comments || comments.trim().length === 0) return "-";
+    if (!comments || comments.trim().length === 0) return "";
     return comments.substring(0, 5) + (comments.length > 5 ? "..." : "");
   };
 
@@ -284,7 +284,7 @@ const MyDataHomepage: React.FC = () => {
         </div>
       </div>
 
-      {/* Enhanced Upcoming Maturities Section */}
+      {/* Upcoming Maturities Section */}
       <div
         className={styles.section}
         style={{
@@ -323,102 +323,46 @@ const MyDataHomepage: React.FC = () => {
             <div className={styles.emptySubtext}>No active deposits found</div>
           </div>
         ) : (
-          <div className={styles.tableResponsiveContainer}>
-            {/* Desktop Table View */}
-            <table className={styles.responsiveTable}>
-              <thead>
-                <tr>
-                  <th>Account</th>
-                  <th>Amount (L)</th>
-                  <th>Comments</th>
-                  <th>Maturity Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {upcomingMaturities.map((deposit) => {
-                  const daysUntil = Math.ceil(
-                    (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-                  );
-                  const isImmediate = daysUntil <= 1;
+          <div className={styles.compactTable}>
+            {upcomingMaturities.map((deposit) => {
+              const daysUntil = Math.ceil(
+                (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
+              );
+              const isImmediate = daysUntil <= 1;
 
-                  return (
-                    <tr
-                      key={deposit.id}
-                      className={isImmediate ? styles.immediateRow : ""}
-                      // REMOVED: onClick handler to disable navigation
-                    >
-                      <td>{getAccountName(deposit.accountId)}</td>
-                      <td>{formatLakhs(deposit.amount)}</td>
-                      <td>{getShortComments(deposit.comments || "")}</td>
-                      <td>
-                        <div className={styles.dateCell}>
-                          <span className={styles.dateText}>
-                            {formatDateShort(deposit.endDate)}
-                          </span>
-                          {isImmediate && (
-                            <span className={styles.immediateBadge}>
-                              {daysUntil === 0 ? "Today" : "Tomorrow"}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-
-            {/* Mobile Card View - Only shows on mobile */}
-            <div className={styles.mobileCardView}>
-              {upcomingMaturities.map((deposit) => {
-                const daysUntil = Math.ceil(
-                  (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-                );
-                const isImmediate = daysUntil <= 1;
-
-                return (
-                  <div
-                    key={deposit.id}
-                    className={`${styles.mobileCard} ${isImmediate ? styles.immediateRow : ""}`}
-                    // REMOVED: onClick handler to disable navigation
-                  >
-                    <div className={styles.mobileCardRow}>
-                      <span className={styles.mobileCardLabel}>Account:</span>
-                      <span className={styles.mobileCardValue}>
-                        {getAccountName(deposit.accountId)}
-                      </span>
-                    </div>
-                    <div className={styles.mobileCardRow}>
-                      <span className={styles.mobileCardLabel}>Amount:</span>
-                      <span className={styles.mobileCardValue}>
-                        {formatLakhs(deposit.amount)} L
-                      </span>
-                    </div>
-                    <div className={styles.mobileCardRow}>
-                      <span className={styles.mobileCardLabel}>Comments:</span>
-                      <span className={styles.mobileCardValue}>
-                        {getShortComments(deposit.comments || "")}
-                      </span>
-                    </div>
-                    <div className={styles.mobileCardRow}>
-                      <span className={styles.mobileCardLabel}>Maturity:</span>
-                      <span className={styles.mobileCardValue}>
-                        <div className={styles.dateCell}>
-                          <span className={styles.dateText}>
-                            {formatDateShort(deposit.endDate)}
-                          </span>
-                          {isImmediate && (
-                            <span className={styles.immediateBadge}>
-                              {daysUntil === 0 ? "Today" : "Tomorrow"}
-                            </span>
-                          )}
-                        </div>
-                      </span>
-                    </div>
+              return (
+                <div
+                  key={deposit.id}
+                  className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
+                >
+                  <div className={styles.compactCell}>
+                    <span className={styles.compactCellValue}>
+                      {getAccountName(deposit.accountId)}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+                  <div className={styles.compactCell}>
+                    <span className={styles.compactCellValue}>
+                      {formatLakhs(deposit.amount)}
+                    </span>
+                  </div>
+                  <div className={styles.compactCell}>
+                    <span className={styles.compactCellValue}>
+                      {getShortComments(deposit.comments || "")}
+                    </span>
+                  </div>
+                  <div className={styles.compactCell}>
+                    <span className={styles.compactCellValue}>
+                      {formatDateShort(deposit.endDate)}
+                      {isImmediate && (
+                        <span className={styles.immediateBadge}>
+                          {daysUntil === 0 ? "Today" : "Tomorrow"}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -472,99 +416,46 @@ const MyDataHomepage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className={styles.tableResponsiveContainer}>
-            {/* Desktop Table View */}
-            <table className={styles.responsiveTable}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Comments</th>
-                  <th>Renewal Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {upcomingRenewals.map((renewal) => {
-                  const daysUntil = Math.ceil(
-                    (renewal.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-                  );
-                  const isImmediate = daysUntil <= 1;
+          <div className={styles.compactTable}>
+            {upcomingRenewals.map((renewal) => {
+              const daysUntil = Math.ceil(
+                (renewal.endDate - Date.now()) / (1000 * 60 * 60 * 24),
+              );
+              const isImmediate = daysUntil <= 1;
 
-                  return (
-                    <tr
-                      key={renewal.id}
-                      className={isImmediate ? styles.immediateRow : ""}
-                      // REMOVED: onClick handler to disable navigation
-                    >
-                      <td style={{ fontWeight: "500" }}>{renewal.name}</td>
-                      <td>{getShortComments(renewal.comments || "")}</td>
-                      <td>
-                        <div className={styles.dateCell}>
-                          <span className={styles.dateText}>
-                            {formatDateShort(renewal.endDate)}
-                          </span>
-                          {isImmediate && (
-                            <span className={styles.immediateBadge}>
-                              {daysUntil === 0 ? "Today" : "Tomorrow"}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-
-            {/* Mobile Card View - Only shows on mobile */}
-            <div className={styles.mobileCardView}>
-              {upcomingRenewals.map((renewal) => {
-                const daysUntil = Math.ceil(
-                  (renewal.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-                );
-                const isImmediate = daysUntil <= 1;
-
-                return (
-                  <div
-                    key={renewal.id}
-                    className={`${styles.mobileCard} ${isImmediate ? styles.immediateRow : ""}`}
-                    // REMOVED: onClick handler to disable navigation
-                  >
-                    <div className={styles.mobileCardRow}>
-                      <span className={styles.mobileCardLabel}>Name:</span>
-                      <span className={styles.mobileCardValue}>
-                        {renewal.name}
-                      </span>
-                    </div>
-                    <div className={styles.mobileCardRow}>
-                      <span className={styles.mobileCardLabel}>Comments:</span>
-                      <span className={styles.mobileCardValue}>
-                        {getShortComments(renewal.comments || "")}
-                      </span>
-                    </div>
-                    <div className={styles.mobileCardRow}>
-                      <span className={styles.mobileCardLabel}>Renewal:</span>
-                      <span className={styles.mobileCardValue}>
-                        <div className={styles.dateCell}>
-                          <span className={styles.dateText}>
-                            {formatDateShort(renewal.endDate)}
-                          </span>
-                          {isImmediate && (
-                            <span className={styles.immediateBadge}>
-                              {daysUntil === 0 ? "Today" : "Tomorrow"}
-                            </span>
-                          )}
-                        </div>
-                      </span>
-                    </div>
+              return (
+                <div
+                  key={renewal.id}
+                  className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
+                >
+                  <div className={styles.compactCell}>
+                    <span className={styles.compactCellValue}>
+                      {renewal.name}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+                  <div className={styles.compactCell}>
+                    <span className={styles.compactCellValue}>
+                      {getShortComments(renewal.comments || "")}
+                    </span>
+                  </div>
+                  <div className={styles.compactCell}>
+                    <span className={styles.compactCellValue}>
+                      {formatDateShort(renewal.endDate)}
+                      {isImmediate && (
+                        <span className={styles.immediateBadge}>
+                          {daysUntil === 0 ? "Today" : "Tomorrow"}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Asset Distribution Chart - At bottom with minimal spacing */}
+      {/* Asset Distribution Chart */}
       <div style={{ marginTop: "15px", marginBottom: "5px" }}>
         <CombinedAssetBarChart
           accounts={accounts}

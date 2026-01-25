@@ -252,16 +252,16 @@
   padding: 0; /* Added: Remove padding */
 }
 
-/* Fixed: Removed black shadow overlay */
+/* Image Overlay - REMOVED black gradient background */
 .imageOverlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: transparent;
-  padding: 4px 2px; /* Reduced padding */
-  color: #1f2937;
-  margin: 0; /* Added: Remove margin */
+  background: transparent; /* CHANGED: Removed black gradient */
+  padding: 6px 4px;
+  color: #ffffff; /* White text */
+  margin: 0;
 }
 
 .overlayContent {
@@ -269,20 +269,22 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
-  margin: 0; /* Added: Remove margin */
+  margin: 0;
 }
 
 .overlayCode {
   font-size: 12px;
   font-weight: 600;
-  color: #1f2937;
-  margin: 0; /* Added: Remove margin */
+  color: #ffffff; /* White text */
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); /* Enhanced shadow for better contrast */
 }
 
 .overlayWeight {
   font-size: 10px;
-  color: #6b7280;
-  margin: 0; /* Added: Remove margin */
+  color: #ffffff; /* White text */
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); /* Enhanced shadow for better contrast */
 }
 
 .overlayStatus {
@@ -294,6 +296,7 @@
   text-transform: uppercase;
   margin-top: 2px;
   background-color: rgba(255, 255, 255, 0.9);
+  color: #111827; /* Keep status text dark for contrast */
 }
 
 /* Placeholder for items without images */

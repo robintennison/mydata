@@ -82,7 +82,7 @@ export const bankingHomeStyles = {
   statsCard: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
-    padding: "16px",
+    padding: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
     border: "1px solid #e5e7eb",
   } as React.CSSProperties,
@@ -176,6 +176,7 @@ export const bankingHomeStyles = {
   emwBoxValue: {
     fontSize: "1.2rem",
     fontWeight: "700" as const,
+    color: "#1f2937",
   } as React.CSSProperties,
 
   emwBoxSubtext: {
@@ -290,7 +291,7 @@ export const bankingHomeStyles = {
   card: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
-    padding: "16px",
+    padding: "12px",
     border: "1px solid #e5e7eb",
     boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
   } as React.CSSProperties,
@@ -372,6 +373,6 @@ export const bankingHomeStyles = {
   } as React.CSSProperties,
 
   sectionPadding: {
-    padding: "0 0 16px 0",
+    padding: "0 0 8px 0",
   } as React.CSSProperties,
 };

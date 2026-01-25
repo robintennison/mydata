@@ -420,7 +420,7 @@ const BankingHomePage: React.FC = () => {
       {/* Recent History */}
       <div
         style={{
-          padding: "0 0 15px 0",
+          padding: "0 0 8px 0",
         }}
       >
         <div style={bankingHomeStyles.card}>
@@ -693,7 +693,7 @@ const BankingHomePage: React.FC = () => {
             activeTab === "history" ||
             activeTab === "summary" ||
             activeTab === "dashboard"
-              ? "16px 0"
+              ? "8px 0"
               : "16px",
           overflowY: "auto",
         }}

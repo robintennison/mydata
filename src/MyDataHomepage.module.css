@@ -102,7 +102,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px; /* Reduced from 10px */
 }
 
 .sectionTitle {
@@ -129,27 +129,30 @@
   cursor: pointer;
 }
 
-/* ========== COMPACT TABLE STYLES ========== */
+/* ========== SIMPLE TABLE ROW STYLES ========== */
 
 .compactTable {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px; /* Reduced from 4px */
 }
 
 .compactRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 4px 0; /* Reduced from 6px 8px - no side padding, less vertical */
   background-color: white;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
-  font-size: 12px;
+  font-size: 11px; /* Reduced from 12px */
   flex-wrap: nowrap;
   overflow: hidden;
-  min-height: 36px;
-  justify-content: space-between;
+  min-height: 28px; /* Reduced from 36px */
+  border-bottom: 1px solid #f0f0f0; /* Simple separator line */
+}
+
+/* Remove border on last row */
+.compactRow:last-child {
+  border-bottom: none;
 }
 
 .compactCell {
@@ -164,7 +167,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 11px;
+  font-size: 10px; /* Reduced from 11px */
   text-align: center;
 }
 
@@ -179,18 +182,18 @@
 .compactRow > div:nth-child(2) { flex: 1; min-width: 0; } /* Comments */
 .compactRow > div:nth-child(3) { flex: 1; min-width: 0; } /* Date */
 
-/* Immediate row styling */
+/* Immediate row styling - simpler */
 .immediateRow {
-  background-color: #fff7ed;
-  border-color: #fdba74;
+  background-color: #fffaf0; /* Lighter background */
+  border-left: 2px solid #fdba74; /* Only left border */
 }
 
 .immediateBadge {
   background-color: #dc2626;
   color: white;
-  font-size: 9px;
-  padding: 1px 4px;
-  border-radius: 3px;
+  font-size: 8px; /* Reduced from 9px */
+  padding: 1px 3px; /* Reduced from 1px 4px */
+  border-radius: 2px; /* Reduced from 3px */
   margin-left: 4px;
   white-space: nowrap;
 }
@@ -251,19 +254,13 @@
 
 /* ========== REMOVED OLD TABLE STYLES ========== */
 
-/* Remove these old styles since we're using compact tables */
+/* Remove these old styles since we're using simple rows */
 .responsiveTable,
 .mobileCardView,
 .tableResponsiveContainer {
   display: none !important;
 }
 
-/* Also remove related styles */
-.tableResponsiveContainer::-webkit-scrollbar,
-.tableResponsiveContainer::-webkit-scrollbar-track,
-.tableResponsiveContainer::-webkit-scrollbar-thumb {
-  display: none;
-}
 
 /* Remove mobile card view styles */
 @media (max-width: 768px) {

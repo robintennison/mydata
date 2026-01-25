@@ -237,7 +237,89 @@ const BankingHomePage: React.FC = () => {
 
   const lastMonthWithdrawal = calculateLastMonthWithdrawal();
 
-  // Dashboard content component
+  // Styles matching HistoryTab
+  const compactHistoryStyles = {
+    container: {
+      height: "100%",
+      display: "flex",
+      flexDirection: "column" as const,
+      padding: "0",
+      margin: "0",
+    },
+    header: {
+      padding: "4px 0",
+      backgroundColor: "#f9fafb",
+      borderBottom: "1px solid #e9ecef",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    headerTitle: {
+      fontSize: "11px",
+      fontWeight: "600",
+      color: "#333",
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+      paddingLeft: "4px",
+    },
+    headerCount: {
+      fontSize: "10px",
+      color: "#666",
+      paddingRight: "4px",
+    },
+    tableHeader: {
+      display: "flex",
+      padding: "4px 0",
+      backgroundColor: "#f9fafb",
+      borderBottom: "1px solid #e9ecef",
+      fontWeight: "600",
+      fontSize: "10px",
+      color: "#374151",
+    },
+    tableRow: {
+      display: "flex",
+      alignItems: "center",
+      padding: "4px 0",
+      borderBottom: "1px solid #f3f4f6",
+      minHeight: "32px",
+    },
+    cellMonth: {
+      flex: 2,
+      padding: "0 2px 0 4px",
+      fontSize: "11px",
+      color: "#333",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+    cellSavings: {
+      flex: 2,
+      padding: "0 2px",
+      fontSize: "11px",
+      fontWeight: "600",
+      color: "#48bb78",
+      textAlign: "right" as const,
+    },
+    cellDeposits: {
+      flex: 2,
+      padding: "0 2px",
+      fontSize: "11px",
+      fontWeight: "600",
+      color: "#ed8936",
+      textAlign: "right" as const,
+    },
+    cellTotal: {
+      flex: 2,
+      padding: "0 4px 0 2px",
+      fontSize: "11px",
+      fontWeight: "600",
+      color: "#1976d2",
+      textAlign: "right" as const,
+    },
+  };
+
+  // Dashboard content component with HistoryTab-style table
   const DashboardContent = () => (
     <>
       {/* Top 3 Cards in Single Row */}
@@ -417,7 +499,7 @@ const BankingHomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Recent History */}
+      {/* Recent History - REPLACED with HistoryTab-style table */}
       <div
         style={{
           padding: "0 0 8px 0",
@@ -426,7 +508,7 @@ const BankingHomePage: React.FC = () => {
         <div style={bankingHomeStyles.card}>
           <div style={bankingHomeStyles.cardTitle}>
             <span>📅</span>
-            <span>Recent History</span>
+            <span>Recent History (Last 6 Months)</span>
           </div>
 
           {last6Months.length === 0 ? (
@@ -442,61 +524,94 @@ const BankingHomePage: React.FC = () => {
             </div>
           ) : (
             <div>
-              {last6Months.map((record, index) => {
-                const date = new Date(record.month + "-01");
+              {/* Table Header - Same as HistoryTab */}
+              <div style={compactHistoryStyles.tableHeader}>
+                <div style={{ flex: 2, padding: "0 2px" }}>Month</div>
+                <div
+                  style={{
+                    flex: 2,
+                    padding: "0 2px",
+                    textAlign: "right",
+                  }}
+                >
+                  Savings
+                </div>
+                <div
+                  style={{
+                    flex: 2,
+                    padding: "0 2px",
+                    textAlign: "right",
+                  }}
+                >
+                  Deposits
+                </div>
+                <div
+                  style={{
+                    flex: 2,
+                    padding: "0 2px",
+                    textAlign: "right",
+                  }}
+                >
+                  Total
+                </div>
+              </div>
+
+              {/* Table Rows - Limited to 6 records */}
+              {last6Months.map((record) => {
+                // Use formatLakhs function to convert rupees to lakhs with 2 decimals
+                const savingsDisplay = formatLakhs(record.savings);
+                const depositsDisplay = formatLakhs(record.totalDeposits);
+                const totalDisplay = formatLakhs(
+                  record.savings + record.totalDeposits,
+                );
+
+                // Format month to "MMM YY" format
+                const [year, month] = record.month.split("-");
+                const date = new Date(parseInt(year), parseInt(month) - 1, 1);
                 const monthName = date.toLocaleDateString("en-IN", {
                   month: "short",
                   year: "2-digit",
                 });
 
-                const totalBalance = record.savings + record.totalDeposits;
-                const prevRecord = index > 0 ? last6Months[index - 1] : null;
-                const prevBalance = prevRecord
-                  ? prevRecord.savings + prevRecord.totalDeposits
-                  : 0;
-                const monthlyChange = prevRecord
-                  ? prevBalance - totalBalance
-                  : 0;
-
                 return (
-                  <div
-                    key={record.month}
-                    style={{
-                      ...bankingHomeStyles.historyItem,
-                      borderBottom:
-                        index < last6Months.length - 1
-                          ? "1px solid #eee"
-                          : "none",
-                    }}
-                  >
-                    <div>
-                      <div style={bankingHomeStyles.historyMonth}>
-                        {monthName}
-                      </div>
-                      {monthlyChange !== 0 && (
-                        <div
-                          style={{
-                            ...bankingHomeStyles.monthlyChange,
-                            color: monthlyChange > 0 ? "#dc2626" : "#059669",
-                          }}
-                        >
-                          {monthlyChange > 0 ? "▼" : "▲"}{" "}
-                          {formatLakhs(Math.abs(monthlyChange))}
-                        </div>
-                      )}
+                  <div key={record.month} style={compactHistoryStyles.tableRow}>
+                    {/* Month */}
+                    <div style={compactHistoryStyles.cellMonth}>
+                      {monthName}
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={bankingHomeStyles.historyBalance}>
-                        {formatLakhs(totalBalance)}
-                      </div>
-                      <div style={bankingHomeStyles.historyDetails}>
-                        <span>S: {formatLakhs(record.savings)}</span>
-                        <span>D: {formatLakhs(record.totalDeposits)}</span>
-                      </div>
+
+                    {/* Savings */}
+                    <div style={compactHistoryStyles.cellSavings}>
+                      {savingsDisplay}
+                    </div>
+
+                    {/* Deposits */}
+                    <div style={compactHistoryStyles.cellDeposits}>
+                      {depositsDisplay}
+                    </div>
+
+                    {/* Total */}
+                    <div style={compactHistoryStyles.cellTotal}>
+                      {totalDisplay}
                     </div>
                   </div>
                 );
               })}
+
+              {/* Show count of records */}
+              <div
+                style={{
+                  fontSize: "10px",
+                  color: "#94a3b8",
+                  textAlign: "center",
+                  padding: "4px 0",
+                  borderTop: "1px solid #f3f4f6",
+                  backgroundColor: "#f9fafb",
+                }}
+              >
+                Showing {Math.min(last6Months.length, 6)} of {history.length}{" "}
+                records
+              </div>
             </div>
           )}
         </div>

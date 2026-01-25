@@ -89,7 +89,7 @@ const AccountsTab: React.FC = () => {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Accounts List - REMOVED extra padding */}
+      {/* Accounts List */}
       <div style={{ flex: 1, overflowY: "auto" }}>
         {sortedAccounts.length === 0 ? (
           <div
@@ -122,7 +122,7 @@ const AccountsTab: React.FC = () => {
           </div>
         ) : (
           <div>
-            {/* Table Header - NEW 2-column layout */}
+            {/* Table Header - SEPARATE COLUMNS */}
             <div
               style={{
                 display: "flex",
@@ -135,6 +135,7 @@ const AccountsTab: React.FC = () => {
                 alignItems: "center",
               }}
             >
+              {/* Account Column */}
               <div
                 style={{
                   flex: 4,
@@ -145,6 +146,19 @@ const AccountsTab: React.FC = () => {
               >
                 Account
               </div>
+              {/* Savings Column */}
+              <div
+                style={{
+                  flex: 2,
+                  padding: "0 4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
+                }}
+              >
+                Savings
+              </div>
+              {/* MPIN Column */}
               <div
                 style={{
                   flex: 3,
@@ -158,7 +172,7 @@ const AccountsTab: React.FC = () => {
               {settings?.showDelete && (
                 <div
                   style={{
-                    width: "32px",
+                    width: "28px",
                     display: "flex",
                     alignItems: "center",
                   }}
@@ -166,15 +180,15 @@ const AccountsTab: React.FC = () => {
               )}
             </div>
 
-            {/* Accounts Rows - NEW 2-column layout */}
+            {/* Accounts Rows - SEPARATE COLUMNS */}
             <div>
               {sortedAccounts.map((account) => {
                 const isActive = isAccountActive(account);
                 const accountCode = account.acctCode || "";
-                // Limit account code to 20 characters
+                // Limit account code to 15 characters
                 const truncatedAccountCode =
-                  accountCode.length > 20
-                    ? `${accountCode.substring(0, 20)}...`
+                  accountCode.length > 15
+                    ? `${accountCode.substring(0, 15)}...`
                     : accountCode;
 
                 return (
@@ -197,7 +211,7 @@ const AccountsTab: React.FC = () => {
                         minHeight: "40px",
                       }}
                     >
-                      {/* Account Column with Savings inline - NEW layout */}
+                      {/* Account Column */}
                       <div
                         style={{
                           flex: 4,
@@ -205,10 +219,8 @@ const AccountsTab: React.FC = () => {
                           padding: "0 4px",
                           display: "flex",
                           alignItems: "center",
-                          gap: "8px", // Space between account code and savings
                         }}
                       >
-                        {/* Account Code (20 chars max) */}
                         <div
                           style={{
                             fontWeight: "500",
@@ -218,20 +230,18 @@ const AccountsTab: React.FC = () => {
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
-                            flexShrink: 1,
-                            minWidth: "0", // Allow shrinking
                           }}
                           title={
-                            accountCode.length > 20 ? accountCode : undefined
+                            accountCode.length > 15 ? accountCode : undefined
                           }
                         >
                           {truncatedAccountCode}
                           {!isActive && (
                             <span
                               style={{
-                                fontSize: "10px",
+                                fontSize: "9px",
                                 color: "#dc2626",
-                                marginLeft: "4px",
+                                marginLeft: "3px",
                                 fontWeight: "normal",
                               }}
                             >
@@ -239,23 +249,32 @@ const AccountsTab: React.FC = () => {
                             </span>
                           )}
                         </div>
+                      </div>
 
-                        {/* Savings Amount - now inline with account code */}
+                      {/* Savings Column - SEPARATE */}
+                      <div
+                        style={{
+                          flex: 2,
+                          padding: "0 4px",
+                          display: "flex",
+                          alignItems: "center",
+                          height: "100%",
+                          justifyContent: "flex-end",
+                        }}
+                      >
                         <div
                           style={{
                             fontSize: "13px",
                             fontWeight: "600",
                             color: isActive ? "#4285f4" : "#6c757d",
-                            flexShrink: 0, // Don't shrink the amount
                             whiteSpace: "nowrap",
-                            marginLeft: "auto", // Push to the right side of available space
                           }}
                         >
                           {formatCurrency(account.savingsAmount)}
                         </div>
                       </div>
 
-                      {/* MPIN Column - CHANGED: font color to black */}
+                      {/* MPIN Column - BLACK FONT */}
                       <div
                         style={{
                           flex: 3,
@@ -263,19 +282,17 @@ const AccountsTab: React.FC = () => {
                           display: "flex",
                           alignItems: "center",
                           height: "100%",
-                          justifyContent: "center",
                         }}
                       >
                         <div
                           style={{
                             fontFamily: "'Courier New', monospace",
-                            fontSize: "12px",
-                            color: isActive ? "#000000" : "#9ca3af", // CHANGED: from "#475569" to "#000000"
+                            fontSize: "14px",
+                            color: "#000000", // CHANGED to black
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
-                            textAlign: "center",
-                            fontWeight: "500", // Added for better visibility
+                            fontWeight: "500",
                           }}
                         >
                           {account.mpin || "••••"}
@@ -286,7 +303,7 @@ const AccountsTab: React.FC = () => {
                       {settings?.showDelete && (
                         <div
                           style={{
-                            width: "32px",
+                            width: "28px",
                             display: "flex",
                             justifyContent: "flex-end",
                             paddingRight: "2px",
@@ -309,8 +326,8 @@ const AccountsTab: React.FC = () => {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              width: "28px",
-                              height: "28px",
+                              width: "26px",
+                              height: "26px",
                             }}
                             title="Edit Account"
                           >
@@ -349,7 +366,7 @@ const AccountsTab: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    fontSize: "10px",
+                    fontSize: "9px",
                     color: "#94a3b8",
                     marginTop: "1px",
                   }}

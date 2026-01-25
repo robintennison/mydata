@@ -9,13 +9,9 @@ import {
   QueryDocumentSnapshot,
   DocumentData,
 } from "firebase/firestore";
-import {
-  Jewellery,
-  //VerificationStatus as ImportedVerificationStatus,
-  VerificationStatusType,
-} from "../models/types";
+import { Jewellery, VerificationStatusType } from "../models/types";
 
-// Define VerificationStatus locally since it conflicts with import
+// Define VerificationStatus locally
 const VerificationStatus = {
   VERIFIED: "Verified",
   MISSING: "Missing",
@@ -23,7 +19,7 @@ const VerificationStatus = {
 } as const;
 
 interface VerificationTabProps {
-  compact?: boolean; // Prop to control if it should show in compact mode
+  compact?: boolean;
 }
 
 const VerificationTab: React.FC<VerificationTabProps> = ({
@@ -35,8 +31,8 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeUpdate, setActiveUpdate] = useState<string | null>(null);
-  const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
-  const [notesText, setNotesText] = useState("");
+  const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
+  const [notesText, setNotesText] = useState<Record<string, string>>({});
 
   // Fetch jewellery items
   useEffect(() => {
@@ -162,6 +158,9 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
       console.error("Error updating verification:", error);
     } finally {
       setActiveUpdate(null);
+      if (expandedNotesId === id) {
+        setExpandedNotesId(null);
+      }
     }
   };
 
@@ -216,44 +215,29 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
     }
   };
 
-  // Get status text color for buttons
-  const getStatusTextColor = (status: VerificationStatusType) => {
-    switch (status) {
-      case VerificationStatus.VERIFIED:
-        return "#047857";
-      case VerificationStatus.MISSING:
-        return "#dc2626";
-      case VerificationStatus.NOT_VERIFIED:
-        return "#d97706";
-      default:
-        return "#4b5563";
+  // Toggle notes expansion
+  const toggleNotes = (item: Jewellery) => {
+    if (expandedNotesId === item.id) {
+      setExpandedNotesId(null);
+    } else {
+      setExpandedNotesId(item.id);
+      setNotesText((prev) => ({
+        ...prev,
+        [item.id]: item.verificationNotes || "",
+      }));
     }
-  };
-
-  // Start editing notes
-  const startEditingNotes = (item: Jewellery) => {
-    setEditingNotesId(item.id);
-    setNotesText(item.verificationNotes || "");
   };
 
   // Save notes
   const saveNotes = async (id: string) => {
-    if (notesText !== undefined) {
+    if (notesText[id] !== undefined) {
       await handleUpdateVerification(
         id,
         jewelleryItems.find((item) => item.id === id)?.verificationStatus ||
           VerificationStatus.NOT_VERIFIED,
-        notesText,
+        notesText[id],
       );
     }
-    setEditingNotesId(null);
-    setNotesText("");
-  };
-
-  // Cancel editing notes
-  const cancelEditingNotes = () => {
-    setEditingNotesId(null);
-    setNotesText("");
   };
 
   if (loading) {
@@ -489,7 +473,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
     );
   }
 
-  // Full mode (similar to original VerificationPage)
+  // Full mode - Optimized for minimal vertical space
   return (
     <div
       style={{
@@ -663,7 +647,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                 flex: 1,
               }}
             >
-              ✓ Mark All as Verified
+              ✓ Mark All Verified
             </button>
             <button
               onClick={() =>
@@ -690,7 +674,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
         )}
       </div>
 
-      {/* Items List */}
+      {/* Items List - Optimized for minimal vertical space */}
       <div
         style={{
           maxHeight: "500px",
@@ -726,86 +710,82 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           </div>
         ) : (
           itemsNeedingVerification.slice(0, 5).map((item) => {
-            const isEditingNotes = editingNotesId === item.id;
             const isUpdating = activeUpdate === item.id;
+            const isExpanded = expandedNotesId === item.id;
+            const hasNotes =
+              item.verificationNotes &&
+              item.verificationNotes.trim().length > 0;
 
             return (
               <div
                 key={item.id}
                 style={{
-                  padding: "12px 0",
+                  padding: "8px 0",
                   borderBottom: "1px solid #f3f4f6",
                 }}
               >
+                {/* Main Row - Compact layout */}
                 <div
                   style={{
                     display: "flex",
-                    alignItems: "flex-start",
+                    alignItems: "center",
                     gap: "10px",
+                    minHeight: "40px",
                   }}
                 >
-                  {/* Image */}
+                  {/* Status Indicator (small circle) */}
                   <div
                     style={{
-                      width: "40px",
-                      height: "40px",
-                      backgroundColor: "#f3f4f6",
-                      borderRadius: "6px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      overflow: "hidden",
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor: getStatusColor(item.verificationStatus),
                       flexShrink: 0,
                     }}
-                  >
-                    {item.imageUrl ? (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.code}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      <span style={{ color: "#9ca3af" }}>💎</span>
-                    )}
-                  </div>
+                  />
 
-                  {/* Item Info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  {/* Item Code and Weight */}
+                  <div
+                    style={{
+                      minWidth: "100px",
+                      maxWidth: "120px",
+                      overflow: "hidden",
+                    }}
+                  >
                     <div
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        marginBottom: "2px",
+                        fontWeight: "600",
+                        fontSize: "13px",
+                        color: "#111827",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
                     >
-                      <div
-                        style={{
-                          fontWeight: "600",
-                          fontSize: "14px",
-                          color: "#111827",
-                        }}
-                      >
-                        {item.code}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b7280",
-                        }}
-                      >
-                        {item.weight}g
-                      </div>
+                      {item.code}
                     </div>
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "#6b7280",
+                      }}
+                    >
+                      {item.weight}g
+                    </div>
+                  </div>
+
+                  {/* Description (truncated) */}
+                  <div
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      overflow: "hidden",
+                    }}
+                  >
                     <div
                       style={{
                         fontSize: "12px",
                         color: "#6b7280",
-                        marginBottom: "4px",
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -815,166 +795,30 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                     </div>
                     <div
                       style={{
-                        display: "flex",
-                        gap: "4px",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          backgroundColor: "#f3f4f6",
-                          color: "#4b5563",
-                          padding: "2px 6px",
-                          borderRadius: "3px",
-                        }}
-                      >
-                        {item.location || "No location"}
-                      </div>
-                      {item.boughtFor && (
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            backgroundColor: "#e0f2fe",
-                            color: "#0369a1",
-                            padding: "2px 6px",
-                            borderRadius: "3px",
-                          }}
-                        >
-                          {item.boughtFor}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Current Status */}
-                    <div
-                      style={{
                         fontSize: "11px",
-                        color: getStatusTextColor(item.verificationStatus),
-                        backgroundColor: `${getStatusColor(item.verificationStatus)}15`,
-                        padding: "2px 8px",
-                        borderRadius: "3px",
-                        display: "inline-block",
-                        marginBottom: "6px",
-                        fontWeight: "500",
+                        color: "#9ca3af",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        marginTop: "2px",
                       }}
                     >
-                      Status: {item.verificationStatus}
+                      <span>{item.location || "No location"}</span>
+                      {item.boughtFor && <span>•</span>}
+                      {item.boughtFor && <span>{item.boughtFor}</span>}
                     </div>
-
-                    {/* Verification Notes Section */}
-                    {isEditingNotes ? (
-                      <div style={{ marginTop: "8px" }}>
-                        <textarea
-                          value={notesText}
-                          onChange={(e) => setNotesText(e.target.value)}
-                          placeholder="Add verification notes..."
-                          style={{
-                            width: "100%",
-                            padding: "8px",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "4px",
-                            fontSize: "12px",
-                            fontFamily: "inherit",
-                            resize: "vertical",
-                            minHeight: "60px",
-                            marginBottom: "8px",
-                          }}
-                          disabled={isUpdating}
-                        />
-                        <div style={{ display: "flex", gap: "8px" }}>
-                          <button
-                            onClick={() => saveNotes(item.id)}
-                            style={{
-                              padding: "4px 12px",
-                              backgroundColor: "#10b981",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: isUpdating ? "not-allowed" : "pointer",
-                              fontSize: "12px",
-                              fontWeight: "500",
-                              opacity: isUpdating ? 0.7 : 1,
-                            }}
-                            disabled={isUpdating}
-                          >
-                            {isUpdating ? "Saving..." : "Save Notes"}
-                          </button>
-                          <button
-                            onClick={cancelEditingNotes}
-                            style={{
-                              padding: "4px 12px",
-                              backgroundColor: "#ef4444",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: isUpdating ? "not-allowed" : "pointer",
-                              fontSize: "12px",
-                              fontWeight: "500",
-                              opacity: isUpdating ? 0.7 : 1,
-                            }}
-                            disabled={isUpdating}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ marginTop: "6px" }}>
-                        {item.verificationNotes ? (
-                          <div
-                            style={{
-                              fontSize: "11px",
-                              color: "#6b7280",
-                              backgroundColor: "#f9fafb",
-                              padding: "6px",
-                              borderRadius: "4px",
-                              borderLeft: "3px solid #3b82f6",
-                              marginBottom: "6px",
-                              whiteSpace: "pre-wrap",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: "500", marginBottom: "2px" }}
-                            >
-                              Notes:
-                            </div>
-                            {item.verificationNotes}
-                          </div>
-                        ) : null}
-                        <button
-                          onClick={() => startEditingNotes(item)}
-                          style={{
-                            padding: "3px 8px",
-                            backgroundColor: "transparent",
-                            color: "#3b82f6",
-                            border: "1px solid #3b82f6",
-                            borderRadius: "3px",
-                            cursor: isUpdating ? "not-allowed" : "pointer",
-                            fontSize: "11px",
-                            opacity: isUpdating ? 0.7 : 1,
-                          }}
-                          disabled={isUpdating}
-                        >
-                          {item.verificationNotes ? "Edit Notes" : "Add Notes"}
-                        </button>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Verification Buttons - 3 status buttons */}
+                  {/* Action Buttons - Horizontal and compact */}
                   <div
                     style={{
                       display: "flex",
-                      flexDirection: "column",
-                      gap: "6px",
-                      minWidth: "90px",
+                      gap: "4px",
+                      alignItems: "center",
+                      flexShrink: 0,
                     }}
                   >
-                    {/* Verified Button */}
+                    {/* Status Icons - All three in one row */}
                     <button
                       onClick={() =>
                         handleUpdateVerification(
@@ -982,39 +826,34 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                           VerificationStatus.VERIFIED,
                         )
                       }
-                      disabled={
-                        isUpdating ||
-                        item.verificationStatus === VerificationStatus.VERIFIED
-                      }
+                      disabled={isUpdating}
+                      title="Mark as Verified"
                       style={{
-                        padding: "6px 8px",
+                        width: "28px",
+                        height: "28px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         backgroundColor:
                           item.verificationStatus ===
                           VerificationStatus.VERIFIED
-                            ? getStatusColor(VerificationStatus.VERIFIED)
-                            : `${getStatusColor(VerificationStatus.VERIFIED)}20`,
+                            ? "#10b981"
+                            : "#f0fdf4",
                         color:
                           item.verificationStatus ===
                           VerificationStatus.VERIFIED
                             ? "white"
-                            : getStatusTextColor(VerificationStatus.VERIFIED),
-                        border: `1px solid ${getStatusColor(VerificationStatus.VERIFIED)}`,
+                            : "#10b981",
+                        border: `1px solid ${item.verificationStatus === VerificationStatus.VERIFIED ? "#10b981" : "#d1fae5"}`,
                         borderRadius: "4px",
                         cursor: isUpdating ? "not-allowed" : "pointer",
-                        fontSize: "11px",
-                        fontWeight: "500",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "4px",
+                        fontSize: "12px",
                         opacity: isUpdating ? 0.7 : 1,
                       }}
                     >
-                      <span>✓</span>
-                      <span>Verified</span>
+                      ✅
                     </button>
 
-                    {/* Not Verified Button */}
                     <button
                       onClick={() =>
                         handleUpdateVerification(
@@ -1022,42 +861,34 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                           VerificationStatus.NOT_VERIFIED,
                         )
                       }
-                      disabled={
-                        isUpdating ||
-                        item.verificationStatus ===
-                          VerificationStatus.NOT_VERIFIED
-                      }
+                      disabled={isUpdating}
+                      title="Mark as Not Verified"
                       style={{
-                        padding: "6px 8px",
+                        width: "28px",
+                        height: "28px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         backgroundColor:
                           item.verificationStatus ===
                           VerificationStatus.NOT_VERIFIED
-                            ? getStatusColor(VerificationStatus.NOT_VERIFIED)
-                            : `${getStatusColor(VerificationStatus.NOT_VERIFIED)}20`,
+                            ? "#f59e0b"
+                            : "#fffbeb",
                         color:
                           item.verificationStatus ===
                           VerificationStatus.NOT_VERIFIED
                             ? "white"
-                            : getStatusTextColor(
-                                VerificationStatus.NOT_VERIFIED,
-                              ),
-                        border: `1px solid ${getStatusColor(VerificationStatus.NOT_VERIFIED)}`,
+                            : "#f59e0b",
+                        border: `1px solid ${item.verificationStatus === VerificationStatus.NOT_VERIFIED ? "#f59e0b" : "#fef3c7"}`,
                         borderRadius: "4px",
                         cursor: isUpdating ? "not-allowed" : "pointer",
-                        fontSize: "11px",
-                        fontWeight: "500",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "4px",
+                        fontSize: "12px",
                         opacity: isUpdating ? 0.7 : 1,
                       }}
                     >
-                      <span>⟲</span>
-                      <span>Not Verified</span>
+                      ⚠️
                     </button>
 
-                    {/* Missing Button */}
                     <button
                       onClick={() =>
                         handleUpdateVerification(
@@ -1065,37 +896,146 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                           VerificationStatus.MISSING,
                         )
                       }
-                      disabled={
-                        isUpdating ||
-                        item.verificationStatus === VerificationStatus.MISSING
-                      }
+                      disabled={isUpdating}
+                      title="Mark as Missing"
                       style={{
-                        padding: "6px 8px",
-                        backgroundColor:
-                          item.verificationStatus === VerificationStatus.MISSING
-                            ? getStatusColor(VerificationStatus.MISSING)
-                            : `${getStatusColor(VerificationStatus.MISSING)}20`,
-                        color:
-                          item.verificationStatus === VerificationStatus.MISSING
-                            ? "white"
-                            : getStatusTextColor(VerificationStatus.MISSING),
-                        border: `1px solid ${getStatusColor(VerificationStatus.MISSING)}`,
-                        borderRadius: "4px",
-                        cursor: isUpdating ? "not-allowed" : "pointer",
-                        fontSize: "11px",
-                        fontWeight: "500",
+                        width: "28px",
+                        height: "28px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: "4px",
+                        backgroundColor:
+                          item.verificationStatus === VerificationStatus.MISSING
+                            ? "#ef4444"
+                            : "#fef2f2",
+                        color:
+                          item.verificationStatus === VerificationStatus.MISSING
+                            ? "white"
+                            : "#ef4444",
+                        border: `1px solid ${item.verificationStatus === VerificationStatus.MISSING ? "#ef4444" : "#fee2e2"}`,
+                        borderRadius: "4px",
+                        cursor: isUpdating ? "not-allowed" : "pointer",
+                        fontSize: "12px",
                         opacity: isUpdating ? 0.7 : 1,
                       }}
                     >
-                      <span>✗</span>
-                      <span>Missing</span>
+                      ❌
+                    </button>
+
+                    {/* Notes Toggle Button */}
+                    <button
+                      onClick={() => toggleNotes(item)}
+                      title={hasNotes ? "View notes" : "Add notes"}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: hasNotes ? "#dbeafe" : "transparent",
+                        color: hasNotes ? "#1d4ed8" : "#6b7280",
+                        border: `1px solid ${hasNotes ? "#93c5fd" : "#e5e7eb"}`,
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "12px",
+                        transform: isExpanded
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                        transition: "transform 0.2s ease",
+                      }}
+                    >
+                      ↓
                     </button>
                   </div>
                 </div>
+
+                {/* Expanded Notes Section (only when toggled) */}
+                {isExpanded && (
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      padding: "8px",
+                      backgroundColor: "#f9fafb",
+                      borderRadius: "4px",
+                      border: "1px solid #e5e7eb",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "500",
+                        color: "#4b5563",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      Verification Notes:
+                    </div>
+                    <textarea
+                      value={notesText[item.id] || ""}
+                      onChange={(e) =>
+                        setNotesText((prev) => ({
+                          ...prev,
+                          [item.id]: e.target.value,
+                        }))
+                      }
+                      placeholder="Add verification notes..."
+                      style={{
+                        width: "100%",
+                        padding: "6px 8px",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                        fontFamily: "inherit",
+                        resize: "vertical",
+                        minHeight: "40px",
+                        marginBottom: "8px",
+                      }}
+                      disabled={isUpdating}
+                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "6px",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <button
+                        onClick={() => saveNotes(item.id)}
+                        style={{
+                          padding: "4px 10px",
+                          backgroundColor: "#3b82f6",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: isUpdating ? "not-allowed" : "pointer",
+                          fontSize: "11px",
+                          fontWeight: "500",
+                          opacity: isUpdating ? 0.7 : 1,
+                        }}
+                        disabled={isUpdating}
+                      >
+                        {isUpdating ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        onClick={() => setExpandedNotesId(null)}
+                        style={{
+                          padding: "4px 10px",
+                          backgroundColor: "#f3f4f6",
+                          color: "#4b5563",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: isUpdating ? "not-allowed" : "pointer",
+                          fontSize: "11px",
+                          fontWeight: "500",
+                          opacity: isUpdating ? 0.7 : 1,
+                        }}
+                        disabled={isUpdating}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })

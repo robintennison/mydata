@@ -4,26 +4,28 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #000; /* Black background for better contrast */
+  background-color: #f8fafc;
   max-width: 600px;
   margin: 0 auto;
+  padding: 0; /* Added: Remove container padding */
 }
 
 /* Compact Top Bar - All in one row - LIGHT THEME */
 .compactTopBar {
   display: flex;
   align-items: center;
-  gap: 4px; /* Reduced gap */
-  padding: 6px 8px; /* Reduced padding */
-  background-color: #ffffff; /* White background */
-  border-bottom: 1px solid #e5e7eb; /* Light gray border */
+  gap: 4px;
+  padding: 6px 8px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
   z-index: 10;
   flex-wrap: nowrap;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  min-height: 44px; /* Minimum touch target size */
+  min-height: 44px;
+  margin: 0; /* Added: Remove margin */
 }
 
 /* Hide scrollbar but keep functionality */
@@ -38,34 +40,34 @@
 .backButton {
   background: none;
   border: none;
-  padding: 6px 4px; /* Reduced padding */
-  font-size: 14px; /* Smaller font */
+  padding: 6px 4px;
+  font-size: 14px;
   cursor: pointer;
-  color: #374151; /* Dark gray text */
+  color: #374151;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px; /* Smaller min-width */
-  min-height: 28px; /* Smaller min-height */
+  min-width: 28px;
+  min-height: 28px;
   flex-shrink: 0;
 }
 
 .backButton:hover {
-  background-color: #f3f4f6; /* Light gray hover */
+  background-color: #f3f4f6;
 }
 
 .compactSearch {
-  flex: 1; /* Takes available space */
+  flex: 1;
   min-width: 0;
-  padding: 4px 6px; /* Reduced padding */
+  padding: 4px 6px;
   border-radius: 4px;
-  border: 1px solid #d1d5db; /* Light gray border */
-  font-size: 11px; /* Smaller font */
+  border: 1px solid #d1d5db;
+  font-size: 11px;
   background-color: white;
-  color: #111827; /* Dark text */
+  color: #111827;
   flex-shrink: 1;
-  max-width: 120px; /* Limit max width */
+  max-width: 120px;
 }
 
 .compactSearch:focus {
@@ -75,7 +77,7 @@
 }
 
 .compactSearch::placeholder {
-  color: #9ca3af; /* Medium gray placeholder */
+  color: #9ca3af;
   font-size: 11px;
 }
 
@@ -86,16 +88,16 @@
 }
 
 .compactSelect {
-  padding: 4px 6px; /* Reduced padding */
-  padding-right: 20px; /* Space for dropdown arrow */
+  padding: 4px 6px;
+  padding-right: 20px;
   border-radius: 4px;
-  border: 1px solid #d1d5db; /* Light gray border */
-  font-size: 11px; /* Much smaller font */
+  border: 1px solid #d1d5db;
+  font-size: 11px;
   background-color: white;
-  color: #374151; /* Dark text */
+  color: #374151;
   cursor: pointer;
   min-width: 0;
-  max-width: 80px; /* Limit max width */
+  max-width: 80px;
   flex-shrink: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -117,7 +119,7 @@
 /* Style for select dropdown options */
 .compactSelect option {
   background-color: white;
-  color: #111827; /* Dark text */
+  color: #111827;
   padding: 8px;
   font-size: 12px;
 }
@@ -125,59 +127,60 @@
 .settingsButton {
   background: none;
   border: none;
-  padding: 6px 4px; /* Reduced padding */
-  font-size: 14px; /* Smaller icon */
+  padding: 6px 4px;
+  font-size: 14px;
   cursor: pointer;
-  color: #374151; /* Dark gray icon */
+  color: #374151;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px; /* Smaller min-width */
-  min-height: 28px; /* Smaller min-height */
+  min-width: 28px;
+  min-height: 28px;
   flex-shrink: 0;
 }
 
 .settingsButton:hover {
-  background-color: #f3f4f6; /* Light gray hover */
+  background-color: #f3f4f6;
 }
 
 .inactiveToggle {
   display: flex;
   align-items: center;
-  gap: 2px; /* Reduced gap */
-  font-size: 10px; /* Smaller font */
-  color: #6b7280; /* Medium gray text */
+  gap: 2px;
+  font-size: 10px;
+  color: #6b7280;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
   padding: 4px;
   border-radius: 4px;
-  background-color: #f3f4f6; /* Light gray background */
-  min-width: 34px; /* Fixed width for consistency */
+  background-color: #f3f4f6;
+  min-width: 34px;
 }
 
 .inactiveToggle:hover {
-  background-color: #e5e7eb; /* Slightly darker gray on hover */
+  background-color: #e5e7eb;
 }
 
 .inactiveCheckbox {
   margin: 0;
   cursor: pointer;
-  width: 12px; /* Smaller checkbox */
-  height: 12px; /* Smaller checkbox */
+  width: 12px;
+  height: 12px;
 }
 
 .toggleLabel {
   cursor: pointer;
-  font-size: 9px; /* Very small label */
+  font-size: 9px;
 }
 
 /* Gallery Grid - Starts immediately below top bar */
 .galleryContainer {
   flex: 1;
-  padding: 4px;
-  background-color: #000; /* Keep black background for images */
+  padding: 0; /* Changed: Removed padding */
+  background-color: #f8fafc;
+  margin: 0; /* Added: Remove margin */
 }
 
 .emptyState {
@@ -187,7 +190,8 @@
   justify-content: center;
   min-height: 50vh;
   padding: 20px;
-  color: #9ca3af;
+  color: #6b7280;
+  margin: 0; /* Added: Remove margin */
 }
 
 .emptyIcon {
@@ -198,7 +202,7 @@
 
 .emptyMessage {
   font-size: 14px;
-  color: #9ca3af; /* Light gray text */
+  color: #6b7280;
   text-align: center;
 }
 
@@ -206,9 +210,10 @@
 .gridContainer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  margin: 0;
+  gap: 1px; /* Reduced from 2px */
+  margin: 0; /* Added: Remove margin */
   width: 100%;
+  padding: 0; /* Added: Remove padding */
 }
 
 /* Gallery Item - Image Only Style */
@@ -218,6 +223,10 @@
   overflow: hidden;
   aspect-ratio: 1/1;
   width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0; /* Changed: Removed border radius */
+  margin: 0; /* Added: Remove margin */
 }
 
 .galleryItem.inactive {
@@ -229,7 +238,9 @@
   width: 100%;
   height: 100%;
   position: relative;
-  background-color: #111827;
+  background-color: #f9fafb;
+  margin: 0; /* Added: Remove margin */
+  padding: 0; /* Added: Remove padding */
 }
 
 .image {
@@ -237,6 +248,8 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  margin: 0; /* Added: Remove margin */
+  padding: 0; /* Added: Remove padding */
 }
 
 /* Fixed: Removed black shadow overlay */
@@ -245,9 +258,10 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: transparent; /* REMOVED: linear-gradient(to top, rgba(244, 240, 240, 0.9) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%); */
-  padding: 6px 4px;
-  color: #ffffff; /* Changed from just "white" for consistency */
+  background: transparent;
+  padding: 4px 2px; /* Reduced padding */
+  color: #1f2937;
+  margin: 0; /* Added: Remove margin */
 }
 
 .overlayContent {
@@ -255,19 +269,20 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
+  margin: 0; /* Added: Remove margin */
 }
 
 .overlayCode {
   font-size: 12px;
   font-weight: 600;
-  color: #ffffff;
-  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5); /* Reduced shadow intensity */
+  color: #1f2937;
+  margin: 0; /* Added: Remove margin */
 }
 
 .overlayWeight {
   font-size: 10px;
-  color: #e5e7eb;
-  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5); /* Reduced shadow intensity */
+  color: #6b7280;
+  margin: 0; /* Added: Remove margin */
 }
 
 .overlayStatus {
@@ -278,7 +293,7 @@
   letter-spacing: 0.3px;
   text-transform: uppercase;
   margin-top: 2px;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 /* Placeholder for items without images */
@@ -289,14 +304,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #111827;
-  color: white;
+  background-color: #f9fafb;
+  color: #6b7280;
+  margin: 0; /* Added: Remove margin */
+  padding: 0; /* Added: Remove padding */
 }
 
 .placeholder {
   font-size: 32px;
   margin-bottom: 6px;
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 .placeholderInfo {
@@ -305,17 +322,21 @@
   align-items: center;
   gap: 1px;
   text-align: center;
+  margin: 0; /* Added: Remove margin */
+  padding: 0; /* Added: Remove padding */
 }
 
 .placeholderCode {
   font-size: 12px;
   font-weight: 600;
-  color: white;
+  color: #374151;
+  margin: 0; /* Added: Remove margin */
 }
 
 .placeholderWeight {
   font-size: 10px;
-  color: #e5e7eb;
+  color: #9ca3af;
+  margin: 0; /* Added: Remove margin */
 }
 
 .placeholderStatus {
@@ -326,28 +347,29 @@
   letter-spacing: 0.3px;
   text-transform: uppercase;
   margin-top: 4px;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 /* Badge Styles */
 .missing {
-  background-color: #ef4444;
-  color: white;
+  background-color: #fee2e2;
+  color: #dc2626;
 }
 
 .notVerified {
-  background-color: #6b7280;
-  color: white;
+  background-color: #f3f4f6;
+  color: #6b7280;
 }
 
 /* Counter at bottom */
 .counter {
   padding: 8px;
-  background-color: #111827; /* Dark background */
-  color: #9ca3af; /* Light gray text */
+  background-color: #ffffff;
+  color: #6b7280;
   font-size: 11px;
   text-align: center;
-  border-top: 1px solid #374151;
+  border-top: 1px solid #e5e7eb;
+  margin: 0; /* Added: Remove margin */
 }
 
 /* Loading */
@@ -358,14 +380,16 @@
   justify-content: center;
   min-height: 60vh;
   gap: 16px;
-  background-color: #000;
-  color: white;
+  background-color: #f8fafc;
+  color: #374151;
+  margin: 0; /* Added: Remove margin */
+  padding: 0; /* Added: Remove padding */
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #374151;
+  border: 3px solid #e5e7eb;
   border-top-color: #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -382,9 +406,23 @@
   .container {
     width: 100%;
     max-width: 100vw;
+    padding: 0; /* Ensure no padding on mobile */
   }
   
   .compactTopBar {
     width: 100%;
+    margin: 0;
+    padding: 6px 8px;
+  }
+  
+  .galleryContainer {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .gridContainer {
+    gap: 1px;
+    margin: 0;
+    padding: 0;
   }
 }

@@ -239,15 +239,15 @@
   display: block;
 }
 
-/* Overlay for image items */
+/* Fixed: Removed black shadow overlay */
 .imageOverlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%);
+  background: transparent; /* REMOVED: linear-gradient(to top, rgba(244, 240, 240, 0.9) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%); */
   padding: 6px 4px;
-  color: white;
+  color: #ffffff; /* Changed from just "white" for consistency */
 }
 
 .overlayContent {
@@ -260,14 +260,14 @@
 .overlayCode {
   font-size: 12px;
   font-weight: 600;
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5); /* Reduced shadow intensity */
 }
 
 .overlayWeight {
   font-size: 10px;
   color: #e5e7eb;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5); /* Reduced shadow intensity */
 }
 
 .overlayStatus {
@@ -278,6 +278,7 @@
   letter-spacing: 0.3px;
   text-transform: uppercase;
   margin-top: 2px;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
 }
 
 /* Placeholder for items without images */
@@ -325,6 +326,7 @@
   letter-spacing: 0.3px;
   text-transform: uppercase;
   margin-top: 4px;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
 }
 
 /* Badge Styles */

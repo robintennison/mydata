@@ -65,7 +65,12 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           items.push(item);
         });
 
-        setJewelleryItems(items);
+        // Sort items by code
+        const sortedItems = items.sort((a, b) => {
+          return (a.code || "").localeCompare(b.code || "");
+        });
+
+        setJewelleryItems(sortedItems);
       } catch (error) {
         console.error("Error fetching jewellery:", error);
       } finally {
@@ -179,18 +184,21 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
       await updateDoc(itemRef, updateData);
 
       // Update local state
-      setJewelleryItems((prevItems) =>
-        prevItems.map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                verificationStatus: status,
-                verificationNotes:
-                  notes !== undefined ? notes : item.verificationNotes,
-                lastVerified: Date.now(),
-              }
-            : item,
-        ),
+      setJewelleryItems(
+        (prevItems) =>
+          prevItems
+            .map((item) =>
+              item.id === id
+                ? {
+                    ...item,
+                    verificationStatus: status,
+                    verificationNotes:
+                      notes !== undefined ? notes : item.verificationNotes,
+                    lastVerified: Date.now(),
+                  }
+                : item,
+            )
+            .sort((a, b) => (a.code || "").localeCompare(b.code || "")), // Re-sort after update
       );
     } catch (error) {
       console.error("Error updating verification:", error);
@@ -223,16 +231,19 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
       }
 
       // Update local state
-      setJewelleryItems((prevItems) =>
-        prevItems.map((item) =>
-          item.location === location && item.active
-            ? {
-                ...item,
-                verificationStatus: status,
-                lastVerified: Date.now(),
-              }
-            : item,
-        ),
+      setJewelleryItems(
+        (prevItems) =>
+          prevItems
+            .map((item) =>
+              item.location === location && item.active
+                ? {
+                    ...item,
+                    verificationStatus: status,
+                    lastVerified: Date.now(),
+                  }
+                : item,
+            )
+            .sort((a, b) => (a.code || "").localeCompare(b.code || "")), // Re-sort after bulk update
       );
     } catch (error) {
       console.error("Error in bulk update:", error);
@@ -712,7 +723,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
         )}
       </div>
 
-      {/* Items List - Show ALL items now */}
+      {/* Items List - Show ALL items sorted by code */}
       <div
         style={{
           maxHeight: "500px",

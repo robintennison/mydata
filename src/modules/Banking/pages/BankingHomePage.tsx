@@ -693,7 +693,7 @@ const BankingHomePage: React.FC = () => {
             activeTab === "history" ||
             activeTab === "summary" ||
             activeTab === "dashboard"
-              ? "8px 0"
+              ? "8px 4px" // Reduced horizontal padding
               : "16px",
           overflowY: "auto",
         }}

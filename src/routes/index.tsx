@@ -45,6 +45,7 @@ export interface RouteConfig {
   needsUserData?: boolean;
   children?: RouteConfig[];
   isIndex?: boolean;
+  noLayoutPadding?: boolean;
 }
 
 export interface NavigationItem {
@@ -88,6 +89,7 @@ const allRoutes: RouteConfig[] = [
     icon: "🏦",
     requiresAuth: true,
     needsUserData: true,
+    noLayoutPadding: true,
   },
 
   {
@@ -398,10 +400,10 @@ const AppRoutes: React.FC<AppRoutesProps> = () => {
         // For all other routes, check if they require auth
         const routeElement = route.requiresAuth ? (
           <ProtectedRoute>
-            <Layout>{route.element}</Layout>
+            <Layout noPadding={route.noLayoutPadding}>{route.element}</Layout>
           </ProtectedRoute>
         ) : (
-          <Layout>{route.element}</Layout>
+          <Layout noPadding={route.noLayoutPadding}>{route.element}</Layout>
         );
 
         return (

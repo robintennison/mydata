@@ -89,10 +89,8 @@ const AccountsTab: React.FC = () => {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* REMOVED: Search Bar section */}
-
-      {/* Accounts List */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "10px 0" }}>
+      {/* Accounts List - REMOVED extra padding */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
         {sortedAccounts.length === 0 ? (
           <div
             style={{
@@ -123,29 +121,29 @@ const AccountsTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "0 8px" }}>
-            {/* Table Header */}
+          <div>
+            {/* Table Header - REMOVED padding from outer div */}
             <div
               style={{
                 display: "flex",
-                padding: "10px 12px",
+                padding: "8px 4px", // Reduced padding
                 backgroundColor: "#f9fafb",
                 borderBottom: "1px solid #e9ecef",
                 fontWeight: "600",
-                fontSize: "13px",
+                fontSize: "12px", // Slightly smaller font
                 color: "#374151",
-                margin: "0 8px",
-                borderRadius: "8px 8px 0 0",
               }}
             >
-              <div style={{ flex: 4 }}>Account</div>
-              <div style={{ flex: 3, textAlign: "right" }}>Savings</div>
-              <div style={{ flex: 3, paddingLeft: "12px" }}>MPIN</div>
-              {settings?.showDelete && <div style={{ width: "40px" }}></div>}
+              <div style={{ flex: 4, padding: "0 4px" }}>Account</div>
+              <div style={{ flex: 3, textAlign: "right", padding: "0 4px" }}>
+                Savings
+              </div>
+              <div style={{ flex: 3, padding: "0 4px" }}>MPIN</div>
+              {settings?.showDelete && <div style={{ width: "32px" }}></div>}
             </div>
 
-            {/* Accounts Rows */}
-            <div style={{ padding: "0 8px" }}>
+            {/* Accounts Rows - REMOVED padding from outer div */}
+            <div>
               {sortedAccounts.map((account) => {
                 const isActive = isAccountActive(account);
                 return (
@@ -153,9 +151,7 @@ const AccountsTab: React.FC = () => {
                     key={account.id}
                     style={{
                       backgroundColor: "white",
-                      margin: "0 8px 8px 8px",
-                      borderRadius: "8px",
-                      border: "1px solid #e9ecef",
+                      borderBottom: "1px solid #f3f4f6", // Changed to bottom border only
                       cursor: "pointer",
                     }}
                     onClick={() =>
@@ -164,18 +160,18 @@ const AccountsTab: React.FC = () => {
                   >
                     <div
                       style={{
-                        padding: "12px",
+                        padding: "8px 4px", // Reduced padding
                         display: "flex",
                         alignItems: "center",
-                        minHeight: "48px",
+                        minHeight: "40px", // Reduced min-height
                       }}
                     >
-                      <div style={{ flex: 4, minWidth: 0 }}>
+                      <div style={{ flex: 4, minWidth: 0, padding: "0 4px" }}>
                         <div
                           style={{
                             fontWeight: "500",
                             color: isActive ? "#1e293b" : "#6c757d",
-                            fontSize: "14px",
+                            fontSize: "13px", // Slightly smaller font
                             textDecoration: isActive ? "none" : "line-through",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -186,9 +182,9 @@ const AccountsTab: React.FC = () => {
                           {!isActive && (
                             <span
                               style={{
-                                fontSize: "11px",
+                                fontSize: "10px", // Smaller
                                 color: "#dc2626",
-                                marginLeft: "6px",
+                                marginLeft: "4px", // Reduced margin
                                 fontWeight: "normal",
                               }}
                             >
@@ -201,11 +197,12 @@ const AccountsTab: React.FC = () => {
                         style={{
                           flex: 3,
                           textAlign: "right",
+                          padding: "0 4px",
                         }}
                       >
                         <div
                           style={{
-                            fontSize: "14px",
+                            fontSize: "13px", // Slightly smaller
                             fontWeight: "600",
                             color: isActive ? "#4285f4" : "#6c757d",
                           }}
@@ -213,11 +210,11 @@ const AccountsTab: React.FC = () => {
                           {formatCurrency(account.savingsAmount)}
                         </div>
                       </div>
-                      <div style={{ flex: 3, paddingLeft: "12px" }}>
+                      <div style={{ flex: 3, padding: "0 4px" }}>
                         <div
                           style={{
                             fontFamily: "'Courier New', monospace",
-                            fontSize: "13px",
+                            fontSize: "12px", // Slightly smaller
                             color: isActive ? "#475569" : "#9ca3af",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -231,9 +228,10 @@ const AccountsTab: React.FC = () => {
                       {settings?.showDelete && (
                         <div
                           style={{
-                            width: "40px",
+                            width: "32px", // Smaller width
                             display: "flex",
                             justifyContent: "flex-end",
+                            paddingRight: "2px",
                           }}
                         >
                           <button
@@ -242,17 +240,17 @@ const AccountsTab: React.FC = () => {
                               navigate(`/banking/accounts/edit/${account.id}`);
                             }}
                             style={{
-                              padding: "4px",
+                              padding: "2px", // Reduced padding
                               background: "none",
                               border: "none",
                               cursor: "pointer",
                               color: "#6b7280",
-                              fontSize: "16px",
+                              fontSize: "14px", // Smaller icon
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              width: "32px",
-                              height: "32px",
+                              width: "28px", // Smaller
+                              height: "28px", // Smaller
                             }}
                             title="Edit Account"
                           >
@@ -266,28 +264,26 @@ const AccountsTab: React.FC = () => {
               })}
             </div>
 
-            {/* Total Savings Footer */}
+            {/* Total Savings Footer - REMOVED margin and padding */}
             <div
               style={{
-                padding: "12px",
+                padding: "8px 4px", // Reduced padding
                 backgroundColor: "#f3f4f6",
-                borderRadius: "8px",
-                border: "1px solid #e9ecef",
-                margin: "0 8px",
+                borderTop: "1px solid #e9ecef",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
               }}
             >
               <div>
-                <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                <div style={{ fontSize: "11px", color: "#6b7280" }}>
                   {settings?.showInactive
                     ? `${sortedAccounts.length} of ${accounts.length} accounts`
                     : `${sortedAccounts.length} active accounts`}
                 </div>
                 <div
                   style={{
-                    fontSize: "11px",
+                    fontSize: "10px", // Smaller
                     color: "#94a3b8",
                     marginTop: "1px",
                   }}
@@ -299,7 +295,7 @@ const AccountsTab: React.FC = () => {
               <div style={{ textAlign: "right" }}>
                 <div
                   style={{
-                    fontSize: "11px",
+                    fontSize: "10px", // Smaller
                     color: "#64748b",
                     fontWeight: "600",
                     textTransform: "uppercase",
@@ -310,7 +306,7 @@ const AccountsTab: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    fontSize: "16px",
+                    fontSize: "14px", // Smaller
                     fontWeight: "700",
                     color: "#4285f4",
                   }}

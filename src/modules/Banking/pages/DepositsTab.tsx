@@ -56,7 +56,6 @@ const DepositsTab: React.FC = () => {
 
   // Filter deposits exactly like Android app with proper account filtering and sorting
   const filteredDeposits = localDeposits
-
     .filter((dep) => {
       if (filterAccount === "All") return true;
       // Get account name for filtering
@@ -116,18 +115,16 @@ const DepositsTab: React.FC = () => {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* REMOVED: Search and Filter Row - replaced with just filter and sort buttons */}
-
-      {/* Filter and Sort Row */}
+      {/* Filter and Sort Row - COMPACT */}
       <div
         style={{
-          padding: "10px 15px",
+          padding: "6px 8px", // Reduced padding
           backgroundColor: "white",
           borderBottom: "1px solid #e9ecef",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          gap: "10px",
+          gap: "8px", // Reduced gap
         }}
       >
         {/* Filter Button */}
@@ -135,16 +132,16 @@ const DepositsTab: React.FC = () => {
           <button
             onClick={() => setShowFilterDropdown(!showFilterDropdown)}
             style={{
-              padding: "10px 12px",
+              padding: "6px 8px", // Reduced padding
               backgroundColor: "#f8f9fa",
               border: "1px solid #e9ecef",
-              borderRadius: "6px",
+              borderRadius: "4px", // Smaller radius
               cursor: "pointer",
-              fontSize: "0.9rem",
+              fontSize: "12px", // Smaller font
               display: "flex",
               alignItems: "center",
-              gap: "6px",
-              minWidth: "100px",
+              gap: "4px", // Reduced gap
+              minWidth: "80px", // Smaller min width
             }}
             title="Filter by Account"
           >
@@ -154,6 +151,7 @@ const DepositsTab: React.FC = () => {
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
+                fontSize: "11px", // Smaller
               }}
             >
               {filterAccount === "All" ? "All" : filterAccount}
@@ -182,19 +180,19 @@ const DepositsTab: React.FC = () => {
                   left: 0,
                   backgroundColor: "#ffffff",
                   border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  borderRadius: "6px", // Smaller
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.1)", // Lighter shadow
                   zIndex: 100,
-                  width: "180px",
-                  maxHeight: "300px",
+                  width: "150px", // Smaller
+                  maxHeight: "250px", // Smaller
                   overflowY: "auto",
-                  marginTop: "4px",
+                  marginTop: "2px", // Reduced margin
                 }}
               >
                 <div
                   style={{
-                    padding: "12px 16px",
-                    fontSize: "0.875rem",
+                    padding: "8px 12px", // Reduced
+                    fontSize: "12px", // Smaller
                     color: "#666",
                     borderBottom: "1px solid #f0f0f0",
                   }}
@@ -210,12 +208,12 @@ const DepositsTab: React.FC = () => {
                     }}
                     style={{
                       width: "100%",
-                      padding: "12px 16px",
+                      padding: "8px 12px", // Reduced
                       textAlign: "left",
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      fontSize: "0.95rem",
+                      fontSize: "13px", // Smaller
                       color: filterAccount === "All" ? "#1976d2" : "#333",
                       backgroundColor:
                         filterAccount === "All" ? "#e3f2fd" : "transparent",
@@ -238,12 +236,12 @@ const DepositsTab: React.FC = () => {
                         }}
                         style={{
                           width: "100%",
-                          padding: "12px 16px",
+                          padding: "8px 12px", // Reduced
                           textAlign: "left",
                           background: "none",
                           border: "none",
                           cursor: "pointer",
-                          fontSize: "0.95rem",
+                          fontSize: "13px", // Smaller
                           color:
                             filterAccount === account.acctCode
                               ? "#1976d2"
@@ -269,15 +267,15 @@ const DepositsTab: React.FC = () => {
           <button
             onClick={() => setShowSortDropdown(!showSortDropdown)}
             style={{
-              padding: "10px 12px",
+              padding: "6px 8px", // Reduced
               backgroundColor: "#f8f9fa",
               border: "1px solid #e9ecef",
-              borderRadius: "6px",
+              borderRadius: "4px", // Smaller
               cursor: "pointer",
-              fontSize: "0.9rem",
+              fontSize: "12px", // Smaller
               display: "flex",
               alignItems: "center",
-              gap: "6px",
+              gap: "4px", // Reduced
             }}
             title={`Sort by ${sortBy === "account" ? "Account Code" : "End Date"}`}
           >
@@ -306,19 +304,19 @@ const DepositsTab: React.FC = () => {
                   right: 0,
                   backgroundColor: "#ffffff",
                   border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  borderRadius: "6px", // Smaller
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.1)", // Lighter
                   zIndex: 100,
-                  minWidth: "180px",
-                  maxHeight: "400px",
+                  minWidth: "150px", // Smaller
+                  maxHeight: "300px",
                   overflow: "hidden",
-                  marginTop: "4px",
+                  marginTop: "2px", // Reduced
                 }}
               >
                 <div
                   style={{
-                    padding: "12px 16px",
-                    fontSize: "0.875rem",
+                    padding: "8px 12px", // Reduced
+                    fontSize: "12px", // Smaller
                     color: "#666",
                     borderBottom: "1px solid #f0f0f0",
                   }}
@@ -326,7 +324,7 @@ const DepositsTab: React.FC = () => {
                   Sort By
                 </div>
 
-                <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                <div style={{ maxHeight: "250px", overflowY: "auto" }}>
                   <button
                     onClick={() => {
                       setSortBy("account");
@@ -334,12 +332,12 @@ const DepositsTab: React.FC = () => {
                     }}
                     style={{
                       width: "100%",
-                      padding: "12px 16px",
+                      padding: "8px 12px", // Reduced
                       textAlign: "left",
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      fontSize: "0.95rem",
+                      fontSize: "13px", // Smaller
                       color: sortBy === "account" ? "#1976d2" : "#333",
                       backgroundColor:
                         sortBy === "account" ? "#e3f2fd" : "transparent",
@@ -350,7 +348,7 @@ const DepositsTab: React.FC = () => {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "8px",
+                        gap: "6px", // Reduced
                       }}
                     >
                       <span>🔢</span>
@@ -365,12 +363,12 @@ const DepositsTab: React.FC = () => {
                     }}
                     style={{
                       width: "100%",
-                      padding: "12px 16px",
+                      padding: "8px 12px", // Reduced
                       textAlign: "left",
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      fontSize: "0.95rem",
+                      fontSize: "13px", // Smaller
                       color: sortBy === "date" ? "#1976d2" : "#333",
                       backgroundColor:
                         sortBy === "date" ? "#e3f2fd" : "transparent",
@@ -380,7 +378,7 @@ const DepositsTab: React.FC = () => {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "8px",
+                        gap: "6px", // Reduced
                       }}
                     >
                       <span>📅</span>
@@ -394,8 +392,8 @@ const DepositsTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Deposits List */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "10px 0" }}>
+      {/* Deposits List - SIMPLE TABLE ROWS */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
         {filteredDeposits.length === 0 ? (
           <div
             style={{
@@ -428,223 +426,209 @@ const DepositsTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "0 8px" }}>
-            {/* Deposits List - Card Style */}
-            {filteredDeposits.map((deposit) => {
-              const accountName = getAccountName(deposit.accountId);
+          <div>
+            {/* Table Header - SIMPLE */}
+            <div
+              style={{
+                display: "flex",
+                padding: "6px 4px", // Reduced
+                backgroundColor: "#f9fafb",
+                borderBottom: "1px solid #e9ecef",
+                fontWeight: "600",
+                fontSize: "11px", // Smaller
+                color: "#374151",
+              }}
+            >
+              <div style={{ flex: 3, padding: "0 4px" }}>Account</div>
+              <div style={{ flex: 2, padding: "0 4px" }}>Date</div>
+              <div style={{ flex: 2, padding: "0 4px", textAlign: "right" }}>
+                Amount
+              </div>
+              {settings?.showDelete && <div style={{ width: "30px" }}></div>}
+            </div>
 
-              return (
-                <div
-                  key={deposit.id}
-                  style={{
-                    backgroundColor: "white",
-                    margin: "0 8px 8px 8px",
-                    borderRadius: "8px",
-                    border: "1px solid #e9ecef",
-                    cursor: "pointer",
-                  }}
-                  onClick={() =>
-                    navigate(`/banking/deposits/edit/${deposit.id}`)
-                  }
-                >
+            {/* Table Rows - SIMPLE */}
+            <div>
+              {filteredDeposits.map((deposit) => {
+                const accountName = getAccountName(deposit.accountId);
+
+                return (
                   <div
+                    key={deposit.id}
                     style={{
-                      padding: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      minHeight: "48px",
+                      backgroundColor: "white",
+                      borderBottom: "1px solid #f3f4f6",
+                      cursor: "pointer",
                     }}
+                    onClick={() =>
+                      navigate(`/banking/deposits/edit/${deposit.id}`)
+                    }
                   >
-                    {/* Left side - Account and Date */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        <span
+                    <div
+                      style={{
+                        padding: "6px 4px", // Reduced
+                        display: "flex",
+                        alignItems: "center",
+                        minHeight: "36px", // Reduced
+                      }}
+                    >
+                      {/* Account */}
+                      <div style={{ flex: 3, padding: "0 4px", minWidth: 0 }}>
+                        <div
                           style={{
-                            fontSize: "0.95rem",
-                            fontWeight: "500",
+                            fontSize: "12px", // Smaller
                             color: "#333",
-                            whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {accountName}
-                        </span>
-                        <span
+                          {deposit.comments && (
+                            <span
+                              style={{
+                                fontSize: "10px", // Smaller
+                                color: "#718096",
+                                marginLeft: "4px",
+                              }}
+                            >
+                              {deposit.comments.length > 10
+                                ? `${deposit.comments.substring(0, 10)}...`
+                                : deposit.comments}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Date */}
+                      <div style={{ flex: 2, padding: "0 4px" }}>
+                        <div
                           style={{
-                            fontSize: "0.8rem",
+                            fontSize: "11px", // Smaller
                             color: "#666",
                             fontFamily: "monospace",
-                            whiteSpace: "nowrap",
                           }}
                         >
                           {formatDate(deposit.endDate)}
-                        </span>
+                        </div>
                       </div>
 
-                      {deposit.comments && (
+                      {/* Amount */}
+                      <div
+                        style={{
+                          flex: 2,
+                          padding: "0 4px",
+                          textAlign: "right",
+                        }}
+                      >
                         <div
                           style={{
-                            fontSize: "0.8rem",
-                            color: "#718096",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
+                            fontSize: "12px", // Smaller
+                            fontWeight: "600",
+                            color: "#1976d2",
                           }}
                         >
-                          {deposit.comments}
+                          {formatInLakhs(deposit.amount)}
+                        </div>
+                      </div>
+
+                      {/* Edit button */}
+                      {settings?.showDelete && (
+                        <div
+                          style={{
+                            width: "30px",
+                            display: "flex",
+                            justifyContent: "center",
+                            paddingRight: "2px",
+                          }}
+                        >
+                          <button
+                            style={{
+                              padding: "2px", // Reduced
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "#6b7280",
+                              fontSize: "12px", // Smaller
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: "26px", // Smaller
+                              height: "26px", // Smaller
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/banking/deposits/edit/${deposit.id}`);
+                            }}
+                            title="Edit"
+                          >
+                            ✏️
+                          </button>
                         </div>
                       )}
                     </div>
-
-                    {/* Right side - Amount and Edit button */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginLeft: "8px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "0.95rem",
-                          fontWeight: "600",
-                          color: "#1976d2",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {formatInLakhs(deposit.amount)}
-                      </span>
-
-                      {settings?.showDelete && (
-                        <button
-                          style={{
-                            padding: "6px",
-                            backgroundColor: "#4299e1",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontSize: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/banking/deposits/edit/${deposit.id}`);
-                          }}
-                          title="Edit"
-                        >
-                          ✏️
-                        </button>
-                      )}
-                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
 
-            {/* Total Summary Card */}
+            {/* Total Summary Footer - SIMPLE */}
             <div
               style={{
-                backgroundColor: "#f8f9fa",
-                borderRadius: "12px",
-                padding: "16px",
-                border: "1px solid #e0e0e0",
-                margin: "0 8px",
+                padding: "8px 4px", // Reduced
+                backgroundColor: "#f3f4f6",
+                borderTop: "1px solid #e9ecef",
               }}
             >
-              {/* Header */}
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: "12px",
+                  marginBottom: "4px", // Reduced
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "1rem",
-                    fontWeight: 600,
-                    color: "#333",
-                  }}
-                >
-                  Total Summary
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "#666",
-                  }}
-                >
+                <div style={{ fontSize: "11px", color: "#6b7280" }}>
                   {filteredDeposits.length} deposit
                   {filteredDeposits.length !== 1 ? "s" : ""}
+                  {filterAccount !== "All" && ` for ${filterAccount}`}
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div
+                    style={{
+                      fontSize: "10px", // Smaller
+                      color: "#64748b",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Total
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "14px", // Smaller
+                      fontWeight: "700",
+                      color: "#1976d2",
+                    }}
+                  >
+                    {formatInLakhs(totalAmount)}
+                  </div>
                 </div>
               </div>
 
-              {/* Total Amount */}
+              {/* Sort Info - Compact */}
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "0.9rem",
-                    fontWeight: 500,
-                    color: "#333",
-                  }}
-                >
-                  Total Amount:
-                </div>
-                <div
-                  style={{
-                    fontSize: "1.2rem",
-                    fontWeight: 700,
-                    color: "#1976d2",
-                  }}
-                >
-                  {formatInLakhs(totalAmount)}
-                </div>
-              </div>
-
-              {/* Filter Info */}
-              {filterAccount !== "All" && (
-                <div
-                  style={{
-                    fontSize: "0.8rem",
-                    color: "#666",
-                    fontStyle: "italic",
-                    marginTop: "8px",
-                    padding: "4px 0",
-                  }}
-                >
-                  Filtered by: {filterAccount}
-                </div>
-              )}
-
-              {/* Sort Info */}
-              <div
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#666",
+                  fontSize: "10px", // Smaller
+                  color: "#94a3b8",
+                  textAlign: "center",
+                  paddingTop: "2px",
+                  borderTop: "1px dashed #e5e7eb",
                   marginTop: "4px",
-                  padding: "4px 0",
                 }}
               >
-                Sorted by: {sortBy === "account" ? "Account Code" : "End Date"}
+                Sorted by {sortBy === "account" ? "account code" : "end date"}
               </div>
             </div>
           </div>

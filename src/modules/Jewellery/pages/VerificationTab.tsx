@@ -11,9 +11,16 @@ import {
 } from "firebase/firestore";
 import {
   Jewellery,
-  VerificationStatus,
+  //VerificationStatus as ImportedVerificationStatus,
   VerificationStatusType,
 } from "../models/types";
+
+// Define VerificationStatus locally since it conflicts with import
+const VerificationStatus = {
+  VERIFIED: "Verified",
+  MISSING: "Missing",
+  NOT_VERIFIED: "Not Verified",
+} as const;
 
 interface VerificationTabProps {
   compact?: boolean; // Prop to control if it should show in compact mode
@@ -28,6 +35,8 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeUpdate, setActiveUpdate] = useState<string | null>(null);
+  const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
+  const [notesText, setNotesText] = useState("");
 
   // Fetch jewellery items
   useEffect(() => {
@@ -142,7 +151,8 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
             ? {
                 ...item,
                 verificationStatus: status,
-                verificationNotes: notes || item.verificationNotes,
+                verificationNotes:
+                  notes !== undefined ? notes : item.verificationNotes,
                 lastVerified: Date.now(),
               }
             : item,
@@ -192,19 +202,59 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
     }
   };
 
-  //   // Get status color
-  //   const getStatusColor = (status: VerificationStatusType) => {
-  //     switch (status) {
-  //       case VerificationStatus.VERIFIED:
-  //         return "#10b981";
-  //       case VerificationStatus.MISSING:
-  //         return "#ef4444";
-  //       case VerificationStatus.NOT_VERIFIED:
-  //         return "#f59e0b";
-  //       default:
-  //         return "#9ca3af";
-  //     }
-  //   };
+  // Get status color
+  const getStatusColor = (status: VerificationStatusType) => {
+    switch (status) {
+      case VerificationStatus.VERIFIED:
+        return "#10b981";
+      case VerificationStatus.MISSING:
+        return "#ef4444";
+      case VerificationStatus.NOT_VERIFIED:
+        return "#f59e0b";
+      default:
+        return "#9ca3af";
+    }
+  };
+
+  // Get status text color for buttons
+  const getStatusTextColor = (status: VerificationStatusType) => {
+    switch (status) {
+      case VerificationStatus.VERIFIED:
+        return "#047857";
+      case VerificationStatus.MISSING:
+        return "#dc2626";
+      case VerificationStatus.NOT_VERIFIED:
+        return "#d97706";
+      default:
+        return "#4b5563";
+    }
+  };
+
+  // Start editing notes
+  const startEditingNotes = (item: Jewellery) => {
+    setEditingNotesId(item.id);
+    setNotesText(item.verificationNotes || "");
+  };
+
+  // Save notes
+  const saveNotes = async (id: string) => {
+    if (notesText !== undefined) {
+      await handleUpdateVerification(
+        id,
+        jewelleryItems.find((item) => item.id === id)?.verificationStatus ||
+          VerificationStatus.NOT_VERIFIED,
+        notesText,
+      );
+    }
+    setEditingNotesId(null);
+    setNotesText("");
+  };
+
+  // Cancel editing notes
+  const cancelEditingNotes = () => {
+    setEditingNotesId(null);
+    setNotesText("");
+  };
 
   if (loading) {
     return (
@@ -643,7 +693,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
       {/* Items List */}
       <div
         style={{
-          maxHeight: "400px",
+          maxHeight: "500px",
           overflowY: "auto",
           padding: "0 15px",
         }}
@@ -675,182 +725,380 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
             </button>
           </div>
         ) : (
-          itemsNeedingVerification.slice(0, 5).map((item) => (
-            <div
-              key={item.id}
-              style={{
-                padding: "12px 0",
-                borderBottom: "1px solid #f3f4f6",
-              }}
-            >
+          itemsNeedingVerification.slice(0, 5).map((item) => {
+            const isEditingNotes = editingNotesId === item.id;
+            const isUpdating = activeUpdate === item.id;
+
+            return (
               <div
+                key={item.id}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
+                  padding: "12px 0",
+                  borderBottom: "1px solid #f3f4f6",
                 }}
               >
-                {/* Image */}
                 <div
                   style={{
-                    width: "40px",
-                    height: "40px",
-                    backgroundColor: "#f3f4f6",
-                    borderRadius: "6px",
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    overflow: "hidden",
-                    flexShrink: 0,
+                    alignItems: "flex-start",
+                    gap: "10px",
                   }}
                 >
-                  {item.imageUrl ? (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.code}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <span style={{ color: "#9ca3af" }}>💎</span>
-                  )}
-                </div>
-
-                {/* Item Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
+                  {/* Image */}
                   <div
                     style={{
+                      width: "40px",
+                      height: "40px",
+                      backgroundColor: "#f3f4f6",
+                      borderRadius: "6px",
                       display: "flex",
                       alignItems: "center",
-                      gap: "6px",
-                      marginBottom: "2px",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      flexShrink: 0,
                     }}
                   >
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.code}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <span style={{ color: "#9ca3af" }}>💎</span>
+                    )}
+                  </div>
+
+                  {/* Item Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
-                        fontWeight: "600",
-                        fontSize: "14px",
-                        color: "#111827",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        marginBottom: "2px",
                       }}
                     >
-                      {item.code}
+                      <div
+                        style={{
+                          fontWeight: "600",
+                          fontSize: "14px",
+                          color: "#111827",
+                        }}
+                      >
+                        {item.code}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#6b7280",
+                        }}
+                      >
+                        {item.weight}g
+                      </div>
                     </div>
                     <div
                       style={{
                         fontSize: "12px",
                         color: "#6b7280",
+                        marginBottom: "4px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
                     >
-                      {item.weight}g
+                      {item.description || "No description"}
                     </div>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#6b7280",
-                      marginBottom: "4px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.description || "No description"}
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "4px",
-                      alignItems: "center",
-                    }}
-                  >
                     <div
                       style={{
-                        fontSize: "11px",
-                        backgroundColor: "#f3f4f6",
-                        color: "#4b5563",
-                        padding: "2px 6px",
-                        borderRadius: "3px",
+                        display: "flex",
+                        gap: "4px",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        marginBottom: "6px",
                       }}
                     >
-                      {item.location || "No location"}
-                    </div>
-                    {item.boughtFor && (
                       <div
                         style={{
                           fontSize: "11px",
-                          backgroundColor: "#e0f2fe",
-                          color: "#0369a1",
+                          backgroundColor: "#f3f4f6",
+                          color: "#4b5563",
                           padding: "2px 6px",
                           borderRadius: "3px",
                         }}
                       >
-                        {item.boughtFor}
+                        {item.location || "No location"}
+                      </div>
+                      {item.boughtFor && (
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            backgroundColor: "#e0f2fe",
+                            color: "#0369a1",
+                            padding: "2px 6px",
+                            borderRadius: "3px",
+                          }}
+                        >
+                          {item.boughtFor}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Current Status */}
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: getStatusTextColor(item.verificationStatus),
+                        backgroundColor: `${getStatusColor(item.verificationStatus)}15`,
+                        padding: "2px 8px",
+                        borderRadius: "3px",
+                        display: "inline-block",
+                        marginBottom: "6px",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Status: {item.verificationStatus}
+                    </div>
+
+                    {/* Verification Notes Section */}
+                    {isEditingNotes ? (
+                      <div style={{ marginTop: "8px" }}>
+                        <textarea
+                          value={notesText}
+                          onChange={(e) => setNotesText(e.target.value)}
+                          placeholder="Add verification notes..."
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontFamily: "inherit",
+                            resize: "vertical",
+                            minHeight: "60px",
+                            marginBottom: "8px",
+                          }}
+                          disabled={isUpdating}
+                        />
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <button
+                            onClick={() => saveNotes(item.id)}
+                            style={{
+                              padding: "4px 12px",
+                              backgroundColor: "#10b981",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: isUpdating ? "not-allowed" : "pointer",
+                              fontSize: "12px",
+                              fontWeight: "500",
+                              opacity: isUpdating ? 0.7 : 1,
+                            }}
+                            disabled={isUpdating}
+                          >
+                            {isUpdating ? "Saving..." : "Save Notes"}
+                          </button>
+                          <button
+                            onClick={cancelEditingNotes}
+                            style={{
+                              padding: "4px 12px",
+                              backgroundColor: "#ef4444",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: isUpdating ? "not-allowed" : "pointer",
+                              fontSize: "12px",
+                              fontWeight: "500",
+                              opacity: isUpdating ? 0.7 : 1,
+                            }}
+                            disabled={isUpdating}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: "6px" }}>
+                        {item.verificationNotes ? (
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              color: "#6b7280",
+                              backgroundColor: "#f9fafb",
+                              padding: "6px",
+                              borderRadius: "4px",
+                              borderLeft: "3px solid #3b82f6",
+                              marginBottom: "6px",
+                              whiteSpace: "pre-wrap",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            <div
+                              style={{ fontWeight: "500", marginBottom: "2px" }}
+                            >
+                              Notes:
+                            </div>
+                            {item.verificationNotes}
+                          </div>
+                        ) : null}
+                        <button
+                          onClick={() => startEditingNotes(item)}
+                          style={{
+                            padding: "3px 8px",
+                            backgroundColor: "transparent",
+                            color: "#3b82f6",
+                            border: "1px solid #3b82f6",
+                            borderRadius: "3px",
+                            cursor: isUpdating ? "not-allowed" : "pointer",
+                            fontSize: "11px",
+                            opacity: isUpdating ? 0.7 : 1,
+                          }}
+                          disabled={isUpdating}
+                        >
+                          {item.verificationNotes ? "Edit Notes" : "Add Notes"}
+                        </button>
                       </div>
                     )}
                   </div>
-                </div>
 
-                {/* Verification Buttons */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
-                  <button
-                    onClick={() =>
-                      handleUpdateVerification(
-                        item.id,
-                        VerificationStatus.VERIFIED,
-                      )
-                    }
-                    disabled={activeUpdate === item.id}
+                  {/* Verification Buttons - 3 status buttons */}
+                  <div
                     style={{
-                      padding: "4px 8px",
-                      backgroundColor: "#10b981",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor:
-                        activeUpdate === item.id ? "not-allowed" : "pointer",
-                      fontSize: "12px",
-                      fontWeight: "500",
-                      opacity: activeUpdate === item.id ? 0.7 : 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "6px",
+                      minWidth: "90px",
                     }}
                   >
-                    {activeUpdate === item.id ? "..." : "✓"}
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleUpdateVerification(
-                        item.id,
-                        VerificationStatus.MISSING,
-                      )
-                    }
-                    disabled={activeUpdate === item.id}
-                    style={{
-                      padding: "4px 8px",
-                      backgroundColor: "#ef4444",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor:
-                        activeUpdate === item.id ? "not-allowed" : "pointer",
-                      fontSize: "12px",
-                      fontWeight: "500",
-                      opacity: activeUpdate === item.id ? 0.7 : 1,
-                    }}
-                  >
-                    {activeUpdate === item.id ? "..." : "✗"}
-                  </button>
+                    {/* Verified Button */}
+                    <button
+                      onClick={() =>
+                        handleUpdateVerification(
+                          item.id,
+                          VerificationStatus.VERIFIED,
+                        )
+                      }
+                      disabled={
+                        isUpdating ||
+                        item.verificationStatus === VerificationStatus.VERIFIED
+                      }
+                      style={{
+                        padding: "6px 8px",
+                        backgroundColor:
+                          item.verificationStatus ===
+                          VerificationStatus.VERIFIED
+                            ? getStatusColor(VerificationStatus.VERIFIED)
+                            : `${getStatusColor(VerificationStatus.VERIFIED)}20`,
+                        color:
+                          item.verificationStatus ===
+                          VerificationStatus.VERIFIED
+                            ? "white"
+                            : getStatusTextColor(VerificationStatus.VERIFIED),
+                        border: `1px solid ${getStatusColor(VerificationStatus.VERIFIED)}`,
+                        borderRadius: "4px",
+                        cursor: isUpdating ? "not-allowed" : "pointer",
+                        fontSize: "11px",
+                        fontWeight: "500",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "4px",
+                        opacity: isUpdating ? 0.7 : 1,
+                      }}
+                    >
+                      <span>✓</span>
+                      <span>Verified</span>
+                    </button>
+
+                    {/* Not Verified Button */}
+                    <button
+                      onClick={() =>
+                        handleUpdateVerification(
+                          item.id,
+                          VerificationStatus.NOT_VERIFIED,
+                        )
+                      }
+                      disabled={
+                        isUpdating ||
+                        item.verificationStatus ===
+                          VerificationStatus.NOT_VERIFIED
+                      }
+                      style={{
+                        padding: "6px 8px",
+                        backgroundColor:
+                          item.verificationStatus ===
+                          VerificationStatus.NOT_VERIFIED
+                            ? getStatusColor(VerificationStatus.NOT_VERIFIED)
+                            : `${getStatusColor(VerificationStatus.NOT_VERIFIED)}20`,
+                        color:
+                          item.verificationStatus ===
+                          VerificationStatus.NOT_VERIFIED
+                            ? "white"
+                            : getStatusTextColor(
+                                VerificationStatus.NOT_VERIFIED,
+                              ),
+                        border: `1px solid ${getStatusColor(VerificationStatus.NOT_VERIFIED)}`,
+                        borderRadius: "4px",
+                        cursor: isUpdating ? "not-allowed" : "pointer",
+                        fontSize: "11px",
+                        fontWeight: "500",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "4px",
+                        opacity: isUpdating ? 0.7 : 1,
+                      }}
+                    >
+                      <span>⟲</span>
+                      <span>Not Verified</span>
+                    </button>
+
+                    {/* Missing Button */}
+                    <button
+                      onClick={() =>
+                        handleUpdateVerification(
+                          item.id,
+                          VerificationStatus.MISSING,
+                        )
+                      }
+                      disabled={
+                        isUpdating ||
+                        item.verificationStatus === VerificationStatus.MISSING
+                      }
+                      style={{
+                        padding: "6px 8px",
+                        backgroundColor:
+                          item.verificationStatus === VerificationStatus.MISSING
+                            ? getStatusColor(VerificationStatus.MISSING)
+                            : `${getStatusColor(VerificationStatus.MISSING)}20`,
+                        color:
+                          item.verificationStatus === VerificationStatus.MISSING
+                            ? "white"
+                            : getStatusTextColor(VerificationStatus.MISSING),
+                        border: `1px solid ${getStatusColor(VerificationStatus.MISSING)}`,
+                        borderRadius: "4px",
+                        cursor: isUpdating ? "not-allowed" : "pointer",
+                        fontSize: "11px",
+                        fontWeight: "500",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "4px",
+                        opacity: isUpdating ? 0.7 : 1,
+                      }}
+                    >
+                      <span>✗</span>
+                      <span>Missing</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
 
         {itemsNeedingVerification.length > 5 && (

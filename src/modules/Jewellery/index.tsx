@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // ADDED: Import useNavigate
 import { jewelleryStyles } from "./styles/jewelleryStyles";
 import { useJewellerySettings } from "./hooks/useSettingsData";
 import {
@@ -17,7 +18,7 @@ import VerificationTab from "./pages/VerificationTab";
 type TabType = "dashboard" | "list" | "gallery" | "bills" | "verification";
 
 const JewelleryHome: React.FC = () => {
-  //const navigate = useNavigate();
+  const navigate = useNavigate(); // ADDED: Initialize navigate
   const { goldRate, settings } = useJewellerySettings();
   const [stats, setStats] = useState({
     totalItems: 0,
@@ -149,6 +150,15 @@ const JewelleryHome: React.FC = () => {
 
   const formatPercent = (percent: number): string => {
     return `${percent}%`;
+  };
+
+  // ADDED: Handle FAB clicks
+  const handleAddJewellery = () => {
+    navigate("/jewellery/add");
+  };
+
+  const handleAddBill = () => {
+    navigate("/jewellery/bills/add");
   };
 
   if (loading) {
@@ -694,6 +704,88 @@ const JewelleryHome: React.FC = () => {
         {/* Bottom spacing */}
         <div style={{ height: "80px" }}></div>
       </div>
+
+      {/* FAB for Add Jewellery - ONLY show when activeTab is "list" */}
+      {activeTab === "list" && (
+        <button
+          onClick={handleAddJewellery}
+          style={{
+            position: "fixed",
+            bottom: "70px", // Position above the bottom navigation
+            right: "16px",
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            backgroundColor: "#3b82f6",
+            color: "white",
+            border: "none",
+            boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "24px",
+            zIndex: 100,
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#2563eb";
+            e.currentTarget.style.transform = "scale(1.05)";
+            e.currentTarget.style.boxShadow =
+              "0 6px 16px rgba(59, 130, 246, 0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#3b82f6";
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow =
+              "0 4px 12px rgba(59, 130, 246, 0.3)";
+          }}
+          title="Add Jewellery"
+        >
+          +
+        </button>
+      )}
+
+      {/* FAB for Add Bill - ONLY show when activeTab is "bills" */}
+      {activeTab === "bills" && (
+        <button
+          onClick={handleAddBill}
+          style={{
+            position: "fixed",
+            bottom: "70px", // Position above the bottom navigation
+            right: "16px",
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            backgroundColor: "#3b82f6",
+            color: "white",
+            border: "none",
+            boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "24px",
+            zIndex: 100,
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#2563eb";
+            e.currentTarget.style.transform = "scale(1.05)";
+            e.currentTarget.style.boxShadow =
+              "0 6px 16px rgba(59, 130, 246, 0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#3b82f6";
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow =
+              "0 4px 12px rgba(59, 130, 246, 0.3)";
+          }}
+          title="Add Bill"
+        >
+          +
+        </button>
+      )}
     </div>
   );
 };

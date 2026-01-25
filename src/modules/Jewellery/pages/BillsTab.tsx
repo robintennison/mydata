@@ -123,6 +123,9 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
     }
   };
 
+  // REMOVED: handleAddBill function
+  // The FAB will be handled in JewelleryHome when activeTab is "bills"
+
   const getTabStats = () => {
     const withJewellery = bills.filter((b) => b.hasLinkedJewellery).length;
     const withoutJewellery = bills.filter((b) => !b.hasLinkedJewellery).length;
@@ -322,13 +325,16 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
   }
 
   return (
-    <div>
+    <div style={{ minHeight: "100vh" }}>
       {/* Tab Navigation */}
       <div
         style={{
           display: "flex",
           borderBottom: "1px solid #e5e7eb",
           backgroundColor: "white",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
         }}
       >
         <button
@@ -459,22 +465,7 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
                   ? "No bills with linked jewellery."
                   : "All bills have linked jewellery."}
             </p>
-            {activeTab === "all" && (
-              <button
-                onClick={() => navigate("/jewellery/bills/add")}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#3b82f6",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                }}
-              >
-                Add your first bill
-              </button>
-            )}
+            {/* REMOVED: Add bill button from empty state - will be handled by FAB */}
           </div>
         ) : (
           <>
@@ -731,6 +722,9 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
           </>
         )}
       </div>
+
+      {/* REMOVED: FAB from BillsTab component */}
+      {/* The FAB will be handled in JewelleryHome when activeTab is "bills" */}
     </div>
   );
 };

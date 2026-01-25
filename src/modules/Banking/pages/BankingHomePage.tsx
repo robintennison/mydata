@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
@@ -12,7 +12,7 @@ import SummaryTab from "./SummaryTab";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
 
   const { loading, accounts, deposits, history, adjustments, settings } =
     useBankingData();
@@ -23,46 +23,33 @@ const BankingHomePage: React.FC = () => {
     "dashboard" | "accounts" | "deposits" | "history" | "summary"
   >("dashboard");
 
-  // Read the state when component mounts or location changes
-  useEffect(() => {
-    if (location.state?.activeTab) {
-      setActiveTab(location.state.activeTab);
-    }
-  }, [location.state]);
-
   // Handle Add button click
   const handleAddClick = () => {
     switch (activeTab) {
       case "accounts":
-        // Navigate to add account form with callback to return to tabs
         navigate("/banking/accounts/add", {
           state: { returnTo: "/banking", activeTab: "accounts" },
         });
         break;
       case "deposits":
-        // Navigate to add deposit form with callback to return to tabs
         navigate("/banking/deposits/add", {
           state: { returnTo: "/banking", activeTab: "deposits" },
         });
         break;
       case "history":
-        // History doesn't have add function - removed per requirement
         // No action needed
         break;
       case "summary":
-        // Summary doesn't typically have add function
         alert("Use edit buttons in the summary table to modify values");
         break;
       case "dashboard":
       default:
-        // Dashboard doesn't have add function
         alert("Select Accounts or Deposits tab to add items");
         break;
     }
   };
 
   // Check if current tab should show Add button
-  // REMOVED history from the condition as per requirement
   const shouldShowAddButton = () => {
     return activeTab === "accounts" || activeTab === "deposits";
   };
@@ -269,7 +256,7 @@ const BankingHomePage: React.FC = () => {
             <div
               style={{
                 ...bankingHomeStyles.statsValue,
-                fontSize: "0.95rem", // Reduced font size
+                fontSize: "0.95rem",
               }}
             >
               {formatLakhs(totalSavings)}
@@ -282,21 +269,20 @@ const BankingHomePage: React.FC = () => {
             <div
               style={{
                 ...bankingHomeStyles.statsValue,
-                fontSize: "0.95rem", // Reduced font size
+                fontSize: "0.95rem",
               }}
             >
               {formatLakhs(totalDeposits)}
             </div>
           </div>
 
-          {/* Total Bank Balance Card - Changed to match other cards */}
+          {/* Total Bank Balance Card */}
           <div style={bankingHomeStyles.statsCard}>
-            <div style={bankingHomeStyles.statsLabel}>Total</div>{" "}
-            {/* Changed from "Total Balance" */}
+            <div style={bankingHomeStyles.statsLabel}>Total</div>
             <div
               style={{
                 ...bankingHomeStyles.statsValue,
-                fontSize: "0.95rem", // Reduced font size
+                fontSize: "0.95rem",
               }}
             >
               {formatLakhs(totalBankBalance)}
@@ -431,7 +417,7 @@ const BankingHomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Recent History - Already sorted newest first */}
+      {/* Recent History */}
       <div
         style={{
           padding: "0 0 15px 0",
@@ -530,57 +516,166 @@ const BankingHomePage: React.FC = () => {
   }
 
   return (
-    // CHANGED: Removed the outer container div
     <>
-      {/* Tabs Navigation */}
-      <div style={styles.tabsContainer}>
-        <div style={styles.tabsList}>
+      {/* Tabs Navigation - FIXED: Use inline styles like JewelleryHome */}
+      <div
+        style={{
+          width: "100%",
+          backgroundColor: "#ffffff",
+          borderBottom: "1px solid #e5e7eb",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            overflowX: "auto",
+            padding: "0 4px",
+            gap: "1px",
+          }}
+        >
           <button
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === "dashboard" ? styles.activeTab : {}),
-            }}
             onClick={() => setActiveTab("dashboard")}
+            style={{
+              flex: "1 1 0",
+              minWidth: "0",
+              padding: "10px 4px",
+              backgroundColor:
+                activeTab === "dashboard" ? "#f0f9ff" : "transparent",
+              border: "none",
+              borderBottom:
+                activeTab === "dashboard"
+                  ? "3px solid #3b82f6"
+                  : "3px solid transparent",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: activeTab === "dashboard" ? "#3b82f6" : "#6b7280",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "3px",
+              transition: "all 0.2s ease",
+            }}
             title="Dashboard"
           >
             📊 Dash
           </button>
+
           <button
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === "accounts" ? styles.activeTab : {}),
-            }}
             onClick={() => setActiveTab("accounts")}
+            style={{
+              flex: "1 1 0",
+              minWidth: "0",
+              padding: "10px 4px",
+              backgroundColor:
+                activeTab === "accounts" ? "#f0f9ff" : "transparent",
+              border: "none",
+              borderBottom:
+                activeTab === "accounts"
+                  ? "3px solid #3b82f6"
+                  : "3px solid transparent",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: activeTab === "accounts" ? "#3b82f6" : "#6b7280",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "3px",
+              transition: "all 0.2s ease",
+            }}
             title="Accounts"
           >
             👥 Acct
           </button>
+
           <button
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === "deposits" ? styles.activeTab : {}),
-            }}
             onClick={() => setActiveTab("deposits")}
+            style={{
+              flex: "1 1 0",
+              minWidth: "0",
+              padding: "10px 4px",
+              backgroundColor:
+                activeTab === "deposits" ? "#f0f9ff" : "transparent",
+              border: "none",
+              borderBottom:
+                activeTab === "deposits"
+                  ? "3px solid #3b82f6"
+                  : "3px solid transparent",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: activeTab === "deposits" ? "#3b82f6" : "#6b7280",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "3px",
+              transition: "all 0.2s ease",
+            }}
             title="Deposits"
           >
             💰 Depo
           </button>
+
           <button
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === "history" ? styles.activeTab : {}),
-            }}
             onClick={() => setActiveTab("history")}
+            style={{
+              flex: "1 1 0",
+              minWidth: "0",
+              padding: "10px 4px",
+              backgroundColor:
+                activeTab === "history" ? "#f0f9ff" : "transparent",
+              border: "none",
+              borderBottom:
+                activeTab === "history"
+                  ? "3px solid #3b82f6"
+                  : "3px solid transparent",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: activeTab === "history" ? "#3b82f6" : "#6b7280",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "3px",
+              transition: "all 0.2s ease",
+            }}
             title="History"
           >
             📅 Hist
           </button>
+
           <button
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === "summary" ? styles.activeTab : {}),
-            }}
             onClick={() => setActiveTab("summary")}
+            style={{
+              flex: "1 1 0",
+              minWidth: "0",
+              padding: "10px 4px",
+              backgroundColor:
+                activeTab === "summary" ? "#f0f9ff" : "transparent",
+              border: "none",
+              borderBottom:
+                activeTab === "summary"
+                  ? "3px solid #3b82f6"
+                  : "3px solid transparent",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: activeTab === "summary" ? "#3b82f6" : "#6b7280",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "3px",
+              transition: "all 0.2s ease",
+            }}
             title="Summary"
           >
             📈 Summ
@@ -589,7 +684,15 @@ const BankingHomePage: React.FC = () => {
       </div>
 
       {/* Tab Content */}
-      <div style={styles.tabContent}>
+      <div
+        style={{
+          flex: 1,
+          width: "100%",
+          maxWidth: "800px",
+          padding: "16px",
+          overflowY: "auto",
+        }}
+      >
         {activeTab === "dashboard" && <DashboardContent />}
         {activeTab === "accounts" && <AccountsTab />}
         {activeTab === "deposits" && <DepositsTab />}
@@ -597,11 +700,31 @@ const BankingHomePage: React.FC = () => {
         {activeTab === "summary" && <SummaryTab />}
       </div>
 
-      {/* Add button - now positioned relative to the content */}
+      {/* Add button */}
       {shouldShowAddButton() && (
         <button
           onClick={handleAddClick}
-          style={styles.addButton}
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            backgroundColor: "#10b981",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "50%",
+            padding: "16px",
+            fontSize: "20px",
+            fontWeight: 600,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "56px",
+            height: "56px",
+            transition: "background-color 0.2s, transform 0.2s",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            zIndex: 100,
+          }}
           title={getAddButtonTitle()}
           onMouseEnter={(e) =>
             (e.currentTarget.style.backgroundColor = "#059669")
@@ -613,79 +736,8 @@ const BankingHomePage: React.FC = () => {
           ➕
         </button>
       )}
-
-      {/* REMOVED: Bottom spacing div */}
     </>
   );
-};
-
-// Tab and button styles
-const styles = {
-  tabsContainer: {
-    width: "100%",
-    backgroundColor: "#ffffff",
-    borderBottom: "1px solid #e5e7eb",
-    position: "sticky" as const,
-    top: 0,
-    zIndex: 10,
-  },
-  tabsList: {
-    display: "flex",
-    overflowX: "auto" as const,
-    padding: "0 4px", // Reduced padding for mobile
-    gap: "1px", // Reduced gap for mobile
-  },
-  tabButton: {
-    flex: "1 1 0",
-    minWidth: "0",
-    padding: "10px 4px", // Reduced padding for mobile
-    backgroundColor: "transparent",
-    border: "none",
-    borderBottom: "3px solid transparent",
-    fontSize: "0.75rem", // Smaller font for mobile
-    fontWeight: 600,
-    color: "#6b7280",
-    cursor: "pointer",
-    whiteSpace: "nowrap" as const,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "3px",
-    transition: "all 0.2s ease",
-  },
-  activeTab: {
-    color: "#3b82f6",
-    borderBottomColor: "#3b82f6",
-    backgroundColor: "#f0f9ff",
-  },
-  tabContent: {
-    flex: 1,
-    width: "100%",
-    maxWidth: "800px",
-    padding: "16px",
-    overflowY: "auto" as const,
-  },
-  addButton: {
-    position: "fixed" as const,
-    bottom: "20px",
-    right: "20px",
-    backgroundColor: "#10b981",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: "50%",
-    padding: "16px",
-    fontSize: "20px",
-    fontWeight: 600,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "56px",
-    height: "56px",
-    transition: "background-color 0.2s, transform 0.2s",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-    zIndex: 100,
-  },
 };
 
 export default BankingHomePage;

@@ -2,7 +2,7 @@ import { CSSProperties } from "react";
 
 export const jewelleryStyles = {
   // Container
- container: {
+  container: {
     display: "flex",
     flexDirection: "column" as const,
     minHeight: "100vh",
@@ -85,7 +85,7 @@ export const jewelleryStyles = {
 
   tableHeader: {
     display: "flex",
-    padding: "12px 15px",
+    padding: "8px 10px",
     backgroundColor: "#f9fafb",
     borderBottom: "2px solid #e9ecef",
     fontWeight: "600",
@@ -96,8 +96,8 @@ export const jewelleryStyles = {
   tableRow: (index: number, isActive: boolean) => ({
     display: "flex",
     alignItems: "center",
-    padding: "12px 15px",
-    minHeight: "52px",
+    padding: "10px 10px",
+    minHeight: "48px",
     backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
     borderBottom: "1px solid #f3f4f6",
     opacity: isActive ? 1 : 0.7,
@@ -309,8 +309,8 @@ export const jewelleryStyles = {
   statsCard: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
-    padding: "20px",
-    margin: "15px",
+    padding: "16px",
+    margin: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
   } as CSSProperties,
 
@@ -397,8 +397,8 @@ export const jewelleryStyles = {
   featureCard: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
-    padding: "20px",
-    margin: "15px",
+    padding: "16px",
+    margin: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
     cursor: "pointer",
     transition: "transform 0.2s, box-shadow 0.2s",

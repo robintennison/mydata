@@ -268,7 +268,13 @@ const OnlineHomepage: React.FC = () => {
       </div>
 
       {/* Tab Content */}
-      <div style={{ flex: 1, overflow: "hidden" }}>
+      <div
+        style={{
+          flex: 1,
+          overflow: "hidden",
+          padding: "8px 4px", // Custom minimal padding
+        }}
+      >
         <TabContent activeTab={activeTab} />
       </div>
 

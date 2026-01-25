@@ -26,7 +26,7 @@ export const onlineStyles = {
     padding: "10px 15px",
     backgroundColor: "#ffffff",
     borderBottom: "1px solid #e9ecef",
-    marginBottom: "20px",
+    marginBottom: "10px",
   } as CSSProperties,
 
   navButton: {
@@ -125,8 +125,8 @@ export const onlineStyles = {
   section: {
     backgroundColor: "white",
     borderRadius: "12px",
-    margin: "0 15px 15px 15px",
-    padding: "15px",
+    margin: "0 10px 10px 10px",
+    padding: "10px",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
     border: "1px solid #e9ecef",
   } as CSSProperties,

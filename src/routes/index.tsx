@@ -157,6 +157,7 @@ const allRoutes: RouteConfig[] = [
     title: "Jewellery",
     icon: "💎",
     requiresAuth: true,
+    noLayoutPadding: true,
   },
   {
     path: "/jewellery/list",
@@ -164,6 +165,7 @@ const allRoutes: RouteConfig[] = [
     title: "Jewellery Items",
     icon: "💎",
     requiresAuth: true,
+    noLayoutPadding: true,
   },
   {
     path: "/jewellery/add",
@@ -191,6 +193,7 @@ const allRoutes: RouteConfig[] = [
     title: "Bills & Documents",
     icon: "📄",
     requiresAuth: true,
+    noLayoutPadding: true,
   },
   {
     path: "/jewellery/bills/add",
@@ -228,6 +231,7 @@ const allRoutes: RouteConfig[] = [
     title: "Online",
     icon: "🌐",
     requiresAuth: true,
+    noLayoutPadding: true,
   },
   {
     path: "/online/categories/add",

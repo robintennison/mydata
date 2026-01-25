@@ -672,7 +672,12 @@ const JewelleryHome: React.FC = () => {
       </div>
 
       {/* Tab Content Area */}
-      <div style={jewelleryStyles.contentWrapper}>
+      <div
+        style={{
+          ...jewelleryStyles.contentWrapper,
+          padding: "8px 4px", // Custom minimal padding
+        }}
+      >
         {renderTabContent()}
 
         {/* Bottom spacing */}

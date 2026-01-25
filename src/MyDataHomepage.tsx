@@ -23,7 +23,7 @@ interface Renewal {
 
 const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
-  const { settings } = useSettings();
+  const { settings: appSettings } = useSettings();
   const { accounts, deposits, adjustments, loading } = useBankingData();
   const [renewals, setRenewals] = useState<Renewal[]>([]);
   const [renewalsLoading, setRenewalsLoading] = useState(true);
@@ -79,7 +79,7 @@ const MyDataHomepage: React.FC = () => {
   }, []);
 
   // Memoize calculations for better performance
-  const { totalBalance, totalDeposits, upcomingMaturities } = useMemo(() => {
+  const { totalBalance, upcomingMaturities } = useMemo(() => {
     if (loading || accounts.length === 0) {
       return { totalBalance: 0, totalDeposits: 0, upcomingMaturities: [] };
     }
@@ -89,17 +89,17 @@ const MyDataHomepage: React.FC = () => {
         accounts,
         deposits,
         adjustments,
-        settings?.showInactive,
+        appSettings?.showInactive,
       ),
       totalDeposits: calculateTotalDeposits(
         accounts,
         deposits,
         adjustments,
-        settings?.showInactive,
+        appSettings?.showInactive,
       ),
       upcomingMaturities: getNextMaturities(deposits, 5),
     };
-  }, [accounts, deposits, adjustments, settings?.showInactive, loading]);
+  }, [accounts, deposits, adjustments, appSettings?.showInactive, loading]);
 
   // Filter active renewals and get next 5
   const upcomingRenewals = useMemo(() => {
@@ -137,6 +137,85 @@ const MyDataHomepage: React.FC = () => {
   // Calculate active deposits count
   const activeDepositsCount = deposits.filter((d) => d.active !== false).length;
 
+  // Calculate EMW (Equivalent Monthly Withdrawal)
+  const calculateEMW = (
+    currentBalance: number,
+    targetDate: Date,
+    annualInterestRate: number = 5,
+  ): number => {
+    if (currentBalance <= 0) return 0;
+
+    const today = new Date();
+    if (targetDate <= today) return 0;
+
+    // Calculate number of months until target date
+    const monthsDiff =
+      (targetDate.getFullYear() - today.getFullYear()) * 12 +
+      (targetDate.getMonth() - today.getMonth());
+
+    if (monthsDiff <= 0) return currentBalance;
+
+    // Convert annual interest rate to monthly rate
+    const monthlyInterestRate = annualInterestRate / 12 / 100;
+
+    // Calculate EMW using the formula: PMT = PV × r / [1 - (1 + r)^-n]
+    const numerator = currentBalance * monthlyInterestRate;
+    const denominator = 1 - Math.pow(1 + monthlyInterestRate, -monthsDiff);
+
+    if (denominator <= 0) {
+      return currentBalance / monthsDiff; // Simple division without interest
+    }
+
+    const emw = numerator / denominator;
+
+    // Round to 2 decimal places
+    return Math.round(emw * 100) / 100;
+  };
+
+  // Get EMW settings from app settings
+  const getEmwSettings = () => {
+    // Default values
+    let interestRate = 5; // 5% default
+    let targetDateStr = "2044-10"; // November 2044 default
+
+    if (appSettings) {
+      // Use EMW_Interest from settings or default
+      interestRate =
+        appSettings.EMW_interest !== undefined ? appSettings.EMW_interest : 5;
+
+      // Use EMW_Date from settings or default
+      targetDateStr = appSettings.EMW_Date || "2044-10";
+    }
+
+    // Parse target date string (format: YYYY-MM)
+    let targetDate: Date;
+    try {
+      const [year, month] = targetDateStr.split("-").map(Number);
+      targetDate = new Date(year, month - 1, 1); // month is 0-indexed
+    } catch (error) {
+      // Fallback to default date if parsing fails
+      console.error("Error parsing EMW date:", error);
+      targetDate = new Date(2044, 10, 1); // November 2044
+      targetDateStr = "2044-10";
+    }
+
+    return {
+      interestRate,
+      targetDate,
+      targetDateStr,
+    };
+  };
+
+  // Get EMW settings
+  const emwSettings = getEmwSettings();
+
+  // Calculate EMW using settings values
+  const emwAmount = calculateEMW(
+    totalBalance,
+    emwSettings.targetDate,
+    emwSettings.interestRate,
+  );
+
   if (loading) {
     return (
       <div className={styles.container}>
@@ -152,27 +231,50 @@ const MyDataHomepage: React.FC = () => {
   const hasRenewals = upcomingRenewals.length > 0;
 
   return (
-    <div className={styles.container}>
-      {/* Page title text removed - Now goes directly to content */}
+    <>
+      {/* EMW Stats Row */}
+      <div className={styles.statsRow}>
+        {/* EMW Card */}
+        <div className={styles.statCard}>
+          <div className={styles.cardTitle}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <span
+                style={{
+                  backgroundColor: "#3b82f6",
+                  color: "white",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  fontSize: "0.7rem",
+                }}
+              >
+                EMW
+              </span>
+              <span>Monthly</span>
+            </div>
+          </div>
+          <div className={styles.cardValue} style={{ color: "#1e40af" }}>
+            {formatLakhs(emwAmount)}
+          </div>
+          <div className={styles.cardSubtitle}>
+            {emwSettings.interestRate}% interest
+          </div>
+        </div>
 
-      {/* Compact Top Stats Cards - Added top padding */}
-      <div className={styles.statsRow} style={{ paddingTop: "10px" }}>
-        {/* Card 1: Total Balance */}
-        <div className={styles.statCard} onClick={() => navigate("/banking")}>
+        {/* Total Balance Card */}
+        <div
+          className={styles.statCard}
+          onClick={() => navigate("/banking")}
+          style={{ cursor: "pointer" }}
+        >
           <div className={styles.cardTitle}>Total Balance</div>
           <div className={styles.cardValue}>{formatLakhs(totalBalance)}</div>
         </div>
 
-        {/* Card 2: Total Deposits */}
-        <div className={styles.statCard} onClick={() => navigate("/banking")}>
-          <div className={styles.cardTitle}>Total Deposits</div>
-          <div className={styles.cardValue}>{formatLakhs(totalDeposits)}</div>
-        </div>
-
-        {/* Card 3: Total Accounts */}
+        {/* Total Accounts Card */}
         <div
           className={styles.statCard}
           onClick={() => navigate("/banking/accounts")}
+          style={{ cursor: "pointer" }}
         >
           <div className={styles.cardTitle}>Accounts</div>
           <div className={styles.cardValue}>{accounts.length}</div>
@@ -182,18 +284,13 @@ const MyDataHomepage: React.FC = () => {
         </div>
       </div>
 
-      {/* Asset Distribution Chart */}
-      <CombinedAssetBarChart
-        accounts={accounts}
-        deposits={deposits}
-        adjustments={adjustments}
-        showInactive={settings?.showInactive}
-      />
-
       {/* Enhanced Upcoming Maturities Section */}
       <div
         className={styles.section}
-        style={{ minHeight: hasMaturities ? "auto" : "80px" }}
+        style={{
+          minHeight: hasMaturities ? "auto" : "80px",
+          marginTop: "10px",
+        }}
       >
         <div
           className={styles.sectionHeader}
@@ -210,7 +307,9 @@ const MyDataHomepage: React.FC = () => {
           {hasMaturities && (
             <button
               className={styles.viewAllButton}
-              onClick={() => navigate("/banking/deposits")}
+              onClick={() =>
+                navigate("/banking", { state: { activeTab: "deposits" } })
+              }
             >
               View All
             </button>
@@ -246,10 +345,7 @@ const MyDataHomepage: React.FC = () => {
                     <tr
                       key={deposit.id}
                       className={isImmediate ? styles.immediateRow : ""}
-                      onClick={() =>
-                        navigate(`/banking/deposits/edit/${deposit.id}`)
-                      }
-                      style={{ cursor: "pointer" }}
+                      // REMOVED: onClick handler to disable navigation
                     >
                       <td>{getAccountName(deposit.accountId)}</td>
                       <td>{formatLakhs(deposit.amount)}</td>
@@ -284,9 +380,7 @@ const MyDataHomepage: React.FC = () => {
                   <div
                     key={deposit.id}
                     className={`${styles.mobileCard} ${isImmediate ? styles.immediateRow : ""}`}
-                    onClick={() =>
-                      navigate(`/banking/deposits/edit/${deposit.id}`)
-                    }
+                    // REMOVED: onClick handler to disable navigation
                   >
                     <div className={styles.mobileCardRow}>
                       <span className={styles.mobileCardLabel}>Account:</span>
@@ -334,7 +428,7 @@ const MyDataHomepage: React.FC = () => {
         className={styles.section}
         style={{
           minHeight: hasRenewals ? "auto" : "80px",
-          marginTop: "20px",
+          marginTop: "10px",
         }}
       >
         <div
@@ -352,7 +446,9 @@ const MyDataHomepage: React.FC = () => {
           {hasRenewals && (
             <button
               className={styles.viewAllButton}
-              onClick={() => navigate("/online/renewals")}
+              onClick={() =>
+                navigate("/online", { state: { activeTab: "renewals" } })
+              }
             >
               View All
             </button>
@@ -397,10 +493,7 @@ const MyDataHomepage: React.FC = () => {
                     <tr
                       key={renewal.id}
                       className={isImmediate ? styles.immediateRow : ""}
-                      onClick={() =>
-                        navigate(`/online/renewals/view/${renewal.id}`)
-                      }
-                      style={{ cursor: "pointer" }}
+                      // REMOVED: onClick handler to disable navigation
                     >
                       <td style={{ fontWeight: "500" }}>{renewal.name}</td>
                       <td>{getShortComments(renewal.comments || "")}</td>
@@ -434,9 +527,7 @@ const MyDataHomepage: React.FC = () => {
                   <div
                     key={renewal.id}
                     className={`${styles.mobileCard} ${isImmediate ? styles.immediateRow : ""}`}
-                    onClick={() =>
-                      navigate(`/online/renewals/view/${renewal.id}`)
-                    }
+                    // REMOVED: onClick handler to disable navigation
                   >
                     <div className={styles.mobileCardRow}>
                       <span className={styles.mobileCardLabel}>Name:</span>
@@ -472,7 +563,17 @@ const MyDataHomepage: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+
+      {/* Asset Distribution Chart - At bottom with minimal spacing */}
+      <div style={{ marginTop: "15px", marginBottom: "5px" }}>
+        <CombinedAssetBarChart
+          accounts={accounts}
+          deposits={deposits}
+          adjustments={adjustments}
+          showInactive={appSettings?.showInactive}
+        />
+      </div>
+    </>
   );
 };
 

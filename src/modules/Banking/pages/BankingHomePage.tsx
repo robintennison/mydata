@@ -13,10 +13,22 @@ import SummaryTab from "./SummaryTab";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // Add this
   const { loading, accounts, deposits, history, adjustments, settings } =
     useBankingData();
   const { settings: appSettings } = useSettings();
 
+  // Get active tab from navigation state, default to "dashboard"
+  const [activeTab, setActiveTab] = useState<
+    "dashboard" | "accounts" | "deposits" | "history" | "summary"
+  >("dashboard");
+
+  // Read the state when component mounts or location changes
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
   // State for active tab
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "accounts" | "deposits" | "history" | "summary"

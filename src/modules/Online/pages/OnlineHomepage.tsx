@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { onlineStyles } from "../styles/onlineStyles";
-import OnlineListTab from "./OnlineListTab"; // Add this import
-import RenewalListTab from "./RenewalListTab"; // Add this import
-import CategoryListTab from "./CategoryListTab"; // Add this import
+import OnlineListTab from "./OnlineListTab";
+import RenewalListTab from "./RenewalListTab";
+import CategoryListTab from "./CategoryListTab";
 
 // Tab components
 const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
@@ -22,9 +22,20 @@ const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
 
 const OnlineHomepage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // Added useLocation
+
+  // State for active tab
   const [activeTab, setActiveTab] = useState<
     "items" | "renewals" | "categories"
   >("items");
+
+  // Read the state when component mounts or location changes
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
+
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({
     items: 0,
@@ -111,50 +122,7 @@ const OnlineHomepage: React.FC = () => {
 
   return (
     <div style={onlineStyles.container}>
-      {/* Top Navigation with Add button */}
-      <div style={onlineStyles.topNav}>
-        <button
-          onClick={() => navigate("/")}
-          style={onlineStyles.navButton}
-          title="Back to Home"
-        >
-          🏠
-        </button>
-        <div style={onlineStyles.navTitle}>Online</div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {/* Add button - changes color based on active tab */}
-          <button
-            onClick={handleAddClick}
-            style={{
-              ...onlineStyles.navButton,
-              backgroundColor:
-                activeTab === "items"
-                  ? "#48bb78"
-                  : activeTab === "renewals"
-                    ? "#ed8936"
-                    : "#4299e1",
-              color: "white",
-              border: "none",
-              fontSize: "1.2rem",
-              width: "40px",
-              height: "40px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            title={`Add ${activeTab === "items" ? "Item" : activeTab === "renewals" ? "Renewal" : "Category"}`}
-          >
-            +
-          </button>
-          <button
-            onClick={() => navigate("/settings")}
-            style={onlineStyles.navButton}
-            title="Settings"
-          >
-            ⚙️
-          </button>
-        </div>
-      </div>
+      {/* REMOVED: Top Navigation header - now in main Layout Header */}
 
       {/* Tab Navigation */}
       <div
@@ -303,6 +271,46 @@ const OnlineHomepage: React.FC = () => {
       <div style={{ flex: 1, overflow: "hidden" }}>
         <TabContent activeTab={activeTab} />
       </div>
+
+      {/* Add button - now as Floating Action Button */}
+      <button
+        onClick={handleAddClick}
+        style={{
+          position: "fixed" as const,
+          bottom: "20px",
+          right: "20px",
+          backgroundColor:
+            activeTab === "items"
+              ? "#48bb78"
+              : activeTab === "renewals"
+                ? "#ed8936"
+                : "#4299e1",
+          color: "white",
+          border: "none",
+          borderRadius: "50%",
+          padding: "16px",
+          fontSize: "20px",
+          fontWeight: 600,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "56px",
+          height: "56px",
+          transition: "background-color 0.2s, transform 0.2s",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+          zIndex: 100,
+        }}
+        title={`Add ${activeTab === "items" ? "Item" : activeTab === "renewals" ? "Renewal" : "Category"}`}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "scale(1.1)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+      >
+        +
+      </button>
 
       <style>{`
         @keyframes spin {

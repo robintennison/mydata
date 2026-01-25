@@ -1,6 +1,5 @@
-// src/modules/BankingHomePage.tsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
@@ -13,12 +12,13 @@ import SummaryTab from "./SummaryTab";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Add this
+  const location = useLocation();
+
   const { loading, accounts, deposits, history, adjustments, settings } =
     useBankingData();
   const { settings: appSettings } = useSettings();
 
-  // Get active tab from navigation state, default to "dashboard"
+  // State for active tab
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "accounts" | "deposits" | "history" | "summary"
   >("dashboard");
@@ -29,10 +29,6 @@ const BankingHomePage: React.FC = () => {
       setActiveTab(location.state.activeTab);
     }
   }, [location.state]);
-  // State for active tab
-  const [activeTab, setActiveTab] = useState<
-    "dashboard" | "accounts" | "deposits" | "history" | "summary"
-  >("dashboard");
 
   // Handle Add button click
   const handleAddClick = () => {
@@ -534,7 +530,8 @@ const BankingHomePage: React.FC = () => {
   }
 
   return (
-    <div style={bankingHomeStyles.centeredContainer}>
+    // CHANGED: Removed the outer container div
+    <>
       {/* Tabs Navigation */}
       <div style={styles.tabsContainer}>
         <div style={styles.tabsList}>
@@ -617,9 +614,8 @@ const BankingHomePage: React.FC = () => {
         </button>
       )}
 
-      {/* Bottom spacing */}
-      <div style={{ height: "20px" }}></div>
-    </div>
+      {/* REMOVED: Bottom spacing div */}
+    </>
   );
 };
 

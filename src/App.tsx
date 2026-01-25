@@ -20,10 +20,29 @@ function App() {
       <SettingsProvider>
         <BrowserRouter>
           <AuthProvider>
-            <div className={styles.container}>
-              <div className={styles.app}>
-                {/* REMOVE Header here - it's already in AppRoutes */}
-                <main className={styles.main}>
+            {/* DIAGNOSTIC: Add colored borders to identify containers */}
+            <div
+              className={styles.container}
+              style={{
+                border: "3px solid red",
+                minHeight: "100vh",
+                position: "relative",
+              }}
+            >
+              <div
+                className={styles.app}
+                style={{
+                  border: "3px solid blue",
+                  position: "relative",
+                }}
+              >
+                <main
+                  className={styles.main}
+                  style={{
+                    border: "3px solid green",
+                    position: "relative",
+                  }}
+                >
                   <AppRoutes />
                 </main>
               </div>

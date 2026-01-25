@@ -1,20 +1,43 @@
-/* src/App.module.css */
+/* src/App.module.css - FIXED VERSION */
 
+/* src/App.module.css - FIXED VERSION */
+
+/* REMOVE min-height from .container - let body handle it */
 .container {
-  min-height: 100vh;
   background-color: var(--color-gray-50);
-}
-
-.app {
-  min-height: 100vh;
+  /* Remove: min-height: 100vh; */
   display: flex;
   flex-direction: column;
+  flex: 1; /* Take available space */
+}
+
+/* .app should NOT have min-height either */
+.app {
+  background-color: var(--color-white);
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
-  background-color: var(--color-white);
+  /* Remove: min-height: 100vh; */
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Take available space from parent */
+  min-height: 0; /* Important for flex children */
 }
 
+/* .main should be flexible */
+.main {
+  flex: 1;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-md);
+  padding-bottom: 0; /* Remove bottom padding */
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for flex children */
+}
+
+/* ... keep the rest of your styles ... */
 /* Updated loading styles */
 .loadingContainer {
   display: flex;
@@ -280,14 +303,6 @@
   display: none; /* Hide text as requested */
 }
 
-.main {
-  flex: 1;
-  max-width: 600px;
-  width: 100%;
-  margin: 0 auto;
-  padding: var(--spacing-lg) var(--spacing-md);
-  padding-bottom: 20px;
-}
 
 /* Desktop view with shadow and rounded corners */
 @media (min-width: 601px) {
@@ -295,13 +310,20 @@
     background-color: var(--color-gray-200);
     padding: 20px 0;
   }
-  
+
   .app {
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    overflow: hidden;
-    min-height: calc(100vh - 40px);
-  }
+  min-height: auto; /* Changed from 100vh */
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  background-color: var(--color-white);
+  
+  /* ADD THIS: Prevent extra space */
+  overflow: hidden;
+}
+
 }
 
 /* Mobile view - full width */

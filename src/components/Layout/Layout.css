@@ -6,7 +6,7 @@
   min-height: 100vh;
   width: 100%;
   position: relative;
-  background-color: var(--color-white, #ffffff); /* White background */
+  background-color: var(--color-white, #ffffff);
 }
 
 .layout-content {
@@ -15,9 +15,9 @@
   max-width: 600px;
   margin: 0 auto;
   padding: var(--spacing-lg, 1.5rem);
-  padding-bottom: calc(var(--spacing-lg, 1.5rem) + 80px);
-  background-color: var(--color-white, #ffffff); /* Ensure white background */
-  min-height: calc(100vh - 80px);
+  /* REMOVED the fixed padding-bottom calculation */
+  background-color: var(--color-white, #ffffff);
+  /* REMOVED min-height: calc(100vh - 80px); - not needed with flex: 1 */
 }
 
 /* When footer is hidden */
@@ -54,8 +54,9 @@
     border-radius: 0;
     margin: 0;
     box-shadow: none;
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: var(--spacing-md, 1rem);
+    padding-right: var(--spacing-md, 1rem);
+    padding-bottom: var(--spacing-md, 1rem); /* Added consistent padding */
   }
   
   .layout {
@@ -64,8 +65,8 @@
   
   /* Ensure content inside has proper padding */
   .layout-content > * {
-    padding-left: var(--spacing-md, 1rem);
-    padding-right: var(--spacing-md, 1rem);
+    padding-left: 0; /* Changed from var(--spacing-md, 1rem) */
+    padding-right: 0; /* Changed from var(--spacing-md, 1rem) */
   }
 }
 
@@ -73,7 +74,7 @@
 @media (max-width: 768px) {
   .layout-content {
     padding: var(--spacing-md, 1rem);
-    padding-bottom: calc(var(--spacing-md, 1rem) + 75px);
+    /* REMOVED the fixed padding-bottom calculation */
   }
   
   .layout-content.no-footer {
@@ -88,7 +89,7 @@
 @media (max-width: 480px) {
   .layout-content {
     padding: var(--spacing-sm, 0.75rem);
-    padding-bottom: calc(var(--spacing-sm, 0.75rem) + 70px);
+    /* REMOVED the fixed padding-bottom calculation */
   }
   
   .layout-content.no-footer {
@@ -100,8 +101,8 @@
   }
   
   .layout-content > * {
-    padding-left: var(--spacing-sm, 0.75rem);
-    padding-right: var(--spacing-sm, 0.75rem);
+    padding-left: 0; /* Changed from var(--spacing-sm, 0.75rem) */
+    padding-right: 0; /* Changed from var(--spacing-sm, 0.75rem) */
   }
 }
 
@@ -113,7 +114,6 @@
   
   .layout-content {
     padding: 0;
-    padding-bottom: 0;
     max-width: 100%;
     margin: 0;
     box-shadow: none;

@@ -689,7 +689,7 @@ const BankingHomePage: React.FC = () => {
           flex: 1,
           width: "100%",
           maxWidth: "800px",
-          padding: "16px",
+          padding: activeTab === "history" ? "16px 0" : "16px",
           overflowY: "auto",
         }}
       >

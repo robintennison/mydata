@@ -62,6 +62,13 @@ const AccountsTab: React.FC = () => {
     (account) => !isAccountActive(account),
   ).length;
 
+  // Truncate account code to 15 characters
+  const truncateAccountCode = (code: string): string => {
+    if (!code) return "";
+    if (code.length <= 15) return code;
+    return `${code.substring(0, 15)}...`;
+  };
+
   const confirmDelete = () => {
     if (accountToDelete) {
       handleDeleteAccount(accountToDelete.id);
@@ -122,11 +129,11 @@ const AccountsTab: React.FC = () => {
           </div>
         ) : (
           <div>
-            {/* Table Header - SEPARATE COLUMNS */}
+            {/* Table Header - ALL LEFT ALIGNED */}
             <div
               style={{
                 display: "flex",
-                padding: "8px 4px",
+                padding: "12px 16px",
                 backgroundColor: "#f9fafb",
                 borderBottom: "1px solid #e9ecef",
                 fontWeight: "600",
@@ -139,21 +146,20 @@ const AccountsTab: React.FC = () => {
               <div
                 style={{
                   flex: 4,
-                  padding: "0 4px",
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "flex-start",
                 }}
               >
                 Account
               </div>
-              {/* Savings Column */}
+              {/* Savings Column - CHANGED to left align */}
               <div
                 style={{
                   flex: 2,
-                  padding: "0 4px",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "flex-end",
+                  justifyContent: "flex-start",
                 }}
               >
                 Savings
@@ -162,9 +168,9 @@ const AccountsTab: React.FC = () => {
               <div
                 style={{
                   flex: 3,
-                  padding: "0 4px",
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "flex-start",
                 }}
               >
                 MPIN
@@ -175,21 +181,18 @@ const AccountsTab: React.FC = () => {
                     width: "28px",
                     display: "flex",
                     alignItems: "center",
+                    justifyContent: "flex-start",
                   }}
                 ></div>
               )}
             </div>
 
-            {/* Accounts Rows - SEPARATE COLUMNS */}
+            {/* Accounts Rows - ALL LEFT ALIGNED */}
             <div>
               {sortedAccounts.map((account) => {
                 const isActive = isAccountActive(account);
                 const accountCode = account.acctCode || "";
-                // Limit account code to 15 characters
-                const truncatedAccountCode =
-                  accountCode.length > 15
-                    ? `${accountCode.substring(0, 15)}...`
-                    : accountCode;
+                const truncatedAccountCode = truncateAccountCode(accountCode);
 
                 return (
                   <div
@@ -205,20 +208,21 @@ const AccountsTab: React.FC = () => {
                   >
                     <div
                       style={{
-                        padding: "8px 4px",
+                        padding: "12px 16px",
                         display: "flex",
                         alignItems: "center",
-                        minHeight: "40px",
+                        minHeight: "44px",
                       }}
                     >
-                      {/* Account Column */}
+                      {/* Account Column - LEFT ALIGNED */}
                       <div
                         style={{
                           flex: 4,
                           minWidth: 0,
-                          padding: "0 4px",
                           display: "flex",
                           alignItems: "center",
+                          justifyContent: "flex-start",
+                          paddingRight: "8px",
                         }}
                       >
                         <div
@@ -251,15 +255,14 @@ const AccountsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Savings Column - SEPARATE */}
+                      {/* Savings Column - LEFT ALIGNED */}
                       <div
                         style={{
                           flex: 2,
-                          padding: "0 4px",
                           display: "flex",
                           alignItems: "center",
-                          height: "100%",
-                          justifyContent: "flex-end",
+                          justifyContent: "flex-start",
+                          paddingRight: "8px",
                         }}
                       >
                         <div
@@ -274,21 +277,21 @@ const AccountsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* MPIN Column - BLACK FONT */}
+                      {/* MPIN Column - LEFT ALIGNED, BLACK FONT */}
                       <div
                         style={{
                           flex: 3,
-                          padding: "0 4px",
                           display: "flex",
                           alignItems: "center",
-                          height: "100%",
+                          justifyContent: "flex-start",
+                          paddingRight: "8px",
                         }}
                       >
                         <div
                           style={{
                             fontFamily: "'Courier New', monospace",
                             fontSize: "14px",
-                            color: "#000000", // CHANGED to black
+                            color: "#000000",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -299,16 +302,14 @@ const AccountsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Edit Button Column */}
+                      {/* Edit Button Column - LEFT ALIGNED */}
                       {settings?.showDelete && (
                         <div
                           style={{
                             width: "28px",
                             display: "flex",
-                            justifyContent: "flex-end",
-                            paddingRight: "2px",
+                            justifyContent: "flex-start",
                             alignItems: "center",
-                            height: "100%",
                           }}
                         >
                           <button
@@ -344,7 +345,7 @@ const AccountsTab: React.FC = () => {
             {/* Total Savings Footer */}
             <div
               style={{
-                padding: "8px 4px",
+                padding: "12px 16px",
                 backgroundColor: "#f3f4f6",
                 borderTop: "1px solid #e9ecef",
                 display: "flex",

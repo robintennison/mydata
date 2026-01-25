@@ -296,220 +296,234 @@ const JewelleryHome: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Weight Distribution Cards */}
-            <div
-              style={{
-                backgroundColor: "white",
-                borderRadius: "10px",
-                padding: "12px", // Restored internal padding
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                margin: "0 4px 8px 4px",
-              }}
-            >
+              {/* Weight Distribution Cards - SIDE BY SIDE */}
               <div
                 style={{
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#333",
-                  marginBottom: "10px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: "8px",
+                  marginBottom: "8px",
                 }}
               >
-                <span>Weight by Person</span>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    color: "#6b7280",
-                    fontWeight: "normal",
-                  }}
-                >
-                  {personsWeight.length} persons
-                </span>
-              </div>
-
-              {personsWeight.length === 0 ? (
+                {/* Weight by Person Card */}
                 <div
                   style={{
-                    textAlign: "center",
-                    padding: "15px",
-                    color: "#9ca3af",
-                    fontSize: "13px",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    padding: "12px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
                   }}
                 >
-                  No person data available
-                </div>
-              ) : (
-                <div
-                  style={{
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                    paddingRight: "2px",
-                  }}
-                >
-                  {personsWeight.map((item, index) => (
-                    <div
-                      key={index}
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      color: "#333",
+                      marginBottom: "10px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>By Person</span>
+                    <span
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "8px 0",
-                        paddingRight: "4px",
-                        borderBottom:
-                          index < personsWeight.length - 1
-                            ? "1px solid #f3f4f6"
-                            : "none",
+                        fontSize: "11px",
+                        color: "#6b7280",
+                        fontWeight: "normal",
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#4b5563",
-                          flex: 1,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          marginRight: "8px",
-                          paddingRight: "4px",
-                        }}
-                        title={item.person}
-                      >
-                        {item.person}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: "600",
-                          color: "#111827",
-                          whiteSpace: "nowrap",
-                          paddingLeft: "4px",
-                          paddingRight: "4px",
-                          minWidth: "50px",
-                          textAlign: "right",
-                        }}
-                      >
-                        {formatWeight(item.totalWeight)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                      {personsWeight.length}
+                    </span>
+                  </div>
 
-            <div
-              style={{
-                backgroundColor: "white",
-                borderRadius: "10px",
-                padding: "12px", // Restored internal padding
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                margin: "0 4px 8px 4px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#333",
-                  marginBottom: "10px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span>Weight by Location</span>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    color: "#6b7280",
-                    fontWeight: "normal",
-                  }}
-                >
-                  {locationWeight.length} locations
-                </span>
-              </div>
-
-              {locationWeight.length === 0 ? (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "15px",
-                    color: "#9ca3af",
-                    fontSize: "13px",
-                  }}
-                >
-                  No location data available
-                </div>
-              ) : (
-                <div
-                  style={{
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                    paddingRight: "2px",
-                  }}
-                >
-                  {locationWeight.map((item, index) => (
+                  {personsWeight.length === 0 ? (
                     <div
-                      key={index}
                       style={{
+                        textAlign: "center",
+                        padding: "15px",
+                        color: "#9ca3af",
+                        fontSize: "12px",
+                        flex: 1,
                         display: "flex",
-                        justifyContent: "space-between",
                         alignItems: "center",
-                        padding: "8px 0",
-                        paddingRight: "4px",
-                        borderBottom:
-                          index < locationWeight.length - 1
-                            ? "1px solid #f3f4f6"
-                            : "none",
+                        justifyContent: "center",
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#4b5563",
-                          flex: 1,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          marginRight: "8px",
-                          paddingRight: "4px",
-                        }}
-                        title={item.location}
-                      >
-                        {item.location}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: "600",
-                          color: "#111827",
-                          whiteSpace: "nowrap",
-                          paddingLeft: "4px",
-                          paddingRight: "4px",
-                          minWidth: "50px",
-                          textAlign: "right",
-                        }}
-                      >
-                        {formatWeight(item.totalWeight)}
-                      </div>
+                      No person data
                     </div>
-                  ))}
+                  ) : (
+                    <div
+                      style={{
+                        flex: 1,
+                        overflowY: "auto",
+                        maxHeight: "200px",
+                        paddingRight: "2px",
+                      }}
+                    >
+                      {personsWeight.map((item, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "8px 0",
+                            paddingRight: "4px",
+                            borderBottom:
+                              index < personsWeight.length - 1
+                                ? "1px solid #f3f4f6"
+                                : "none",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#4b5563",
+                              flex: 1,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              marginRight: "8px",
+                              paddingRight: "4px",
+                            }}
+                            title={item.person}
+                          >
+                            {item.person}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              fontWeight: "600",
+                              color: "#111827",
+                              whiteSpace: "nowrap",
+                              paddingLeft: "4px",
+                              paddingRight: "4px",
+                              minWidth: "50px",
+                              textAlign: "right",
+                            }}
+                          >
+                            {formatWeight(item.totalWeight)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Compact Summary Cards for other modules */}
-            <div style={{ margin: "0 4px 8px 4px" }}>
-              <BillsTab compact={true} />
-            </div>
-            <div style={{ margin: "0 4px 8px 4px" }}>
-              <GalleryTab compact={true} />
-            </div>
-            <div style={{ margin: "0 4px 8px 4px" }}>
-              <VerificationTab compact={true} />
+                {/* Weight by Location Card */}
+                <div
+                  style={{
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    padding: "12px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      color: "#333",
+                      marginBottom: "10px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>By Location</span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#6b7280",
+                        fontWeight: "normal",
+                      }}
+                    >
+                      {locationWeight.length}
+                    </span>
+                  </div>
+
+                  {locationWeight.length === 0 ? (
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "15px",
+                        color: "#9ca3af",
+                        fontSize: "12px",
+                        flex: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      No location data
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        flex: 1,
+                        overflowY: "auto",
+                        maxHeight: "200px",
+                        paddingRight: "2px",
+                      }}
+                    >
+                      {locationWeight.map((item, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "8px 0",
+                            paddingRight: "4px",
+                            borderBottom:
+                              index < locationWeight.length - 1
+                                ? "1px solid #f3f4f6"
+                                : "none",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#4b5563",
+                              flex: 1,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              marginRight: "8px",
+                              paddingRight: "4px",
+                            }}
+                            title={item.location}
+                          >
+                            {item.location}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              fontWeight: "600",
+                              color: "#111827",
+                              whiteSpace: "nowrap",
+                              paddingLeft: "4px",
+                              paddingRight: "4px",
+                              minWidth: "50px",
+                              textAlign: "right",
+                            }}
+                          >
+                            {formatWeight(item.totalWeight)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </>
         );
@@ -528,26 +542,23 @@ const JewelleryHome: React.FC = () => {
 
   return (
     <div style={jewelleryStyles.container}>
-      {/* REMOVED: Top Navigation header - now in main Layout Header */}
-
       {/* Tab Navigation - Compact with smaller text */}
       <div
         style={{
           display: "flex",
           backgroundColor: "white",
           borderBottom: "1px solid #e5e7eb",
-          /* Remove overflowX: auto to prevent scrollbar */
         }}
       >
         <button
           onClick={() => setActiveTab("dashboard")}
           style={{
-            padding: "14px 8px" /* Reduced padding for more compact look */,
+            padding: "14px 8px",
             border: "none",
             backgroundColor:
               activeTab === "dashboard" ? "#f3f4f6" : "transparent",
             color: activeTab === "dashboard" ? "#111827" : "#6b7280",
-            fontSize: "12px" /* Even smaller font size */,
+            fontSize: "12px",
             fontWeight: activeTab === "dashboard" ? "600" : "400",
             borderBottom:
               activeTab === "dashboard" ? "2px solid #3b82f6" : "none",
@@ -555,15 +566,15 @@ const JewelleryHome: React.FC = () => {
             whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
-            gap: "3px" /* Minimal gap */,
-            flex: 1 /* Make all tabs equal width */,
+            gap: "3px",
+            flex: 1,
             justifyContent: "center",
-            minWidth: 0 /* Allow shrinking */,
+            minWidth: 0,
           }}
           title="Dashboard"
         >
           <span>📊</span>
-          <span>Dash</span> {/* Changed from "Dashboard" to "Dash" */}
+          <span>Dash</span>
         </button>
 
         <button
@@ -667,7 +678,7 @@ const JewelleryHome: React.FC = () => {
           title="Verification"
         >
           <span>✓</span>
-          <span>Verify</span> {/* Changed from "Verification" to "Verify" */}
+          <span>Verify</span>
         </button>
       </div>
 
@@ -675,7 +686,7 @@ const JewelleryHome: React.FC = () => {
       <div
         style={{
           ...jewelleryStyles.contentWrapper,
-          padding: "8px 2px", // Custom minimal padding
+          padding: "8px 2px",
         }}
       >
         {renderTabContent()}

@@ -15,10 +15,20 @@ const OnlineListTab: React.FC = () => {
   const [items, setItems] = useState<OnlineItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [categories, setCategories] = useState<string[]>(["All"]);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    // Extract unique categories from items
+    const uniqueCategories = Array.from(
+      new Set(items.map((item) => item.category).filter(Boolean)),
+    ).sort();
+    setCategories(["All", ...uniqueCategories]);
+  }, [items]);
 
   const fetchData = async () => {
     try {
@@ -64,12 +74,19 @@ const OnlineListTab: React.FC = () => {
     }
   };
 
-  const filteredItems = items.filter(
-    (item) =>
+  const filteredItems = items.filter((item) => {
+    // Filter by search term
+    const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.detail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+      item.category.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Filter by category
+    const matchesCategory =
+      selectedCategory === "All" || item.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
 
   if (loading) {
     return (
@@ -97,7 +114,7 @@ const OnlineListTab: React.FC = () => {
         flexDirection: "column",
       }}
     >
-      {/* Search Bar */}
+      {/* Search and Filter Row */}
       <div
         style={{
           padding: "8px",
@@ -106,18 +123,24 @@ const OnlineListTab: React.FC = () => {
           position: "sticky",
           top: 0,
           zIndex: 10,
+          display: "flex",
+          gap: "8px",
+          alignItems: "center",
         }}
       >
-        <div style={{ position: "relative" }}>
+        {/* Search Input */}
+        <div style={{ flex: 2, minWidth: 0, position: "relative" }}>
           <input
             type="text"
-            placeholder="Search items by name, details, or category..."
+            placeholder="Search items..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               ...onlineStyles.searchInput,
               padding: "10px 35px 10px 12px",
               fontSize: "0.9rem",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           />
           <span
@@ -127,43 +150,53 @@ const OnlineListTab: React.FC = () => {
               top: "50%",
               transform: "translateY(-50%)",
               color: "#a0aec0",
+              fontSize: "14px",
             }}
           >
             🔍
           </span>
         </div>
-      </div>
 
-      {/* Add Button - Fixed at top */}
-      <div
-        style={{
-          padding: "8px 8px 0 8px",
-          backgroundColor: "white",
-          position: "sticky",
-          top: "57px", // Height of search bar + padding
-          zIndex: 9,
-        }}
-      >
-        <button
-          onClick={() => navigate("/online/items/add")}
-          style={{
-            width: "100%",
-            padding: "10px",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "500",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          }}
-        >
-          ＋ Add New Item
-        </button>
+        {/* Category Filter Dropdown */}
+        <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              fontSize: "0.9rem",
+              borderRadius: "6px",
+              border: "1px solid #d1d5db",
+              backgroundColor: "white",
+              color: "#374151",
+              cursor: "pointer",
+              appearance: "none",
+              WebkitAppearance: "none",
+              MozAppearance: "none",
+              boxSizing: "border-box",
+            }}
+          >
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <div
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "#6b7280",
+              fontSize: "10px",
+              pointerEvents: "none",
+            }}
+          >
+            ▼
+          </div>
+        </div>
       </div>
 
       {/* Items List */}
@@ -172,14 +205,58 @@ const OnlineListTab: React.FC = () => {
           <div style={onlineStyles.emptyState}>
             <div style={onlineStyles.emptyIcon}>🛒</div>
             <div style={onlineStyles.emptyText}>
-              {searchTerm ? "No matching items found" : "No items yet"}
+              {searchTerm || selectedCategory !== "All"
+                ? "No matching items found"
+                : "No items yet"}
             </div>
             <div style={onlineStyles.emptySubtext}>
-              {!searchTerm && "Add your first item"}
+              {!searchTerm &&
+                selectedCategory === "All" &&
+                "Add your first item using the ＋ button"}
             </div>
           </div>
         ) : (
           <div style={{ padding: "0 8px" }}>
+            {/* Results Info */}
+            <div
+              style={{
+                padding: "4px 0",
+                fontSize: "0.8rem",
+                color: "#6b7280",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "4px",
+              }}
+            >
+              <span>
+                {filteredItems.length} item
+                {filteredItems.length !== 1 ? "s" : ""}
+                {selectedCategory !== "All" && ` in ${selectedCategory}`}
+              </span>
+              {(searchTerm || selectedCategory !== "All") && (
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedCategory("All");
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#3b82f6",
+                    fontSize: "0.8rem",
+                    cursor: "pointer",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    backgroundColor: "#f0f9ff",
+                  }}
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+
+            {/* Items List */}
             {filteredItems.map((item) => (
               <div
                 key={item.id}
@@ -190,8 +267,6 @@ const OnlineListTab: React.FC = () => {
                   border: "1px solid #e9ecef",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
-                  // Remove the ":hover" pseudo-class from here
-                  // Keep the base styles only
                 }}
                 onClick={() => navigate(`/online/items/view/${item.id}`)}
                 onMouseEnter={(e) => {

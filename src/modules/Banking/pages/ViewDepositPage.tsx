@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
+import { useSettings } from "../../../contexts/SettingsContext"; // Import settings context
 import { Deposit } from "../../../types/banking.types";
 import { formatDate } from "../../../utils/formatters";
 import { bankingStyles } from "../styles";
@@ -10,6 +11,7 @@ const ViewDepositPage: React.FC = () => {
   const { depositId } = useParams();
   const navigate = useNavigate();
   const { accounts, deposits, loading: dataLoading } = useBankingData();
+  const { settings } = useSettings(); // Get settings
 
   const [deposit, setDeposit] = useState<Deposit | null>(null);
   const [accountCode, setAccountCode] = useState("");
@@ -69,19 +71,22 @@ const ViewDepositPage: React.FC = () => {
           ←
         </button>
         <div style={bankingStyles.navTitle}>Banking / View Deposit</div>
-        {/* Edit button in top nav for view mode */}
-        <button
-          onClick={handleEdit}
-          style={{
-            ...bankingStyles.navButton,
-            backgroundColor: "#3b82f6",
-            color: "#fff",
-            border: "none",
-          }}
-          title="Edit"
-        >
-          ✏️ Edit
-        </button>
+
+        {/* EDIT button in top nav - only show if showDelete setting is true */}
+        {settings?.showDelete && (
+          <button
+            onClick={handleEdit}
+            style={{
+              ...bankingStyles.navButton,
+              backgroundColor: "#3b82f6",
+              color: "#fff",
+              border: "none",
+            }}
+            title="Edit"
+          >
+            ✏️ Edit
+          </button>
+        )}
       </div>
 
       {/* Deposit Details Card */}
@@ -306,7 +311,7 @@ const ViewDepositPage: React.FC = () => {
           )}
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons - EDIT button only shows if showDelete setting is true */}
         <div style={{ display: "flex", gap: "12px" }}>
           <button
             onClick={handleBack}
@@ -315,24 +320,27 @@ const ViewDepositPage: React.FC = () => {
               backgroundColor: "#f3f4f6",
               color: "#374151",
               border: "1px solid #d1d5db",
-              flex: 1,
+              flex: settings?.showDelete ? 1 : "100%", // Take full width if no edit button
             }}
           >
             ← Back to Deposits
           </button>
 
-          <button
-            onClick={handleEdit}
-            style={{
-              ...bankingStyles.actionButton,
-              backgroundColor: "#3b82f6",
-              color: "#fff",
-              border: "none",
-              flex: 1,
-            }}
-          >
-            ✏️ Edit Deposit
-          </button>
+          {/* EDIT button - only show if showDelete setting is true */}
+          {settings?.showDelete && (
+            <button
+              onClick={handleEdit}
+              style={{
+                ...bankingStyles.actionButton,
+                backgroundColor: "#3b82f6",
+                color: "#fff",
+                border: "none",
+                flex: 1,
+              }}
+            >
+              ✏️ Edit Deposit
+            </button>
+          )}
         </div>
       </div>
     </div>

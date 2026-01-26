@@ -116,7 +116,14 @@ const RenewalListTab: React.FC = () => {
   }
 
   return (
-    <div style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        height: "100%",
+        overflowY: "auto",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <div
         style={{
           padding: "8px",
@@ -176,7 +183,7 @@ const RenewalListTab: React.FC = () => {
                   border: "1px solid #e9ecef",
                   cursor: "pointer",
                 }}
-                onClick={() => navigate(`/online/renewals/view/${renewal.id}`)}
+                onClick={() => navigate(`/online/renewals/edit/${renewal.id}`)}
               >
                 <div
                   style={{

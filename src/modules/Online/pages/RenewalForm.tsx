@@ -14,7 +14,7 @@ import { onlineStyles } from "../styles/onlineStyles";
 const RenewalForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
-  const isEditing = !!id;
+  const isEditing = !!id; // Simple check: if we have an ID, we're editing
 
   const [formData, setFormData] = useState<Renewal>({
     id: "",
@@ -45,23 +45,38 @@ const RenewalForm: React.FC = () => {
 
       if (renewalDoc.exists()) {
         const data = renewalDoc.data();
+
+        // Helper function to handle Firestore timestamps
+        const getTimestamp = (field: any): number => {
+          if (!field) return Date.now();
+          if (field && typeof field === "object" && "toDate" in field) {
+            return field.toDate().getTime();
+          }
+          if (typeof field === "number") return field;
+          if (typeof field === "string") {
+            const parsed = Date.parse(field);
+            return isNaN(parsed) ? Date.now() : parsed;
+          }
+          return Date.now();
+        };
+
         setFormData({
           id: renewalDoc.id,
           name: data.name || "",
-          startDate: data.startDate || Date.now(),
-          endDate: data.endDate || Date.now(),
+          startDate: getTimestamp(data.startDate),
+          endDate: getTimestamp(data.endDate),
           comments: data.comments || "",
-          createdAt: data.createdAt || Date.now(),
-          updatedAt: data.updatedAt || Date.now(),
+          createdAt: getTimestamp(data.createdAt),
+          updatedAt: getTimestamp(data.updatedAt),
         });
       } else {
         alert("Renewal not found");
-        navigate("/online"); // CHANGED: from "/online/renewals" to "/online"
+        navigate("/online");
       }
     } catch (error) {
       console.error("Error fetching renewal:", error);
       alert("Failed to load renewal");
-      navigate("/online"); // CHANGED: from "/online/renewals" to "/online"
+      navigate("/online");
     } finally {
       setLoading(false);
     }
@@ -86,11 +101,11 @@ const RenewalForm: React.FC = () => {
 
       const renewalData = {
         name: formData.name.trim(),
-        startDate: formData.startDate,
-        endDate: formData.endDate,
+        startDate: new Date(formData.startDate),
+        endDate: new Date(formData.endDate),
         comments: formData.comments?.trim() || "",
-        updatedAt: Date.now(),
-        ...(isEditing ? {} : { createdAt: Date.now() }),
+        updatedAt: new Date(),
+        ...(isEditing ? {} : { createdAt: new Date() }),
       };
 
       if (isEditing && id) {
@@ -101,7 +116,7 @@ const RenewalForm: React.FC = () => {
         alert("Renewal added successfully!");
       }
 
-      navigate("/online"); // CHANGED: from "/online/renewals" to "/online"
+      navigate("/online");
     } catch (error) {
       console.error("Error saving renewal:", error);
       alert("Failed to save renewal");
@@ -126,7 +141,7 @@ const RenewalForm: React.FC = () => {
       {/* Top Navigation with Save button */}
       <div style={onlineStyles.topNav}>
         <button
-          onClick={() => navigate("/online")} // CHANGED: from "/online/renewals" to "/online"
+          onClick={() => navigate("/online")}
           style={onlineStyles.navButton}
           title="Back"
         >
@@ -143,7 +158,7 @@ const RenewalForm: React.FC = () => {
         <div style={onlineStyles.headerRight}>
           <button
             type="submit"
-            form="renewal-form" // Connect to the form
+            form="renewal-form"
             style={onlineStyles.addButton}
             disabled={saving}
           >
@@ -223,30 +238,6 @@ const RenewalForm: React.FC = () => {
               rows={3}
               disabled={saving}
             />
-          </div>
-
-          {/* Form Actions - Removed the bottom buttons */}
-          <div
-            style={{
-              ...onlineStyles.formActions,
-              display: "none", // Hide bottom buttons since we have top button
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => navigate("/online")} // CHANGED: from "/online/renewals" to "/online"
-              style={onlineStyles.cancelButton}
-              disabled={saving}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              style={onlineStyles.submitButton}
-              disabled={saving}
-            >
-              {saving ? "Saving..." : isEditing ? "Update" : "Add"}
-            </button>
           </div>
         </form>
       </div>

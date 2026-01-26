@@ -33,6 +33,9 @@ import OnlineForm from "../modules/Online/pages/OnlineForm";
 import RenewalForm from "../modules/Online/pages/RenewalForm";
 import OnlineHomepage from "../modules/Online/pages/OnlineHomepage";
 
+// Import ViewDepositPage
+import ViewDepositPage from "../modules/Banking/pages/ViewDepositPage"; // Add this import
+
 // ==================== TYPES ====================
 export interface RouteConfig {
   path: string;
@@ -126,6 +129,14 @@ const allRoutes: RouteConfig[] = [
     element: <AddEditDepositPage isEdit={true} />,
     title: "Edit Deposit",
     icon: "✏️",
+    requiresAuth: true,
+    needsUserData: true,
+  },
+  {
+    path: "/banking/deposits/view/:depositId", // Add this route
+    element: <ViewDepositPage />,
+    title: "View Deposit",
+    icon: "👁️",
     requiresAuth: true,
     needsUserData: true,
   },

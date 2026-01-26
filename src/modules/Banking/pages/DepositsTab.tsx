@@ -460,9 +460,18 @@ const DepositsTab: React.FC = () => {
                       borderBottom: "1px solid #f3f4f6",
                       cursor: "pointer",
                     }}
-                    onClick={() =>
-                      navigate(`/banking/deposits/edit/${deposit.id}`)
-                    }
+                    // onClick={() =>
+                    //   navigate(`/banking/deposits/edit/${deposit.id}`)
+                    // }
+                    onClick={() => {
+                      if (settings?.showDelete) {
+                        // If showDelete is true, go to edit mode
+                        navigate(`/banking/deposits/edit/${deposit.id}`);
+                      } else {
+                        // Otherwise, go to view mode
+                        navigate(`/banking/deposits/view/${deposit.id}`);
+                      }
+                    }}
                   >
                     <div
                       style={{

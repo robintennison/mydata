@@ -32,7 +32,6 @@ import CategoryForm from "../modules/Online/pages/CategoryForm";
 import OnlineForm from "../modules/Online/pages/OnlineForm";
 import RenewalForm from "../modules/Online/pages/RenewalForm";
 import OnlineHomepage from "../modules/Online/pages/OnlineHomepage";
-//import OnlineViewPage from "../modules/Online/pages/OnlineViewPage"; // Add this if you have it
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -215,10 +214,11 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
   },
 
-  // Online Module Routes - UPDATED FOR TABS
+  // Online Module Routes
+  // Main online page - this should be the tabbed interface
   {
     path: "/online",
-    element: <OnlineHomepage />,
+    element: <OnlineHomepage />, // This is your tabbed homepage
     title: "Online",
     icon: "🌐",
     requiresAuth: true,
@@ -252,12 +252,12 @@ const allRoutes: RouteConfig[] = [
     icon: "✏️",
     requiresAuth: true,
   },
-  // {
-  //   path: "/online/items/view/:id",
-  //   element: <OnlineViewPage />,
-  //   title: "View Item",
-  //   requiresAuth: true,
-  // },
+  {
+    path: "/online/items/view/:id",
+    element: <OnlineForm />, // Use OnlineForm with view mode
+    title: "View Item",
+    requiresAuth: true,
+  },
   {
     path: "/online/renewals/add",
     element: <RenewalForm />,
@@ -274,15 +274,10 @@ const allRoutes: RouteConfig[] = [
   },
   {
     path: "/online/renewals/view/:id",
-    element: <RenewalForm />, // You might want a separate view page for renewals
+    element: <RenewalForm />,
     title: "View Renewal",
     requiresAuth: true,
   },
-
-  // REMOVED: Old Online list page routes
-  // "/online/categories", "/online/items", "/online/renewals" - Now handled by tabs
-
-  // REMOVED: Properties module entirely
 ];
 
 // ==================== NAVIGATION ITEMS ====================
@@ -374,37 +369,52 @@ interface AppRoutesProps {
 }
 
 const AppRoutes: React.FC<AppRoutesProps> = () => {
+  // Helper function to render routes with children
+  const renderRoute = (route: RouteConfig) => {
+    if (route.path === "/login") {
+      return (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={
+            <PublicRoute>
+              <Layout>{route.element}</Layout>
+            </PublicRoute>
+          }
+        />
+      );
+    }
+
+    const routeElement = route.requiresAuth ? (
+      <ProtectedRoute>
+        <Layout noPadding={route.noLayoutPadding}>{route.element}</Layout>
+      </ProtectedRoute>
+    ) : (
+      <Layout noPadding={route.noLayoutPadding}>{route.element}</Layout>
+    );
+
+    // Handle routes with children (nested routes)
+    if (route.children && route.children.length > 0) {
+      return (
+        <Route key={route.path} path={route.path} element={routeElement}>
+          {route.children.map((childRoute) => (
+            <Route
+              key={childRoute.path || "index"}
+              index={childRoute.isIndex}
+              path={childRoute.path}
+              element={childRoute.element}
+            />
+          ))}
+        </Route>
+      );
+    }
+
+    return <Route key={route.path} path={route.path} element={routeElement} />;
+  };
+
   return (
     <Routes>
-      {allRoutes.map((route) => {
-        // Special handling for login page - use PublicRoute
-        if (route.path === "/login") {
-          return (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={
-                <PublicRoute>
-                  <Layout>{route.element}</Layout>
-                </PublicRoute>
-              }
-            />
-          );
-        }
-
-        // For all other routes, check if they require auth
-        const routeElement = route.requiresAuth ? (
-          <ProtectedRoute>
-            <Layout noPadding={route.noLayoutPadding}>{route.element}</Layout>
-          </ProtectedRoute>
-        ) : (
-          <Layout noPadding={route.noLayoutPadding}>{route.element}</Layout>
-        );
-
-        return (
-          <Route key={route.path} path={route.path} element={routeElement} />
-        );
-      })}
+      {allRoutes.map(renderRoute)}
 
       {/* 404 Route - Show layout for authenticated users */}
       <Route

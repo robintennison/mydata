@@ -33,19 +33,6 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
   const [activeUpdate, setActiveUpdate] = useState<string | null>(null);
   const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
   const [notesText, setNotesText] = useState<Record<string, string>>({});
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Check if mobile screen
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // Fetch jewellery items
   useEffect(() => {
@@ -528,7 +515,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
     );
   }
 
-  // Full mode - Optimized for minimal vertical space
+  // Full mode - Exactly 2 lines per record (mobile optimized)
   return (
     <div
       style={{
@@ -729,7 +716,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
         )}
       </div>
 
-      {/* Items List - Show ALL items sorted by code */}
+      {/* Items List - Exactly 2 lines per record (mobile optimized) */}
       <div
         style={{
           maxHeight: "500px",
@@ -764,8 +751,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
             </button>
           </div>
         ) : (
-          filteredItems.slice(0, 10).map((item) => {
-            // Increased to 10 items since we're showing all
+          filteredItems.slice(0, 15).map((item) => {
             const isUpdating = activeUpdate === item.id;
             const isExpanded = expandedNotesId === item.id;
             const hasNotes =
@@ -783,22 +769,20 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                   borderBottom: "1px solid #f3f4f6",
                 }}
               >
-                {/* Main Row - Compact layout */}
+                {/* LINE 1: Image + Code + Weight + Date + Buttons (ALL ON SAME LINE) */}
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: isMobile ? "6px" : "10px",
-                    minHeight: "40px",
-                    flexWrap: isMobile ? "nowrap" : "nowrap",
-                    overflowX: isMobile ? "auto" : "visible",
+                    gap: "6px",
+                    marginBottom: "4px",
                   }}
                 >
-                  {/* Jewellery Image - First item */}
+                  {/* Jewellery Image */}
                   <div
                     style={{
-                      width: "35px",
-                      height: "35px",
+                      width: "32px",
+                      height: "32px",
                       backgroundColor: "#f3f4f6",
                       borderRadius: "6px",
                       display: "flex",
@@ -819,13 +803,13 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                         }}
                       />
                     ) : (
-                      <span style={{ color: "#9ca3af", fontSize: "18px" }}>
+                      <span style={{ color: "#9ca3af", fontSize: "16px" }}>
                         💎
                       </span>
                     )}
                   </div>
 
-                  {/* Status Indicator (small circle) */}
+                  {/* Status Indicator */}
                   <div
                     style={{
                       width: "6px",
@@ -833,23 +817,24 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       borderRadius: "50%",
                       backgroundColor: getStatusColor(item.verificationStatus),
                       flexShrink: 0,
-                      marginRight: isMobile ? "2px" : "0",
                     }}
                   />
 
-                  {/* Item Code and Weight - More compact on mobile */}
+                  {/* Item Code and Weight - Compact on same line */}
                   <div
                     style={{
-                      minWidth: isMobile ? "70px" : "80px",
-                      maxWidth: isMobile ? "80px" : "100px",
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: "6px",
+                      flex: 1,
+                      minWidth: 0,
                       overflow: "hidden",
-                      flexShrink: 0,
                     }}
                   >
                     <div
                       style={{
                         fontWeight: "600",
-                        fontSize: isMobile ? "12px" : "13px",
+                        fontSize: "13px",
                         color: "#111827",
                         whiteSpace: "nowrap",
                         overflow: "hidden",
@@ -860,64 +845,28 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                     </div>
                     <div
                       style={{
-                        fontSize: isMobile ? "10px" : "11px",
+                        fontSize: "11px",
                         color: "#6b7280",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {item.weight}g
                     </div>
                   </div>
 
-                  {/* Description (truncated) - Hidden on mobile to save space */}
-                  {!isMobile && (
-                    <div
-                      style={{
-                        flex: 1,
-                        minWidth: 0,
-                        overflow: "hidden",
-                        flexShrink: 1,
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b7280",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {item.description || "No description"}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#9ca3af",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          marginTop: "2px",
-                        }}
-                      >
-                        <span>{item.location || "No location"}</span>
-                        {item.boughtFor && <span>•</span>}
-                        {item.boughtFor && <span>{item.boughtFor}</span>}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Last Verified Date - Compact on mobile */}
+                  {/* Last Verified Date - Compact */}
                   <div
                     style={{
-                      minWidth: isMobile ? "45px" : "55px",
-                      maxWidth: isMobile ? "55px" : "65px",
+                      minWidth: "40px",
+                      maxWidth: "50px",
                       textAlign: "center",
                       flexShrink: 0,
+                      marginRight: "4px",
                     }}
                   >
                     <div
                       style={{
-                        fontSize: isMobile ? "10px" : "11px",
+                        fontSize: "10px",
                         color: isRecentlyVerified ? "#10b981" : "#6b7280",
                         fontWeight: isRecentlyVerified ? "500" : "normal",
                         backgroundColor: isRecentlyVerified
@@ -937,16 +886,15 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                     </div>
                   </div>
 
-                  {/* Action Buttons - More compact on mobile */}
+                  {/* Action Buttons - Smaller on mobile */}
                   <div
                     style={{
                       display: "flex",
-                      gap: isMobile ? "2px" : "4px",
+                      gap: "2px",
                       alignItems: "center",
                       flexShrink: 0,
                     }}
                   >
-                    {/* Status Icons - All four in one row */}
                     <button
                       onClick={() =>
                         handleUpdateVerification(
@@ -957,8 +905,8 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       disabled={isUpdating}
                       title="Mark as Verified"
                       style={{
-                        width: isMobile ? "24px" : "28px",
-                        height: isMobile ? "24px" : "28px",
+                        width: "24px",
+                        height: "24px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -973,13 +921,14 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                             ? "white"
                             : "#10b981",
                         border: `1px solid ${item.verificationStatus === VerificationStatus.VERIFIED ? "#10b981" : "#d1fae5"}`,
-                        borderRadius: "4px",
+                        borderRadius: "3px",
                         cursor: isUpdating ? "not-allowed" : "pointer",
-                        fontSize: isMobile ? "10px" : "12px",
+                        fontSize: "10px",
                         opacity: isUpdating ? 0.7 : 1,
+                        flexShrink: 0,
                       }}
                     >
-                      {isMobile ? "✓" : "✅"}
+                      ✓
                     </button>
 
                     <button
@@ -992,8 +941,8 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       disabled={isUpdating}
                       title="Mark as Not Verified"
                       style={{
-                        width: isMobile ? "24px" : "28px",
-                        height: isMobile ? "24px" : "28px",
+                        width: "24px",
+                        height: "24px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -1008,13 +957,14 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                             ? "white"
                             : "#f59e0b",
                         border: `1px solid ${item.verificationStatus === VerificationStatus.NOT_VERIFIED ? "#f59e0b" : "#fef3c7"}`,
-                        borderRadius: "4px",
+                        borderRadius: "3px",
                         cursor: isUpdating ? "not-allowed" : "pointer",
-                        fontSize: isMobile ? "10px" : "12px",
+                        fontSize: "10px",
                         opacity: isUpdating ? 0.7 : 1,
+                        flexShrink: 0,
                       }}
                     >
-                      {isMobile ? "!" : "⚠️"}
+                      !
                     </button>
 
                     <button
@@ -1027,8 +977,8 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       disabled={isUpdating}
                       title="Mark as Missing"
                       style={{
-                        width: isMobile ? "24px" : "28px",
-                        height: isMobile ? "24px" : "28px",
+                        width: "24px",
+                        height: "24px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -1041,35 +991,36 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                             ? "white"
                             : "#ef4444",
                         border: `1px solid ${item.verificationStatus === VerificationStatus.MISSING ? "#ef4444" : "#fee2e2"}`,
-                        borderRadius: "4px",
+                        borderRadius: "3px",
                         cursor: isUpdating ? "not-allowed" : "pointer",
-                        fontSize: isMobile ? "10px" : "12px",
+                        fontSize: "10px",
                         opacity: isUpdating ? 0.7 : 1,
+                        flexShrink: 0,
                       }}
                     >
-                      {isMobile ? "✗" : "❌"}
+                      ✗
                     </button>
 
-                    {/* Notes Toggle Button */}
                     <button
                       onClick={() => toggleNotes(item)}
                       title={hasNotes ? "View notes" : "Add notes"}
                       style={{
-                        width: isMobile ? "24px" : "28px",
-                        height: isMobile ? "24px" : "28px",
+                        width: "24px",
+                        height: "24px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         backgroundColor: hasNotes ? "#dbeafe" : "transparent",
                         color: hasNotes ? "#1d4ed8" : "#6b7280",
                         border: `1px solid ${hasNotes ? "#93c5fd" : "#e5e7eb"}`,
-                        borderRadius: "4px",
+                        borderRadius: "3px",
                         cursor: "pointer",
-                        fontSize: isMobile ? "10px" : "12px",
+                        fontSize: "10px",
                         transform: isExpanded
                           ? "rotate(180deg)"
                           : "rotate(0deg)",
                         transition: "transform 0.2s ease",
+                        flexShrink: 0,
                       }}
                     >
                       ↓
@@ -1077,24 +1028,58 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                   </div>
                 </div>
 
-                {/* Mobile-only description line */}
-                {isMobile && (
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#6b7280",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      marginTop: "4px",
-                      paddingLeft: "41px", // Align with image + status circle
-                    }}
-                  >
-                    {item.description || "No description"}
-                    {item.location && ` • ${item.location}`}
-                    {item.boughtFor && ` • ${item.boughtFor}`}
-                  </div>
-                )}
+                {/* LINE 2: Location + Bought For only */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    paddingLeft: "44px", // Align with image (32px) + status (6px) + gap (6px) = 44px
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Location - Tiny badge */}
+                  {item.location && (
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        color: "#4b5563",
+                        backgroundColor: "#f3f4f6",
+                        padding: "2px 4px",
+                        borderRadius: "3px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: "80px",
+                        flexShrink: 0,
+                      }}
+                      title={item.location}
+                    >
+                      {item.location}
+                    </div>
+                  )}
+
+                  {/* Bought For - Tiny badge */}
+                  {item.boughtFor && (
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        color: "#0369a1",
+                        backgroundColor: "#e0f2fe",
+                        padding: "2px 4px",
+                        borderRadius: "3px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: "80px",
+                        flexShrink: 0,
+                      }}
+                      title={item.boughtFor}
+                    >
+                      {item.boughtFor}
+                    </div>
+                  )}
+                </div>
 
                 {/* Expanded Notes Section (only when toggled) */}
                 {isExpanded && (
@@ -1105,6 +1090,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       backgroundColor: "#f9fafb",
                       borderRadius: "4px",
                       border: "1px solid #e5e7eb",
+                      marginLeft: "44px",
                     }}
                   >
                     <div
@@ -1188,7 +1174,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           })
         )}
 
-        {filteredItems.length > 10 && (
+        {filteredItems.length > 15 && (
           <div
             style={{
               textAlign: "center",
@@ -1208,7 +1194,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                 fontSize: "14px",
               }}
             >
-              View {filteredItems.length - 10} more items
+              View {filteredItems.length - 15} more items
             </button>
           </div>
         )}

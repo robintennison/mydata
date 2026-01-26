@@ -67,7 +67,8 @@ const OnlineListTab: React.FC = () => {
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.detail.toLowerCase().includes(searchTerm.toLowerCase()),
+      item.detail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (loading) {
@@ -88,7 +89,14 @@ const OnlineListTab: React.FC = () => {
   }
 
   return (
-    <div style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        height: "100%",
+        overflowY: "auto",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {/* Search Bar */}
       <div
         style={{
@@ -103,7 +111,7 @@ const OnlineListTab: React.FC = () => {
         <div style={{ position: "relative" }}>
           <input
             type="text"
-            placeholder="Search items..."
+            placeholder="Search items by name, details, or category..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
@@ -126,6 +134,38 @@ const OnlineListTab: React.FC = () => {
         </div>
       </div>
 
+      {/* Add Button - Fixed at top */}
+      <div
+        style={{
+          padding: "8px 8px 0 8px",
+          backgroundColor: "white",
+          position: "sticky",
+          top: "57px", // Height of search bar + padding
+          zIndex: 9,
+        }}
+      >
+        <button
+          onClick={() => navigate("/online/items/add")}
+          style={{
+            width: "100%",
+            padding: "10px",
+            backgroundColor: "#3b82f6",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "500",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+          }}
+        >
+          ＋ Add New Item
+        </button>
+      </div>
+
       {/* Items List */}
       <div style={{ flex: 1, padding: "8px 0" }}>
         {filteredItems.length === 0 ? (
@@ -139,18 +179,30 @@ const OnlineListTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "0" }}>
+          <div style={{ padding: "0 8px" }}>
             {filteredItems.map((item) => (
               <div
                 key={item.id}
                 style={{
                   backgroundColor: "white",
-                  margin: "0 8px 8px 8px", // Matched margin to search padding (8px)
+                  margin: "8px 0",
                   borderRadius: "8px",
                   border: "1px solid #e9ecef",
                   cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  // Remove the ":hover" pseudo-class from here
+                  // Keep the base styles only
                 }}
                 onClick={() => navigate(`/online/items/view/${item.id}`)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#3b82f6";
+                  e.currentTarget.style.boxShadow =
+                    "0 2px 8px rgba(59, 130, 246, 0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#e9ecef";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
               >
                 <div
                   style={{
@@ -160,6 +212,34 @@ const OnlineListTab: React.FC = () => {
                     minHeight: "48px",
                   }}
                 >
+                  {/* Image thumbnail if available */}
+                  {(item.image1 || item.image2) && (
+                    <div
+                      style={{
+                        width: "48px",
+                        height: "48px",
+                        borderRadius: "6px",
+                        overflow: "hidden",
+                        marginRight: "12px",
+                        flexShrink: 0,
+                        backgroundColor: "#f9fafb",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <img
+                        src={item.image1 || item.image2}
+                        alt={item.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
+                  )}
+
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
@@ -167,8 +247,21 @@ const OnlineListTab: React.FC = () => {
                         alignItems: "center",
                         gap: "8px",
                         marginBottom: "4px",
+                        flexWrap: "wrap",
                       }}
                     >
+                      <span
+                        style={{
+                          fontSize: "0.95rem",
+                          fontWeight: "600",
+                          color: "#111827",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.name}
+                      </span>
                       {item.category && (
                         <span
                           style={{
@@ -181,24 +274,12 @@ const OnlineListTab: React.FC = () => {
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            maxWidth: "100px",
+                            maxWidth: "120px",
                           }}
                         >
                           {item.category}
                         </span>
                       )}
-                      <span
-                        style={{
-                          fontSize: "0.95rem",
-                          fontWeight: "500",
-                          color: "#333",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {item.name}
-                      </span>
                     </div>
                     {item.detail && (
                       <div
@@ -208,6 +289,7 @@ const OnlineListTab: React.FC = () => {
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          lineHeight: "1.4",
                         }}
                       >
                         {item.detail}
@@ -224,17 +306,25 @@ const OnlineListTab: React.FC = () => {
                     }}
                   >
                     <button
-                      style={onlineStyles.editButton}
+                      style={{
+                        ...onlineStyles.editButton,
+                        padding: "6px 8px",
+                        fontSize: "12px",
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/online/items/edit/${item.id}`);
                       }}
                       title="Edit"
                     >
-                      ✏️
+                      ✏️ Edit
                     </button>
                     <button
-                      style={onlineStyles.deleteButton}
+                      style={{
+                        ...onlineStyles.deleteButton,
+                        padding: "6px 8px",
+                        fontSize: "12px",
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(item.id, item.name);

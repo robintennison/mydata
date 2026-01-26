@@ -1,7 +1,7 @@
 // src/modules/Banking/pages/EditAccountPage.tsx
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom"; // Add useLocation
-import { useSettings } from "../../../contexts/SettingsContext"; // Uncomment this import
+import { useNavigate, useParams } from "react-router-dom"; // Removed useLocation
+import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
 import { bankingStyles } from "../styles/BankingStyles";
@@ -9,9 +9,8 @@ import type { BankAccount } from "../../../types/banking.types";
 
 const EditAccountPage: React.FC = () => {
   const navigate = useNavigate();
-  //const location = useLocation(); // Add this
-  const { id } = useParams<{ id: string }>();
-  const { settings } = useSettings(); // Uncomment this
+  const { id } = useParams<{ id: string }>(); // Removed useLocation
+  const { settings } = useSettings();
   const { accounts, loading: dataLoading } = useBankingData();
   const { handleSaveAccount, handleDeleteAccount } = useBankingOperations();
 
@@ -81,12 +80,9 @@ const EditAccountPage: React.FC = () => {
       setError("Please enter a valid savings amount");
       return false;
     }
-    if (formData.mpin.length !== 4) {
-      setError("MPIN must be exactly 4 digits");
-      return false;
-    }
-    if (!/^\d{4}$/.test(formData.mpin)) {
-      setError("MPIN must be 4 numbers only");
+    // Removed the 4-digit restriction for MPIN
+    if (formData.mpin.length === 0) {
+      setError("MPIN is required");
       return false;
     }
     setError(null);
@@ -97,8 +93,7 @@ const EditAccountPage: React.FC = () => {
     e.preventDefault();
 
     if (isViewMode) {
-      // In view mode, clicking the "Save Changes" button should navigate to edit mode
-      navigate(`/banking/accounts/edit/${id}`);
+      // In view mode, form submission is disabled
       return;
     }
 
@@ -234,21 +229,8 @@ const EditAccountPage: React.FC = () => {
           ←
         </button>
         <div style={bankingStyles.navTitle}>Banking / {getPageTitle()}</div>
-        {isViewMode && (
-          <button
-            onClick={() => navigate(`/banking/accounts/edit/${id}`)}
-            style={{
-              ...bankingStyles.primaryButton,
-              padding: "8px 16px",
-              fontSize: "14px",
-              minWidth: "auto",
-              height: "auto",
-            }}
-            title="Edit Account"
-          >
-            ✏️ Edit
-          </button>
-        )}
+        {/* Remove Edit button from top when in view mode */}
+        <div style={{ width: "40px" }}></div>
       </div>
 
       {/* Error Message */}
@@ -268,13 +250,14 @@ const EditAccountPage: React.FC = () => {
         </div>
       )}
 
-      {/* Form */}
+      {/* Form - Use div instead of form in view mode to prevent submission */}
       <div style={{ padding: "15px 0" }}>
-        <form onSubmit={handleSubmit}>
-          {/* Account Code */}
-          <div style={{ marginBottom: "20px" }}>
-            <label style={bankingStyles.label}>Account Code *</label>
-            {isViewMode ? (
+        {isViewMode ? (
+          // View mode - just display data
+          <div>
+            {/* Account Code */}
+            <div style={{ marginBottom: "20px" }}>
+              <label style={bankingStyles.label}>Account Code *</label>
               <div
                 style={{
                   ...bankingStyles.input,
@@ -289,25 +272,11 @@ const EditAccountPage: React.FC = () => {
               >
                 {formData.acctCode || "Not specified"}
               </div>
-            ) : (
-              <input
-                type="text"
-                placeholder="e.g., SBI1234"
-                value={formData.acctCode}
-                onChange={(e) => handleChange("acctCode", e.target.value)}
-                style={bankingStyles.input}
-                required={!isViewMode}
-                disabled={submitting || isViewMode}
-                readOnly={isViewMode}
-                maxLength={50}
-              />
-            )}
-          </div>
+            </div>
 
-          {/* Account Details */}
-          <div style={{ marginBottom: "20px" }}>
-            <label style={bankingStyles.label}>Account Details *</label>
-            {isViewMode ? (
+            {/* Account Details */}
+            <div style={{ marginBottom: "20px" }}>
+              <label style={bankingStyles.label}>Account Details *</label>
               <div
                 style={{
                   ...bankingStyles.input,
@@ -322,30 +291,11 @@ const EditAccountPage: React.FC = () => {
               >
                 {formData.acctDetails || "No details provided"}
               </div>
-            ) : (
-              <textarea
-                placeholder="Bank name, branch, account type, etc."
-                value={formData.acctDetails}
-                onChange={(e) => handleChange("acctDetails", e.target.value)}
-                style={{
-                  ...bankingStyles.input,
-                  minHeight: "100px",
-                  resize: "vertical",
-                  lineHeight: "1.5",
-                }}
-                rows={4}
-                required={!isViewMode}
-                disabled={submitting || isViewMode}
-                readOnly={isViewMode}
-                maxLength={500}
-              />
-            )}
-          </div>
+            </div>
 
-          {/* Savings Amount */}
-          <div style={{ marginBottom: "20px" }}>
-            <label style={bankingStyles.label}>Savings Amount *</label>
-            {isViewMode ? (
+            {/* Savings Amount */}
+            <div style={{ marginBottom: "20px" }}>
+              <label style={bankingStyles.label}>Savings Amount *</label>
               <div
                 style={{
                   ...bankingStyles.input,
@@ -363,7 +313,96 @@ const EditAccountPage: React.FC = () => {
                   "en-IN",
                 )}
               </div>
-            ) : (
+            </div>
+
+            {/* MPIN - Show as plain text in view mode */}
+            <div style={{ marginBottom: "30px" }}>
+              <label style={bankingStyles.label}>MPIN</label>
+              <div
+                style={{
+                  ...bankingStyles.input,
+                  backgroundColor: "#f9fafb",
+                  cursor: "default",
+                  color: "#111827",
+                  padding: "10px 12px",
+                  minHeight: "44px",
+                  display: "flex",
+                  alignItems: "center",
+                  fontFamily: "monospace",
+                  fontSize: "16px",
+                }}
+              >
+                {formData.mpin || "Not set"}
+              </div>
+            </div>
+
+            {/* Back Button only in view mode */}
+            <div
+              style={{
+                paddingTop: "10px",
+                borderTop: "1px solid #e9ecef",
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleCancel}
+                style={{
+                  width: "100%",
+                  padding: "14px",
+                  backgroundColor: "#f8f9fa",
+                  border: "1px solid #dee2e6",
+                  borderRadius: "8px",
+                  color: "#495057",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                }}
+              >
+                Back to Accounts
+              </button>
+            </div>
+          </div>
+        ) : (
+          // Edit mode - form for editing
+          <form onSubmit={handleSubmit}>
+            {/* Account Code */}
+            <div style={{ marginBottom: "20px" }}>
+              <label style={bankingStyles.label}>Account Code *</label>
+              <input
+                type="text"
+                placeholder="e.g., SBI1234"
+                value={formData.acctCode}
+                onChange={(e) => handleChange("acctCode", e.target.value)}
+                style={bankingStyles.input}
+                required
+                disabled={submitting}
+                maxLength={50}
+              />
+            </div>
+
+            {/* Account Details */}
+            <div style={{ marginBottom: "20px" }}>
+              <label style={bankingStyles.label}>Account Details *</label>
+              <textarea
+                placeholder="Bank name, branch, account type, etc."
+                value={formData.acctDetails}
+                onChange={(e) => handleChange("acctDetails", e.target.value)}
+                style={{
+                  ...bankingStyles.input,
+                  minHeight: "100px",
+                  resize: "vertical",
+                  lineHeight: "1.5",
+                }}
+                rows={4}
+                required
+                disabled={submitting}
+                maxLength={500}
+              />
+            </div>
+
+            {/* Savings Amount */}
+            <div style={{ marginBottom: "20px" }}>
+              <label style={bankingStyles.label}>Savings Amount *</label>
               <div style={{ position: "relative" }}>
                 <span
                   style={{
@@ -390,163 +429,102 @@ const EditAccountPage: React.FC = () => {
                     ...bankingStyles.input,
                     paddingLeft: "35px",
                   }}
-                  required={!isViewMode}
+                  required
                   min="0"
                   step="0.01"
-                  disabled={submitting || isViewMode}
-                  readOnly={isViewMode}
+                  disabled={submitting}
                 />
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* MPIN */}
-          <div style={{ marginBottom: "30px" }}>
-            <label style={bankingStyles.label}>MPIN (4 digits) *</label>
-            {isViewMode ? (
-              <div
-                style={{
-                  ...bankingStyles.input,
-                  backgroundColor: "#f9fafb",
-                  cursor: "default",
-                  color: "#111827",
-                  padding: "10px 12px",
-                  minHeight: "44px",
-                  display: "flex",
-                  alignItems: "center",
-                  fontFamily: "monospace",
-                  fontSize: "18px",
-                  letterSpacing: "8px",
-                }}
-              >
-                {formData.mpin || "••••"}
-              </div>
-            ) : (
+            {/* MPIN - Show as plain text input in edit mode */}
+            <div style={{ marginBottom: "30px" }}>
+              <label style={bankingStyles.label}>MPIN</label>
               <input
-                type="password"
-                placeholder="••••"
+                type="text" // Changed from "password" to "text"
+                placeholder="Enter MPIN or any access code"
                 value={formData.mpin}
                 onChange={(e) => handleChange("mpin", e.target.value)}
                 style={{
                   ...bankingStyles.input,
-                  letterSpacing: "8px",
-                  textAlign: "center",
                   fontFamily: "monospace",
-                  fontSize: "18px",
+                  fontSize: "16px",
                 }}
-                maxLength={4}
-                pattern="\d{4}"
-                required={!isViewMode}
-                disabled={submitting || isViewMode}
-                readOnly={isViewMode}
+                disabled={submitting}
               />
-            )}
-            {!isViewMode && (
-              <div
-                style={{
-                  fontSize: "0.85rem",
-                  color: "#6c757d",
-                  marginTop: "6px",
-                  fontStyle: "italic",
-                }}
-              >
-                Must be exactly 4 digits
-              </div>
-            )}
-          </div>
+              {/* Removed the 4-digit restriction message */}
+            </div>
 
-          {/* Buttons */}
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              paddingTop: "10px",
-              borderTop: "1px solid #e9ecef",
-            }}
-          >
-            <button
-              type="button"
-              onClick={handleCancel}
+            {/* Buttons - Edit mode only */}
+            <div
               style={{
-                flex: 1,
-                padding: "14px",
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #dee2e6",
-                borderRadius: "8px",
-                color: "#495057",
-                fontWeight: "500",
-                cursor: "pointer",
-                fontSize: "16px",
-                opacity: submitting ? 0.6 : 1,
+                display: "flex",
+                gap: "12px",
+                paddingTop: "10px",
+                borderTop: "1px solid #e9ecef",
               }}
-              disabled={submitting}
             >
-              {isViewMode ? "Back" : "Cancel"}
-            </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                style={{
+                  flex: 1,
+                  padding: "14px",
+                  backgroundColor: "#f8f9fa",
+                  border: "1px solid #dee2e6",
+                  borderRadius: "8px",
+                  color: "#495057",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  opacity: submitting ? 0.6 : 1,
+                }}
+                disabled={submitting}
+              >
+                Cancel
+              </button>
 
-            {!isViewMode && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteDialog(true)}
-                  style={{
-                    flex: 1,
-                    padding: "14px",
-                    backgroundColor: "#fef2f2",
-                    border: "1px solid #fecaca",
-                    borderRadius: "8px",
-                    color: "#dc2626",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    opacity: submitting ? 0.6 : 1,
-                  }}
-                  disabled={submitting}
-                >
-                  Delete Account
-                </button>
+              <button
+                type="button"
+                onClick={() => setShowDeleteDialog(true)}
+                style={{
+                  flex: 1,
+                  padding: "14px",
+                  backgroundColor: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  borderRadius: "8px",
+                  color: "#dc2626",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  opacity: submitting ? 0.6 : 1,
+                }}
+                disabled={submitting}
+              >
+                Delete Account
+              </button>
 
-                <button
-                  type="submit"
-                  style={{
-                    flex: 1,
-                    padding: "14px",
-                    backgroundColor: submitting ? "#94a3b8" : "#2563eb",
-                    border: "none",
-                    borderRadius: "8px",
-                    color: "#ffffff",
-                    fontWeight: "600",
-                    cursor: submitting ? "not-allowed" : "pointer",
-                    fontSize: "16px",
-                    opacity: submitting ? 0.7 : 1,
-                  }}
-                  disabled={submitting}
-                >
-                  {submitting ? "Saving..." : "Save Changes"}
-                </button>
-              </>
-            )}
-
-            {isViewMode && (
               <button
                 type="submit"
                 style={{
                   flex: 1,
                   padding: "14px",
-                  backgroundColor: "#2563eb",
+                  backgroundColor: submitting ? "#94a3b8" : "#2563eb",
                   border: "none",
                   borderRadius: "8px",
                   color: "#ffffff",
                   fontWeight: "600",
-                  cursor: "pointer",
+                  cursor: submitting ? "not-allowed" : "pointer",
                   fontSize: "16px",
+                  opacity: submitting ? 0.7 : 1,
                 }}
+                disabled={submitting}
               >
-                ✏️ Edit Account
+                {submitting ? "Saving..." : "Save Changes"}
               </button>
-            )}
-          </div>
-        </form>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Delete Confirmation Dialog */}

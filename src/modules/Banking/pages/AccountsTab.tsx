@@ -77,6 +77,27 @@ const AccountsTab: React.FC = () => {
     }
   };
 
+  // Handle row click - view mode when showDelete is false, edit mode when showDelete is true
+  const handleRowClick = (accountId: string) => {
+    if (settings?.showDelete) {
+      // When showDelete is true, open in edit mode
+      navigate(`/banking/accounts/edit/${accountId}`);
+    } else {
+      // When showDelete is false, open in view mode
+      // You need to create a view route or modify the existing edit route to handle view mode
+      // For now, we'll use the same edit route but the component should handle view mode
+      navigate(`/banking/accounts/view/${accountId}`);
+    }
+  };
+
+  // Handle edit button click - only available when showDelete is true
+  const handleEditClick = (accountId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (settings?.showDelete) {
+      navigate(`/banking/accounts/edit/${accountId}`);
+    }
+  };
+
   if (loading) {
     return (
       <div
@@ -202,9 +223,7 @@ const AccountsTab: React.FC = () => {
                       borderBottom: "1px solid #f3f4f6",
                       cursor: "pointer",
                     }}
-                    onClick={() =>
-                      navigate(`/banking/accounts/edit/${account.id}`)
-                    }
+                    onClick={() => handleRowClick(account.id)}
                   >
                     <div
                       style={{
@@ -313,10 +332,7 @@ const AccountsTab: React.FC = () => {
                           }}
                         >
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/banking/accounts/edit/${account.id}`);
-                            }}
+                            onClick={(e) => handleEditClick(account.id, e)}
                             style={{
                               padding: "2px",
                               background: "none",

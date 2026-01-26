@@ -105,6 +105,13 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
+  {
+    path: "/banking/accounts/view/:id",
+    element: <EditAccountPage />,
+    title: "View Account",
+    requiresAuth: true,
+    needsUserData: true,
+  },
 
   {
     path: "/banking/deposits/add",

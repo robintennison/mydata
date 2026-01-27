@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getStorage, ref, getDownloadURL } from "firebase/storage"; // Added import
 import { Jewellery, VerificationStatus } from "../models/types";
 import { jewelleryStyles } from "../styles/jewelleryStyles";
 
@@ -21,6 +22,8 @@ const JewelleryDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [billLoading, setBillLoading] = useState(false);
   const [billError, setBillError] = useState<string | null>(null);
+  const [downloadingImage, setDownloadingImage] = useState(false);
+  const [storage] = useState(getStorage()); // Initialize Firebase Storage
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,6 +148,103 @@ const JewelleryDetail: React.FC = () => {
       console.error("Error formatting date:", error);
       return "Invalid date";
     }
+  };
+
+  const handleDownloadImage = async () => {
+    if (!item?.imageUrl) {
+      alert("No image available to download.");
+      return;
+    }
+
+    setDownloadingImage(true);
+    try {
+      // Method 1: Try using Firebase Storage SDK to get a download URL
+      // Extract the storage path from the imageUrl if it's a Firebase Storage URL
+      let downloadUrl = item.imageUrl;
+
+      // Check if it's a Firebase Storage URL
+      if (item.imageUrl.includes("firebasestorage.googleapis.com")) {
+        try {
+          // Try to get a download URL using the Firebase Storage SDK
+          // This bypasses CORS restrictions
+          const storageRef = ref(storage, extractPathFromUrl(item.imageUrl));
+          downloadUrl = await getDownloadURL(storageRef);
+        } catch (storageError) {
+          console.log(
+            "Could not get download URL via SDK, using original URL",
+            storageError,
+          );
+        }
+      }
+
+      // Method 2: Create a download link that works with CORS
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.target = "_blank"; // Open in new tab to avoid CORS issues
+
+      // Generate filename
+      const filename = generateImageFilename(item);
+      link.download = filename;
+
+      // Append to body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+      }, 100);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+
+      // Fallback method: Open the image in a new tab for manual download
+      alert(
+        `Could not automatically download the image. Opening in a new tab instead.\n\nYou can right-click the image and select "Save image as..." to download it.`,
+      );
+      window.open(item.imageUrl, "_blank");
+    } finally {
+      setDownloadingImage(false);
+    }
+  };
+
+  // Helper function to extract path from Firebase Storage URL
+  const extractPathFromUrl = (url: string): string => {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+
+      // Firebase Storage URLs have format: /v0/b/{bucket}/o/{path}?alt=media&token={token}
+      const match = pathname.match(/\/o\/(.+)/);
+      if (match) {
+        // Decode the path (it's URL encoded)
+        const encodedPath = match[1];
+        return decodeURIComponent(encodedPath);
+      }
+      return url;
+    } catch (e) {
+      return url;
+    }
+  };
+
+  // Helper function to generate appropriate filename
+  const generateImageFilename = (jewelleryItem: Jewellery): string => {
+    let filename = jewelleryItem.code || "Jewellery_Image";
+
+    // Clean filename (remove special characters)
+    filename = filename.replace(/[^a-zA-Z0-9_-]/g, "_");
+
+    // Try to get extension from URL
+    const url = jewelleryItem.imageUrl;
+    const extensionMatch = url.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
+    if (extensionMatch) {
+      const ext = extensionMatch[1].toLowerCase();
+      if (["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) {
+        return `${filename}.${ext}`;
+      }
+    }
+
+    // Default to .jpg if no valid extension found
+    return `${filename}.jpg`;
   };
 
   const handleViewBill = () => {
@@ -298,15 +398,71 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
 
           {item.imageUrl && (
             <div style={{ marginBottom: "20px", textAlign: "center" }}>
-              <img
-                src={item.imageUrl}
-                alt={item.code}
+              <div
                 style={{
+                  position: "relative",
+                  display: "inline-block",
                   maxWidth: "100%",
-                  maxHeight: "300px",
-                  borderRadius: "8px",
                 }}
-              />
+              >
+                <img
+                  src={item.imageUrl}
+                  alt={item.code}
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "300px",
+                    borderRadius: "8px",
+                  }}
+                />
+
+                {/* Image Download Button */}
+                <button
+                  onClick={handleDownloadImage}
+                  disabled={downloadingImage}
+                  style={{
+                    position: "absolute",
+                    bottom: "10px",
+                    right: "10px",
+                    backgroundColor: "rgba(0, 0, 0, 0.7)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    padding: "8px 12px",
+                    cursor: downloadingImage ? "not-allowed" : "pointer",
+                    fontSize: "14px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    transition: "all 0.2s",
+                    opacity: downloadingImage ? 0.7 : 1,
+                  }}
+                  title="Download Image"
+                  onMouseEnter={(e) => {
+                    if (!downloadingImage) {
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(0, 0, 0, 0.9)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!downloadingImage) {
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(0, 0, 0, 0.7)";
+                    }
+                  }}
+                >
+                  {downloadingImage ? (
+                    <>
+                      <span>⏳</span>
+                      <span>Downloading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📥</span>
+                      <span>Download</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           )}
 

@@ -425,11 +425,13 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     setShowBillDropdown(true);
   };
 
+  // FIXED: Now navigates to jewellery list instead of browser history
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
     } else {
-      navigate(-1);
+      // Navigate back to jewellery list instead of browser history
+      navigate("/jewellery/list");
     }
   };
 

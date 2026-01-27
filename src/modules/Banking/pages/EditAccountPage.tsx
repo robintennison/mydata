@@ -27,6 +27,28 @@ const EditAccountPage: React.FC = () => {
     mpin: "",
   });
 
+  // Function to escape special characters in textarea
+  const escapeTextareaValue = (text: string): string => {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;")
+      .replace(/\*/g, "&#42;"); // Specifically escape asterisks
+  };
+
+  // Function to unescape when saving
+  const unescapeTextareaValue = (text: string): string => {
+    return text
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&#42;/g, "*");
+  };
+
   useEffect(() => {
     if (!id) {
       setError("Account ID is missing");
@@ -41,10 +63,26 @@ const EditAccountPage: React.FC = () => {
         return;
       }
 
+      console.log("DEBUG - Account '01 AXIS' details:", {
+        raw: foundAccount.acctDetails,
+        length: foundAccount.acctDetails?.length,
+        hasAsterisk: foundAccount.acctDetails?.includes("*"),
+        asteriskPositions: foundAccount.acctDetails
+          ?.split("")
+          .map((char, i) => (char === "*" ? i : -1))
+          .filter((i) => i !== -1),
+      });
+
       setAccount(foundAccount);
+
+      // Escape the text before displaying in textarea
+      const escapedDetails = foundAccount.acctDetails
+        ? escapeTextareaValue(foundAccount.acctDetails)
+        : "";
+
       setFormData({
         acctCode: foundAccount.acctCode || "",
-        acctDetails: foundAccount.acctDetails || "",
+        acctDetails: escapedDetails,
         savingsAmount: foundAccount.savingsAmount?.toString() || "0",
         mpin: foundAccount.mpin || "",
       });
@@ -53,7 +91,6 @@ const EditAccountPage: React.FC = () => {
   }, [id, accounts, dataLoading]);
 
   const handleChange = (field: keyof typeof formData, value: string) => {
-    if (isViewMode) return;
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -96,18 +133,25 @@ const EditAccountPage: React.FC = () => {
     try {
       setSubmitting(true);
 
+      // Unescape the text before saving
+      const unescapedDetails = unescapeTextareaValue(formData.acctDetails);
+
       const accountData: BankAccount = {
         id: id,
         acctCode: formData.acctCode.trim(),
-        acctDetails: formData.acctDetails.trim(),
+        acctDetails: unescapedDetails.trim(),
         savingsAmount: parseFloat(formData.savingsAmount) || 0,
         mpin: formData.mpin,
       };
 
-      console.log("Updating account with data:", accountData);
+      console.log("Saving account data:", {
+        escaped: formData.acctDetails,
+        unescaped: unescapedDetails,
+        hasAsterisk: unescapedDetails.includes("*"),
+      });
+
       await handleSaveAccount(accountData);
 
-      // FIXED: Use activeTab, not tab
       navigate("/banking", {
         state: { activeTab: "accounts" },
       });
@@ -123,7 +167,6 @@ const EditAccountPage: React.FC = () => {
 
     try {
       await handleDeleteAccount(id);
-      // FIXED: Use activeTab, not tab
       navigate("/banking", {
         state: { activeTab: "accounts" },
       });
@@ -137,7 +180,6 @@ const EditAccountPage: React.FC = () => {
 
   const handleCancel = () => {
     if (isViewMode) {
-      // FIXED: Use activeTab, not tab
       navigate("/banking", {
         state: { activeTab: "accounts" },
       });
@@ -147,7 +189,10 @@ const EditAccountPage: React.FC = () => {
     const hasChanges =
       account &&
       (formData.acctCode !== account.acctCode ||
-        formData.acctDetails !== account.acctDetails ||
+        formData.acctDetails !==
+          (account.acctDetails
+            ? escapeTextareaValue(account.acctDetails)
+            : "") ||
         formData.savingsAmount !== (account.savingsAmount?.toString() || "0") ||
         formData.mpin !== account.mpin);
 
@@ -158,7 +203,6 @@ const EditAccountPage: React.FC = () => {
       if (!confirmLeave) return;
     }
 
-    // FIXED: Use activeTab, not tab
     navigate("/banking", {
       state: { activeTab: "accounts" },
     });
@@ -199,6 +243,40 @@ const EditAccountPage: React.FC = () => {
     );
   }
 
+  // Create a clean style for textarea
+  const textareaStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "8px",
+    border: "1px solid #d1d5db",
+    backgroundColor: submitting ? "#f3f4f6" : "white",
+    color: "#111827",
+    fontSize: "14px",
+    lineHeight: "1.5",
+    fontFamily: "'Courier New', monospace", // Use monospace for better readability
+    minHeight: "150px", // Increased height for multiline content
+    resize: "vertical" as const,
+    boxSizing: "border-box" as const,
+    outline: "none",
+    cursor: submitting ? "not-allowed" : "text",
+    whiteSpace: "pre-wrap" as const,
+    wordBreak: "break-word" as const,
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "8px",
+    border: "1px solid #d1d5db",
+    backgroundColor: submitting ? "#f3f4f6" : "white",
+    color: "#111827",
+    fontSize: "14px",
+    fontFamily: "inherit",
+    boxSizing: "border-box" as const,
+    outline: "none",
+    cursor: submitting ? "not-allowed" : "text",
+  };
+
   return (
     <div style={bankingStyles.container}>
       {/* Top Navigation */}
@@ -232,7 +310,21 @@ const EditAccountPage: React.FC = () => {
         </div>
       )}
 
-      {/* Form - Use div instead of form in view mode to prevent submission */}
+      {/* Debug info */}
+      <div
+        style={{
+          padding: "10px 15px",
+          backgroundColor: "#f0f9ff",
+          fontSize: "12px",
+          color: "#0369a1",
+          borderBottom: "1px solid #bae6fd",
+        }}
+      >
+        Editing: {account?.acctCode} | Contains special characters:{" "}
+        {formData.acctDetails.includes("*") ? "Yes (asterisks escaped)" : "No"}
+      </div>
+
+      {/* Form */}
       <div style={{ padding: "15px 0" }}>
         {isViewMode ? (
           // View mode - just display data
@@ -242,36 +334,28 @@ const EditAccountPage: React.FC = () => {
               <label style={bankingStyles.label}>Account Code *</label>
               <div
                 style={{
-                  ...bankingStyles.input,
+                  ...inputStyle,
                   backgroundColor: "#f9fafb",
                   cursor: "default",
-                  color: "#111827",
-                  padding: "10px 12px",
-                  minHeight: "44px",
-                  display: "flex",
-                  alignItems: "center",
                 }}
               >
                 {formData.acctCode || "Not specified"}
               </div>
             </div>
 
-            {/* Account Details */}
+            {/* Account Details - Show unescaped in view mode */}
             <div style={{ marginBottom: "20px" }}>
               <label style={bankingStyles.label}>Account Details *</label>
               <div
                 style={{
-                  ...bankingStyles.input,
+                  ...textareaStyle,
                   backgroundColor: "#f9fafb",
                   cursor: "default",
-                  color: "#111827",
-                  padding: "12px",
-                  minHeight: "100px",
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
+                  fontFamily: "'Courier New', monospace",
                 }}
               >
-                {formData.acctDetails || "No details provided"}
+                {unescapeTextareaValue(formData.acctDetails) ||
+                  "No details provided"}
               </div>
             </div>
 
@@ -280,14 +364,9 @@ const EditAccountPage: React.FC = () => {
               <label style={bankingStyles.label}>Savings Amount *</label>
               <div
                 style={{
-                  ...bankingStyles.input,
+                  ...inputStyle,
                   backgroundColor: "#f9fafb",
                   cursor: "default",
-                  color: "#111827",
-                  padding: "10px 12px",
-                  minHeight: "44px",
-                  display: "flex",
-                  alignItems: "center",
                 }}
               >
                 ₹{" "}
@@ -302,14 +381,9 @@ const EditAccountPage: React.FC = () => {
               <label style={bankingStyles.label}>MPIN</label>
               <div
                 style={{
-                  ...bankingStyles.input,
+                  ...inputStyle,
                   backgroundColor: "#f9fafb",
                   cursor: "default",
-                  color: "#111827",
-                  padding: "10px 12px",
-                  minHeight: "44px",
-                  display: "flex",
-                  alignItems: "center",
                   fontFamily: "monospace",
                   fontSize: "16px",
                 }}
@@ -355,31 +429,45 @@ const EditAccountPage: React.FC = () => {
                 placeholder="e.g., SBI1234"
                 value={formData.acctCode}
                 onChange={(e) => handleChange("acctCode", e.target.value)}
-                style={bankingStyles.input}
+                style={inputStyle}
                 required
                 disabled={submitting}
                 maxLength={50}
               />
             </div>
 
-            {/* Account Details */}
+            {/* Account Details - Using escaped value */}
             <div style={{ marginBottom: "20px" }}>
               <label style={bankingStyles.label}>Account Details *</label>
               <textarea
                 placeholder="Bank name, branch, account type, etc."
                 value={formData.acctDetails}
-                onChange={(e) => handleChange("acctDetails", e.target.value)}
-                style={{
-                  ...bankingStyles.input,
-                  minHeight: "100px",
-                  resize: "vertical",
-                  lineHeight: "1.5",
+                onChange={(e) => {
+                  console.log(
+                    "Textarea change - escaped value:",
+                    e.target.value,
+                  );
+                  console.log(
+                    "Textarea change - unescaped preview:",
+                    unescapeTextareaValue(e.target.value),
+                  );
+                  handleChange("acctDetails", e.target.value);
                 }}
-                rows={4}
+                style={textareaStyle}
+                rows={6} // Increased rows for more content
                 required
                 disabled={submitting}
-                maxLength={500}
+                maxLength={1000} // Increased max length
               />
+              <div
+                style={{ fontSize: "12px", color: "#666", marginTop: "5px" }}
+              >
+                Characters: {formData.acctDetails.length}/1000 | Contains
+                asterisks:{" "}
+                {formData.acctDetails.includes("&#42;")
+                  ? "Yes (escaped)"
+                  : "No"}
+              </div>
             </div>
 
             {/* Savings Amount */}
@@ -408,7 +496,7 @@ const EditAccountPage: React.FC = () => {
                     handleChange("savingsAmount", e.target.value)
                   }
                   style={{
-                    ...bankingStyles.input,
+                    ...inputStyle,
                     paddingLeft: "35px",
                   }}
                   required
@@ -419,7 +507,7 @@ const EditAccountPage: React.FC = () => {
               </div>
             </div>
 
-            {/* MPIN - Show as plain text input in edit mode */}
+            {/* MPIN */}
             <div style={{ marginBottom: "30px" }}>
               <label style={bankingStyles.label}>MPIN</label>
               <input
@@ -428,7 +516,7 @@ const EditAccountPage: React.FC = () => {
                 value={formData.mpin}
                 onChange={(e) => handleChange("mpin", e.target.value)}
                 style={{
-                  ...bankingStyles.input,
+                  ...inputStyle,
                   fontFamily: "monospace",
                   fontSize: "16px",
                 }}
@@ -581,51 +669,22 @@ const EditAccountPage: React.FC = () => {
         </div>
       )}
 
-      {/* Loading overlay */}
-      {submitting && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              textAlign: "center",
-              padding: "30px",
-              backgroundColor: "white",
-              borderRadius: "12px",
-              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-            }}
-          >
-            <div
-              style={{
-                width: "50px",
-                height: "50px",
-                border: "3px solid #e5e7eb",
-                borderTop: "3px solid #2563eb",
-                borderRadius: "50%",
-                animation: "spin 1s linear infinite",
-                margin: "0 auto 15px",
-              }}
-            ></div>
-            <p style={{ margin: 0, color: "#374151", fontWeight: "500" }}>
-              Saving changes...
-            </p>
-          </div>
-        </div>
-      )}
-
       <style>
-        {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
+        {`
+          /* Ensure textarea is fully editable */
+          textarea {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+            pointer-events: auto !important;
+          }
+          
+          @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+          }
+        `}
       </style>
     </div>
   );

@@ -243,17 +243,17 @@ const EditAccountPage: React.FC = () => {
     );
   }
 
-  // Create a clean style for textarea
+  // Create a clean style for textarea - CHANGED FONT ONLY
   const textareaStyle: React.CSSProperties = {
     width: "100%",
     padding: "12px",
     borderRadius: "8px",
     border: "1px solid #d1d5db",
     backgroundColor: submitting ? "#f3f4f6" : "white",
-    color: "#111827",
-    fontSize: "14px",
+    color: "#111827", // Default text color
+    fontSize: "14px", // Normal font size
     lineHeight: "1.5",
-    fontFamily: "'Courier New', monospace", // Use monospace for better readability
+    fontFamily: "inherit", // Use default font instead of monospace
     minHeight: "150px", // Increased height for multiline content
     resize: "vertical" as const,
     boxSizing: "border-box" as const,
@@ -310,8 +310,8 @@ const EditAccountPage: React.FC = () => {
         </div>
       )}
 
-      {/* Debug info */}
-      <div
+      {/* Debug info - REMOVED TO CLEAN UP UI */}
+      {/* <div
         style={{
           padding: "10px 15px",
           backgroundColor: "#f0f9ff",
@@ -322,7 +322,7 @@ const EditAccountPage: React.FC = () => {
       >
         Editing: {account?.acctCode} | Contains special characters:{" "}
         {formData.acctDetails.includes("*") ? "Yes (asterisks escaped)" : "No"}
-      </div>
+      </div> */}
 
       {/* Form */}
       <div style={{ padding: "15px 0" }}>
@@ -351,7 +351,7 @@ const EditAccountPage: React.FC = () => {
                   ...textareaStyle,
                   backgroundColor: "#f9fafb",
                   cursor: "default",
-                  fontFamily: "'Courier New', monospace",
+                  fontFamily: "inherit", // Use default font
                 }}
               >
                 {unescapeTextareaValue(formData.acctDetails) ||
@@ -429,7 +429,7 @@ const EditAccountPage: React.FC = () => {
                 placeholder="e.g., SBI1234"
                 value={formData.acctCode}
                 onChange={(e) => handleChange("acctCode", e.target.value)}
-                style={inputStyle}
+                style={bankingStyles.input} // Use original bankingStyles
                 required
                 disabled={submitting}
                 maxLength={50}
@@ -442,17 +442,7 @@ const EditAccountPage: React.FC = () => {
               <textarea
                 placeholder="Bank name, branch, account type, etc."
                 value={formData.acctDetails}
-                onChange={(e) => {
-                  console.log(
-                    "Textarea change - escaped value:",
-                    e.target.value,
-                  );
-                  console.log(
-                    "Textarea change - unescaped preview:",
-                    unescapeTextareaValue(e.target.value),
-                  );
-                  handleChange("acctDetails", e.target.value);
-                }}
+                onChange={(e) => handleChange("acctDetails", e.target.value)}
                 style={textareaStyle}
                 rows={6} // Increased rows for more content
                 required
@@ -462,11 +452,7 @@ const EditAccountPage: React.FC = () => {
               <div
                 style={{ fontSize: "12px", color: "#666", marginTop: "5px" }}
               >
-                Characters: {formData.acctDetails.length}/1000 | Contains
-                asterisks:{" "}
-                {formData.acctDetails.includes("&#42;")
-                  ? "Yes (escaped)"
-                  : "No"}
+                Characters: {formData.acctDetails.length}/1000
               </div>
             </div>
 
@@ -495,10 +481,7 @@ const EditAccountPage: React.FC = () => {
                   onChange={(e) =>
                     handleChange("savingsAmount", e.target.value)
                   }
-                  style={{
-                    ...inputStyle,
-                    paddingLeft: "35px",
-                  }}
+                  style={bankingStyles.input} // Use original bankingStyles
                   required
                   min="0"
                   step="0.01"
@@ -515,11 +498,7 @@ const EditAccountPage: React.FC = () => {
                 placeholder="Enter MPIN or any access code"
                 value={formData.mpin}
                 onChange={(e) => handleChange("mpin", e.target.value)}
-                style={{
-                  ...inputStyle,
-                  fontFamily: "monospace",
-                  fontSize: "16px",
-                }}
+                style={bankingStyles.input} // Use original bankingStyles
                 disabled={submitting}
               />
             </div>

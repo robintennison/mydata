@@ -330,28 +330,46 @@ const MyDataHomepage: React.FC = () => {
               );
               const isImmediate = daysUntil <= 1;
 
+              // Combine amount and short comments
+              const amountWithComments = `${formatLakhs(deposit.amount)}${deposit.comments ? ` • ${getShortComments(deposit.comments)}` : ""}`;
+
               return (
                 <div
                   key={deposit.id}
                   className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
+                  style={{
+                    fontSize: "0.95rem",
+                    lineHeight: "1.2",
+                  }}
                 >
-                  <div className={styles.compactCell}>
-                    <span className={styles.compactCellValue}>
+                  <div className={styles.compactCell} style={{ flex: 1.5 }}>
+                    <span
+                      className={styles.compactCellValue}
+                      style={{ fontSize: "0.95rem" }}
+                    >
                       {getAccountName(deposit.accountId)}
                     </span>
                   </div>
-                  <div className={styles.compactCell}>
-                    <span className={styles.compactCellValue}>
-                      {formatLakhs(deposit.amount)}
+                  <div className={styles.compactCell} style={{ flex: 1.5 }}>
+                    <span
+                      className={styles.compactCellValue}
+                      style={{
+                        fontSize: "0.95rem",
+                        color: "#1e40af",
+                      }}
+                    >
+                      {amountWithComments}
                     </span>
                   </div>
-                  <div className={styles.compactCell}>
-                    <span className={styles.compactCellValue}>
-                      {getShortComments(deposit.comments || "")}
-                    </span>
-                  </div>
-                  <div className={styles.compactCell}>
-                    <span className={styles.compactCellValue}>
+                  <div className={styles.compactCell} style={{ flex: 1 }}>
+                    <span
+                      className={styles.compactCellValue}
+                      style={{
+                        fontSize: "0.95rem",
+                        whiteSpace: "nowrap",
+                        textAlign: "right",
+                      }}
+                    >
                       {formatDateShort(deposit.endDate)}
                       {isImmediate && (
                         <span className={styles.immediateBadge}>
@@ -427,19 +445,36 @@ const MyDataHomepage: React.FC = () => {
                 <div
                   key={renewal.id}
                   className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
+                  style={{
+                    fontSize: "0.95rem",
+                    lineHeight: "1.2",
+                  }}
                 >
-                  <div className={styles.compactCell}>
-                    <span className={styles.compactCellValue}>
+                  <div className={styles.compactCell} style={{ flex: 2 }}>
+                    <span
+                      className={styles.compactCellValue}
+                      style={{ fontSize: "0.95rem" }}
+                    >
                       {renewal.name}
                     </span>
                   </div>
-                  <div className={styles.compactCell}>
-                    <span className={styles.compactCellValue}>
+                  <div className={styles.compactCell} style={{ flex: 1 }}>
+                    <span
+                      className={styles.compactCellValue}
+                      style={{ fontSize: "0.95rem" }}
+                    >
                       {getShortComments(renewal.comments || "")}
                     </span>
                   </div>
-                  <div className={styles.compactCell}>
-                    <span className={styles.compactCellValue}>
+                  <div className={styles.compactCell} style={{ flex: 1 }}>
+                    <span
+                      className={styles.compactCellValue}
+                      style={{
+                        fontSize: "0.95rem",
+                        whiteSpace: "nowrap",
+                        textAlign: "right",
+                      }}
+                    >
                       {formatDateShort(renewal.endDate)}
                       {isImmediate && (
                         <span className={styles.immediateBadge}>

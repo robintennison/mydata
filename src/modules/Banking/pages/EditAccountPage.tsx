@@ -1,6 +1,5 @@
-// src/modules/Banking/pages/EditAccountPage.tsx
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom"; // Removed useLocation
+import { useNavigate, useParams } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
@@ -9,16 +8,12 @@ import type { BankAccount } from "../../../types/banking.types";
 
 const EditAccountPage: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>(); // Removed useLocation
+  const { id } = useParams<{ id: string }>();
   const { settings } = useSettings();
   const { accounts, loading: dataLoading } = useBankingData();
   const { handleSaveAccount, handleDeleteAccount } = useBankingOperations();
 
-  // Determine if we're in view mode
-  // If showDelete is false, we're in view mode (read-only)
-  // If showDelete is true, we're in edit mode
   const isViewMode = !settings?.showDelete;
-  //const isEditMode = settings?.showDelete;
 
   const [submitting, setSubmitting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -32,7 +27,6 @@ const EditAccountPage: React.FC = () => {
     mpin: "",
   });
 
-  // Find the account when accounts data loads or id changes
   useEffect(() => {
     if (!id) {
       setError("Account ID is missing");
@@ -59,7 +53,7 @@ const EditAccountPage: React.FC = () => {
   }, [id, accounts, dataLoading]);
 
   const handleChange = (field: keyof typeof formData, value: string) => {
-    if (isViewMode) return; // Prevent changes in view mode
+    if (isViewMode) return;
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -80,7 +74,6 @@ const EditAccountPage: React.FC = () => {
       setError("Please enter a valid savings amount");
       return false;
     }
-    // Removed the 4-digit restriction for MPIN
     if (formData.mpin.length === 0) {
       setError("MPIN is required");
       return false;
@@ -93,7 +86,6 @@ const EditAccountPage: React.FC = () => {
     e.preventDefault();
 
     if (isViewMode) {
-      // In view mode, form submission is disabled
       return;
     }
 
@@ -115,10 +107,9 @@ const EditAccountPage: React.FC = () => {
       console.log("Updating account with data:", accountData);
       await handleSaveAccount(accountData);
 
-      // Success - ALWAYS navigate back to banking with accounts tab active
+      // FIXED: Use activeTab, not tab
       navigate("/banking", {
-        state: { activeTab: "accounts" }, // Force accounts tab
-        replace: true,
+        state: { activeTab: "accounts" },
       });
     } catch (err) {
       console.error("Update error:", err);
@@ -132,10 +123,9 @@ const EditAccountPage: React.FC = () => {
 
     try {
       await handleDeleteAccount(id);
-      // After delete, ALWAYS navigate back to banking with accounts tab active
+      // FIXED: Use activeTab, not tab
       navigate("/banking", {
-        state: { activeTab: "accounts" }, // Force accounts tab
-        replace: true,
+        state: { activeTab: "accounts" },
       });
     } catch (err) {
       console.error("Delete error:", err);
@@ -147,10 +137,9 @@ const EditAccountPage: React.FC = () => {
 
   const handleCancel = () => {
     if (isViewMode) {
-      // In view mode, just go back
+      // FIXED: Use activeTab, not tab
       navigate("/banking", {
-        state: { tab: "accounts" },
-        replace: true,
+        state: { activeTab: "accounts" },
       });
       return;
     }
@@ -169,10 +158,9 @@ const EditAccountPage: React.FC = () => {
       if (!confirmLeave) return;
     }
 
-    // ALWAYS navigate back to banking with accounts tab active
+    // FIXED: Use activeTab, not tab
     navigate("/banking", {
-      state: { activeTab: "accounts" }, // Force accounts tab
-      replace: true,
+      state: { activeTab: "accounts" },
     });
   };
 
@@ -224,7 +212,6 @@ const EditAccountPage: React.FC = () => {
           ←
         </button>
         <div style={bankingStyles.navTitle}>Banking / {getPageTitle()}</div>
-        {/* Remove Edit button from top when in view mode */}
         <div style={{ width: "40px" }}></div>
       </div>
 
@@ -436,7 +423,7 @@ const EditAccountPage: React.FC = () => {
             <div style={{ marginBottom: "30px" }}>
               <label style={bankingStyles.label}>MPIN</label>
               <input
-                type="text" // Changed from "password" to "text"
+                type="text"
                 placeholder="Enter MPIN or any access code"
                 value={formData.mpin}
                 onChange={(e) => handleChange("mpin", e.target.value)}
@@ -447,7 +434,6 @@ const EditAccountPage: React.FC = () => {
                 }}
                 disabled={submitting}
               />
-              {/* Removed the 4-digit restriction message */}
             </div>
 
             {/* Buttons - Edit mode only */}

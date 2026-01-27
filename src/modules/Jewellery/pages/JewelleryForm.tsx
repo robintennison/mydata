@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   getFirestore,
   collection,
@@ -6,6 +6,7 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +15,7 @@ interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
   onSubmit: (data: Partial<Jewellery>) => void;
   isEditing?: boolean;
-  onCancel?: () => void; // Optional cancel callback
+  onCancel?: () => void;
 }
 
 interface Bill {
@@ -33,6 +34,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   onCancel,
 }) => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [storage] = useState(getStorage());
 
   const [formData, setFormData] = useState<Partial<Jewellery>>({
     code: "",
@@ -46,6 +49,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     verificationNotes: "",
     lastVerified: 0,
     billId: "",
+    imageUrl: "",
     ...initialData,
   });
 
@@ -56,12 +60,31 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   const [showBillDropdown, setShowBillDropdown] = useState(false);
   const [billError, setBillError] = useState<string | null>(null);
 
+  // Image states
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    formData.imageUrl || null,
+  );
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [deletingImage, setDeletingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   // Get settings data
   const {
     locations,
     boughtForOptions,
     loading: settingsLoading,
   } = useJewellerySettings();
+
+  // Initialize image preview when formData changes
+  useEffect(() => {
+    if (formData.imageUrl) {
+      setImagePreview(formData.imageUrl);
+    } else {
+      setImagePreview(null);
+    }
+  }, [formData.imageUrl]);
 
   // Fetch assigned bill details based on billId
   useEffect(() => {
@@ -200,6 +223,128 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/jpg",
+    ];
+    if (!validTypes.includes(file.type)) {
+      setImageError("Please select a valid image file (JPEG, PNG, GIF, WebP)");
+      return;
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setImageError("Image size should be less than 5MB");
+      return;
+    }
+
+    setSelectedFile(file);
+    setImageError(null);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUploadImage = async () => {
+    if (!selectedFile) {
+      setImageError("Please select an image file first");
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      setImageError(null);
+
+      // Generate a unique filename
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 9);
+      const fileExtension = selectedFile.name.split(".").pop();
+      const fileName = `jewellery_${timestamp}_${randomId}.${fileExtension}`;
+
+      // Create storage reference
+      const storageRef = ref(storage, `jewellery_images/${fileName}`);
+
+      // Upload file
+      const snapshot = await uploadBytes(storageRef, selectedFile);
+
+      // Get download URL
+      const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${snapshot.ref.bucket}/o/${encodeURIComponent(snapshot.ref.fullPath)}?alt=media`;
+
+      // Update form data with new image URL
+      setFormData((prev) => ({
+        ...prev,
+        imageUrl: downloadURL,
+      }));
+
+      // Clear selected file
+      setSelectedFile(null);
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      setImageError(`Failed to upload image: ${error.message}`);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    if (!formData.imageUrl) {
+      setShowDeleteConfirm(false);
+      return;
+    }
+
+    try {
+      setDeletingImage(true);
+      setImageError(null);
+
+      // Extract file path from URL
+      const url = new URL(formData.imageUrl);
+      const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+
+      if (pathMatch) {
+        const filePath = decodeURIComponent(pathMatch[1]);
+        const storageRef = ref(storage, filePath);
+
+        // Delete file from storage
+        await deleteObject(storageRef);
+
+        // Update form data
+        setFormData((prev) => ({
+          ...prev,
+          imageUrl: "",
+        }));
+
+        // Clear preview
+        setImagePreview(null);
+      } else {
+        throw new Error("Could not extract file path from URL");
+      }
+    } catch (error: any) {
+      console.error("Error deleting image:", error);
+      setImageError(`Failed to delete image: ${error.message}`);
+    } finally {
+      setDeletingImage(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -284,8 +429,15 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     if (onCancel) {
       onCancel();
     } else {
-      // Default behavior: navigate back
       navigate(-1);
+    }
+  };
+
+  const handleCancelImageUpload = () => {
+    setSelectedFile(null);
+    setImageError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -294,6 +446,245 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       onSubmit={handleSubmit}
       style={{ maxWidth: "600px", margin: "0 auto" }}
     >
+      {/* Image Section - ADDED AT THE TOP */}
+      <div style={{ marginBottom: "25px" }}>
+        <label
+          style={{
+            display: "block",
+            marginBottom: "10px",
+            fontSize: "14px",
+            color: "#374151",
+            fontWeight: "500",
+          }}
+        >
+          Jewellery Image
+        </label>
+
+        {/* Image Preview */}
+        {imagePreview && (
+          <div
+            style={{
+              marginBottom: "15px",
+              textAlign: "center",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-block",
+                maxWidth: "100%",
+                position: "relative",
+              }}
+            >
+              <img
+                src={imagePreview}
+                alt="Jewellery preview"
+                style={{
+                  maxWidth: "300px",
+                  maxHeight: "300px",
+                  borderRadius: "8px",
+                  border: "1px solid #e5e7eb",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                }}
+              />
+
+              {/* Delete button overlay */}
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={deletingImage}
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  backgroundColor: "rgba(220, 38, 38, 0.9)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "32px",
+                  height: "32px",
+                  cursor: deletingImage ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "16px",
+                  opacity: deletingImage ? 0.7 : 1,
+                  transition: "all 0.2s",
+                }}
+                title="Delete Image"
+                onMouseEnter={(e) => {
+                  if (!deletingImage) {
+                    e.currentTarget.style.backgroundColor =
+                      "rgba(185, 28, 28, 0.9)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!deletingImage) {
+                    e.currentTarget.style.backgroundColor =
+                      "rgba(220, 38, 38, 0.9)";
+                  }
+                }}
+              >
+                {deletingImage ? "⏳" : "🗑️"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* File Upload Section */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div
+            style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}
+          >
+            <div style={{ flex: 1 }}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                disabled={uploadingImage || deletingImage}
+                style={{
+                  width: "100%",
+                  padding: "8px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                  fontSize: "14px",
+                  backgroundColor: "white",
+                  boxSizing: "border-box",
+                  opacity: uploadingImage || deletingImage ? 0.7 : 1,
+                  cursor:
+                    uploadingImage || deletingImage ? "not-allowed" : "pointer",
+                }}
+              />
+            </div>
+
+            {selectedFile ? (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  type="button"
+                  onClick={handleUploadImage}
+                  disabled={uploadingImage || deletingImage}
+                  style={{
+                    padding: "8px 15px",
+                    backgroundColor: uploadingImage ? "#94a3b8" : "#10b981",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: uploadingImage ? "not-allowed" : "pointer",
+                    fontSize: "14px",
+                    whiteSpace: "nowrap",
+                    opacity: uploadingImage || deletingImage ? 0.7 : 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  {uploadingImage ? (
+                    <>
+                      <span>⏳</span>
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📤</span>
+                      <span>Upload</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCancelImageUpload}
+                  disabled={uploadingImage || deletingImage}
+                  style={{
+                    padding: "8px 15px",
+                    backgroundColor: "#f3f4f6",
+                    color: "#374151",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "6px",
+                    cursor:
+                      uploadingImage || deletingImage
+                        ? "not-allowed"
+                        : "pointer",
+                    fontSize: "14px",
+                    whiteSpace: "nowrap",
+                    opacity: uploadingImage || deletingImage ? 0.7 : 1,
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              !imagePreview && (
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    fontStyle: "italic",
+                  }}
+                >
+                  No image selected
+                </div>
+              )
+            )}
+          </div>
+
+          {/* File info and errors */}
+          {selectedFile && (
+            <div
+              style={{
+                padding: "8px 12px",
+                backgroundColor: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                borderRadius: "6px",
+                fontSize: "13px",
+                color: "#475569",
+              }}
+            >
+              Selected: {selectedFile.name} (
+              {(selectedFile.size / 1024).toFixed(1)} KB)
+            </div>
+          )}
+
+          {imageError && (
+            <div
+              style={{
+                padding: "8px 12px",
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: "6px",
+                fontSize: "13px",
+                color: "#dc2626",
+              }}
+            >
+              ⚠️ {imageError}
+            </div>
+          )}
+
+          {!imagePreview && !selectedFile && (
+            <div
+              style={{
+                padding: "20px",
+                border: "2px dashed #d1d5db",
+                borderRadius: "8px",
+                textAlign: "center",
+                color: "#6b7280",
+                fontSize: "14px",
+              }}
+            >
+              <div style={{ marginBottom: "8px" }}>
+                <span style={{ fontSize: "24px" }}>📷</span>
+              </div>
+              <div>No image uploaded</div>
+              <div style={{ fontSize: "12px", marginTop: "4px" }}>
+                Click "Choose File" to add an image
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Rest of the form fields remain the same */}
       {/* Code and Weight in same row */}
       <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
         <div style={{ flex: 1 }}>
@@ -523,7 +914,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         </div>
       </div>
 
-      {/* Bill Section - MOVED TO BOTTOM */}
+      {/* Bill Section */}
       <div
         style={{
           marginBottom: "20px",
@@ -855,20 +1246,119 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
         <button
           type="submit"
+          disabled={uploadingImage || deletingImage}
           style={{
             padding: "10px 30px",
-            backgroundColor: "#3b82f6",
+            backgroundColor:
+              uploadingImage || deletingImage ? "#94a3b8" : "#3b82f6",
             color: "white",
             border: "none",
             borderRadius: "6px",
-            cursor: "pointer",
+            cursor: uploadingImage || deletingImage ? "not-allowed" : "pointer",
             fontSize: "16px",
             fontWeight: "500",
+            opacity: uploadingImage || deletingImage ? 0.7 : 1,
           }}
         >
           {isEditing ? "Update" : "Add Item"}
         </button>
       </div>
+
+      {/* Delete Image Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10000,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "12px",
+              padding: "24px",
+              maxWidth: "400px",
+              width: "100%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            }}
+          >
+            <h3
+              style={{
+                margin: "0 0 12px 0",
+                fontSize: "1.25rem",
+                fontWeight: 600,
+                color: "#333",
+              }}
+            >
+              Delete Image
+            </h3>
+            <p
+              style={{
+                margin: "0 0 24px 0",
+                color: "#666",
+                lineHeight: "1.5",
+                fontSize: "0.95rem",
+              }}
+            >
+              Are you sure you want to delete this image? This action cannot be
+              undone.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deletingImage}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "transparent",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "8px",
+                  color: "#666",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontSize: "0.95rem",
+                  minWidth: "80px",
+                  opacity: deletingImage ? 0.7 : 1,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteImage}
+                disabled={deletingImage}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: deletingImage ? "#9ca3af" : "#dc2626",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#fff",
+                  fontWeight: 500,
+                  cursor: deletingImage ? "not-allowed" : "pointer",
+                  fontSize: "0.95rem",
+                  minWidth: "80px",
+                  opacity: deletingImage ? 0.7 : 1,
+                }}
+              >
+                {deletingImage ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 };

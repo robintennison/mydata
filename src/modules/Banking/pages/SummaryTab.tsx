@@ -320,8 +320,6 @@ const SummaryTab: React.FC = () => {
 
   return (
     <div style={{ padding: "0 4px", width: "100%" }}>
-      {" "}
-      {/* Added width: 100% */}
       {/* Error Message */}
       {saveError && (
         <div style={styles.errorContainer}>
@@ -344,14 +342,16 @@ const SummaryTab: React.FC = () => {
         <>
           {/* Summary Table */}
           <div style={styles.tableContainer}>
-            {/* Table Header - Optimized for full width */}
+            {/* Table Header - Smaller font size */}
             <div style={styles.tableHeader}>
               <div
                 style={{
                   ...styles.headerCell,
-                  flex: 3, // Increased flex value
-                  paddingLeft: "12px",
-                  minWidth: "120px",
+                  flex: 3,
+                  paddingLeft: "8px",
+                  minWidth: "100px",
+                  fontSize: "12px", // Reduced from default
+                  fontWeight: "600",
                 }}
               >
                 Account
@@ -359,9 +359,11 @@ const SummaryTab: React.FC = () => {
               <div
                 style={{
                   ...styles.headerCell,
-                  flex: 2.5, // Increased flex value
+                  flex: 2,
                   textAlign: "right",
-                  paddingRight: "20px",
+                  paddingRight: "12px",
+                  fontSize: "12px", // Reduced from default
+                  fontWeight: "600",
                 }}
               >
                 Savings
@@ -369,9 +371,11 @@ const SummaryTab: React.FC = () => {
               <div
                 style={{
                   ...styles.headerCell,
-                  flex: 2.5, // Increased flex value
+                  flex: 2,
                   textAlign: "right",
-                  paddingRight: "20px",
+                  paddingRight: "12px",
+                  fontSize: "12px", // Reduced from default
+                  fontWeight: "600",
                 }}
               >
                 Deposits
@@ -379,16 +383,18 @@ const SummaryTab: React.FC = () => {
               <div
                 style={{
                   ...styles.headerCell,
-                  flex: 1, // Increased flex value
+                  flex: 0.8,
                   textAlign: "center",
-                  minWidth: "90px",
+                  minWidth: "40px",
+                  fontSize: "12px", // Reduced from default
+                  fontWeight: "600",
                 }}
               >
-                Actions
+                Edit
               </div>
             </div>
 
-            {/* Table Rows - Optimized for full width */}
+            {/* Table Rows - Smaller font size */}
             <div>
               {summaries.map((summary, index) => {
                 const isEditing = editingAccountId === summary.accountId;
@@ -399,13 +405,14 @@ const SummaryTab: React.FC = () => {
                     key={summary.accountId}
                     style={{
                       ...styles.tableRow,
-                      width: "100%", // Explicit width
+                      width: "100%",
                       backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
                       borderBottom:
                         index < summaries.length - 1
                           ? "1px solid #f3f4f6"
                           : "none",
                       cursor: "pointer",
+                      fontSize: "13px", // Reduced font size for entire row
                     }}
                     onMouseEnter={(e) => {
                       if (!isEditing)
@@ -417,29 +424,35 @@ const SummaryTab: React.FC = () => {
                           index % 2 === 0 ? "#ffffff" : "#f9fafb";
                     }}
                   >
-                    {/* Account Code - Full width optimized */}
+                    {/* Account Code */}
                     <div
                       style={{
                         ...styles.tableCell,
                         flex: 3,
-                        paddingLeft: "12px",
+                        paddingLeft: "8px",
                         overflow: "hidden",
-                        minWidth: "120px",
+                        minWidth: "100px",
                       }}
                     >
-                      <div style={styles.accountCode}>
+                      <div
+                        style={{
+                          ...styles.accountCode,
+                          fontSize: "13px", // Smaller font
+                          fontWeight: "500",
+                        }}
+                      >
                         {summary.accountCode}
                       </div>
                     </div>
 
-                    {/* Savings Amount - Full width optimized */}
+                    {/* Savings Amount */}
                     <div
                       style={{
                         ...styles.tableCell,
-                        flex: 2.5,
+                        flex: 2,
                         textAlign: "right",
-                        paddingRight: "20px",
-                        minWidth: "100px",
+                        paddingRight: "12px",
+                        minWidth: "80px",
                       }}
                     >
                       {isEditing ? (
@@ -450,7 +463,9 @@ const SummaryTab: React.FC = () => {
                             onChange={(e) => setEditedSavings(e.target.value)}
                             style={{
                               ...styles.editInput,
-                              width: "100%", // Full width input
+                              width: "100%",
+                              fontSize: "13px", // Smaller input font
+                              padding: "4px 6px",
                             }}
                             step="0.01"
                             min="0"
@@ -463,7 +478,8 @@ const SummaryTab: React.FC = () => {
                           style={{
                             ...styles.amountDisplay,
                             color: "#1976d2",
-                            fontSize: "15px",
+                            fontSize: "13px", // Smaller font
+                            fontWeight: "600",
                           }}
                         >
                           {summary.savingsInLakhs}
@@ -471,14 +487,14 @@ const SummaryTab: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Deposits Amount - Full width optimized */}
+                    {/* Deposits Amount */}
                     <div
                       style={{
                         ...styles.tableCell,
-                        flex: 2.5,
+                        flex: 2,
                         textAlign: "right",
-                        paddingRight: "20px",
-                        minWidth: "100px",
+                        paddingRight: "12px",
+                        minWidth: "80px",
                       }}
                     >
                       {isEditing ? (
@@ -489,7 +505,9 @@ const SummaryTab: React.FC = () => {
                             onChange={(e) => setEditedDeposits(e.target.value)}
                             style={{
                               ...styles.editInput,
-                              width: "100%", // Full width input
+                              width: "100%",
+                              fontSize: "13px", // Smaller input font
+                              padding: "4px 6px",
                             }}
                             step="0.01"
                             min="0"
@@ -502,7 +520,8 @@ const SummaryTab: React.FC = () => {
                           style={{
                             ...styles.amountDisplay,
                             color: "#1976d2",
-                            fontSize: "15px",
+                            fontSize: "13px", // Smaller font
+                            fontWeight: "600",
                           }}
                         >
                           {summary.depositsInLakhs}
@@ -510,33 +529,57 @@ const SummaryTab: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Action Column - Full width optimized */}
+                    {/* Action Column - Compact icon button */}
                     <div
                       style={{
                         ...styles.tableCell,
-                        flex: 1,
+                        flex: 0.8,
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        minWidth: "90px",
+                        minWidth: "40px",
+                        padding: "0 4px",
                       }}
                     >
                       {isEditing ? (
-                        <div style={styles.actionButtons}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "4px",
+                            alignItems: "center",
+                          }}
+                        >
                           <button
                             onClick={() => saveEdits(summary.accountId)}
                             style={{
-                              ...styles.saveButton,
+                              backgroundColor: "#10b981",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
                               cursor: isSaving ? "not-allowed" : "pointer",
                               opacity: isSaving ? 0.6 : 1,
-                              padding: "6px 12px",
-                              minWidth: "40px",
+                              padding: "4px 8px",
+                              minWidth: "28px",
+                              height: "28px",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
                             }}
                             title="Save"
                             disabled={isSaving}
                           >
                             {isSaving ? (
-                              <div style={styles.spinnerSmall}></div>
+                              <div
+                                style={{
+                                  width: "12px",
+                                  height: "12px",
+                                  border: "2px solid rgba(255,255,255,0.3)",
+                                  borderTopColor: "white",
+                                  borderRadius: "50%",
+                                  animation: "spin 0.8s linear infinite",
+                                }}
+                              ></div>
                             ) : (
                               "✓"
                             )}
@@ -544,9 +587,18 @@ const SummaryTab: React.FC = () => {
                           <button
                             onClick={cancelEditing}
                             style={{
-                              ...styles.cancelButton,
-                              padding: "6px 12px",
-                              minWidth: "40px",
+                              backgroundColor: "#ef4444",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: isSaving ? "not-allowed" : "pointer",
+                              padding: "4px 8px",
+                              minWidth: "28px",
+                              height: "28px",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
                             }}
                             title="Cancel"
                             disabled={isSaving}
@@ -564,22 +616,30 @@ const SummaryTab: React.FC = () => {
                             )
                           }
                           style={{
-                            ...styles.editButton,
+                            backgroundColor: "#3b82f6",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
                             cursor:
                               editingAccountId !== null
                                 ? "not-allowed"
                                 : "pointer",
                             opacity: editingAccountId !== null ? 0.5 : 1,
-                            padding: "8px 16px",
-                            minWidth: "50px",
+                            padding: "5px",
+                            minWidth: "30px",
+                            height: "30px",
+                            fontSize: "14px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                           }}
                           title="Edit"
                           disabled={editingAccountId !== null}
                         >
-                          ✏️ Edit
+                          ✏️
                         </button>
                       ) : (
-                        <div style={{ width: "50px", height: "32px" }}></div>
+                        <div style={{ width: "30px", height: "30px" }}></div>
                       )}
                     </div>
                   </div>
@@ -587,15 +647,15 @@ const SummaryTab: React.FC = () => {
               })}
             </div>
 
-            {/* Totals Row - Full width optimized */}
+            {/* Totals Row - Smaller font size */}
             <div style={styles.totalsRow}>
               <div
                 style={{
                   ...styles.totalsCell,
                   flex: 3,
-                  paddingLeft: "12px",
+                  paddingLeft: "8px",
                   fontWeight: "600",
-                  fontSize: "15px",
+                  fontSize: "13px", // Smaller font
                 }}
               >
                 TOTAL
@@ -603,12 +663,12 @@ const SummaryTab: React.FC = () => {
               <div
                 style={{
                   ...styles.totalsCell,
-                  flex: 2.5,
+                  flex: 2,
                   textAlign: "right",
-                  paddingRight: "20px",
+                  paddingRight: "12px",
                   color: "#1976d2",
                   fontWeight: "600",
-                  fontSize: "15px",
+                  fontSize: "13px", // Smaller font
                 }}
               >
                 {formatInLakhs(totalSavings)}
@@ -616,12 +676,12 @@ const SummaryTab: React.FC = () => {
               <div
                 style={{
                   ...styles.totalsCell,
-                  flex: 2.5,
+                  flex: 2,
                   textAlign: "right",
-                  paddingRight: "20px",
+                  paddingRight: "12px",
                   color: "#1976d2",
                   fontWeight: "600",
-                  fontSize: "15px",
+                  fontSize: "13px", // Smaller font
                 }}
               >
                 {formatInLakhs(totalDeposits)}
@@ -629,9 +689,9 @@ const SummaryTab: React.FC = () => {
               <div
                 style={{
                   ...styles.totalsCell,
-                  flex: 1,
+                  flex: 0.8,
                   textAlign: "center",
-                  minWidth: "90px",
+                  minWidth: "40px",
                 }}
               >
                 {/* Empty for consistency */}
@@ -642,11 +702,11 @@ const SummaryTab: React.FC = () => {
           {/* Summary Count Info */}
           <div
             style={{
-              fontSize: "12px",
+              fontSize: "11px", // Smaller font
               color: "#6b7280",
               textAlign: "center",
-              margin: "8px 0",
-              padding: "0 12px",
+              margin: "6px 0",
+              padding: "0 8px",
             }}
           >
             Showing {summaries.length} account
@@ -664,22 +724,29 @@ const SummaryTab: React.FC = () => {
                     ? "not-allowed"
                     : "pointer",
                 opacity: isUpdatingHistory || !currentMonth ? 0.6 : 1,
-                fontSize: "14px",
-                padding: "10px 20px",
-                minWidth: "250px",
+                fontSize: "13px", // Smaller font
+                padding: "8px 16px",
+                minWidth: "220px",
               }}
               disabled={isUpdatingHistory || !currentMonth}
             >
               {isUpdatingHistory ? (
                 <>
                   <div style={styles.spinnerSmall}></div>
-                  <span style={{ marginLeft: "8px" }}>Processing...</span>
+                  <span style={{ marginLeft: "6px", fontSize: "13px" }}>
+                    Processing...
+                  </span>
                 </>
               ) : (
                 historyButtonText || "Loading..."
               )}
             </button>
-            <div style={styles.historyNote}>
+            <div
+              style={{
+                ...styles.historyNote,
+                fontSize: "11px", // Smaller font
+              }}
+            >
               {historyButtonText?.includes("Update") ? "Updates" : "Creates"}{" "}
               record in history table for {currentMonth}
             </div>
@@ -692,17 +759,10 @@ const SummaryTab: React.FC = () => {
           100% { transform: rotate(360deg); }
         }
         
-        /* Full width optimization */
         input:focus {
           border-color: #3b82f6;
           box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
           outline: none;
-        }
-        
-        /* Ensure table uses full width */
-        [data-table="true"] {
-          width: 100%;
-          table-layout: fixed;
         }
       `}</style>
     </div>

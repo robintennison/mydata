@@ -149,7 +149,7 @@ const EditAccountPage: React.FC = () => {
     if (isViewMode) {
       // In view mode, just go back
       navigate("/banking", {
-        state: { activeTab: "accounts" },
+        state: { tab: "accounts" },
         replace: true,
       });
       return;
@@ -180,11 +180,6 @@ const EditAccountPage: React.FC = () => {
     if (!id) return "Add Account";
     return isViewMode ? "View Account" : "Edit Account";
   };
-
-  // const getPageSubtitle = () => {
-  //   if (!id) return "Create a new bank account";
-  //   return isViewMode ? "Account details" : "Update account information";
-  // };
 
   if (dataLoading) {
     return (

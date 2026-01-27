@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom"; // Add useLocation
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   getFirestore,
   doc,
@@ -31,8 +31,8 @@ const parseTimestamp = (timestamp: any): number => {
 
 const OnlineForm: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Get current location
-  const { id } = useParams<{ id?: string }>(); // Only get id parameter
+  const location = useLocation();
+  const { id } = useParams<{ id?: string }>();
 
   // Determine mode from the current URL path
   const getModeFromPath = (): "add" | "edit" | "view" => {
@@ -102,7 +102,7 @@ const OnlineForm: React.FC = () => {
       setImage1File(null);
       setImage2File(null);
     }
-  }, [id, location.pathname]); // Use location.pathname instead of mode
+  }, [id, location.pathname]);
 
   const fetchCategories = async () => {
     try {
@@ -155,12 +155,12 @@ const OnlineForm: React.FC = () => {
         setImage2File(null);
       } else {
         alert("Item not found");
-        navigate("/online");
+        navigate("/online", { state: { activeTab: "items" } });
       }
     } catch (error) {
       console.error("Error fetching item:", error);
       alert("Failed to load item");
-      navigate("/online");
+      navigate("/online", { state: { activeTab: "items" } });
     } finally {
       setLoading(false);
     }
@@ -210,7 +210,7 @@ const OnlineForm: React.FC = () => {
         alert("Item added successfully!");
       }
 
-      navigate("/online");
+      navigate("/online", { state: { activeTab: "items" } });
     } catch (error) {
       console.error("Error saving item:", error);
       alert("Failed to save item");
@@ -260,7 +260,7 @@ const OnlineForm: React.FC = () => {
       {/* Top Navigation */}
       <div style={onlineStyles.topNav}>
         <button
-          onClick={() => navigate("/online")}
+          onClick={() => navigate("/online", { state: { activeTab: "items" } })}
           style={onlineStyles.navButton}
           title="Back"
         >
@@ -274,7 +274,11 @@ const OnlineForm: React.FC = () => {
         {/* View mode: Show Edit button */}
         {isViewMode && (
           <button
-            onClick={() => navigate(`/online/items/edit/${id}`)}
+            onClick={() =>
+              navigate(`/online/items/edit/${id}`, {
+                state: { returnTo: "/online", activeTab: "items" },
+              })
+            }
             style={{
               ...onlineStyles.editButton,
               padding: "6px 12px",
@@ -579,7 +583,9 @@ const OnlineForm: React.FC = () => {
             <div style={onlineStyles.formActions}>
               <button
                 type="button"
-                onClick={() => navigate("/online")}
+                onClick={() =>
+                  navigate("/online", { state: { activeTab: "items" } })
+                }
                 style={onlineStyles.cancelButton}
                 disabled={saving}
               >

@@ -14,7 +14,7 @@ import { onlineStyles } from "../styles/onlineStyles";
 const RenewalForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
-  const isEditing = !!id; // Simple check: if we have an ID, we're editing
+  const isEditing = !!id;
 
   const [formData, setFormData] = useState<Renewal>({
     id: "",
@@ -71,12 +71,12 @@ const RenewalForm: React.FC = () => {
         });
       } else {
         alert("Renewal not found");
-        navigate("/online");
+        navigate("/online", { state: { activeTab: "renewals" } }); // UPDATED
       }
     } catch (error) {
       console.error("Error fetching renewal:", error);
       alert("Failed to load renewal");
-      navigate("/online");
+      navigate("/online", { state: { activeTab: "renewals" } }); // UPDATED
     } finally {
       setLoading(false);
     }
@@ -116,7 +116,7 @@ const RenewalForm: React.FC = () => {
         alert("Renewal added successfully!");
       }
 
-      navigate("/online");
+      navigate("/online", { state: { activeTab: "renewals" } }); // UPDATED
     } catch (error) {
       console.error("Error saving renewal:", error);
       alert("Failed to save renewal");
@@ -141,7 +141,9 @@ const RenewalForm: React.FC = () => {
       {/* Top Navigation with Save button */}
       <div style={onlineStyles.topNav}>
         <button
-          onClick={() => navigate("/online")}
+          onClick={() =>
+            navigate("/online", { state: { activeTab: "renewals" } })
+          } // UPDATED
           style={onlineStyles.navButton}
           title="Back"
         >

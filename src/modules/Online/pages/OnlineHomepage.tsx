@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { onlineStyles } from "../styles/onlineStyles";
 import OnlineListTab from "./OnlineListTab";
@@ -22,19 +22,26 @@ const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
 
 const OnlineHomepage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Added useLocation
+  const location = useLocation();
 
-  // State for active tab
+  // State for active tab - initialize from location state if available
   const [activeTab, setActiveTab] = useState<
     "items" | "renewals" | "categories"
-  >("items");
+  >(() => {
+    return location.state?.activeTab || "items";
+  });
 
   // Read the state when component mounts or location changes
   useEffect(() => {
     if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
+
+      // Clean up location state to prevent persisting across refreshes
+      if (location.state?.activeTab) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
     }
-  }, [location.state]);
+  }, [location]);
 
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({
@@ -73,11 +80,23 @@ const OnlineHomepage: React.FC = () => {
       renewalsSnapshot.forEach((doc) => {
         const data = doc.data();
         renewalsCount++;
-        if (
+
+        // Handle different date formats
+        let endDate = 0;
+        if (data.endDate && typeof data.endDate === "number") {
+          endDate = data.endDate;
+        } else if (
           data.endDate &&
-          data.endDate <= thirtyDaysFromNow &&
-          data.endDate > now
+          typeof data.endDate === "object" &&
+          data.endDate.toDate
         ) {
+          endDate = data.endDate.toDate().getTime();
+        } else if (data.endDate && typeof data.endDate === "string") {
+          const parsed = Date.parse(data.endDate);
+          endDate = isNaN(parsed) ? 0 : parsed;
+        }
+
+        if (endDate && endDate <= thirtyDaysFromNow && endDate > now) {
           expiringSoonCount++;
         }
       });
@@ -98,13 +117,19 @@ const OnlineHomepage: React.FC = () => {
   const handleAddClick = () => {
     switch (activeTab) {
       case "items":
-        navigate("/online/items/add");
+        navigate("/online/items/add", {
+          state: { returnTo: "/online", activeTab: "items" },
+        });
         break;
       case "renewals":
-        navigate("/online/renewals/add");
+        navigate("/online/renewals/add", {
+          state: { returnTo: "/online", activeTab: "renewals" },
+        });
         break;
       case "categories":
-        navigate("/online/categories/add");
+        navigate("/online/categories/add", {
+          state: { returnTo: "/online", activeTab: "categories" },
+        });
         break;
     }
   };
@@ -122,34 +147,33 @@ const OnlineHomepage: React.FC = () => {
 
   return (
     <div style={onlineStyles.container}>
-      {/* REMOVED: Top Navigation header - now in main Layout Header */}
-
       {/* Tab Navigation */}
       <div
         style={{
           display: "flex",
           backgroundColor: "white",
           borderBottom: "1px solid #e9ecef",
-          padding: "0 15px",
+          padding: "0 4px",
         }}
       >
         <button
           onClick={() => setActiveTab("items")}
           style={{
             flex: 1,
-            padding: "15px 0",
+            padding: "12px 0",
             backgroundColor: "transparent",
             border: "none",
             borderBottom:
               activeTab === "items"
-                ? "2px solid #48bb78"
-                : "2px solid transparent",
+                ? "3px solid #48bb78"
+                : "3px solid transparent",
             color: activeTab === "items" ? "#48bb78" : "#666",
             fontWeight: activeTab === "items" ? "600" : "500",
-            fontSize: "0.95rem",
+            fontSize: "0.9rem",
             cursor: "pointer",
             transition: "all 0.2s",
             position: "relative",
+            whiteSpace: "nowrap",
           }}
         >
           Items
@@ -157,14 +181,14 @@ const OnlineHomepage: React.FC = () => {
             <span
               style={{
                 position: "absolute",
-                top: "8px",
-                right: "15px",
+                top: "6px",
+                right: "8px",
                 backgroundColor: "#48bb78",
                 color: "white",
-                fontSize: "0.7rem",
-                padding: "2px 6px",
+                fontSize: "0.65rem",
+                padding: "1px 5px",
                 borderRadius: "10px",
-                minWidth: "20px",
+                minWidth: "18px",
                 textAlign: "center",
               }}
             >
@@ -177,19 +201,20 @@ const OnlineHomepage: React.FC = () => {
           onClick={() => setActiveTab("renewals")}
           style={{
             flex: 1,
-            padding: "15px 0",
+            padding: "12px 0",
             backgroundColor: "transparent",
             border: "none",
             borderBottom:
               activeTab === "renewals"
-                ? "2px solid #ed8936"
-                : "2px solid transparent",
+                ? "3px solid #ed8936"
+                : "3px solid transparent",
             color: activeTab === "renewals" ? "#ed8936" : "#666",
             fontWeight: activeTab === "renewals" ? "600" : "500",
-            fontSize: "0.95rem",
+            fontSize: "0.9rem",
             cursor: "pointer",
             transition: "all 0.2s",
             position: "relative",
+            whiteSpace: "nowrap",
           }}
         >
           Renewals
@@ -197,15 +222,15 @@ const OnlineHomepage: React.FC = () => {
             <span
               style={{
                 position: "absolute",
-                top: "8px",
-                right: "15px",
+                top: "6px",
+                right: "8px",
                 backgroundColor:
                   counts.expiringSoon > 0 ? "#ed8936" : "#4299e1",
                 color: "white",
-                fontSize: "0.7rem",
-                padding: "2px 6px",
+                fontSize: "0.65rem",
+                padding: "1px 5px",
                 borderRadius: "10px",
-                minWidth: "20px",
+                minWidth: "18px",
                 textAlign: "center",
               }}
             >
@@ -214,7 +239,7 @@ const OnlineHomepage: React.FC = () => {
                 <span
                   style={{
                     display: "block",
-                    fontSize: "0.6rem",
+                    fontSize: "0.55rem",
                     marginTop: "1px",
                     color: "#fffaf0",
                   }}
@@ -230,19 +255,20 @@ const OnlineHomepage: React.FC = () => {
           onClick={() => setActiveTab("categories")}
           style={{
             flex: 1,
-            padding: "15px 0",
+            padding: "12px 0",
             backgroundColor: "transparent",
             border: "none",
             borderBottom:
               activeTab === "categories"
-                ? "2px solid #4299e1"
-                : "2px solid transparent",
+                ? "3px solid #4299e1"
+                : "3px solid transparent",
             color: activeTab === "categories" ? "#4299e1" : "#666",
             fontWeight: activeTab === "categories" ? "600" : "500",
-            fontSize: "0.95rem",
+            fontSize: "0.9rem",
             cursor: "pointer",
             transition: "all 0.2s",
             position: "relative",
+            whiteSpace: "nowrap",
           }}
         >
           Categories
@@ -250,14 +276,14 @@ const OnlineHomepage: React.FC = () => {
             <span
               style={{
                 position: "absolute",
-                top: "8px",
-                right: "15px",
+                top: "6px",
+                right: "8px",
                 backgroundColor: "#9f7aea",
                 color: "white",
-                fontSize: "0.7rem",
-                padding: "2px 6px",
+                fontSize: "0.65rem",
+                padding: "1px 5px",
                 borderRadius: "10px",
-                minWidth: "20px",
+                minWidth: "18px",
                 textAlign: "center",
               }}
             >
@@ -272,7 +298,7 @@ const OnlineHomepage: React.FC = () => {
         style={{
           flex: 1,
           overflow: "hidden",
-          padding: "8px 4px", // Custom minimal padding
+          padding: "8px 4px",
         }}
       >
         <TabContent activeTab={activeTab} />
@@ -282,7 +308,7 @@ const OnlineHomepage: React.FC = () => {
       <button
         onClick={handleAddClick}
         style={{
-          position: "fixed" as const,
+          position: "fixed",
           bottom: "20px",
           right: "20px",
           backgroundColor:

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ADDED: Import useNavigate
+import { useNavigate, useLocation } from "react-router-dom";
 import { jewelleryStyles } from "./styles/jewelleryStyles";
 import { useJewellerySettings } from "./hooks/useSettingsData";
 import {
@@ -18,7 +18,9 @@ import VerificationTab from "./pages/VerificationTab";
 type TabType = "dashboard" | "list" | "gallery" | "bills" | "verification";
 
 const JewelleryHome: React.FC = () => {
-  const navigate = useNavigate(); // ADDED: Initialize navigate
+  const navigate = useNavigate();
+  const location = useLocation(); // ADDED: To read location state
+
   const { goldRate, settings } = useJewellerySettings();
   const [stats, setStats] = useState({
     totalItems: 0,
@@ -33,7 +35,24 @@ const JewelleryHome: React.FC = () => {
     { location: string; totalWeight: number }[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+
+  // Initialize activeTab from location state if available
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    // Read from location state or default to "dashboard"
+    return location.state?.activeTab || "dashboard";
+  });
+
+  // ADDED: Read activeTab from location state when component mounts or location changes
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+
+      // Clean up location state to prevent persisting across refreshes
+      if (location.state?.activeTab) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }
+  }, [location]);
 
   // Get makingTaxPercent and resaleDiscountPercent from settings object
   const makingTaxPercent = settings?.makingTaxPercent || 0;
@@ -152,13 +171,17 @@ const JewelleryHome: React.FC = () => {
     return `${percent}%`;
   };
 
-  // ADDED: Handle FAB clicks
+  // Handle FAB clicks
   const handleAddJewellery = () => {
-    navigate("/jewellery/add");
+    navigate("/jewellery/add", {
+      state: { returnTo: "/jewellery", activeTab: "list" },
+    });
   };
 
   const handleAddBill = () => {
-    navigate("/jewellery/bills/add");
+    navigate("/jewellery/bills/add", {
+      state: { returnTo: "/jewellery", activeTab: "bills" },
+    });
   };
 
   if (loading) {

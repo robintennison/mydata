@@ -34,6 +34,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [localAccounts, setLocalAccounts] = useState<any[]>([]);
+  const [error, setError] = useState<string>("");
 
   // Refs for dropdown positioning
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -91,6 +92,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
       ...prev,
       [field]: value,
     }));
+    // Clear error when user starts typing
+    if (error) setError("");
   };
 
   const handleAccountSelect = (accountId: string, accountCode: string) => {
@@ -100,6 +103,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
     }));
     setSelectedAccountCode(accountCode);
     setShowAccountDropdown(false);
+    // Clear error when account is selected
+    if (error) setError("");
   };
 
   const showDatePicker = (field: "startDate" | "endDate") => {
@@ -116,38 +121,69 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
       const date = new Date(dateStr);
       if (!isNaN(date.getTime())) {
         handleInputChange(field, date.getTime());
+      } else {
+        alert("Invalid date format. Please use YYYY-MM-DD format.");
       }
     }
   };
 
   const handleSave = async () => {
-    if (!formData.accountId || formData.amount <= 0) {
-      alert("Please fill in all required fields with valid values");
+    // Clear previous errors
+    setError("");
+
+    // Validation
+    if (!formData.accountId) {
+      setError("Please select an account");
+      return;
+    }
+
+    if (formData.amount <= 0) {
+      setError("Amount must be greater than 0");
       return;
     }
 
     if (formData.startDate > formData.endDate) {
-      alert("Start date cannot be after end date");
+      setError("Start date cannot be after end date");
       return;
     }
 
     setSaving(true);
 
     try {
+      // For editing: use existing ID
+      // For new deposits: use empty string - let Firebase generate the ID
       const depositToSave: Deposit = {
         ...formData,
-        id: isEdit && depositId ? depositId : `deposit_${Date.now()}`,
+        // Keep the ID if editing, otherwise empty string for new deposits
+        id: isEdit && depositId ? depositId : "",
       };
 
-      await handleSaveDeposit(depositToSave);
-      // Success - ALWAYS navigate back to banking with deposits tab active
-      navigate("/banking", {
-        state: { activeTab: "deposits" },
-        replace: true,
-      });
-    } catch (error) {
-      console.error("Error saving deposit:", error);
-      alert("Failed to save deposit. Please try again.");
+      console.log("DEBUG: Saving deposit:", depositToSave);
+
+      // Call the save function
+      const success = await handleSaveDeposit(depositToSave);
+
+      if (success) {
+        console.log("DEBUG: Save completed successfully, navigating...");
+        navigate("/banking?tab=deposits", { replace: true });
+      } else {
+        console.log("DEBUG: Save operation was cancelled");
+        setSaving(false);
+      }
+    } catch (error: any) {
+      console.error("DEBUG: Error saving deposit:", error);
+      // Provide more specific error messages
+      let errorMessage = "Failed to save deposit. Please try again.";
+
+      if (error.code === "permission-denied") {
+        errorMessage = "You don't have permission to save deposits.";
+      } else if (error.code === "unavailable") {
+        errorMessage = "Network error. Please check your connection.";
+      } else if (error.message) {
+        errorMessage = `Failed to save deposit: ${error.message}`;
+      }
+
+      setError(errorMessage);
       setSaving(false);
     }
   };
@@ -157,26 +193,37 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
     setDeleting(true);
     try {
-      await handleDeleteDeposit(depositId);
-      // After delete, ALWAYS navigate back to banking with deposits tab active
-      navigate("/banking", {
-        state: { activeTab: "deposits" },
-        replace: true,
-      });
-    } catch (error) {
-      console.error("Error deleting deposit:", error);
-      alert("Failed to delete deposit. Please try again.");
+      // Call delete function and wait for it to complete
+      const success = await handleDeleteDeposit(depositId);
+
+      if (success) {
+        console.log("DEBUG: Delete completed successfully, navigating...");
+        navigate("/banking?tab=deposits", { replace: true });
+      } else {
+        // If handleDeleteDeposit returns false (e.g., user cancelled confirmation)
+        console.log("DEBUG: Delete operation was cancelled");
+        setDeleting(false);
+        setShowDeleteConfirm(false);
+      }
+    } catch (error: any) {
+      console.error("DEBUG: Error deleting deposit:", error);
+      let errorMessage = "Failed to delete deposit. Please try again.";
+
+      if (error.code === "permission-denied") {
+        errorMessage = "You don't have permission to delete deposits.";
+      } else if (error.message) {
+        errorMessage = `Failed to delete deposit: ${error.message}`;
+      }
+
+      setError(errorMessage);
       setDeleting(false);
       setShowDeleteConfirm(false);
     }
   };
 
   const handleCancel = () => {
-    // ALWAYS navigate back to banking with deposits tab active
-    navigate("/banking", {
-      state: { activeTab: "deposits" },
-      replace: true,
-    });
+    // Navigate back to banking with deposits tab active
+    navigate("/banking?tab=deposits", { replace: true });
   };
 
   if (dataLoading && isEdit) {
@@ -210,6 +257,27 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
       {/* Form */}
       <div style={{ padding: "15px 0", position: "relative" }}>
+        {/* Error Message */}
+        {error && (
+          <div
+            style={{
+              backgroundColor: "#fee2e2",
+              border: "1px solid #ef4444",
+              color: "#dc2626",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              marginBottom: "16px",
+              fontSize: "0.9rem",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "8px",
+            }}
+          >
+            <div style={{ fontSize: "1.2rem" }}>⚠️</div>
+            <div>{error}</div>
+          </div>
+        )}
+
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {/* Account Dropdown - FIXED WIDTH to match container */}
           <div style={{ position: "relative", width: "100%" }}>
@@ -252,6 +320,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   opacity: localAccounts.length > 0 ? 1 : 0.7,
                   width: "100%",
                   boxSizing: "border-box",
+                  borderColor:
+                    error && !formData.accountId ? "#dc2626" : "#e0e0e0",
                 }}
                 disabled={localAccounts.length === 0}
               />
@@ -450,6 +520,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 ...bankingStyles.input,
                 width: "100%",
                 boxSizing: "border-box",
+                borderColor:
+                  error && formData.amount <= 0 ? "#dc2626" : "#e0e0e0",
               }}
               min="0"
               step="1000"

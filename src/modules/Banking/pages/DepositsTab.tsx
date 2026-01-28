@@ -1,3 +1,5 @@
+// src/modules/banking/DepositsTab.tsx (FIXED VERSION)
+
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
@@ -95,6 +97,11 @@ const DepositsTab: React.FC = () => {
     (sum, dep) => sum + dep.amount,
     0,
   );
+
+  // Handle row click - FIXED: Always go to edit for now
+  const handleRowClick = (depositId: string) => {
+    navigate(`/banking/deposits/edit/${depositId}`);
+  };
 
   if (loading) {
     return (
@@ -460,18 +467,7 @@ const DepositsTab: React.FC = () => {
                       borderBottom: "1px solid #f3f4f6",
                       cursor: "pointer",
                     }}
-                    // onClick={() =>
-                    //   navigate(`/banking/deposits/edit/${deposit.id}`)
-                    // }
-                    onClick={() => {
-                      if (settings?.showDelete) {
-                        // If showDelete is true, go to edit mode
-                        navigate(`/banking/deposits/edit/${deposit.id}`);
-                      } else {
-                        // Otherwise, go to view mode
-                        navigate(`/banking/deposits/view/${deposit.id}`);
-                      }
-                    }}
+                    onClick={() => handleRowClick(deposit.id)}
                   >
                     <div
                       style={{

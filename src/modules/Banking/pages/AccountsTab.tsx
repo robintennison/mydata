@@ -150,11 +150,11 @@ const AccountsTab: React.FC = () => {
           </div>
         ) : (
           <div>
-            {/* Table Header - ALL LEFT ALIGNED */}
+            {/* Table Header - ALL LEFT ALIGNED - REDUCED PADDING */}
             <div
               style={{
                 display: "flex",
-                padding: "12px 16px",
+                padding: "10px 12px", // Reduced from 12px 16px
                 backgroundColor: "#f9fafb",
                 borderBottom: "1px solid #e9ecef",
                 fontWeight: "600",
@@ -208,7 +208,7 @@ const AccountsTab: React.FC = () => {
               )}
             </div>
 
-            {/* Accounts Rows - ALL LEFT ALIGNED */}
+            {/* Accounts Rows - ALL LEFT ALIGNED - REDUCED PADDING */}
             <div>
               {sortedAccounts.map((account) => {
                 const isActive = isAccountActive(account);
@@ -227,7 +227,7 @@ const AccountsTab: React.FC = () => {
                   >
                     <div
                       style={{
-                        padding: "12px 16px",
+                        padding: "10px 12px", // Reduced from 12px 16px
                         display: "flex",
                         alignItems: "center",
                         minHeight: "44px",
@@ -241,7 +241,7 @@ const AccountsTab: React.FC = () => {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "flex-start",
-                          paddingRight: "8px",
+                          paddingRight: "6px", // Reduced from 8px
                         }}
                       >
                         <div
@@ -281,7 +281,7 @@ const AccountsTab: React.FC = () => {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "flex-start",
-                          paddingRight: "8px",
+                          paddingRight: "6px", // Reduced from 8px
                         }}
                       >
                         <div
@@ -303,7 +303,7 @@ const AccountsTab: React.FC = () => {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "flex-start",
-                          paddingRight: "8px",
+                          paddingRight: "6px", // Reduced from 8px
                         }}
                       >
                         <div
@@ -358,10 +358,10 @@ const AccountsTab: React.FC = () => {
               })}
             </div>
 
-            {/* Total Savings Footer */}
+            {/* Total Savings Footer - REDUCED PADDING */}
             <div
               style={{
-                padding: "12px 16px",
+                padding: "10px 12px", // Reduced from 12px 16px
                 backgroundColor: "#f3f4f6",
                 borderTop: "1px solid #e9ecef",
                 display: "flex",

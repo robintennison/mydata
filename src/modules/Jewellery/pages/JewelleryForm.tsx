@@ -14,8 +14,10 @@ import { useNavigate } from "react-router-dom";
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
   onSubmit: (data: Partial<Jewellery>) => void;
+  onDelete?: () => void; // Already exists
   isEditing?: boolean;
   onCancel?: () => void;
+  showDelete?: boolean; // Add this line
 }
 
 interface Bill {
@@ -30,8 +32,10 @@ interface Bill {
 const JewelleryForm: React.FC<JewelleryFormProps> = ({
   initialData,
   onSubmit,
+  onDelete, // Add this
   isEditing = false,
   onCancel,
+  showDelete = false, // Add this with default value
 }) => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1691,6 +1695,34 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           <span>←</span>
           <span>Cancel</span>
         </button>
+
+        {/* Only show Delete button when showDelete is true and onDelete function is provided */}
+        {showDelete && onDelete && (
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={uploadingImage || deletingImage}
+            style={{
+              padding: "10px 30px",
+              backgroundColor:
+                uploadingImage || deletingImage ? "#9ca3af" : "#dc2626",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor:
+                uploadingImage || deletingImage ? "not-allowed" : "pointer",
+              fontSize: "16px",
+              fontWeight: "500",
+              opacity: uploadingImage || deletingImage ? 0.7 : 1,
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <span>🗑️</span>
+            <span>Delete</span>
+          </button>
+        )}
 
         <button
           type="submit"

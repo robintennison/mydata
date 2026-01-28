@@ -70,6 +70,14 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Calendar states
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState<Date>(
+    new Date(formData.purchaseDate || Date.now()),
+  );
+  const [showYearSelector, setShowYearSelector] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
   // Get settings data
   const {
     locations,
@@ -199,6 +207,25 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     fetchBills();
   }, []);
 
+  // Close calendar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as Node) &&
+        !(event.target as HTMLElement).closest(".date-input")
+      ) {
+        setShowCalendar(false);
+        setShowYearSelector(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -213,14 +240,174 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       });
     } else if (name === "weight") {
       setFormData({ ...formData, [name]: parseFloat(value) || 0 });
-    } else if (name === "purchaseDate") {
-      const date = e.target.value
-        ? new Date(e.target.value).getTime()
-        : Date.now();
-      setFormData({ ...formData, [name]: date });
     } else {
       setFormData({ ...formData, [name]: value });
     }
+  };
+
+  const openCalendar = () => {
+    setShowCalendar(true);
+    setShowYearSelector(false);
+    setCurrentMonth(new Date(formData.purchaseDate || Date.now()));
+  };
+
+  const selectDate = (date: Date) => {
+    setFormData((prev) => ({
+      ...prev,
+      purchaseDate: date.getTime(),
+    }));
+    setShowCalendar(false);
+    setShowYearSelector(false);
+  };
+
+  const navigateMonth = (direction: "prev" | "next") => {
+    const newMonth = new Date(currentMonth);
+    if (direction === "prev") {
+      newMonth.setMonth(newMonth.getMonth() - 1);
+    } else {
+      newMonth.setMonth(newMonth.getMonth() + 1);
+    }
+    setCurrentMonth(newMonth);
+  };
+
+  const navigateYear = (direction: "prev" | "next") => {
+    const newMonth = new Date(currentMonth);
+    if (direction === "prev") {
+      newMonth.setFullYear(newMonth.getFullYear() - 1);
+    } else {
+      newMonth.setFullYear(newMonth.getFullYear() + 1);
+    }
+    setCurrentMonth(newMonth);
+  };
+
+  const selectYear = (year: number) => {
+    const newMonth = new Date(currentMonth);
+    newMonth.setFullYear(year);
+    setCurrentMonth(newMonth);
+    setShowYearSelector(false);
+  };
+
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (year: number, month: number) => {
+    return new Date(year, month, 1).getDay();
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isSelectedDate = (date: Date) => {
+    const selectedDate = new Date(formData.purchaseDate || Date.now());
+    return (
+      date.getDate() === selectedDate.getDate() &&
+      date.getMonth() === selectedDate.getMonth() &&
+      date.getFullYear() === selectedDate.getFullYear()
+    );
+  };
+
+  const renderCalendar = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const daysInMonth = getDaysInMonth(year, month);
+    const firstDay = getFirstDayOfMonth(year, month);
+
+    const days = [];
+
+    // Empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`empty-${i}`} style={{ padding: "10px 0" }}></div>);
+    }
+
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const isTodayDate = isToday(date);
+      const isSelected = isSelectedDate(date);
+
+      days.push(
+        <button
+          key={day}
+          onClick={() => selectDate(date)}
+          style={{
+            padding: "10px 0",
+            background: "none",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            color: "#333",
+            transition: "all 0.2s",
+            ...(isSelected
+              ? {
+                  backgroundColor: "#3b82f6",
+                  color: "#fff",
+                  fontWeight: 600,
+                }
+              : {}),
+            ...(isTodayDate
+              ? {
+                  border: "2px solid #3b82f6",
+                }
+              : {}),
+          }}
+        >
+          {day}
+        </button>,
+      );
+    }
+
+    return days;
+  };
+
+  const renderYearSelector = () => {
+    const currentYear = currentMonth.getFullYear();
+    const startYear = currentYear - 6;
+    const years = [];
+
+    for (let year = startYear; year <= startYear + 12; year++) {
+      years.push(
+        <button
+          key={year}
+          onClick={() => selectYear(year)}
+          style={{
+            padding: "10px 0",
+            background: year === currentYear ? "#3b82f6" : "none",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            color: year === currentYear ? "#fff" : "#333",
+            fontWeight: year === currentYear ? 600 : 400,
+            transition: "all 0.2s",
+          }}
+        >
+          {year}
+        </button>,
+      );
+    }
+
+    return (
+      <div
+        style={{
+          maxHeight: "300px",
+          overflowY: "auto",
+          padding: "10px",
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "8px",
+        }}
+      >
+        {years}
+      </div>
+    );
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -441,6 +628,15 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  // Format date for display
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   return (
@@ -859,7 +1055,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         </div>
       </div>
 
-      {/* Purchase Date and Active checkbox in same row */}
+      {/* Purchase Date with Calendar and Active checkbox in same row */}
       <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
         <div style={{ flex: 1 }}>
           <label
@@ -872,24 +1068,45 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           >
             Purchase Date
           </label>
-          <input
-            type="date"
-            name="purchaseDate"
-            value={
-              formData.purchaseDate
-                ? new Date(formData.purchaseDate).toISOString().split("T")[0]
-                : ""
-            }
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              type="text"
+              value={formatDate(formData.purchaseDate || Date.now())}
+              readOnly
+              onClick={openCalendar}
+              className="date-input"
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: "6px",
+                border: "1px solid #d1d5db",
+                fontSize: "14px",
+                boxSizing: "border-box",
+                cursor: "pointer",
+                paddingRight: "40px",
+                backgroundColor: "#fff",
+              }}
+            />
+            <button
+              type="button"
+              onClick={openCalendar}
+              style={{
+                position: "absolute",
+                right: "8px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#6c757d",
+                fontSize: "1.2rem",
+                padding: "4px",
+              }}
+              title="Pick purchase date"
+            >
+              📅
+            </button>
+          </div>
         </div>
 
         <div style={{ flex: 1, display: "flex", alignItems: "flex-end" }}>
@@ -915,6 +1132,235 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           </label>
         </div>
       </div>
+
+      {/* Calendar Popup */}
+      {showCalendar && (
+        <div
+          ref={calendarRef}
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "#fff",
+            border: "1px solid #e0e0e0",
+            borderRadius: "12px",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+            zIndex: 10001,
+            padding: "20px",
+            minWidth: showYearSelector ? "350px" : "300px",
+            maxWidth: showYearSelector ? "400px" : "350px",
+            width: "90%",
+            maxHeight: "80vh",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "15px",
+            }}
+          >
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => navigateYear("prev")}
+                style={{
+                  background: "none",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "6px",
+                  padding: "6px 10px",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  color: "#333",
+                  minWidth: "40px",
+                }}
+                title="Previous Year"
+                type="button"
+              >
+                &lt;&lt;
+              </button>
+              <button
+                onClick={() => navigateMonth("prev")}
+                style={{
+                  background: "none",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "6px",
+                  padding: "6px 10px",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  color: "#333",
+                  minWidth: "40px",
+                }}
+                title="Previous Month"
+                type="button"
+              >
+                &lt;
+              </button>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <button
+                onClick={() => setShowYearSelector(!showYearSelector)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  color: "#333",
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  transition: "background-color 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#f0f0f0";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
+                title="Select Year"
+                type="button"
+              >
+                {currentMonth.toLocaleDateString("en-US", {
+                  month: "short",
+                  year: "numeric",
+                })}
+              </button>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => navigateMonth("next")}
+                style={{
+                  background: "none",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "6px",
+                  padding: "6px 10px",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  color: "#333",
+                  minWidth: "40px",
+                }}
+                title="Next Month"
+                type="button"
+              >
+                &gt;
+              </button>
+              <button
+                onClick={() => navigateYear("next")}
+                style={{
+                  background: "none",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "6px",
+                  padding: "6px 10px",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  color: "#333",
+                  minWidth: "40px",
+                }}
+                title="Next Year"
+                type="button"
+              >
+                &gt;&gt;
+              </button>
+            </div>
+          </div>
+
+          {showYearSelector ? (
+            renderYearSelector()
+          ) : (
+            <>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(7, 1fr)",
+                  marginBottom: "8px",
+                }}
+              >
+                {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+                  <div
+                    key={day}
+                    style={{
+                      textAlign: "center" as const,
+                      fontSize: "0.85rem",
+                      color: "#666",
+                      fontWeight: 500,
+                      padding: "4px 0",
+                    }}
+                  >
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(7, 1fr)",
+                  gap: "4px",
+                }}
+              >
+                {renderCalendar()}
+              </div>
+            </>
+          )}
+
+          <div
+            style={{
+              marginTop: "15px",
+              textAlign: "center",
+              display: "flex",
+              justifyContent: "center",
+              gap: "10px",
+            }}
+          >
+            <button
+              onClick={() => {
+                // Set to today
+                const today = new Date();
+                selectDate(today);
+              }}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#3b82f6",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "0.9rem",
+                color: "#fff",
+              }}
+              type="button"
+            >
+              Today
+            </button>
+            <button
+              onClick={() => {
+                setShowCalendar(false);
+                setShowYearSelector(false);
+              }}
+              style={{
+                padding: "8px 20px",
+                backgroundColor: "#f0f0f0",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "0.9rem",
+              }}
+              type="button"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bill Section */}
       <div

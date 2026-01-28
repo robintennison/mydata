@@ -359,7 +359,7 @@ const EditAccountPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Savings Amount */}
+            {/* Savings Amount - REMOVED ₹ SYMBOL */}
             <div style={{ marginBottom: "20px" }}>
               <label style={bankingStyles.label}>Savings Amount *</label>
               <div
@@ -369,7 +369,6 @@ const EditAccountPage: React.FC = () => {
                   cursor: "default",
                 }}
               >
-                ₹{" "}
                 {parseFloat(formData.savingsAmount || "0").toLocaleString(
                   "en-IN",
                 )}
@@ -456,38 +455,20 @@ const EditAccountPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Savings Amount */}
+            {/* Savings Amount - REMOVED ₹ SYMBOL AND WRAPPER DIV */}
             <div style={{ marginBottom: "20px" }}>
               <label style={bankingStyles.label}>Savings Amount *</label>
-              <div style={{ position: "relative" }}>
-                <span
-                  style={{
-                    position: "absolute",
-                    left: "12px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#666",
-                    fontWeight: "500",
-                    fontSize: "16px",
-                    zIndex: 1,
-                  }}
-                >
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  value={formData.savingsAmount}
-                  onChange={(e) =>
-                    handleChange("savingsAmount", e.target.value)
-                  }
-                  style={bankingStyles.input} // Use original bankingStyles
-                  required
-                  min="0"
-                  step="0.01"
-                  disabled={submitting}
-                />
-              </div>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={formData.savingsAmount}
+                onChange={(e) => handleChange("savingsAmount", e.target.value)}
+                style={bankingStyles.input} // Use original bankingStyles
+                required
+                min="0"
+                step="0.01"
+                disabled={submitting}
+              />
             </div>
 
             {/* MPIN */}

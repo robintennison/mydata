@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
@@ -12,7 +12,7 @@ import SummaryTab from "./SummaryTab";
 
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
-  // const location = useLocation();
+  const location = useLocation();
 
   const { loading, accounts, deposits, history, adjustments, settings } =
     useBankingData();
@@ -22,6 +22,24 @@ const BankingHomePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "accounts" | "deposits" | "history" | "summary"
   >("dashboard");
+
+  // Handle navigation state to set active tab
+  useEffect(() => {
+    // Check if there's state in the location (passed from navigation)
+    if (location.state && location.state.activeTab) {
+      const tabFromState = location.state.activeTab;
+      if (
+        ["dashboard", "accounts", "deposits", "history", "summary"].includes(
+          tabFromState,
+        )
+      ) {
+        setActiveTab(tabFromState as any);
+
+        // Clear the state after using it to prevent issues on refresh
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state]);
 
   // Handle Add button click
   const handleAddClick = () => {

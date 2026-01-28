@@ -10,6 +10,10 @@ import DepositsTab from "./DepositsTab";
 import HistoryTab from "./HistoryTab";
 import SummaryTab from "./SummaryTab";
 
+// Import the pie chart components
+import DepositPieChart from "./DepositPieChart";
+import SavingsPieChart from "./SavingsPieChart";
+
 const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -337,7 +341,7 @@ const BankingHomePage: React.FC = () => {
     },
   };
 
-  // Dashboard content component with HistoryTab-style table
+  // Dashboard content component with HistoryTab-style table and Pie Charts
   const DashboardContent = () => (
     <>
       {/* Top 3 Cards in Single Row */}
@@ -517,7 +521,7 @@ const BankingHomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Recent History - REPLACED with HistoryTab-style table */}
+      {/* Recent History */}
       <div
         style={{
           padding: "0 0 8px 0",
@@ -633,6 +637,27 @@ const BankingHomePage: React.FC = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Pie Charts Section - Below Recent History Table (One below the other) */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          padding: "0 0 8px 0",
+        }}
+      >
+        {/* Top: Savings Pie Chart */}
+        <SavingsPieChart accounts={accounts} />
+
+        {/* Bottom: Deposit Pie Chart */}
+        <DepositPieChart
+          accounts={accounts}
+          deposits={deposits}
+          adjustments={adjustments}
+          showInactive={settings.showInactive}
+        />
       </div>
     </>
   );

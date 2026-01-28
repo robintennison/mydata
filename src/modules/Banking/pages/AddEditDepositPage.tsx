@@ -35,11 +35,17 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   const [deleting, setDeleting] = useState(false);
   const [localAccounts, setLocalAccounts] = useState<any[]>([]);
   const [error, setError] = useState<string>("");
+  const [showCalendar, setShowCalendar] = useState<"start" | "end" | null>(
+    null,
+  );
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [showYearSelector, setShowYearSelector] = useState(false);
 
   // Refs for dropdown positioning
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
 
   // Sync accounts when they load
   useEffect(() => {
@@ -68,9 +74,10 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
     }
   }, [isEdit, depositId, deposits, accounts]);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Close account dropdown
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
@@ -78,6 +85,16 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         !inputRef.current.contains(event.target as Node)
       ) {
         setShowAccountDropdown(false);
+      }
+
+      // Close calendar
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as Node) &&
+        !(event.target as HTMLElement).closest(".date-input")
+      ) {
+        setShowCalendar(null);
+        setShowYearSelector(false);
       }
     };
 
@@ -107,24 +124,177 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
     if (error) setError("");
   };
 
-  const showDatePicker = (field: "startDate" | "endDate") => {
-    const currentDate =
-      field === "startDate" ? formData.startDate : formData.endDate;
-    const defaultDate = new Date(currentDate).toISOString().split("T")[0];
+  const openCalendar = (field: "start" | "end") => {
+    setShowCalendar(field);
+    setShowYearSelector(false);
+    // Set current month based on the selected date
+    const dateValue = field === "start" ? formData.startDate : formData.endDate;
+    setCurrentMonth(new Date(dateValue));
+  };
 
-    const dateStr = prompt(
-      `Enter ${field === "startDate" ? "start" : "end"} date (YYYY-MM-DD):`,
-      defaultDate,
-    );
-
-    if (dateStr) {
-      const date = new Date(dateStr);
-      if (!isNaN(date.getTime())) {
-        handleInputChange(field, date.getTime());
-      } else {
-        alert("Invalid date format. Please use YYYY-MM-DD format.");
-      }
+  const selectDate = (date: Date, field: "start" | "end") => {
+    if (field === "start") {
+      handleInputChange("startDate", date.getTime());
+    } else {
+      handleInputChange("endDate", date.getTime());
     }
+    setShowCalendar(null);
+    setShowYearSelector(false);
+  };
+
+  const navigateMonth = (direction: "prev" | "next") => {
+    const newMonth = new Date(currentMonth);
+    if (direction === "prev") {
+      newMonth.setMonth(newMonth.getMonth() - 1);
+    } else {
+      newMonth.setMonth(newMonth.getMonth() + 1);
+    }
+    setCurrentMonth(newMonth);
+  };
+
+  const navigateYear = (direction: "prev" | "next") => {
+    const newMonth = new Date(currentMonth);
+    if (direction === "prev") {
+      newMonth.setFullYear(newMonth.getFullYear() - 1);
+    } else {
+      newMonth.setFullYear(newMonth.getFullYear() + 1);
+    }
+    setCurrentMonth(newMonth);
+  };
+
+  const selectYear = (year: number) => {
+    const newMonth = new Date(currentMonth);
+    newMonth.setFullYear(year);
+    setCurrentMonth(newMonth);
+    setShowYearSelector(false);
+  };
+
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (year: number, month: number) => {
+    return new Date(year, month, 1).getDay();
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isSelectedDate = (date: Date, field: "start" | "end") => {
+    const selectedDate =
+      field === "start" ? formData.startDate : formData.endDate;
+    const compareDate = new Date(selectedDate);
+    return (
+      date.getDate() === compareDate.getDate() &&
+      date.getMonth() === compareDate.getMonth() &&
+      date.getFullYear() === compareDate.getFullYear()
+    );
+  };
+
+  const renderCalendar = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const daysInMonth = getDaysInMonth(year, month);
+    const firstDay = getFirstDayOfMonth(year, month);
+
+    const days = [];
+
+    // Empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`empty-${i}`} style={{ padding: "10px 0" }}></div>);
+    }
+
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const isTodayDate = isToday(date);
+      const isSelectedStart = isSelectedDate(date, "start");
+      const isSelectedEnd = isSelectedDate(date, "end");
+      const isSelected =
+        showCalendar === "start" ? isSelectedStart : isSelectedEnd;
+
+      days.push(
+        <button
+          key={day}
+          onClick={() => selectDate(date, showCalendar!)}
+          style={{
+            padding: "10px 0",
+            background: "none",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            color: "#333",
+            transition: "all 0.2s",
+            ...(isSelected
+              ? {
+                  backgroundColor: "#3b82f6",
+                  color: "#fff",
+                  fontWeight: 600,
+                }
+              : {}),
+            ...(isTodayDate
+              ? {
+                  border: "2px solid #3b82f6",
+                }
+              : {}),
+          }}
+        >
+          {day}
+        </button>,
+      );
+    }
+
+    return days;
+  };
+
+  const renderYearSelector = () => {
+    const currentYear = currentMonth.getFullYear();
+    const startYear = currentYear - 6;
+    const years = [];
+
+    for (let year = startYear; year <= startYear + 12; year++) {
+      years.push(
+        <button
+          key={year}
+          onClick={() => selectYear(year)}
+          style={{
+            padding: "10px 0",
+            background: year === currentYear ? "#3b82f6" : "none",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            color: year === currentYear ? "#fff" : "#333",
+            fontWeight: year === currentYear ? 600 : 400,
+            transition: "all 0.2s",
+          }}
+        >
+          {year}
+        </button>,
+      );
+    }
+
+    return (
+      <div
+        style={{
+          maxHeight: "300px",
+          overflowY: "auto",
+          padding: "10px",
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "8px",
+        }}
+      >
+        {years}
+      </div>
+    );
   };
 
   const handleSave = async () => {
@@ -279,7 +449,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {/* Account Dropdown - FIXED WIDTH to match container */}
+          {/* Account Dropdown */}
           <div style={{ position: "relative", width: "100%" }}>
             <label
               style={{
@@ -341,7 +511,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
               )}
             </div>
 
-            {/* DROPDOWN - FIXED WIDTH to match container */}
+            {/* Account Dropdown */}
             {showAccountDropdown && localAccounts.length > 0 && (
               <div
                 ref={dropdownRef}
@@ -354,8 +524,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                     : "200px",
                   left: "50%",
                   transform: "translateX(-50%)",
-                  width: "calc(100% - 30px)", // Match container padding
-                  maxWidth: "600px", // Match your container max-width
+                  width: "calc(100% - 30px)",
+                  maxWidth: "600px",
                   backgroundColor: "#fff",
                   border: "1px solid #e9ecef",
                   borderRadius: "8px",
@@ -482,7 +652,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                                 : "#dc2626",
                             whiteSpace: "nowrap",
                             marginLeft: "12px",
-                            textAlign: "right",
+                            textAlign: "right" as const,
                             minWidth: "80px",
                           }}
                         >
@@ -528,7 +698,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
             />
           </div>
 
-          {/* Start Date */}
+          {/* Start Date with Calendar */}
           <div>
             <label
               style={{
@@ -550,7 +720,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   year: "numeric",
                 })}
                 readOnly
-                onClick={() => showDatePicker("startDate")}
+                onClick={() => openCalendar("start")}
+                className="date-input"
                 style={{
                   ...bankingStyles.input,
                   cursor: "pointer",
@@ -561,7 +732,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 }}
               />
               <button
-                onClick={() => showDatePicker("startDate")}
+                onClick={() => openCalendar("start")}
                 style={{
                   position: "absolute",
                   right: "8px",
@@ -582,7 +753,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
             </div>
           </div>
 
-          {/* End Date */}
+          {/* End Date with Calendar */}
           <div>
             <label
               style={{
@@ -604,7 +775,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   year: "numeric",
                 })}
                 readOnly
-                onClick={() => showDatePicker("endDate")}
+                onClick={() => openCalendar("end")}
+                className="date-input"
                 style={{
                   ...bankingStyles.input,
                   cursor: "pointer",
@@ -615,7 +787,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 }}
               />
               <button
-                onClick={() => showDatePicker("endDate")}
+                onClick={() => openCalendar("end")}
                 style={{
                   position: "absolute",
                   right: "8px",
@@ -635,6 +807,235 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Calendar Popup */}
+          {showCalendar && (
+            <div
+              ref={calendarRef}
+              style={{
+                position: "fixed",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                backgroundColor: "#fff",
+                border: "1px solid #e0e0e0",
+                borderRadius: "12px",
+                boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+                zIndex: 10001,
+                padding: "20px",
+                minWidth: showYearSelector ? "350px" : "300px",
+                maxWidth: showYearSelector ? "400px" : "350px",
+                width: "90%",
+                maxHeight: "80vh",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "15px",
+                }}
+              >
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    onClick={() => navigateYear("prev")}
+                    style={{
+                      background: "none",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "6px",
+                      padding: "6px 10px",
+                      cursor: "pointer",
+                      fontSize: "0.9rem",
+                      color: "#333",
+                      minWidth: "40px",
+                    }}
+                    title="Previous Year"
+                    type="button"
+                  >
+                    &lt;&lt;
+                  </button>
+                  <button
+                    onClick={() => navigateMonth("prev")}
+                    style={{
+                      background: "none",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "6px",
+                      padding: "6px 10px",
+                      cursor: "pointer",
+                      fontSize: "0.9rem",
+                      color: "#333",
+                      minWidth: "40px",
+                    }}
+                    title="Previous Month"
+                    type="button"
+                  >
+                    &lt;
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <button
+                    onClick={() => setShowYearSelector(!showYearSelector)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "1.1rem",
+                      fontWeight: 600,
+                      color: "#333",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      transition: "background-color 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f0f0f0";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                    title="Select Year"
+                    type="button"
+                  >
+                    {currentMonth.toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </button>
+                </div>
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    onClick={() => navigateMonth("next")}
+                    style={{
+                      background: "none",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "6px",
+                      padding: "6px 10px",
+                      cursor: "pointer",
+                      fontSize: "0.9rem",
+                      color: "#333",
+                      minWidth: "40px",
+                    }}
+                    title="Next Month"
+                    type="button"
+                  >
+                    &gt;
+                  </button>
+                  <button
+                    onClick={() => navigateYear("next")}
+                    style={{
+                      background: "none",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "6px",
+                      padding: "6px 10px",
+                      cursor: "pointer",
+                      fontSize: "0.9rem",
+                      color: "#333",
+                      minWidth: "40px",
+                    }}
+                    title="Next Year"
+                    type="button"
+                  >
+                    &gt;&gt;
+                  </button>
+                </div>
+              </div>
+
+              {showYearSelector ? (
+                renderYearSelector()
+              ) : (
+                <>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(7, 1fr)",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+                      <div
+                        key={day}
+                        style={{
+                          textAlign: "center" as const,
+                          fontSize: "0.85rem",
+                          color: "#666",
+                          fontWeight: 500,
+                          padding: "4px 0",
+                        }}
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(7, 1fr)",
+                      gap: "4px",
+                    }}
+                  >
+                    {renderCalendar()}
+                  </div>
+                </>
+              )}
+
+              <div
+                style={{
+                  marginTop: "15px",
+                  textAlign: "center",
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                }}
+              >
+                <button
+                  onClick={() => {
+                    // Set to today
+                    const today = new Date();
+                    selectDate(today, showCalendar!);
+                  }}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#3b82f6",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    color: "#fff",
+                  }}
+                  type="button"
+                >
+                  Today
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCalendar(null);
+                    setShowYearSelector(false);
+                  }}
+                  style={{
+                    padding: "8px 20px",
+                    backgroundColor: "#f0f0f0",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                  }}
+                  type="button"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Comments */}
           <div>
@@ -668,7 +1069,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
               style={{
                 fontSize: "0.8rem",
                 color: "#6c757d",
-                textAlign: "right",
+                textAlign: "right" as const,
                 marginTop: "4px",
               }}
             >
@@ -712,7 +1113,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons - Similar to Edit Accounts Form */}
+        {/* Action Buttons */}
         <div style={{ marginTop: "32px", display: "flex", gap: "12px" }}>
           {/* Cancel Button */}
           <button
@@ -845,7 +1246,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
             marginTop: "12px",
             fontSize: "0.85rem",
             color: "#6c757d",
-            textAlign: "center",
+            textAlign: "center" as const,
           }}
         >
           * Required fields

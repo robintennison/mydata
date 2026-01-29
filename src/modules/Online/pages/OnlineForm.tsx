@@ -8,9 +8,11 @@ import {
   addDoc,
   collection,
   getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 import { OnlineItem, Category } from "../types/online.types";
 import { onlineStyles } from "../styles/onlineStyles";
+import { useSettings } from "../../../contexts/SettingsContext";
 
 // Helper function to safely parse timestamps
 const parseTimestamp = (timestamp: any): number => {
@@ -33,6 +35,8 @@ const OnlineForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id?: string }>();
+  const { settings } = useSettings();
+  const showDelete = settings?.showDelete || false;
 
   // Determine mode from the current URL path
   const getModeFromPath = (): "add" | "edit" | "view" => {
@@ -59,6 +63,7 @@ const OnlineForm: React.FC = () => {
     isAddMode,
     isEditMode,
     isViewMode,
+    showDelete,
   });
 
   const [formData, setFormData] = useState<Partial<OnlineItem>>({
@@ -219,6 +224,28 @@ const OnlineForm: React.FC = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!id) return;
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this item? This action cannot be undone.",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      setSaving(true);
+      const db = getFirestore();
+      await deleteDoc(doc(db, "online", id));
+      alert("Item deleted successfully!");
+      navigate("/online", { state: { activeTab: "items" } });
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Failed to delete item");
+      setSaving(false);
+    }
+  };
+
   const getPageTitle = () => {
     if (isAddMode) return "Add Item";
     if (isEditMode) return "Edit Item";
@@ -246,7 +273,7 @@ const OnlineForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={onlineStyles.container}>
+      <div style={onlineStyles.pageContainer}>
         <div style={onlineStyles.loading}>
           <div style={onlineStyles.spinner}></div>
           <p>Loading item...</p>
@@ -256,7 +283,7 @@ const OnlineForm: React.FC = () => {
   }
 
   return (
-    <div style={onlineStyles.container}>
+    <div style={onlineStyles.pageContainer}>
       {/* Top Navigation */}
       <div style={onlineStyles.topNav}>
         <button
@@ -293,314 +320,358 @@ const OnlineForm: React.FC = () => {
       </div>
 
       {/* Form/View Content */}
-      <div style={onlineStyles.section}>
-        <form onSubmit={handleSubmit} style={onlineStyles.form}>
-          <div style={onlineStyles.formGroup}>
-            <label style={onlineStyles.label}>
-              Item Name {!isViewMode && "*"}
-            </label>
-            <input
-              type="text"
-              value={formData.name || ""}
-              onChange={(e) =>
-                !isViewMode &&
-                setFormData({ ...formData, name: e.target.value })
-              }
-              style={{
-                ...onlineStyles.input,
-                backgroundColor: isViewMode ? "#f9fafb" : "white",
-                cursor: isViewMode ? "default" : "text",
-              }}
-              placeholder="Enter item name"
-              required={!isViewMode}
-              disabled={isViewMode || saving}
-              readOnly={isViewMode}
-              autoFocus={!isViewMode}
-            />
-          </div>
-
-          <div style={onlineStyles.formGroup}>
-            <label style={onlineStyles.label}>Category</label>
-            {isViewMode ? (
-              <div
-                style={{
-                  padding: "8px 12px",
-                  backgroundColor: "#f9fafb",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                  color: "#111827",
-                  minHeight: "40px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                {formData.category || "Not specified"}
-              </div>
-            ) : (
-              <select
-                value={formData.category || ""}
+      <div style={onlineStyles.formContentWrapper}>
+        <div style={onlineStyles.section}>
+          <form onSubmit={handleSubmit} style={onlineStyles.form}>
+            <div style={onlineStyles.formGroup}>
+              <label style={onlineStyles.label}>
+                Item Name {!isViewMode && "*"}
+              </label>
+              <input
+                type="text"
+                value={formData.name || ""}
                 onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
+                  !isViewMode &&
+                  setFormData({ ...formData, name: e.target.value })
                 }
-                style={onlineStyles.select}
-                disabled={saving}
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.name}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          <div style={onlineStyles.formGroup}>
-            <label style={onlineStyles.label}>Details</label>
-            {isViewMode ? (
-              <div
                 style={{
-                  padding: "12px",
-                  backgroundColor: "#f9fafb",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                  color: "#111827",
-                  minHeight: "60px",
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
+                  ...onlineStyles.input,
+                  backgroundColor: isViewMode ? "#f9fafb" : "white",
+                  cursor: isViewMode ? "default" : "text",
                 }}
-              >
-                {formData.detail || "No details provided"}
-              </div>
-            ) : (
-              <textarea
-                value={formData.detail || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, detail: e.target.value })
-                }
-                style={onlineStyles.textarea}
-                placeholder="Enter item details"
-                rows={4}
-                disabled={saving}
+                placeholder="Enter item name"
+                required={!isViewMode}
+                disabled={isViewMode || saving}
+                readOnly={isViewMode}
+                autoFocus={!isViewMode}
               />
+            </div>
+
+            <div style={onlineStyles.formGroup}>
+              <label style={onlineStyles.label}>Category</label>
+              {isViewMode ? (
+                <div
+                  style={{
+                    padding: "8px 12px",
+                    backgroundColor: "#f9fafb",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    color: "#111827",
+                    minHeight: "40px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {formData.category || "Not specified"}
+                </div>
+              ) : (
+                <select
+                  value={formData.category || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  style={onlineStyles.select}
+                  disabled={saving}
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <div style={onlineStyles.formGroup}>
+              <label style={onlineStyles.label}>Details</label>
+              {isViewMode ? (
+                <div
+                  style={{
+                    padding: "12px",
+                    backgroundColor: "#f9fafb",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    color: "#111827",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    overflow: "auto",
+                    maxHeight: "none",
+                    minHeight: "80px",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  {formData.detail || "No details provided"}
+                </div>
+              ) : (
+                <textarea
+                  value={formData.detail || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, detail: e.target.value })
+                  }
+                  style={{
+                    ...onlineStyles.textarea,
+                    minHeight: "150px",
+                    maxHeight: "400px",
+                    overflowY: "auto",
+                    resize: "vertical",
+                  }}
+                  placeholder="Enter item details"
+                  disabled={saving}
+                />
+              )}
+            </div>
+
+            <div style={onlineStyles.formRow}>
+              <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
+                <label style={onlineStyles.label}>Image 1</label>
+                {isViewMode ? (
+                  <div style={{ textAlign: "center" }}>
+                    {formData.image1 ? (
+                      <>
+                        <img
+                          src={formData.image1}
+                          alt="Image 1"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "200px",
+                            borderRadius: "6px",
+                            border: "1px solid #e5e7eb",
+                          }}
+                        />
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#6b7280",
+                            marginTop: "8px",
+                          }}
+                        >
+                          Image 1
+                        </div>
+                      </>
+                    ) : (
+                      <div
+                        style={{
+                          padding: "40px 20px",
+                          backgroundColor: "#f9fafb",
+                          border: "1px dashed #e5e7eb",
+                          borderRadius: "6px",
+                          color: "#6b7280",
+                          fontSize: "14px",
+                        }}
+                      >
+                        No image
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        setImage1File(e.target.files?.[0] || null)
+                      }
+                      style={onlineStyles.fileInput}
+                      disabled={saving}
+                    />
+                    {formData.image1 && !image1File && (
+                      <div style={{ marginTop: "10px", textAlign: "center" }}>
+                        <img
+                          src={formData.image1}
+                          alt="Preview 1"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "150px",
+                            borderRadius: "6px",
+                            border: "1px solid #e5e7eb",
+                          }}
+                        />
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#6b7280",
+                            marginTop: "5px",
+                          }}
+                        >
+                          Current Image
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
+                <label style={onlineStyles.label}>Image 2</label>
+                {isViewMode ? (
+                  <div style={{ textAlign: "center" }}>
+                    {formData.image2 ? (
+                      <>
+                        <img
+                          src={formData.image2}
+                          alt="Image 2"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "200px",
+                            borderRadius: "6px",
+                            border: "1px solid #e5e7eb",
+                          }}
+                        />
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#6b7280",
+                            marginTop: "8px",
+                          }}
+                        >
+                          Image 2
+                        </div>
+                      </>
+                    ) : (
+                      <div
+                        style={{
+                          padding: "40px 20px",
+                          backgroundColor: "#f9fafb",
+                          border: "1px dashed #e5e7eb",
+                          borderRadius: "6px",
+                          color: "#6b7280",
+                          fontSize: "14px",
+                        }}
+                      >
+                        No image
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        setImage2File(e.target.files?.[0] || null)
+                      }
+                      style={onlineStyles.fileInput}
+                      disabled={saving}
+                    />
+                    {formData.image2 && !image2File && (
+                      <div style={{ marginTop: "10px", textAlign: "center" }}>
+                        <img
+                          src={formData.image2}
+                          alt="Preview 2"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "150px",
+                            borderRadius: "6px",
+                            border: "1px solid #e5e7eb",
+                          }}
+                        />
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#6b7280",
+                            marginTop: "5px",
+                          }}
+                        >
+                          Current Image
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Timestamps - Show in View mode */}
+            {isViewMode && (
+              <div style={{ ...onlineStyles.formRow, marginTop: "16px" }}>
+                <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
+                  <label
+                    style={{
+                      ...onlineStyles.label,
+                      fontSize: "12px",
+                      color: "#6b7280",
+                    }}
+                  >
+                    Created
+                  </label>
+                  <div style={{ fontSize: "13px", color: "#111827" }}>
+                    {formatDate(formData.createdAt)}
+                  </div>
+                </div>
+                <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
+                  <label
+                    style={{
+                      ...onlineStyles.label,
+                      fontSize: "12px",
+                      color: "#6b7280",
+                    }}
+                  >
+                    Last Updated
+                  </label>
+                  <div style={{ fontSize: "13px", color: "#111827" }}>
+                    {formatDate(formData.updatedAt)}
+                  </div>
+                </div>
+              </div>
             )}
-          </div>
 
-          <div style={onlineStyles.formRow}>
-            <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
-              <label style={onlineStyles.label}>Image 1</label>
-              {isViewMode ? (
-                <div style={{ textAlign: "center" }}>
-                  {formData.image1 ? (
-                    <>
-                      <img
-                        src={formData.image1}
-                        alt="Image 1"
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "200px",
-                          borderRadius: "6px",
-                          border: "1px solid #e5e7eb",
-                        }}
-                      />
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b7280",
-                          marginTop: "8px",
-                        }}
-                      >
-                        Image 1
-                      </div>
-                    </>
-                  ) : (
-                    <div
-                      style={{
-                        padding: "40px 20px",
-                        backgroundColor: "#f9fafb",
-                        border: "1px dashed #e5e7eb",
-                        borderRadius: "6px",
-                        color: "#6b7280",
-                        fontSize: "14px",
-                      }}
-                    >
-                      No image
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImage1File(e.target.files?.[0] || null)}
-                    style={onlineStyles.fileInput}
-                    disabled={saving}
-                  />
-                  {formData.image1 && !image1File && (
-                    <div style={{ marginTop: "10px", textAlign: "center" }}>
-                      <img
-                        src={formData.image1}
-                        alt="Preview 1"
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "150px",
-                          borderRadius: "6px",
-                          border: "1px solid #e5e7eb",
-                        }}
-                      />
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b7280",
-                          marginTop: "5px",
-                        }}
-                      >
-                        Current Image
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
-              <label style={onlineStyles.label}>Image 2</label>
-              {isViewMode ? (
-                <div style={{ textAlign: "center" }}>
-                  {formData.image2 ? (
-                    <>
-                      <img
-                        src={formData.image2}
-                        alt="Image 2"
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "200px",
-                          borderRadius: "6px",
-                          border: "1px solid #e5e7eb",
-                        }}
-                      />
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b7280",
-                          marginTop: "8px",
-                        }}
-                      >
-                        Image 2
-                      </div>
-                    </>
-                  ) : (
-                    <div
-                      style={{
-                        padding: "40px 20px",
-                        backgroundColor: "#f9fafb",
-                        border: "1px dashed #e5e7eb",
-                        borderRadius: "6px",
-                        color: "#6b7280",
-                        fontSize: "14px",
-                      }}
-                    >
-                      No image
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImage2File(e.target.files?.[0] || null)}
-                    style={onlineStyles.fileInput}
-                    disabled={saving}
-                  />
-                  {formData.image2 && !image2File && (
-                    <div style={{ marginTop: "10px", textAlign: "center" }}>
-                      <img
-                        src={formData.image2}
-                        alt="Preview 2"
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "150px",
-                          borderRadius: "6px",
-                          border: "1px solid #e5e7eb",
-                        }}
-                      />
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b7280",
-                          marginTop: "5px",
-                        }}
-                      >
-                        Current Image
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Timestamps - Show in View mode */}
-          {isViewMode && (
-            <div style={{ ...onlineStyles.formRow, marginTop: "16px" }}>
-              <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
-                <label
-                  style={{
-                    ...onlineStyles.label,
-                    fontSize: "12px",
-                    color: "#6b7280",
-                  }}
-                >
-                  Created
-                </label>
-                <div style={{ fontSize: "13px", color: "#111827" }}>
-                  {formatDate(formData.createdAt)}
-                </div>
-              </div>
-              <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
-                <label
-                  style={{
-                    ...onlineStyles.label,
-                    fontSize: "12px",
-                    color: "#6b7280",
-                  }}
-                >
-                  Last Updated
-                </label>
-                <div style={{ fontSize: "13px", color: "#111827" }}>
-                  {formatDate(formData.updatedAt)}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Form Actions - Hide in View mode */}
-          {!isViewMode && (
-            <div style={onlineStyles.formActions}>
-              <button
-                type="button"
-                onClick={() =>
-                  navigate("/online", { state: { activeTab: "items" } })
-                }
-                style={onlineStyles.cancelButton}
-                disabled={saving}
+            {/* Form Actions - Hide in View mode */}
+            {!isViewMode && (
+              <div
+                style={{
+                  ...onlineStyles.formActions,
+                  marginTop: "30px",
+                  paddingTop: "20px",
+                  borderTop: "1px solid #e5e7eb",
+                  paddingBottom: "20px", // Added padding at bottom
+                }}
               >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                style={onlineStyles.submitButton}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : isAddMode ? "Add Item" : "Update Item"}
-              </button>
-            </div>
-          )}
-        </form>
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate("/online", { state: { activeTab: "items" } })
+                  }
+                  style={onlineStyles.cancelButton}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+
+                {/* DELETE Button - Only show in edit mode and when showDelete is true */}
+                {isEditMode && showDelete && (
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    style={{
+                      ...onlineStyles.deleteButton,
+                      padding: "12px 30px",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                    }}
+                    disabled={saving}
+                  >
+                    {saving ? "Deleting..." : "Delete"}
+                  </button>
+                )}
+
+                <button
+                  type="submit"
+                  style={onlineStyles.submitButton}
+                  disabled={saving}
+                >
+                  {saving
+                    ? "Saving..."
+                    : isAddMode
+                      ? "Add Item"
+                      : "Update Item"}
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );

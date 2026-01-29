@@ -312,14 +312,21 @@ export const onlineStyles = {
     boxSizing: "border-box",
   } as CSSProperties,
 
+  // UPDATED: textarea for better content display
   textarea: {
     width: "100%",
-    padding: "10px 12px",
+    padding: "12px",
     border: "1px solid #d1d5db",
     borderRadius: "6px",
     fontSize: "14px",
-    minHeight: "80px",
-    resize: "vertical",
+    fontFamily: "inherit",
+    lineHeight: "1.5",
+    color: "#111827",
+    backgroundColor: "white",
+    resize: "vertical" as const,
+    minHeight: "150px", // Increased from 80px
+    maxHeight: "400px", // Added max height for scroll
+    overflowY: "auto" as const,
     boxSizing: "border-box",
   } as CSSProperties,
 

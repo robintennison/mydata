@@ -1,4 +1,4 @@
-// components/Layout/Header.tsx
+// components/Layout/Header.tsx - Ensure it has the updated CSS classes
 import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -109,13 +109,6 @@ const Header: React.FC<HeaderProps> = ({
               onClick={handleAddClick}
               aria-label={addButtonTitle}
               title={addButtonTitle}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "44px",
-                height: "44px",
-              }}
             >
               {NAV_ICONS.ADD}
             </button>
@@ -126,13 +119,6 @@ const Header: React.FC<HeaderProps> = ({
             onClick={() => navigate("/settings")}
             aria-label="Settings"
             title="Settings"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "44px",
-              height: "44px",
-            }}
           >
             {NAV_ICONS.SETTINGS}
           </button>
@@ -141,13 +127,6 @@ const Header: React.FC<HeaderProps> = ({
             onClick={handleLogout}
             aria-label="Logout"
             title="Logout"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "44px",
-              height: "44px",
-            }}
           >
             <span className={styles.logoutIcon}>{NAV_ICONS.LOGOUT}</span>
           </button>

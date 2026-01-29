@@ -231,7 +231,6 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
   },
 
-  // Online Module Routes
   {
     path: "/online",
     element: <OnlineHomepage />,
@@ -239,8 +238,9 @@ const allRoutes: RouteConfig[] = [
     icon: "🌐",
     requiresAuth: true,
     noLayoutPadding: true,
-    hideHeader: true, // NEW: OnlineHomepage likely has its own header structure
+    hideHeader: true, // KEEP THIS - Online module will handle its own header
   },
+
   {
     path: "/online/categories/add",
     element: <CategoryForm />,

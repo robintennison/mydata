@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
@@ -19,6 +19,9 @@ const EditAccountPage: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [account, setAccount] = useState<BankAccount | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [textareaHeight, setTextareaHeight] = useState<number>(150); // Default height
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [formData, setFormData] = useState({
     acctCode: "",
@@ -89,6 +92,21 @@ const EditAccountPage: React.FC = () => {
       setError(null);
     }
   }, [id, accounts, dataLoading]);
+
+  // Calculate textarea height based on content
+  useEffect(() => {
+    if (textareaRef.current) {
+      // Reset height to auto to get the scrollHeight
+      textareaRef.current.style.height = "auto";
+
+      // Calculate the new height based on scrollHeight
+      const newHeight = Math.max(150, textareaRef.current.scrollHeight);
+      setTextareaHeight(newHeight);
+
+      // Set the height on the textarea
+      textareaRef.current.style.height = `${newHeight}px`;
+    }
+  }, [formData.acctDetails, isViewMode]);
 
   const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({
@@ -254,13 +272,14 @@ const EditAccountPage: React.FC = () => {
     fontSize: "14px", // Normal font size
     lineHeight: "1.5",
     fontFamily: "inherit", // Use default font instead of monospace
-    minHeight: "150px", // Increased height for multiline content
+    height: `${textareaHeight}px`, // Use dynamic height
     resize: "vertical" as const,
     boxSizing: "border-box" as const,
     outline: "none",
     cursor: submitting ? "not-allowed" : "text",
     whiteSpace: "pre-wrap" as const,
     wordBreak: "break-word" as const,
+    overflowY: "auto", // Allow vertical scrolling if content exceeds viewport height
   };
 
   const inputStyle: React.CSSProperties = {
@@ -352,6 +371,7 @@ const EditAccountPage: React.FC = () => {
                   backgroundColor: "#f9fafb",
                   cursor: "default",
                   fontFamily: "inherit", // Use default font
+                  minHeight: "150px", // Keep minHeight for view mode
                 }}
               >
                 {unescapeTextareaValue(formData.acctDetails) ||
@@ -439,11 +459,11 @@ const EditAccountPage: React.FC = () => {
             <div style={{ marginBottom: "20px" }}>
               <label style={bankingStyles.label}>Account Details *</label>
               <textarea
+                ref={textareaRef}
                 placeholder="Bank name, branch, account type, etc."
                 value={formData.acctDetails}
                 onChange={(e) => handleChange("acctDetails", e.target.value)}
                 style={textareaStyle}
-                rows={6} // Increased rows for more content
                 required
                 disabled={submitting}
                 maxLength={1000} // Increased max length

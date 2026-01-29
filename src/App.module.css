@@ -1,6 +1,4 @@
-/* src/App.module.css - FIXED VERSION */
-
-/* src/App.module.css - FIXED VERSION */
+/* src/App.module.css - UPDATED VERSION */
 
 /* REMOVE min-height from .container - let body handle it */
 .container {
@@ -37,7 +35,6 @@
   min-height: 0; /* Important for flex children */
 }
 
-/* ... keep the rest of your styles ... */
 /* Updated loading styles */
 .loadingContainer {
   display: flex;
@@ -245,64 +242,82 @@
   gap: 8px;
 }
 
-/* Settings button */
-.settingsButton {
-  background: none;
-  border: none;
-  color: var(--color-gray-700);
-  font-size: 1.2rem;
+/* Add button styling - UPDATED to match Online module */
+.addButton {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  font-size: 1.5rem;
   cursor: pointer;
   padding: 8px;
   border-radius: 6px;
+  transition: all 0.2s;
+  color: #4f46e5;
+  margin-right: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.addButton:hover {
+  background-color: rgba(79, 70, 229, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Settings button styling - UPDATED for consistency */
+.settingsButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
   transition: all 0.2s;
-  width: 40px;
-  height: 40px;
+  color: var(--color-gray-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
 }
 
 .settingsButton:hover {
-  background-color: var(--color-gray-100);
-  transform: translateY(-1px);
+  background-color: rgba(107, 114, 128, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* Logout button - Icon only */
+/* Logout button styling - UPDATED for consistency */
 .logoutButton {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--color-error-600);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  padding: 8px;
-  border-radius: 8px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  color: var(--color-error-600);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 500;
-  width: 40px;
-  height: 40px;
-  gap: 0; /* Remove gap since no text */
+  width: 44px;
+  height: 44px;
 }
 
 .logoutButton:hover {
-  background-color: rgba(239, 68, 68, 0.2);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
-}
-
-.logoutButton:active {
-  transform: translateY(0);
+  background-color: rgba(239, 68, 68, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .logoutIcon {
   font-size: 1.2rem;
+  transform: rotate(180deg);
 }
 
 .logoutText {
   display: none; /* Hide text as requested */
 }
-
 
 /* Desktop view with shadow and rounded corners */
 @media (min-width: 601px) {
@@ -312,18 +327,17 @@
   }
 
   .app {
-  min-height: auto; /* Changed from 100vh */
-  display: flex;
-  flex-direction: column;
-  max-width: 600px;
-  margin: 0 auto;
-  width: 100%;
-  background-color: var(--color-white);
-  
-  /* ADD THIS: Prevent extra space */
-  overflow: hidden;
-}
-
+    min-height: auto; /* Changed from 100vh */
+    display: flex;
+    flex-direction: column;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+    background-color: var(--color-white);
+    
+    /* ADD THIS: Prevent extra space */
+    overflow: hidden;
+  }
 }
 
 /* Mobile view - full width */
@@ -369,11 +383,13 @@
     padding: 6px 8px;
   }
   
+  .addButton,
   .logoutButton,
   .settingsButton {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     padding: 6px;
+    font-size: 1.3rem;
   }
   
   .logoutIcon {
@@ -407,6 +423,15 @@
   
   .headerActions {
     gap: 6px;
+  }
+  
+  .addButton,
+  .logoutButton,
+  .settingsButton {
+    width: 36px;
+    height: 36px;
+    padding: 5px;
+    font-size: 1.2rem;
   }
 }
 
@@ -452,19 +477,17 @@
     font-size: 1.3rem;
   }
   
+  .addButton,
   .logoutButton,
   .settingsButton {
     width: 32px;
     height: 32px;
     padding: 5px;
+    font-size: 1.1rem;
   }
   
   .logoutIcon {
     font-size: 1rem;
-  }
-  
-  .settingsButton {
-    font-size: 1.1rem;
   }
 }
 
@@ -493,38 +516,20 @@
     font-size: 1.2rem;
   }
   
+  .addButton,
   .logoutButton,
   .settingsButton {
     width: 28px;
     height: 28px;
     padding: 4px;
+    font-size: 1rem;
   }
   
   .logoutIcon {
     font-size: 0.9rem;
   }
-
-  /* Add button styling */
-.addButton {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-  color: #4f46e5; /* Indigo color to match banking theme */
-}
-
-.addButton:hover {
-  background-color: rgba(79, 70, 229, 0.1);
-}
-
-/* Adjust header actions to accommodate new button */
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
+  
+  .headerActions {
+    gap: 4px;
+  }
 }

@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({
     BACK: "←",
     SETTINGS: "⚙️",
     LOGOUT: "↪️",
-    ADD: "➕", // New add icon
+    ADD: "➕",
   };
 
   // Module navigation items
@@ -102,14 +102,20 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* Right side: Actions */}
         <div className={styles.headerActions}>
-          {/* Add button - displayed left to settings icon as requested */}
+          {/* Add button - displayed left to settings icon */}
           {showAddButton && (
             <button
               className={styles.addButton}
               onClick={handleAddClick}
               aria-label={addButtonTitle}
               title={addButtonTitle}
-              style={{ marginRight: "8px" }} // Add space between + and settings
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "44px",
+                height: "44px",
+              }}
             >
               {NAV_ICONS.ADD}
             </button>
@@ -120,6 +126,13 @@ const Header: React.FC<HeaderProps> = ({
             onClick={() => navigate("/settings")}
             aria-label="Settings"
             title="Settings"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "44px",
+              height: "44px",
+            }}
           >
             {NAV_ICONS.SETTINGS}
           </button>
@@ -128,6 +141,13 @@ const Header: React.FC<HeaderProps> = ({
             onClick={handleLogout}
             aria-label="Logout"
             title="Logout"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "44px",
+              height: "44px",
+            }}
           >
             <span className={styles.logoutIcon}>{NAV_ICONS.LOGOUT}</span>
           </button>

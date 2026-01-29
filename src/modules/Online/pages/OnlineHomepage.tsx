@@ -279,7 +279,8 @@ const OnlineHomepage: React.FC = () => {
               aria-label="Go to Home"
               title="Go to Home"
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+                e.currentTarget.style.backgroundColor =
+                  "rgba(59, 130, 246, 0.1)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "transparent";
@@ -582,91 +583,113 @@ const OnlineHomepage: React.FC = () => {
   );
 };
 
-// Header styles - MATCH THE HEADER COMPONENT STYLING WITH BOX EFFECT
+// Header styles - UPDATED to match the App.module.css styling
 const headerStyles = {
   header: {
     backgroundColor: "#ffffff",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+    borderBottom: "1px solid #e5e7eb",
     position: "sticky" as const,
     top: 0,
     zIndex: 1000,
-    borderBottom: "1px solid #e5e7eb",
+    height: "56px",
+    padding: "8px 0",
   },
   headerContent: {
     display: "flex" as const,
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "12px 16px",
-    maxWidth: "1200px",
+    maxWidth: "600px",
     margin: "0 auto",
+    width: "100%",
+    padding: "0 16px",
+    height: "100%",
+    gap: "8px",
   },
   headerLeft: {
+    flex: "0 0 auto" as const,
     display: "flex" as const,
     alignItems: "center",
+    minWidth: "36px",
   },
   homeButton: {
     background: "none",
     border: "none",
-    fontSize: "1.25rem",
-    fontWeight: 600,
-    color: "#374151",
+    color: "#3b82f6",
+    fontSize: "1.3rem",
+    fontWeight: 700,
     cursor: "pointer",
-    padding: "8px 12px",
+    padding: "6px 10px",
     borderRadius: "6px",
-    transition: "background-color 0.2s",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s",
+    textDecoration: "none",
+    letterSpacing: "-0.5px",
   },
   headerCenter: {
+    flex: 1,
     display: "flex" as const,
+    justifyContent: "center",
     alignItems: "center",
+    minWidth: 0,
   },
   moduleNav: {
     display: "flex" as const,
-    gap: "4px",
-    backgroundColor: "#f3f4f6",
-    padding: "4px",
-    borderRadius: "8px",
+    gap: "12px",
+    flex: 1,
+    justifyContent: "center",
+    minWidth: 0,
   },
   moduleButton: {
-    background: "none",
+    background: "transparent",
     border: "none",
+    color: "#374151",
+    cursor: "pointer",
+    padding: "8px 12px",
+    borderRadius: "8px",
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s",
+    minWidth: "50px",
+    minHeight: "50px",
+    opacity: 0.8,
+  },
+  activeModule: {
+    backgroundColor: "#eff6ff",
+    color: "#3b82f6",
+    opacity: 1,
+    boxShadow: "0 2px 4px rgba(59, 130, 246, 0.2)",
+  },
+  moduleIcon: {
+    fontSize: "1.5rem",
+    lineHeight: 1,
+  },
+  headerActions: {
+    flex: "0 0 auto" as const,
+    display: "flex" as const,
+    alignItems: "center",
+    gap: "8px",
+  },
+  addButton: {
+    background: "#ffffff",
+    border: "1px solid #e5e7eb",
     fontSize: "1.5rem",
     cursor: "pointer",
     padding: "8px",
     borderRadius: "6px",
     transition: "all 0.2s",
+    color: "#4f46e5",
+    marginRight: 0,
+    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     width: "44px",
     height: "44px",
-  },
-  activeModule: {
-    backgroundColor: "#ffffff",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-  },
-  moduleIcon: {
-    display: "block",
-  },
-  headerActions: {
-    display: "flex" as const,
-    alignItems: "center",
-    gap: "8px", // Increased gap for better spacing with boxed buttons
-  },
-  addButton: {
-    background: "#ffffff", // White background for box effect
-    border: "1px solid #e5e7eb", // Border for box effect
-    fontSize: "1.5rem",
-    cursor: "pointer",
-    padding: "8px",
-    borderRadius: "6px", // Slightly more rounded to match module buttons
-    transition: "all 0.2s",
-    color: "#4f46e5",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "44px", // Fixed width to match module buttons
-    height: "44px", // Fixed height to match module buttons
-    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)", // Subtle shadow for depth
   },
   settingsButton: {
     background: "none",
@@ -699,7 +722,7 @@ const headerStyles = {
     height: "44px",
   },
   logoutIcon: {
-    display: "block",
+    fontSize: "1.2rem",
     transform: "rotate(180deg)",
   },
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { useAuth } from "../../../contexts/AuthContext"; // Import useAuth
+import { useAuth } from "../../../contexts/AuthContext";
 import { onlineStyles } from "../styles/onlineStyles";
 import OnlineListTab from "./OnlineListTab";
 import RenewalListTab from "./RenewalListTab";
@@ -24,7 +24,7 @@ const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
 const OnlineHomepage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, logout } = useAuth(); // Get auth context
+  const { isAuthenticated, logout } = useAuth();
 
   // State for active tab - initialize from location state if available
   const [activeTab, setActiveTab] = useState<
@@ -161,7 +161,7 @@ const OnlineHomepage: React.FC = () => {
     }
   };
 
-  // Define all icons in one place
+  // Define all icons in one place - MATCH THE HEADER COMPONENT EXACTLY
   const NAV_ICONS = {
     // Module icons
     BANKING: "🏦",
@@ -172,7 +172,7 @@ const OnlineHomepage: React.FC = () => {
     BACK: "←",
     SETTINGS: "⚙️",
     LOGOUT: "↪️",
-    ADD: "➕",
+    ADD: "➕", // This should match the Header component
   };
 
   // Module navigation items
@@ -278,6 +278,12 @@ const OnlineHomepage: React.FC = () => {
               onClick={handleHomeClick}
               aria-label="Go to Home"
               title="Go to Home"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
             >
               MyData
             </button>
@@ -302,6 +308,16 @@ const OnlineHomepage: React.FC = () => {
                     onClick={() => navigate(item.path)}
                     aria-label={item.label}
                     title={item.label}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = "#e5e7eb";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }
+                    }}
                   >
                     <span style={headerStyles.moduleIcon}>{item.icon}</span>
                   </button>
@@ -312,12 +328,23 @@ const OnlineHomepage: React.FC = () => {
 
           {/* Right side: Actions */}
           <div style={headerStyles.headerActions}>
-            {/* Add button - displayed left to settings icon */}
+            {/* Add button - displayed left to settings icon WITH BOX EFFECT */}
             <button
               style={headerStyles.addButton}
               onClick={handleAddClick}
               aria-label={getAddButtonTitle()}
               title={getAddButtonTitle()}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(79, 70, 229, 0.1)";
+                e.currentTarget.style.boxShadow =
+                  "0 2px 4px rgba(0, 0, 0, 0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#ffffff";
+                e.currentTarget.style.boxShadow =
+                  "0 1px 2px rgba(0, 0, 0, 0.05)";
+              }}
             >
               {NAV_ICONS.ADD}
             </button>
@@ -327,6 +354,16 @@ const OnlineHomepage: React.FC = () => {
               onClick={() => navigate("/settings")}
               aria-label="Settings"
               title="Settings"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(107, 114, 128, 0.1)";
+                e.currentTarget.style.boxShadow =
+                  "0 1px 2px rgba(0, 0, 0, 0.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.boxShadow = "none";
+              }}
             >
               {NAV_ICONS.SETTINGS}
             </button>
@@ -335,6 +372,16 @@ const OnlineHomepage: React.FC = () => {
               onClick={handleLogout}
               aria-label="Logout"
               title="Logout"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(239, 68, 68, 0.1)";
+                e.currentTarget.style.boxShadow =
+                  "0 1px 2px rgba(0, 0, 0, 0.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.boxShadow = "none";
+              }}
             >
               <span style={headerStyles.logoutIcon}>{NAV_ICONS.LOGOUT}</span>
             </button>
@@ -371,6 +418,16 @@ const OnlineHomepage: React.FC = () => {
               transition: "all 0.2s",
               position: "relative",
               whiteSpace: "nowrap",
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "items") {
+                e.currentTarget.style.backgroundColor = "#f8f9fa";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "items") {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }
             }}
           >
             Items
@@ -412,6 +469,16 @@ const OnlineHomepage: React.FC = () => {
               transition: "all 0.2s",
               position: "relative",
               whiteSpace: "nowrap",
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "renewals") {
+                e.currentTarget.style.backgroundColor = "#f8f9fa";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "renewals") {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }
             }}
           >
             Renewals
@@ -467,6 +534,16 @@ const OnlineHomepage: React.FC = () => {
               position: "relative",
               whiteSpace: "nowrap",
             }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "categories") {
+                e.currentTarget.style.backgroundColor = "#f8f9fa";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "categories") {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }
+            }}
           >
             Categories
             {counts.categories > 0 && (
@@ -501,13 +578,11 @@ const OnlineHomepage: React.FC = () => {
           <TabContent activeTab={activeTab} />
         </div>
       </div>
-
-      {/* REMOVED: FAB button (now in Header) */}
     </div>
   );
 };
 
-// Header styles
+// Header styles - MATCH THE HEADER COMPONENT STYLING WITH BOX EFFECT
 const headerStyles = {
   header: {
     backgroundColor: "#ffffff",
@@ -575,18 +650,23 @@ const headerStyles = {
   headerActions: {
     display: "flex" as const,
     alignItems: "center",
-    gap: "8px",
+    gap: "8px", // Increased gap for better spacing with boxed buttons
   },
   addButton: {
-    background: "none",
-    border: "none",
+    background: "#ffffff", // White background for box effect
+    border: "1px solid #e5e7eb", // Border for box effect
     fontSize: "1.5rem",
     cursor: "pointer",
     padding: "8px",
-    borderRadius: "4px",
-    transition: "background-color 0.2s",
-    color: "#3b82f6",
-    marginRight: "4px",
+    borderRadius: "6px", // Slightly more rounded to match module buttons
+    transition: "all 0.2s",
+    color: "#4f46e5",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "44px", // Fixed width to match module buttons
+    height: "44px", // Fixed height to match module buttons
+    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)", // Subtle shadow for depth
   },
   settingsButton: {
     background: "none",
@@ -594,9 +674,14 @@ const headerStyles = {
     fontSize: "1.5rem",
     cursor: "pointer",
     padding: "8px",
-    borderRadius: "4px",
-    transition: "background-color 0.2s",
+    borderRadius: "6px",
+    transition: "all 0.2s",
     color: "#6b7280",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "44px",
+    height: "44px",
   },
   logoutButton: {
     background: "none",
@@ -604,9 +689,14 @@ const headerStyles = {
     fontSize: "1.5rem",
     cursor: "pointer",
     padding: "8px",
-    borderRadius: "4px",
-    transition: "background-color 0.2s",
+    borderRadius: "6px",
+    transition: "all 0.2s",
     color: "#ef4444",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "44px",
+    height: "44px",
   },
   logoutIcon: {
     display: "block",

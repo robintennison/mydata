@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   getFirestore,
@@ -37,6 +37,8 @@ const OnlineForm: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const { settings } = useSettings();
   const showDelete = settings?.showDelete || false;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [textareaHeight, setTextareaHeight] = useState<number>(150); // Default height
 
   // Determine mode from the current URL path
   const getModeFromPath = (): "add" | "edit" | "view" => {
@@ -81,6 +83,21 @@ const OnlineForm: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [image1File, setImage1File] = useState<File | null>(null);
   const [image2File, setImage2File] = useState<File | null>(null);
+
+  // Calculate textarea height based on content
+  useEffect(() => {
+    if (textareaRef.current && !isViewMode) {
+      // Reset height to auto to get the scrollHeight
+      textareaRef.current.style.height = "auto";
+
+      // Calculate the new height based on scrollHeight
+      const newHeight = Math.max(150, textareaRef.current.scrollHeight);
+      setTextareaHeight(newHeight);
+
+      // Set the height on the textarea
+      textareaRef.current.style.height = `${newHeight}px`;
+    }
+  }, [formData.detail, isViewMode]);
 
   useEffect(() => {
     console.log("useEffect triggered with:", {
@@ -282,6 +299,27 @@ const OnlineForm: React.FC = () => {
     );
   }
 
+  // Create a dynamic textarea style for edit mode
+  const textareaStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "12px",
+    border: "1px solid #d1d5db",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontFamily: "inherit",
+    lineHeight: "1.5",
+    color: "#111827",
+    backgroundColor: "white",
+    resize: "vertical",
+    height: `${textareaHeight}px`, // Use dynamic height
+    boxSizing: "border-box",
+    outline: "none",
+    cursor: saving ? "not-allowed" : "text",
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word",
+    overflowY: "auto",
+  };
+
   return (
     <div style={onlineStyles.pageContainer}>
       {/* Top Navigation */}
@@ -384,6 +422,7 @@ const OnlineForm: React.FC = () => {
               )}
             </div>
 
+            {/* DETAILS FIELD - UPDATED WITH DYNAMIC HEIGHT */}
             <div style={onlineStyles.formGroup}>
               <label style={onlineStyles.label}>Details</label>
               {isViewMode ? (
@@ -407,17 +446,12 @@ const OnlineForm: React.FC = () => {
                 </div>
               ) : (
                 <textarea
+                  ref={textareaRef}
                   value={formData.detail || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, detail: e.target.value })
                   }
-                  style={{
-                    ...onlineStyles.textarea,
-                    minHeight: "150px",
-                    maxHeight: "400px",
-                    overflowY: "auto",
-                    resize: "vertical",
-                  }}
+                  style={textareaStyle}
                   placeholder="Enter item details"
                   disabled={saving}
                 />
@@ -626,7 +660,7 @@ const OnlineForm: React.FC = () => {
                   marginTop: "30px",
                   paddingTop: "20px",
                   borderTop: "1px solid #e5e7eb",
-                  paddingBottom: "20px", // Added padding at bottom
+                  paddingBottom: "20px",
                 }}
               >
                 <button

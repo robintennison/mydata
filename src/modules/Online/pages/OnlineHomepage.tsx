@@ -10,16 +10,27 @@ import styles from "../../../App.module.css"; // Import the CSS module
 
 // Tab components
 const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
-  switch (activeTab) {
-    case "items":
-      return <OnlineListTab />;
-    case "renewals":
-      return <RenewalListTab />;
-    case "categories":
-      return <CategoryListTab />;
-    default:
-      return <OnlineListTab />;
-  }
+  // Use scrollableArea style for tab content
+  const tabContainerStyle = {
+    ...onlineStyles.scrollableArea,
+  };
+
+  return (
+    <div style={tabContainerStyle}>
+      {(() => {
+        switch (activeTab) {
+          case "items":
+            return <OnlineListTab />;
+          case "renewals":
+            return <RenewalListTab />;
+          case "categories":
+            return <CategoryListTab />;
+          default:
+            return <OnlineListTab />;
+        }
+      })()}
+    </div>
+  );
 };
 
 const OnlineHomepage: React.FC = () => {
@@ -189,9 +200,7 @@ const OnlineHomepage: React.FC = () => {
 
   if (loading) {
     return (
-      <div
-        style={{ display: "flex", flexDirection: "column", height: "100vh" }}
-      >
+      <div style={onlineStyles.container}>
         {/* Header during loading (without add button) */}
         <header className={styles.header}>
           <div className={styles.headerContent}>
@@ -253,18 +262,16 @@ const OnlineHomepage: React.FC = () => {
           </div>
         </header>
 
-        <div style={onlineStyles.container}>
-          <div style={onlineStyles.loading}>
-            <div style={onlineStyles.spinner}></div>
-            <p>Loading online module...</p>
-          </div>
+        <div style={onlineStyles.loading}>
+          <div style={onlineStyles.spinner}></div>
+          <p>Loading online module...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div style={onlineStyles.container}>
       {/* Header with add button */}
       <header className={styles.header}>
         <div className={styles.headerContent}>
@@ -336,8 +343,8 @@ const OnlineHomepage: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      {/* Main Content Area */}
+      <div style={onlineStyles.contentWrapper}>
         {/* Tab Navigation */}
         <div
           style={{
@@ -345,6 +352,7 @@ const OnlineHomepage: React.FC = () => {
             backgroundColor: "white",
             borderBottom: "1px solid #e9ecef",
             padding: "0 4px",
+            flexShrink: 0, // Prevent tab navigation from shrinking
           }}
         >
           <button
@@ -514,12 +522,13 @@ const OnlineHomepage: React.FC = () => {
           </button>
         </div>
 
-        {/* Tab Content */}
+        {/* Tab Content Area - Flex container for proper sizing */}
         <div
           style={{
             flex: 1,
-            overflow: "hidden",
-            padding: "8px 4px",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0, // Crucial for flex scrolling
           }}
         >
           <TabContent activeTab={activeTab} />

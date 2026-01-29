@@ -90,15 +90,7 @@ const OnlineListTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "60px 20px",
-        }}
-      >
+      <div style={onlineStyles.loading}>
         <div style={onlineStyles.spinner}></div>
         <p>Loading items...</p>
       </div>
@@ -106,26 +98,17 @@ const OnlineListTab: React.FC = () => {
   }
 
   return (
-    <div
-      style={{
-        height: "100%",
-        overflowY: "auto",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Search and Filter Row */}
+    <div style={{ minHeight: "100%" }}>
+      {/* Search and Filter Row - Removed sticky positioning to avoid conflicts */}
       <div
         style={{
           padding: "8px",
           backgroundColor: "white",
           borderBottom: "1px solid #e9ecef",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
           display: "flex",
           gap: "8px",
           alignItems: "center",
+          flexShrink: 0, // Prevent this from shrinking
         }}
       >
         {/* Search Input */}
@@ -199,8 +182,8 @@ const OnlineListTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Items List */}
-      <div style={{ flex: 1, padding: "8px 0" }}>
+      {/* Items List Container - This will scroll within the parent container */}
+      <div style={{ flex: 1, minHeight: 0 }}>
         {filteredItems.length === 0 ? (
           <div style={onlineStyles.emptyState}>
             <div style={onlineStyles.emptyIcon}>🛒</div>
@@ -216,7 +199,7 @@ const OnlineListTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "0 8px" }}>
+          <div style={{ padding: "8px" }}>
             {/* Results Info */}
             <div
               style={{
@@ -226,7 +209,7 @@ const OnlineListTab: React.FC = () => {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "4px",
+                marginBottom: "8px",
               }}
             >
               <span>
@@ -262,7 +245,7 @@ const OnlineListTab: React.FC = () => {
                 key={item.id}
                 style={{
                   backgroundColor: "white",
-                  margin: "8px 0",
+                  marginBottom: "8px",
                   borderRadius: "8px",
                   border: "1px solid #e9ecef",
                   cursor: "pointer",

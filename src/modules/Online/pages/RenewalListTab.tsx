@@ -100,15 +100,7 @@ const RenewalListTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "60px 20px",
-        }}
-      >
+      <div style={onlineStyles.loading}>
         <div style={onlineStyles.spinner}></div>
         <p>Loading renewals...</p>
       </div>
@@ -116,22 +108,13 @@ const RenewalListTab: React.FC = () => {
   }
 
   return (
-    <div
-      style={{
-        height: "100%",
-        overflowY: "auto",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div style={{ minHeight: "100%" }}>
       <div
         style={{
           padding: "8px",
           backgroundColor: "white",
           borderBottom: "1px solid #e9ecef",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
+          flexShrink: 0, // Prevent this from shrinking
         }}
       >
         <div style={{ position: "relative" }}>
@@ -144,6 +127,8 @@ const RenewalListTab: React.FC = () => {
               ...onlineStyles.searchInput,
               padding: "10px 35px 10px 12px",
               fontSize: "0.9rem",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           />
           <span
@@ -160,7 +145,7 @@ const RenewalListTab: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ flex: 1, padding: "8px 0" }}>
+      <div style={{ flex: 1, minHeight: 0 }}>
         {filteredRenewals.length === 0 ? (
           <div style={onlineStyles.emptyState}>
             <div style={onlineStyles.emptyIcon}>🔄</div>
@@ -172,99 +157,201 @@ const RenewalListTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "0" }}>
-            {filteredRenewals.map((renewal) => (
-              <div
-                key={renewal.id}
-                style={{
-                  backgroundColor: "#f8f9fa",
-                  margin: "0 8px 8px 8px", // Matched margin to search padding (8px)
-                  borderRadius: "8px",
-                  border: "1px solid #e9ecef",
-                  cursor: "pointer",
-                }}
-                onClick={() => navigate(`/online/renewals/edit/${renewal.id}`)}
-              >
-                <div
+          <div style={{ padding: "8px" }}>
+            {/* Results Info */}
+            <div
+              style={{
+                padding: "4px 0",
+                fontSize: "0.8rem",
+                color: "#6b7280",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "8px",
+              }}
+            >
+              <span>
+                {filteredRenewals.length} renewal
+                {filteredRenewals.length !== 1 ? "s" : ""}
+              </span>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
                   style={{
-                    padding: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    minHeight: "48px",
+                    background: "none",
+                    border: "none",
+                    color: "#3b82f6",
+                    fontSize: "0.8rem",
+                    cursor: "pointer",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    backgroundColor: "#f0f9ff",
                   }}
                 >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: "0.95rem",
-                        fontWeight: "500",
-                        color: "#333",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      {renewal.name}
-                    </div>
-                    {renewal.comments && (
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "#718096",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {renewal.comments}
-                      </div>
-                    )}
-                  </div>
+                  Clear search
+                </button>
+              )}
+            </div>
 
+            {filteredRenewals.map((renewal) => {
+              const now = Date.now();
+              const endDate = renewal.endDate;
+              const daysUntilExpiry = Math.ceil(
+                (endDate - now) / (1000 * 60 * 60 * 24),
+              );
+
+              // Determine status
+              let statusStyle = {};
+              let statusText = "";
+
+              if (endDate < now) {
+                statusStyle = { backgroundColor: "#fee2e2", color: "#dc2626" };
+                statusText = "Expired";
+              } else if (daysUntilExpiry <= 7) {
+                statusStyle = { backgroundColor: "#fef3c7", color: "#d97706" };
+                statusText = `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? "s" : ""} left`;
+              } else if (daysUntilExpiry <= 30) {
+                statusStyle = { backgroundColor: "#dbeafe", color: "#1d4ed8" };
+                statusText = `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? "s" : ""} left`;
+              } else {
+                statusStyle = { backgroundColor: "#dcfce7", color: "#166534" };
+                statusText = "Active";
+              }
+
+              return (
+                <div
+                  key={renewal.id}
+                  style={{
+                    backgroundColor: "white",
+                    marginBottom: "8px",
+                    borderRadius: "8px",
+                    border: "1px solid #e9ecef",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  onClick={() =>
+                    navigate(`/online/renewals/edit/${renewal.id}`)
+                  }
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "#3b82f6";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 8px rgba(59, 130, 246, 0.1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#e9ecef";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                >
                   <div
                     style={{
-                      marginLeft: "8px",
-                      fontSize: "0.85rem",
-                      color: "#666",
-                      whiteSpace: "nowrap",
-                      padding: "0 12px",
-                    }}
-                  >
-                    {formatDate(renewal.endDate)}
-                  </div>
-
-                  <div
-                    style={{
+                      padding: "12px",
                       display: "flex",
                       alignItems: "center",
-                      gap: "4px",
+                      minHeight: "48px",
                     }}
                   >
-                    <button
-                      style={onlineStyles.editButton}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/online/renewals/edit/${renewal.id}`);
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "4px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "0.95rem",
+                            fontWeight: "600",
+                            color: "#111827",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {renewal.name}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "0.7rem",
+                            fontWeight: "600",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            ...statusStyle,
+                          }}
+                        >
+                          {statusText}
+                        </span>
+                      </div>
+
+                      {renewal.comments && (
+                        <div
+                          style={{
+                            fontSize: "0.8rem",
+                            color: "#666",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            lineHeight: "1.4",
+                          }}
+                        >
+                          {renewal.comments}
+                        </div>
+                      )}
+
+                      <div
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "#9ca3af",
+                          marginTop: "4px",
+                        }}
+                      >
+                        Expires: {formatDate(renewal.endDate)}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        marginLeft: "8px",
                       }}
-                      title="Edit"
                     >
-                      ✏️
-                    </button>
-                    <button
-                      style={onlineStyles.deleteButton}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(renewal.id, renewal.name);
-                      }}
-                      title="Delete"
-                    >
-                      🗑️
-                    </button>
+                      <button
+                        style={{
+                          ...onlineStyles.editButton,
+                          padding: "6px 8px",
+                          fontSize: "12px",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/online/renewals/edit/${renewal.id}`);
+                        }}
+                        title="Edit"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        style={{
+                          ...onlineStyles.deleteButton,
+                          padding: "6px 8px",
+                          fontSize: "12px",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(renewal.id, renewal.name);
+                        }}
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -66,15 +66,7 @@ const CategoryListTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "60px 20px",
-        }}
-      >
+      <div style={onlineStyles.loading}>
         <div style={onlineStyles.spinner}></div>
         <p>Loading categories...</p>
       </div>
@@ -82,15 +74,13 @@ const CategoryListTab: React.FC = () => {
   }
 
   return (
-    <div style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100%" }}>
       <div
         style={{
           padding: "8px",
           backgroundColor: "white",
           borderBottom: "1px solid #e9ecef",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
+          flexShrink: 0, // Prevent this from shrinking
         }}
       >
         <div style={{ position: "relative" }}>
@@ -103,6 +93,8 @@ const CategoryListTab: React.FC = () => {
               ...onlineStyles.searchInput,
               padding: "10px 35px 10px 12px",
               fontSize: "0.9rem",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           />
           <span
@@ -119,7 +111,7 @@ const CategoryListTab: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ flex: 1, padding: "8px 0" }}>
+      <div style={{ flex: 1, minHeight: 0 }}>
         {filteredCategories.length === 0 ? (
           <div style={onlineStyles.emptyState}>
             <div style={onlineStyles.emptyIcon}>📁</div>
@@ -133,20 +125,65 @@ const CategoryListTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "0" }}>
+          <div style={{ padding: "8px" }}>
+            {/* Results Info */}
+            <div
+              style={{
+                padding: "4px 0",
+                fontSize: "0.8rem",
+                color: "#6b7280",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "8px",
+              }}
+            >
+              <span>
+                {filteredCategories.length} categor
+                {filteredCategories.length !== 1 ? "ies" : "y"}
+              </span>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#3b82f6",
+                    fontSize: "0.8rem",
+                    cursor: "pointer",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    backgroundColor: "#f0f9ff",
+                  }}
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
+
             {filteredCategories.map((category) => (
               <div
                 key={category.id}
                 style={{
                   backgroundColor: "white",
-                  margin: "0 8px 8px 8px", // Matched margin to search padding (8px)
+                  marginBottom: "8px",
                   borderRadius: "8px",
                   border: "1px solid #e9ecef",
                   cursor: "pointer",
+                  transition: "all 0.2s ease",
                 }}
                 onClick={() =>
                   navigate(`/online/categories/edit/${category.id}`)
                 }
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#3b82f6";
+                  e.currentTarget.style.boxShadow =
+                    "0 2px 8px rgba(59, 130, 246, 0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#e9ecef";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
               >
                 <div
                   style={{
@@ -156,15 +193,34 @@ const CategoryListTab: React.FC = () => {
                     minHeight: "48px",
                   }}
                 >
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "20px",
+                      backgroundColor: "#dbeafe",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: "12px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span style={{ fontSize: "18px", color: "#1d4ed8" }}>
+                      {category.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
                         fontSize: "0.95rem",
-                        fontWeight: "500",
-                        color: "#333",
+                        fontWeight: "600",
+                        color: "#111827",
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
+                        marginBottom: "4px",
                       }}
                     >
                       {category.name}
@@ -180,17 +236,25 @@ const CategoryListTab: React.FC = () => {
                     }}
                   >
                     <button
-                      style={onlineStyles.editButton}
+                      style={{
+                        ...onlineStyles.editButton,
+                        padding: "6px 8px",
+                        fontSize: "12px",
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/online/categories/edit/${category.id}`);
                       }}
                       title="Edit"
                     >
-                      ✏️
+                      ✏️ Edit
                     </button>
                     <button
-                      style={onlineStyles.deleteButton}
+                      style={{
+                        ...onlineStyles.deleteButton,
+                        padding: "6px 8px",
+                        fontSize: "12px",
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(category.id, category.name);

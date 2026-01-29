@@ -1,21 +1,51 @@
 import { CSSProperties } from "react";
 
 export const onlineStyles = {
-  // Container
+  // Container - KEEP but modify for proper scrolling
   container: {
+    display: "flex",
+    flexDirection: "column" as const,
+    height: "100vh", // Changed from minHeight to height
+    overflow: "hidden", // Prevent container from scrolling
+    backgroundColor: "#f5f5f5",
+  },
+
+  // Updated contentWrapper for scrolling
+  contentWrapper: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column" as const,
+    width: "100%",
+    overflow: "hidden", // Prevent wrapper from scrolling
+    minHeight: 0, // Crucial for flex scrolling
+  },
+
+  // Scrollable area for lists
+  scrollableArea: {
+    flex: 1,
+    overflowY: "auto" as const,
+    WebkitOverflowScrolling: "touch" as const,
+    minHeight: 0,
+    padding: "8px 4px",
+  },
+
+  // Full page container for forms (no scrolling needed)
+  pageContainer: {
     display: "flex",
     flexDirection: "column" as const,
     minHeight: "100vh",
     backgroundColor: "#f5f5f5",
   },
 
-  contentWrapper: {
+  // Form content wrapper
+  formContentWrapper: {
     flex: 1,
     display: "flex",
     flexDirection: "column" as const,
-    maxWidth: "100%", // Changed from 500px to fill the Layout container
+    maxWidth: "600px",
     margin: "0 auto",
     width: "100%",
+    padding: "20px 15px",
   },
 
   // Top Navigation
@@ -27,6 +57,7 @@ export const onlineStyles = {
     backgroundColor: "#ffffff",
     borderBottom: "1px solid #e9ecef",
     marginBottom: "10px",
+    flexShrink: 0, // Prevent shrinking
   } as CSSProperties,
 
   navButton: {
@@ -86,6 +117,7 @@ export const onlineStyles = {
     alignItems: "center",
     justifyContent: "center",
     padding: "60px 20px",
+    flex: 1,
   } as CSSProperties,
 
   spinner: {
@@ -125,10 +157,11 @@ export const onlineStyles = {
   section: {
     backgroundColor: "white",
     borderRadius: "12px",
-    margin: "0 4px 8px 4px", // Reduced margins for edge-to-edge look
-    padding: "8px", // Reduced padding
+    margin: "0 4px 8px 4px",
+    padding: "8px",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
     border: "1px solid #e9ecef",
+    flexShrink: 0, // Prevent sections from shrinking
   } as CSSProperties,
 
   sectionHeader: {
@@ -238,6 +271,7 @@ export const onlineStyles = {
   form: {
     maxWidth: "600px",
     margin: "0 auto",
+    width: "100%",
   } as CSSProperties,
 
   formGroup: {
@@ -336,6 +370,11 @@ export const onlineStyles = {
     textAlign: "center" as const,
     padding: "40px 20px",
     color: "#6c757d",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
   } as CSSProperties,
 
   emptyIcon: {

@@ -4,7 +4,17 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "../../App.module.css";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  showAddButton?: boolean;
+  onAddClick?: () => void;
+  addButtonTitle?: string;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  showAddButton = false,
+  onAddClick,
+  addButtonTitle = "Add",
+}) => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,6 +30,7 @@ const Header: React.FC = () => {
     BACK: "←",
     SETTINGS: "⚙️",
     LOGOUT: "↪️",
+    ADD: "➕", // New add icon
   };
 
   // Module navigation items
@@ -39,6 +50,12 @@ const Header: React.FC = () => {
 
   const handleHomeClick = () => {
     navigate("/");
+  };
+
+  const handleAddClick = () => {
+    if (onAddClick) {
+      onAddClick();
+    }
   };
 
   if (!isAuthenticated) {
@@ -77,7 +94,6 @@ const Header: React.FC = () => {
                   title={item.label}
                 >
                   <span className={styles.moduleIcon}>{item.icon}</span>
-                  {/* Removed the module label text below icons */}
                 </button>
               );
             })}
@@ -86,6 +102,19 @@ const Header: React.FC = () => {
 
         {/* Right side: Actions */}
         <div className={styles.headerActions}>
+          {/* Add button - displayed left to settings icon as requested */}
+          {showAddButton && (
+            <button
+              className={styles.addButton}
+              onClick={handleAddClick}
+              aria-label={addButtonTitle}
+              title={addButtonTitle}
+              style={{ marginRight: "8px" }} // Add space between + and settings
+            >
+              {NAV_ICONS.ADD}
+            </button>
+          )}
+
           <button
             className={styles.settingsButton}
             onClick={() => navigate("/settings")}
@@ -101,7 +130,6 @@ const Header: React.FC = () => {
             title="Logout"
           >
             <span className={styles.logoutIcon}>{NAV_ICONS.LOGOUT}</span>
-            {/* Removed the "Logout" text */}
           </button>
         </div>
       </div>

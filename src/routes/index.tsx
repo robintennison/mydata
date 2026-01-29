@@ -34,7 +34,7 @@ import RenewalForm from "../modules/Online/pages/RenewalForm";
 import OnlineHomepage from "../modules/Online/pages/OnlineHomepage";
 
 // Import ViewDepositPage
-import ViewDepositPage from "../modules/Banking/pages/ViewDepositPage"; // Add this import
+import ViewDepositPage from "../modules/Banking/pages/ViewDepositPage";
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -47,6 +47,7 @@ export interface RouteConfig {
   children?: RouteConfig[];
   isIndex?: boolean;
   noLayoutPadding?: boolean;
+  hideHeader?: boolean; // NEW: Option to hide header for pages that have their own
 }
 
 export interface NavigationItem {
@@ -91,8 +92,8 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
     noLayoutPadding: true,
+    hideHeader: true, // NEW: BankingHomePage has its own header
   },
-
   {
     path: "/banking/accounts/add",
     element: <AddAccountPage />,
@@ -115,7 +116,6 @@ const allRoutes: RouteConfig[] = [
     requiresAuth: true,
     needsUserData: true,
   },
-
   {
     path: "/banking/deposits/add",
     element: <AddEditDepositPage />,
@@ -133,14 +133,13 @@ const allRoutes: RouteConfig[] = [
     needsUserData: true,
   },
   {
-    path: "/banking/deposits/view/:depositId", // Add this route
+    path: "/banking/deposits/view/:depositId",
     element: <ViewDepositPage />,
     title: "View Deposit",
     icon: "👁️",
     requiresAuth: true,
     needsUserData: true,
   },
-
   {
     path: "/banking/history/add",
     element: <EditHistoryPage />,
@@ -166,6 +165,7 @@ const allRoutes: RouteConfig[] = [
     icon: "💎",
     requiresAuth: true,
     noLayoutPadding: true,
+    hideHeader: true, // NEW: JewelleryHome likely has its own header structure
   },
   {
     path: "/jewellery/list",
@@ -223,7 +223,6 @@ const allRoutes: RouteConfig[] = [
     title: "Linked Jewellery",
     requiresAuth: true,
   },
-
   {
     path: "/jewellery/batch-edit",
     element: <BatchEditPage />,
@@ -233,14 +232,14 @@ const allRoutes: RouteConfig[] = [
   },
 
   // Online Module Routes
-  // Main online page - this should be the tabbed interface
   {
     path: "/online",
-    element: <OnlineHomepage />, // This is your tabbed homepage
+    element: <OnlineHomepage />,
     title: "Online",
     icon: "🌐",
     requiresAuth: true,
     noLayoutPadding: true,
+    hideHeader: true, // NEW: OnlineHomepage likely has its own header structure
   },
   {
     path: "/online/categories/add",
@@ -272,7 +271,7 @@ const allRoutes: RouteConfig[] = [
   },
   {
     path: "/online/items/view/:id",
-    element: <OnlineForm />, // Use OnlineForm with view mode
+    element: <OnlineForm />,
     title: "View Item",
     requiresAuth: true,
   },
@@ -403,12 +402,23 @@ const AppRoutes: React.FC<AppRoutesProps> = () => {
       );
     }
 
+    // For routes with hideHeader flag, render without Layout's header
     const routeElement = route.requiresAuth ? (
       <ProtectedRoute>
-        <Layout noPadding={route.noLayoutPadding}>{route.element}</Layout>
+        <Layout
+          noPadding={route.noLayoutPadding}
+          hideHeader={route.hideHeader} // Pass hideHeader prop to Layout
+        >
+          {route.element}
+        </Layout>
       </ProtectedRoute>
     ) : (
-      <Layout noPadding={route.noLayoutPadding}>{route.element}</Layout>
+      <Layout
+        noPadding={route.noLayoutPadding}
+        hideHeader={route.hideHeader} // Pass hideHeader prop to Layout
+      >
+        {route.element}
+      </Layout>
     );
 
     // Handle routes with children (nested routes)

@@ -503,4 +503,28 @@
   .logoutIcon {
     font-size: 0.9rem;
   }
+
+  /* Add button styling */
+.addButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: #4f46e5; /* Indigo color to match banking theme */
+}
+
+.addButton:hover {
+  background-color: rgba(79, 70, 229, 0.1);
+}
+
+/* Adjust header actions to accommodate new button */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 }

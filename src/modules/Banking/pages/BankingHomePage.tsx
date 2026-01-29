@@ -1,8 +1,10 @@
+// src/modules/banking/BankingHomePage.tsx (Updated)
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
+import Header from "../../../components/Layout/Header"; // Import Header
 
 // Import the tab components
 import AccountsTab from "./AccountsTab";
@@ -14,7 +16,11 @@ import SummaryTab from "./SummaryTab";
 import DepositPieChart from "./DepositPieChart";
 import SavingsPieChart from "./SavingsPieChart";
 
-const BankingHomePage: React.FC = () => {
+interface BankingHomePageProps {
+  // Add any props if needed
+}
+
+const BankingHomePage: React.FC<BankingHomePageProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -45,7 +51,7 @@ const BankingHomePage: React.FC = () => {
     }
   }, [location.state]);
 
-  // Handle Add button click
+  // Handle Add button click - UPDATED to be passed to Header
   const handleAddClick = () => {
     switch (activeTab) {
       case "accounts":
@@ -87,6 +93,9 @@ const BankingHomePage: React.FC = () => {
         return "Add";
     }
   };
+
+  // Rest of the component remains the same...
+  // [All the existing code for DashboardContent, calculations, etc.]
 
   // Format numbers in lakhs with 2 decimals (no currency symbol or "L" label)
   const formatLakhs = (amount: number): string => {
@@ -674,15 +683,22 @@ const BankingHomePage: React.FC = () => {
   }
 
   return (
-    <>
-      {/* Tabs Navigation - FIXED: Use inline styles like JewelleryHome */}
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {/* Header with Add button */}
+      <Header
+        showAddButton={shouldShowAddButton()}
+        onAddClick={handleAddClick}
+        addButtonTitle={getAddButtonTitle()}
+      />
+
+      {/* Tabs Navigation */}
       <div
         style={{
           width: "100%",
           backgroundColor: "#ffffff",
           borderBottom: "1px solid #e5e7eb",
           position: "sticky",
-          top: 0,
+          top: 0, // Will be below header
           zIndex: 10,
         }}
       >
@@ -863,43 +879,8 @@ const BankingHomePage: React.FC = () => {
         {activeTab === "summary" && <SummaryTab />}
       </div>
 
-      {/* Add button */}
-      {shouldShowAddButton() && (
-        <button
-          onClick={handleAddClick}
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            right: "20px",
-            backgroundColor: "#10b981",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "50%",
-            padding: "16px",
-            fontSize: "20px",
-            fontWeight: 600,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "56px",
-            height: "56px",
-            transition: "background-color 0.2s, transform 0.2s",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-            zIndex: 100,
-          }}
-          title={getAddButtonTitle()}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = "#059669")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "#10b981")
-          }
-        >
-          ➕
-        </button>
-      )}
-    </>
+      {/* REMOVED: FAB button (now in header) */}
+    </div>
   );
 };
 

@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { OnlineItem } from "../types/online.types";
 import { onlineStyles } from "../styles/onlineStyles";
 
@@ -58,19 +52,6 @@ const OnlineListTab: React.FC = () => {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
-      try {
-        const db = getFirestore();
-        await deleteDoc(doc(db, "online", id));
-        setItems(items.filter((item) => item.id !== id));
-      } catch (error) {
-        console.error("Error deleting item:", error);
-        alert("Failed to delete item");
-      }
     }
   };
 
@@ -355,18 +336,16 @@ const OnlineListTab: React.FC = () => {
                     )}
                   </div>
 
+                  {/* Edit button only */}
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
                       marginLeft: "8px",
                     }}
                   >
                     <button
                       style={{
                         ...onlineStyles.editButton,
-                        padding: "6px 8px",
+                        padding: "6px 12px",
                         fontSize: "12px",
                       }}
                       onClick={(e) => {
@@ -376,20 +355,6 @@ const OnlineListTab: React.FC = () => {
                       title="Edit"
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      style={{
-                        ...onlineStyles.deleteButton,
-                        padding: "6px 8px",
-                        fontSize: "12px",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(item.id, item.name);
-                      }}
-                      title="Delete"
-                    >
-                      🗑️
                     </button>
                   </div>
                 </div>

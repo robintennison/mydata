@@ -14,12 +14,13 @@ import ListTab from "./pages/ListTab";
 import BillsTab from "./pages/BillsTab";
 import GalleryTab from "./pages/GalleryTab";
 import VerificationTab from "./pages/VerificationTab";
+import Header from "../../components/Layout/Header"; // Import Header
 
 type TabType = "dashboard" | "list" | "gallery" | "bills" | "verification";
 
 const JewelleryHome: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // ADDED: To read location state
+  const location = useLocation();
 
   const { goldRate, settings } = useJewellerySettings();
   const [stats, setStats] = useState({
@@ -38,7 +39,6 @@ const JewelleryHome: React.FC = () => {
 
   // Initialize activeTab from location state if available
   const [activeTab, setActiveTab] = useState<TabType>(() => {
-    // Read from location state or default to "dashboard"
     return location.state?.activeTab || "dashboard";
   });
 
@@ -171,17 +171,52 @@ const JewelleryHome: React.FC = () => {
     return `${percent}%`;
   };
 
-  // Handle FAB clicks
-  const handleAddJewellery = () => {
-    navigate("/jewellery/add", {
-      state: { returnTo: "/jewellery", activeTab: "list" },
-    });
+  // Handle Add button click for Header
+  const handleAddClick = () => {
+    switch (activeTab) {
+      case "list":
+        navigate("/jewellery/add", {
+          state: { returnTo: "/jewellery", activeTab: "list" },
+        });
+        break;
+      case "bills":
+        navigate("/jewellery/bills/add", {
+          state: { returnTo: "/jewellery", activeTab: "bills" },
+        });
+        break;
+      case "dashboard":
+      case "gallery":
+      case "verification":
+      default:
+        // For tabs that don't have add functionality, show guidance
+        if (
+          activeTab === "dashboard" ||
+          activeTab === "gallery" ||
+          activeTab === "verification"
+        ) {
+          alert(
+            "Select List tab to add jewellery items or Bills tab to add bills",
+          );
+        }
+        break;
+    }
   };
 
-  const handleAddBill = () => {
-    navigate("/jewellery/bills/add", {
-      state: { returnTo: "/jewellery", activeTab: "bills" },
-    });
+  // Check if current tab should show Add button
+  const shouldShowAddButton = () => {
+    return activeTab === "list" || activeTab === "bills";
+  };
+
+  // Get button title based on active tab
+  const getAddButtonTitle = () => {
+    switch (activeTab) {
+      case "list":
+        return "Add Jewellery Item";
+      case "bills":
+        return "Add Bill";
+      default:
+        return "Add";
+    }
   };
 
   if (loading) {
@@ -574,241 +609,172 @@ const JewelleryHome: React.FC = () => {
   };
 
   return (
-    <div style={jewelleryStyles.container}>
-      {/* Tab Navigation - Compact with smaller text */}
-      <div
-        style={{
-          display: "flex",
-          backgroundColor: "white",
-          borderBottom: "1px solid #e5e7eb",
-        }}
-      >
-        <button
-          onClick={() => setActiveTab("dashboard")}
-          style={{
-            padding: "14px 8px",
-            border: "none",
-            backgroundColor:
-              activeTab === "dashboard" ? "#f3f4f6" : "transparent",
-            color: activeTab === "dashboard" ? "#111827" : "#6b7280",
-            fontSize: "12px",
-            fontWeight: activeTab === "dashboard" ? "600" : "400",
-            borderBottom:
-              activeTab === "dashboard" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            display: "flex",
-            alignItems: "center",
-            gap: "3px",
-            flex: 1,
-            justifyContent: "center",
-            minWidth: 0,
-          }}
-          title="Dashboard"
-        >
-          <span>📊</span>
-          <span>Dash</span>
-        </button>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {/* Header with Add button */}
+      <Header
+        showAddButton={shouldShowAddButton()}
+        onAddClick={handleAddClick}
+        addButtonTitle={getAddButtonTitle()}
+      />
 
-        <button
-          onClick={() => setActiveTab("list")}
+      {/* Main Content */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        {/* Tab Navigation - Compact with smaller text */}
+        <div
           style={{
-            padding: "14px 8px",
-            border: "none",
-            backgroundColor: activeTab === "list" ? "#f3f4f6" : "transparent",
-            color: activeTab === "list" ? "#111827" : "#6b7280",
-            fontSize: "12px",
-            fontWeight: activeTab === "list" ? "600" : "400",
-            borderBottom: activeTab === "list" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
             display: "flex",
-            alignItems: "center",
-            gap: "3px",
-            flex: 1,
-            justifyContent: "center",
-            minWidth: 0,
+            backgroundColor: "white",
+            borderBottom: "1px solid #e5e7eb",
           }}
-          title="List"
         >
-          <span>📋</span>
-          <span>List</span>
-        </button>
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            style={{
+              padding: "14px 8px",
+              border: "none",
+              backgroundColor:
+                activeTab === "dashboard" ? "#f3f4f6" : "transparent",
+              color: activeTab === "dashboard" ? "#111827" : "#6b7280",
+              fontSize: "12px",
+              fontWeight: activeTab === "dashboard" ? "600" : "400",
+              borderBottom:
+                activeTab === "dashboard" ? "2px solid #3b82f6" : "none",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              flex: 1,
+              justifyContent: "center",
+              minWidth: 0,
+            }}
+            title="Dashboard"
+          >
+            <span>📊</span>
+            <span>Dash</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab("gallery")}
-          style={{
-            padding: "14px 8px",
-            border: "none",
-            backgroundColor:
-              activeTab === "gallery" ? "#f3f4f6" : "transparent",
-            color: activeTab === "gallery" ? "#111827" : "#6b7280",
-            fontSize: "12px",
-            fontWeight: activeTab === "gallery" ? "600" : "400",
-            borderBottom:
-              activeTab === "gallery" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            display: "flex",
-            alignItems: "center",
-            gap: "3px",
-            flex: 1,
-            justifyContent: "center",
-            minWidth: 0,
-          }}
-          title="Gallery"
-        >
-          <span>🖼️</span>
-          <span>Gallery</span>
-        </button>
+          <button
+            onClick={() => setActiveTab("list")}
+            style={{
+              padding: "14px 8px",
+              border: "none",
+              backgroundColor: activeTab === "list" ? "#f3f4f6" : "transparent",
+              color: activeTab === "list" ? "#111827" : "#6b7280",
+              fontSize: "12px",
+              fontWeight: activeTab === "list" ? "600" : "400",
+              borderBottom: activeTab === "list" ? "2px solid #3b82f6" : "none",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              flex: 1,
+              justifyContent: "center",
+              minWidth: 0,
+            }}
+            title="List"
+          >
+            <span>📋</span>
+            <span>List</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab("bills")}
-          style={{
-            padding: "14px 8px",
-            border: "none",
-            backgroundColor: activeTab === "bills" ? "#f3f4f6" : "transparent",
-            color: activeTab === "bills" ? "#111827" : "#6b7280",
-            fontSize: "12px",
-            fontWeight: activeTab === "bills" ? "600" : "400",
-            borderBottom: activeTab === "bills" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            display: "flex",
-            alignItems: "center",
-            gap: "3px",
-            flex: 1,
-            justifyContent: "center",
-            minWidth: 0,
-          }}
-          title="Bills"
-        >
-          <span>📄</span>
-          <span>Bills</span>
-        </button>
+          <button
+            onClick={() => setActiveTab("gallery")}
+            style={{
+              padding: "14px 8px",
+              border: "none",
+              backgroundColor:
+                activeTab === "gallery" ? "#f3f4f6" : "transparent",
+              color: activeTab === "gallery" ? "#111827" : "#6b7280",
+              fontSize: "12px",
+              fontWeight: activeTab === "gallery" ? "600" : "400",
+              borderBottom:
+                activeTab === "gallery" ? "2px solid #3b82f6" : "none",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              flex: 1,
+              justifyContent: "center",
+              minWidth: 0,
+            }}
+            title="Gallery"
+          >
+            <span>🖼️</span>
+            <span>Gallery</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab("verification")}
+          <button
+            onClick={() => setActiveTab("bills")}
+            style={{
+              padding: "14px 8px",
+              border: "none",
+              backgroundColor:
+                activeTab === "bills" ? "#f3f4f6" : "transparent",
+              color: activeTab === "bills" ? "#111827" : "#6b7280",
+              fontSize: "12px",
+              fontWeight: activeTab === "bills" ? "600" : "400",
+              borderBottom:
+                activeTab === "bills" ? "2px solid #3b82f6" : "none",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              flex: 1,
+              justifyContent: "center",
+              minWidth: 0,
+            }}
+            title="Bills"
+          >
+            <span>📄</span>
+            <span>Bills</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("verification")}
+            style={{
+              padding: "14px 8px",
+              border: "none",
+              backgroundColor:
+                activeTab === "verification" ? "#f3f4f6" : "transparent",
+              color: activeTab === "verification" ? "#111827" : "#6b7280",
+              fontSize: "12px",
+              fontWeight: activeTab === "verification" ? "600" : "400",
+              borderBottom:
+                activeTab === "verification" ? "2px solid #3b82f6" : "none",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              flex: 1,
+              justifyContent: "center",
+              minWidth: 0,
+            }}
+            title="Verification"
+          >
+            <span>✓</span>
+            <span>Verify</span>
+          </button>
+        </div>
+
+        {/* Tab Content Area */}
+        <div
           style={{
-            padding: "14px 8px",
-            border: "none",
-            backgroundColor:
-              activeTab === "verification" ? "#f3f4f6" : "transparent",
-            color: activeTab === "verification" ? "#111827" : "#6b7280",
-            fontSize: "12px",
-            fontWeight: activeTab === "verification" ? "600" : "400",
-            borderBottom:
-              activeTab === "verification" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            display: "flex",
-            alignItems: "center",
-            gap: "3px",
+            ...jewelleryStyles.contentWrapper,
+            padding: "8px 2px",
             flex: 1,
-            justifyContent: "center",
-            minWidth: 0,
+            overflowY: "auto",
           }}
-          title="Verification"
         >
-          <span>✓</span>
-          <span>Verify</span>
-        </button>
+          {renderTabContent()}
+        </div>
       </div>
 
-      {/* Tab Content Area */}
-      <div
-        style={{
-          ...jewelleryStyles.contentWrapper,
-          padding: "8px 2px",
-        }}
-      >
-        {renderTabContent()}
-
-        {/* Bottom spacing */}
-        <div style={{ height: "80px" }}></div>
-      </div>
-
-      {/* FAB for Add Jewellery - ONLY show when activeTab is "list" */}
-      {activeTab === "list" && (
-        <button
-          onClick={handleAddJewellery}
-          style={{
-            position: "fixed",
-            bottom: "70px", // Position above the bottom navigation
-            right: "16px",
-            width: "56px",
-            height: "56px",
-            borderRadius: "50%",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "24px",
-            zIndex: 100,
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#2563eb";
-            e.currentTarget.style.transform = "scale(1.05)";
-            e.currentTarget.style.boxShadow =
-              "0 6px 16px rgba(59, 130, 246, 0.4)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#3b82f6";
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.boxShadow =
-              "0 4px 12px rgba(59, 130, 246, 0.3)";
-          }}
-          title="Add Jewellery"
-        >
-          +
-        </button>
-      )}
-
-      {/* FAB for Add Bill - ONLY show when activeTab is "bills" */}
-      {activeTab === "bills" && (
-        <button
-          onClick={handleAddBill}
-          style={{
-            position: "fixed",
-            bottom: "70px", // Position above the bottom navigation
-            right: "16px",
-            width: "56px",
-            height: "56px",
-            borderRadius: "50%",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "24px",
-            zIndex: 100,
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#2563eb";
-            e.currentTarget.style.transform = "scale(1.05)";
-            e.currentTarget.style.boxShadow =
-              "0 6px 16px rgba(59, 130, 246, 0.4)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#3b82f6";
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.boxShadow =
-              "0 4px 12px rgba(59, 130, 246, 0.3)";
-          }}
-          title="Add Bill"
-        >
-          +
-        </button>
-      )}
+      {/* REMOVED: FAB buttons (now in Header) */}
     </div>
   );
 };

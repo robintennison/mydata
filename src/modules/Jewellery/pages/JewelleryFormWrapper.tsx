@@ -195,7 +195,7 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
         <div style={{ width: "44px" }}></div>
       </div>
 
-      {/* Form Content */}
+      {/* Form Content - This is the main scrollable area */}
       <div style={styles.formContainer}>
         {error && (
           <div style={styles.errorAlert}>
@@ -204,7 +204,6 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
           </div>
         )}
 
-        {/* Wrapper for form content with padding bottom for buttons */}
         <div style={styles.formContentWrapper}>
           <JewelleryForm
             initialData={initialData}
@@ -227,8 +226,7 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
         )}
       </div>
 
-      {/* Bottom spacing for mobile - ensure buttons are not covered */}
-      <div style={styles.bottomSpacing}></div>
+      {/* REMOVED: Bottom spacing div - it was causing extra space */}
     </div>
   );
 };
@@ -251,7 +249,7 @@ const styles = {
     position: "sticky" as const,
     top: 0,
     zIndex: 10,
-    flexShrink: 0, // Prevent shrinking
+    flexShrink: 0,
   },
   navButton: {
     background: "none",
@@ -279,15 +277,13 @@ const styles = {
     overflowY: "auto" as const,
     padding: "16px",
     position: "relative" as const,
-    // Use padding-bottom to create space for buttons
-    paddingBottom: "80px", // Added extra padding for mobile
+    // REMOVED: paddingBottom: "80px" - Let the form handle its own padding
   },
   formContentWrapper: {
     maxWidth: "600px",
     margin: "0 auto",
     width: "100%",
-    // Ensure buttons have space
-    paddingBottom: "20px",
+    // REMOVED: paddingBottom: "20px" - Let the form handle its own padding
   },
   loadingContainer: {
     display: "flex",
@@ -365,48 +361,23 @@ const styles = {
     fontSize: "16px",
     flexShrink: 0,
   },
-  // New style for bottom spacing on mobile
-  bottomSpacing: {
-    height: "60px", // Adjust based on your bottom navigation height
-    flexShrink: 0,
-    // Hide on larger screens
-    "@media (min-width: 768px)": {
-      display: "none",
-    },
-  } as React.CSSProperties,
 };
 
-// Add responsive styles
-const mediaQueries = `
-  @media (max-width: 768px) {
-    .jewellery-form-container {
-      padding-bottom: 100px !important;
-    }
-    
-    .jewellery-form-buttons {
-      position: sticky;
-      bottom: 0;
-      background: white;
-      padding: 16px;
-      border-top: 1px solid #e5e7eb;
-      z-index: 100;
-      margin-top: 20px;
-    }
-  }
-  
+// Add CSS animation
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+  
+  /* Add this for mobile spacing */
+  @media (max-width: 768px) {
+    .jewellery-form-container {
+      padding-bottom: 20px !important;
+    }
+  }
 `;
-
-// Apply the media queries
-const styleSheet = document.createElement("style");
-styleSheet.textContent = mediaQueries;
 document.head.appendChild(styleSheet);
-
-// Also update the JewelleryForm component to add a class to the form container
-// Add this line at the beginning of the JewelleryForm component's form element:
-// className="jewellery-form-container"
 
 export default JewelleryFormWrapper;

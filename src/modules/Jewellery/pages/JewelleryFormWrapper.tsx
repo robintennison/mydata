@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 import JewelleryForm from "./JewelleryForm";
 import { Jewellery } from "../models/types";
-import { useSettings } from "../../../contexts/SettingsContext"; // CORRECTED IMPORT
+import { useSettings } from "../../../contexts/SettingsContext";
 
 interface JewelleryFormWrapperProps {
   isEditing?: boolean;
@@ -27,14 +27,8 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
   const [error, setError] = useState<string | null>(null);
   const db = getFirestore();
 
-  // Get settings data - CORRECTED: use useSettings() instead of useJewellerySettings()
+  // Get settings data
   const { settings } = useSettings();
-
-  // Debug log to check settings
-  console.log("Settings in JewelleryFormWrapper:", {
-    showDelete: settings?.showDelete,
-    settings,
-  });
 
   // Fetch jewellery data if editing
   useEffect(() => {
@@ -45,7 +39,6 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             const data = docSnap.data();
-            // Don't include id in initialData since it's not part of the form
             setInitialData({
               code: data.code || "",
               description: data.description || "",
@@ -81,14 +74,12 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
     try {
       setError(null);
 
-      // Ensure we have required fields
       if (!formData.code || !formData.weight) {
         alert("Code and weight are required!");
         return;
       }
 
       if (isEditing && id) {
-        // Update existing document - don't include id in the update data
         const { id: _, ...updateData } = formData;
         const docRef = doc(db, "jewellery", id);
         await setDoc(
@@ -101,17 +92,15 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
         );
         alert("Jewellery updated successfully!");
       } else {
-        // Create new document
         const newDocRef = doc(collection(db, "jewellery"));
         await setDoc(newDocRef, {
           ...formData,
-          id: newDocRef.id, // Firestore will store the id separately
+          id: newDocRef.id,
           createdAt: new Date().toISOString(),
         });
         alert("Jewellery added successfully!");
       }
 
-      // Navigate back to list
       navigate("/jewellery/list");
     } catch (error) {
       console.error("Error saving jewellery:", error);
@@ -122,7 +111,6 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
   const handleDelete = async () => {
     if (!id) return;
 
-    // Confirm deletion
     if (
       !window.confirm(
         `Are you sure you want to delete "${initialData.code}"? This action cannot be undone.`,
@@ -141,7 +129,6 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
       console.log("Jewellery item deleted successfully");
       alert("Jewellery item deleted successfully!");
 
-      // Navigate back to list
       navigate("/jewellery/list");
     } catch (error: any) {
       console.error("Error deleting jewellery item:", error);
@@ -205,7 +192,7 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
         <div style={styles.navTitle}>
           {isEditing ? "Edit Jewellery" : "Add New Jewellery"}
         </div>
-        <div style={{ width: "44px" }}></div> {/* Spacer for alignment */}
+        <div style={{ width: "44px" }}></div>
       </div>
 
       {/* Form Content */}
@@ -217,18 +204,19 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
           </div>
         )}
 
-        <JewelleryForm
-          initialData={initialData}
-          onSubmit={handleSubmit}
-          // Pass onDelete only when isEditing is true AND settings.showDelete is true
-          onDelete={
-            isEditing && settings?.showDelete ? handleDelete : undefined
-          }
-          isEditing={isEditing}
-          onCancel={handleCancel}
-          // ADD THIS LINE - pass the showDelete prop:
-          showDelete={isEditing && settings?.showDelete ? true : false}
-        />
+        {/* Wrapper for form content with padding bottom for buttons */}
+        <div style={styles.formContentWrapper}>
+          <JewelleryForm
+            initialData={initialData}
+            onSubmit={handleSubmit}
+            onDelete={
+              isEditing && settings?.showDelete ? handleDelete : undefined
+            }
+            isEditing={isEditing}
+            onCancel={handleCancel}
+            showDelete={isEditing && settings?.showDelete ? true : false}
+          />
+        </div>
 
         {/* Loading overlay for delete */}
         {deleting && (
@@ -238,17 +226,20 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
           </div>
         )}
       </div>
+
+      {/* Bottom spacing for mobile - ensure buttons are not covered */}
+      <div style={styles.bottomSpacing}></div>
     </div>
   );
 };
 
 const styles = {
   container: {
-    maxWidth: "100%",
-    margin: "0 auto",
+    width: "100%",
     height: "100vh",
     display: "flex",
     flexDirection: "column" as const,
+    overflow: "hidden",
   },
   topNav: {
     display: "flex",
@@ -260,6 +251,7 @@ const styles = {
     position: "sticky" as const,
     top: 0,
     zIndex: 10,
+    flexShrink: 0, // Prevent shrinking
   },
   navButton: {
     background: "none",
@@ -285,8 +277,17 @@ const styles = {
   formContainer: {
     flex: 1,
     overflowY: "auto" as const,
-    padding: "20px",
+    padding: "16px",
     position: "relative" as const,
+    // Use padding-bottom to create space for buttons
+    paddingBottom: "80px", // Added extra padding for mobile
+  },
+  formContentWrapper: {
+    maxWidth: "600px",
+    margin: "0 auto",
+    width: "100%",
+    // Ensure buttons have space
+    paddingBottom: "20px",
   },
   loadingContainer: {
     display: "flex",
@@ -364,16 +365,48 @@ const styles = {
     fontSize: "16px",
     flexShrink: 0,
   },
+  // New style for bottom spacing on mobile
+  bottomSpacing: {
+    height: "60px", // Adjust based on your bottom navigation height
+    flexShrink: 0,
+    // Hide on larger screens
+    "@media (min-width: 768px)": {
+      display: "none",
+    },
+  } as React.CSSProperties,
 };
 
-// Add CSS animation
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
+// Add responsive styles
+const mediaQueries = `
+  @media (max-width: 768px) {
+    .jewellery-form-container {
+      padding-bottom: 100px !important;
+    }
+    
+    .jewellery-form-buttons {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      padding: 16px;
+      border-top: 1px solid #e5e7eb;
+      z-index: 100;
+      margin-top: 20px;
+    }
+  }
+  
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
 `;
+
+// Apply the media queries
+const styleSheet = document.createElement("style");
+styleSheet.textContent = mediaQueries;
 document.head.appendChild(styleSheet);
+
+// Also update the JewelleryForm component to add a class to the form container
+// Add this line at the beginning of the JewelleryForm component's form element:
+// className="jewellery-form-container"
 
 export default JewelleryFormWrapper;

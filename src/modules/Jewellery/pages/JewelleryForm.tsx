@@ -14,10 +14,10 @@ import { useNavigate } from "react-router-dom";
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
   onSubmit: (data: Partial<Jewellery>) => void;
-  onDelete?: () => void; // Already exists
+  onDelete?: () => void;
   isEditing?: boolean;
   onCancel?: () => void;
-  showDelete?: boolean; // Add this line
+  showDelete?: boolean;
 }
 
 interface Bill {
@@ -32,10 +32,10 @@ interface Bill {
 const JewelleryForm: React.FC<JewelleryFormProps> = ({
   initialData,
   onSubmit,
-  onDelete, // Add this
+  onDelete,
   isEditing = false,
   onCancel,
-  showDelete = false, // Add this with default value
+  showDelete = false,
 }) => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -646,10 +646,16 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      style={{ maxWidth: "600px", margin: "0 auto" }}
+      style={{
+        maxWidth: "600px",
+        margin: "0 auto",
+        // Add extra bottom padding for mobile
+        paddingBottom: "10px",
+      }}
+      className="jewellery-form-container"
     >
-      {/* Image Section - ADDED AT THE TOP */}
-      <div style={{ marginBottom: "25px" }}>
+      {/* Image Section */}
+      <div style={{ marginBottom: "10px" }}>
         <label
           style={{
             display: "block",
@@ -1666,46 +1672,73 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         )}
       </div>
 
-      {/* Submit and Cancel Buttons */}
-      <div
-        style={{
-          display: "flex",
-          gap: "15px",
-          justifyContent: "center",
-          marginTop: "10px",
-        }}
-      >
-        <button
-          type="button"
-          onClick={handleCancel}
+      {/* Submit and Cancel Buttons - ORIGINAL POSITION with bottom spacing */}
+      <div style={{ marginTop: "30px" }}>
+        <div
           style={{
-            padding: "10px 30px",
-            backgroundColor: "#f3f4f6",
-            color: "#374151",
-            border: "1px solid #d1d5db",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "16px",
-            fontWeight: "500",
             display: "flex",
-            alignItems: "center",
-            gap: "6px",
+            gap: "15px",
+            justifyContent: "center",
+            // Add extra margin at the bottom for mobile
+            marginBottom: "10px",
           }}
         >
-          <span>←</span>
-          <span>Cancel</span>
-        </button>
-
-        {/* Only show Delete button when showDelete is true and onDelete function is provided */}
-        {showDelete && onDelete && (
           <button
             type="button"
-            onClick={onDelete}
+            onClick={handleCancel}
+            style={{
+              padding: "10px 30px",
+              backgroundColor: "#f3f4f6",
+              color: "#374151",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "16px",
+              fontWeight: "500",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <span>←</span>
+            <span>Cancel</span>
+          </button>
+
+          {/* Only show Delete button when showDelete is true and onDelete function is provided */}
+          {showDelete && onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={uploadingImage || deletingImage}
+              style={{
+                padding: "10px 30px",
+                backgroundColor:
+                  uploadingImage || deletingImage ? "#9ca3af" : "#dc2626",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor:
+                  uploadingImage || deletingImage ? "not-allowed" : "pointer",
+                fontSize: "16px",
+                fontWeight: "500",
+                opacity: uploadingImage || deletingImage ? 0.7 : 1,
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span>🗑️</span>
+              <span>Delete</span>
+            </button>
+          )}
+
+          <button
+            type="submit"
             disabled={uploadingImage || deletingImage}
             style={{
               padding: "10px 30px",
               backgroundColor:
-                uploadingImage || deletingImage ? "#9ca3af" : "#dc2626",
+                uploadingImage || deletingImage ? "#94a3b8" : "#3b82f6",
               color: "white",
               border: "none",
               borderRadius: "6px",
@@ -1714,34 +1747,11 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               fontSize: "16px",
               fontWeight: "500",
               opacity: uploadingImage || deletingImage ? 0.7 : 1,
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
             }}
           >
-            <span>🗑️</span>
-            <span>Delete</span>
+            {isEditing ? "Update" : "Add Item"}
           </button>
-        )}
-
-        <button
-          type="submit"
-          disabled={uploadingImage || deletingImage}
-          style={{
-            padding: "10px 30px",
-            backgroundColor:
-              uploadingImage || deletingImage ? "#94a3b8" : "#3b82f6",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            cursor: uploadingImage || deletingImage ? "not-allowed" : "pointer",
-            fontSize: "16px",
-            fontWeight: "500",
-            opacity: uploadingImage || deletingImage ? 0.7 : 1,
-          }}
-        >
-          {isEditing ? "Update" : "Add Item"}
-        </button>
+        </div>
       </div>
 
       {/* Delete Image Confirmation Dialog */}

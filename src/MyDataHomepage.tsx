@@ -303,6 +303,187 @@ const MyDataHomepage: React.FC = () => {
         </div>
       </div>
 
+      {/* Upcoming Renewals Section */}
+      <div
+        className={styles.section}
+        style={{
+          minHeight: hasAnyRenewals ? "auto" : "80px",
+          marginTop: "10px",
+        }}
+      >
+        <div
+          className={styles.sectionHeader}
+          style={{ marginBottom: hasAnyRenewals ? "15px" : "0" }}
+        >
+          <div className={styles.sectionTitle}>
+            Renewals
+            {hasAnyRenewals && (
+              <span className={styles.maturityCount}>
+                ({hasUpcomingRenewals ? upcomingRenewals.length : 0} upcoming,{" "}
+                {hasExpiredRenewals ? expiredRenewals.length : 0} expired)
+              </span>
+            )}
+          </div>
+          {hasAnyRenewals && (
+            <button
+              className={styles.viewAllButton}
+              onClick={() =>
+                navigate("/online", { state: { activeTab: "renewals" } })
+              }
+            >
+              View All
+            </button>
+          )}
+        </div>
+
+        {renewalsLoading ? (
+          <div className={styles.emptyState}>
+            <div
+              className={styles.spinner}
+              style={{ margin: "0 auto 10px" }}
+            ></div>
+            <div className={styles.emptyText}>Loading renewals...</div>
+          </div>
+        ) : !hasAnyRenewals ? (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>🔄</div>
+            <div className={styles.emptyText}>No renewals found</div>
+            <div className={styles.emptySubtext}>
+              Add renewals to track them
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Upcoming Renewals */}
+            {hasUpcomingRenewals && (
+              <div className={styles.maturitySection}>
+                <div className={styles.subsectionTitle}>Upcoming</div>
+                <div className={styles.compactTable}>
+                  {upcomingRenewals.map((renewal) => {
+                    const daysUntil = Math.ceil(
+                      (renewal.endDate - Date.now()) / (1000 * 60 * 60 * 24),
+                    );
+                    const isImmediate = daysUntil <= 1;
+
+                    return (
+                      <div
+                        key={renewal.id}
+                        className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
+                        style={{
+                          fontSize: "0.95rem",
+                          lineHeight: "1.2",
+                        }}
+                      >
+                        <div className={styles.compactCell} style={{ flex: 2 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {renewal.name}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {getShortComments(renewal.comments || "")}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              whiteSpace: "nowrap",
+                              textAlign: "right",
+                            }}
+                          >
+                            {formatDateShort(renewal.endDate)}
+                            {isImmediate && (
+                              <span className={styles.immediateBadge}>
+                                {daysUntil === 0 ? "Today" : "Tomorrow"}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Expired Renewals */}
+            {hasExpiredRenewals && (
+              <div className={styles.maturitySection}>
+                <div
+                  className={styles.subsectionTitle}
+                  style={{ color: "#dc2626" }}
+                >
+                  Expired
+                </div>
+                <div className={styles.compactTable}>
+                  {expiredRenewals.map((renewal) => {
+                    return (
+                      <div
+                        key={renewal.id}
+                        className={styles.compactRow}
+                        style={{
+                          fontSize: "0.95rem",
+                          lineHeight: "1.2",
+                          opacity: 0.7,
+                          color: "#6b7280",
+                        }}
+                      >
+                        <div className={styles.compactCell} style={{ flex: 2 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              textDecoration: "line-through",
+                            }}
+                          >
+                            {renewal.name}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              color: "#6b7280",
+                            }}
+                          >
+                            {getShortComments(renewal.comments || "")}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              whiteSpace: "nowrap",
+                              textAlign: "right",
+                              color: "#dc2626",
+                            }}
+                          >
+                            {formatDateShort(renewal.endDate)}
+                            <span className={styles.expiredBadge}>
+                              {getDaysAgo(renewal.endDate)}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
       {/* Upcoming Maturities Section */}
       <div
         className={styles.section}
@@ -485,187 +666,6 @@ const MyDataHomepage: React.FC = () => {
                             {formatDateShort(deposit.endDate)}
                             <span className={styles.expiredBadge}>
                               {getDaysAgo(deposit.endDate)}
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Upcoming Renewals Section */}
-      <div
-        className={styles.section}
-        style={{
-          minHeight: hasAnyRenewals ? "auto" : "80px",
-          marginTop: "10px",
-        }}
-      >
-        <div
-          className={styles.sectionHeader}
-          style={{ marginBottom: hasAnyRenewals ? "15px" : "0" }}
-        >
-          <div className={styles.sectionTitle}>
-            Renewals
-            {hasAnyRenewals && (
-              <span className={styles.maturityCount}>
-                ({hasUpcomingRenewals ? upcomingRenewals.length : 0} upcoming,{" "}
-                {hasExpiredRenewals ? expiredRenewals.length : 0} expired)
-              </span>
-            )}
-          </div>
-          {hasAnyRenewals && (
-            <button
-              className={styles.viewAllButton}
-              onClick={() =>
-                navigate("/online", { state: { activeTab: "renewals" } })
-              }
-            >
-              View All
-            </button>
-          )}
-        </div>
-
-        {renewalsLoading ? (
-          <div className={styles.emptyState}>
-            <div
-              className={styles.spinner}
-              style={{ margin: "0 auto 10px" }}
-            ></div>
-            <div className={styles.emptyText}>Loading renewals...</div>
-          </div>
-        ) : !hasAnyRenewals ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>🔄</div>
-            <div className={styles.emptyText}>No renewals found</div>
-            <div className={styles.emptySubtext}>
-              Add renewals to track them
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Upcoming Renewals */}
-            {hasUpcomingRenewals && (
-              <div className={styles.maturitySection}>
-                <div className={styles.subsectionTitle}>Upcoming</div>
-                <div className={styles.compactTable}>
-                  {upcomingRenewals.map((renewal) => {
-                    const daysUntil = Math.ceil(
-                      (renewal.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-                    );
-                    const isImmediate = daysUntil <= 1;
-
-                    return (
-                      <div
-                        key={renewal.id}
-                        className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
-                        style={{
-                          fontSize: "0.95rem",
-                          lineHeight: "1.2",
-                        }}
-                      >
-                        <div className={styles.compactCell} style={{ flex: 2 }}>
-                          <span
-                            className={styles.compactCellValue}
-                            style={{ fontSize: "0.95rem" }}
-                          >
-                            {renewal.name}
-                          </span>
-                        </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
-                          <span
-                            className={styles.compactCellValue}
-                            style={{ fontSize: "0.95rem" }}
-                          >
-                            {getShortComments(renewal.comments || "")}
-                          </span>
-                        </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
-                          <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              whiteSpace: "nowrap",
-                              textAlign: "right",
-                            }}
-                          >
-                            {formatDateShort(renewal.endDate)}
-                            {isImmediate && (
-                              <span className={styles.immediateBadge}>
-                                {daysUntil === 0 ? "Today" : "Tomorrow"}
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Expired Renewals */}
-            {hasExpiredRenewals && (
-              <div className={styles.maturitySection}>
-                <div
-                  className={styles.subsectionTitle}
-                  style={{ color: "#dc2626" }}
-                >
-                  Expired
-                </div>
-                <div className={styles.compactTable}>
-                  {expiredRenewals.map((renewal) => {
-                    return (
-                      <div
-                        key={renewal.id}
-                        className={styles.compactRow}
-                        style={{
-                          fontSize: "0.95rem",
-                          lineHeight: "1.2",
-                          opacity: 0.7,
-                          color: "#6b7280",
-                        }}
-                      >
-                        <div className={styles.compactCell} style={{ flex: 2 }}>
-                          <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              textDecoration: "line-through",
-                            }}
-                          >
-                            {renewal.name}
-                          </span>
-                        </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
-                          <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              color: "#6b7280",
-                            }}
-                          >
-                            {getShortComments(renewal.comments || "")}
-                          </span>
-                        </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
-                          <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              whiteSpace: "nowrap",
-                              textAlign: "right",
-                              color: "#dc2626",
-                            }}
-                          >
-                            {formatDateShort(renewal.endDate)}
-                            <span className={styles.expiredBadge}>
-                              {getDaysAgo(renewal.endDate)}
                             </span>
                           </span>
                         </div>

@@ -105,3 +105,23 @@ export const getNextMaturitiesDescending = (
         .sort((a, b) => b.endDate - a.endDate)
         .slice(0, limit);
 };
+
+// Add to bankingCalculations.ts
+export const getExpiredMaturities = (
+  deposits: Deposit[],
+  limit: number = 5,
+  activeOnly: boolean = true
+): Deposit[] => {
+  const currentTime = Date.now();
+  
+  return deposits
+    .filter(deposit => {
+      // Filter by active status if activeOnly is true
+      if (activeOnly && deposit.active === false) return false;
+      
+      // Filter expired deposits (endDate is in the past)
+      return deposit.endDate && deposit.endDate < currentTime;
+    })
+    .sort((a, b) => b.endDate - a.endDate) // Most recent expired first
+    .slice(0, limit);
+};

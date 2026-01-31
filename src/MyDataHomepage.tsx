@@ -5,8 +5,8 @@ import { useSettings } from "./contexts/SettingsContext";
 import styles from "./MyDataHomepage.module.css";
 import {
   calculateTotalBalance,
-  calculateTotalDeposits,
   getNextMaturities,
+  getExpiredMaturities,
 } from "./modules/Banking/utils/bankingCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
@@ -65,7 +65,7 @@ const MyDataHomepage: React.FC = () => {
           });
         });
 
-        // Sort by end date ascending (soonest first)
+        // Sort by end date ascending (soonest first, including expired)
         renewalsList.sort((a, b) => a.endDate - b.endDate);
         setRenewals(renewalsList);
       } catch (error) {
@@ -79,35 +79,42 @@ const MyDataHomepage: React.FC = () => {
   }, []);
 
   // Memoize calculations for better performance
-  const { totalBalance, upcomingMaturities } = useMemo(() => {
-    if (loading || accounts.length === 0) {
-      return { totalBalance: 0, totalDeposits: 0, upcomingMaturities: [] };
-    }
+  const { totalBalance, upcomingMaturities, expiredMaturities } =
+    useMemo(() => {
+      if (loading || accounts.length === 0) {
+        return {
+          totalBalance: 0,
+          upcomingMaturities: [],
+          expiredMaturities: [],
+        };
+      }
 
-    return {
-      totalBalance: calculateTotalBalance(
-        accounts,
-        deposits,
-        adjustments,
-        appSettings?.showInactive,
-      ),
-      totalDeposits: calculateTotalDeposits(
-        accounts,
-        deposits,
-        adjustments,
-        appSettings?.showInactive,
-      ),
-      upcomingMaturities: getNextMaturities(deposits, 5),
-    };
-  }, [accounts, deposits, adjustments, appSettings?.showInactive, loading]);
+      return {
+        totalBalance: calculateTotalBalance(
+          accounts,
+          deposits,
+          adjustments,
+          appSettings?.showInactive,
+        ),
+        upcomingMaturities: getNextMaturities(deposits, 5),
+        expiredMaturities: getExpiredMaturities(deposits, 5, true), // true = only active deposits
+      };
+    }, [accounts, deposits, adjustments, appSettings?.showInactive, loading]);
 
-  // Filter active renewals and get next 5
-  const upcomingRenewals = useMemo(() => {
+  // Get upcoming and expired renewals
+  const { upcomingRenewals, expiredRenewals } = useMemo(() => {
     const currentTime = Date.now();
-    // Filter out past renewals and get next 5 upcoming
-    return renewals
-      .filter((renewal) => renewal.endDate > currentTime)
+
+    // Separate upcoming and expired renewals
+    const upcoming = renewals
+      .filter((renewal) => renewal.endDate >= currentTime)
       .slice(0, 5);
+
+    const expired = renewals
+      .filter((renewal) => renewal.endDate < currentTime)
+      .slice(0, 5);
+
+    return { upcomingRenewals: upcoming, expiredRenewals: expired };
   }, [renewals]);
 
   // Format lakhs for display (without L suffix)
@@ -227,8 +234,20 @@ const MyDataHomepage: React.FC = () => {
     );
   }
 
-  const hasMaturities = upcomingMaturities.length > 0;
-  const hasRenewals = upcomingRenewals.length > 0;
+  const hasUpcomingMaturities = upcomingMaturities.length > 0;
+  const hasExpiredMaturities = expiredMaturities.length > 0;
+  const hasUpcomingRenewals = upcomingRenewals.length > 0;
+  const hasExpiredRenewals = expiredRenewals.length > 0;
+  const hasAnyMaturities = hasUpcomingMaturities || hasExpiredMaturities;
+  const hasAnyRenewals = hasUpcomingRenewals || hasExpiredRenewals;
+
+  // Helper function to calculate days ago for expired items
+  const getDaysAgo = (endDate: number): string => {
+    const daysAgo = Math.floor((Date.now() - endDate) / (1000 * 60 * 60 * 24));
+    if (daysAgo === 0) return "Today";
+    if (daysAgo === 1) return "1 day ago";
+    return `${daysAgo} days ago`;
+  };
 
   return (
     <>
@@ -288,23 +307,25 @@ const MyDataHomepage: React.FC = () => {
       <div
         className={styles.section}
         style={{
-          minHeight: hasMaturities ? "auto" : "80px",
+          minHeight: hasAnyMaturities ? "auto" : "80px",
           marginTop: "10px",
         }}
       >
         <div
           className={styles.sectionHeader}
-          style={{ marginBottom: hasMaturities ? "15px" : "0" }}
+          style={{ marginBottom: hasAnyMaturities ? "15px" : "0" }}
         >
           <div className={styles.sectionTitle}>
-            Upcoming Maturities
-            {hasMaturities && (
+            Maturities
+            {hasAnyMaturities && (
               <span className={styles.maturityCount}>
-                ({upcomingMaturities.length})
+                ({hasUpcomingMaturities ? upcomingMaturities.length : 0}{" "}
+                upcoming, {hasExpiredMaturities ? expiredMaturities.length : 0}{" "}
+                expired)
               </span>
             )}
           </div>
-          {hasMaturities && (
+          {hasAnyMaturities && (
             <button
               className={styles.viewAllButton}
               onClick={() =>
@@ -316,72 +337,164 @@ const MyDataHomepage: React.FC = () => {
           )}
         </div>
 
-        {!hasMaturities ? (
+        {!hasAnyMaturities ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>📅</div>
-            <div className={styles.emptyText}>No upcoming maturities</div>
-            <div className={styles.emptySubtext}>No active deposits found</div>
+            <div className={styles.emptyText}>No maturities found</div>
+            <div className={styles.emptySubtext}>
+              No active deposits with maturity dates
+            </div>
           </div>
         ) : (
-          <div className={styles.compactTable}>
-            {upcomingMaturities.map((deposit) => {
-              const daysUntil = Math.ceil(
-                (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-              );
-              const isImmediate = daysUntil <= 1;
+          <>
+            {/* Upcoming Maturities */}
+            {hasUpcomingMaturities && (
+              <div className={styles.maturitySection}>
+                <div className={styles.subsectionTitle}>Upcoming</div>
+                <div className={styles.compactTable}>
+                  {upcomingMaturities.map((deposit) => {
+                    const daysUntil = Math.ceil(
+                      (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
+                    );
+                    const isImmediate = daysUntil <= 1;
 
-              // Combine amount and short comments
-              const amountWithComments = `${formatLakhs(deposit.amount)}${deposit.comments ? ` • ${getShortComments(deposit.comments)}` : ""}`;
+                    // Combine amount and short comments
+                    const amountWithComments = `${formatLakhs(deposit.amount)}${deposit.comments ? ` • ${getShortComments(deposit.comments)}` : ""}`;
 
-              return (
-                <div
-                  key={deposit.id}
-                  className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
-                  style={{
-                    fontSize: "0.95rem",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  <div className={styles.compactCell} style={{ flex: 1.5 }}>
-                    <span
-                      className={styles.compactCellValue}
-                      style={{ fontSize: "0.95rem" }}
-                    >
-                      {getAccountName(deposit.accountId)}
-                    </span>
-                  </div>
-                  <div className={styles.compactCell} style={{ flex: 1.5 }}>
-                    <span
-                      className={styles.compactCellValue}
-                      style={{
-                        fontSize: "0.95rem",
-                        color: "#1e40af",
-                      }}
-                    >
-                      {amountWithComments}
-                    </span>
-                  </div>
-                  <div className={styles.compactCell} style={{ flex: 1 }}>
-                    <span
-                      className={styles.compactCellValue}
-                      style={{
-                        fontSize: "0.95rem",
-                        whiteSpace: "nowrap",
-                        textAlign: "right",
-                      }}
-                    >
-                      {formatDateShort(deposit.endDate)}
-                      {isImmediate && (
-                        <span className={styles.immediateBadge}>
-                          {daysUntil === 0 ? "Today" : "Tomorrow"}
-                        </span>
-                      )}
-                    </span>
-                  </div>
+                    return (
+                      <div
+                        key={deposit.id}
+                        className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
+                        style={{
+                          fontSize: "0.95rem",
+                          lineHeight: "1.2",
+                        }}
+                      >
+                        <div
+                          className={styles.compactCell}
+                          style={{ flex: 1.5 }}
+                        >
+                          <span
+                            className={styles.compactCellValue}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {getAccountName(deposit.accountId)}
+                          </span>
+                        </div>
+                        <div
+                          className={styles.compactCell}
+                          style={{ flex: 1.5 }}
+                        >
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              color: "#1e40af",
+                            }}
+                          >
+                            {amountWithComments}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              whiteSpace: "nowrap",
+                              textAlign: "right",
+                            }}
+                          >
+                            {formatDateShort(deposit.endDate)}
+                            {isImmediate && (
+                              <span className={styles.immediateBadge}>
+                                {daysUntil === 0 ? "Today" : "Tomorrow"}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            )}
+
+            {/* Expired Maturities (only active deposits) */}
+            {hasExpiredMaturities && (
+              <div className={styles.maturitySection}>
+                <div
+                  className={styles.subsectionTitle}
+                  style={{ color: "#dc2626" }}
+                >
+                  Expired
+                </div>
+                <div className={styles.compactTable}>
+                  {expiredMaturities.map((deposit) => {
+                    // Combine amount and short comments
+                    const amountWithComments = `${formatLakhs(deposit.amount)}${deposit.comments ? ` • ${getShortComments(deposit.comments)}` : ""}`;
+
+                    return (
+                      <div
+                        key={deposit.id}
+                        className={styles.compactRow}
+                        style={{
+                          fontSize: "0.95rem",
+                          lineHeight: "1.2",
+                          opacity: 0.7,
+                          color: "#6b7280",
+                        }}
+                      >
+                        <div
+                          className={styles.compactCell}
+                          style={{ flex: 1.5 }}
+                        >
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              textDecoration: "line-through",
+                            }}
+                          >
+                            {getAccountName(deposit.accountId)}
+                          </span>
+                        </div>
+                        <div
+                          className={styles.compactCell}
+                          style={{ flex: 1.5 }}
+                        >
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              color: "#6b7280",
+                            }}
+                          >
+                            {amountWithComments}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              whiteSpace: "nowrap",
+                              textAlign: "right",
+                              color: "#dc2626",
+                            }}
+                          >
+                            {formatDateShort(deposit.endDate)}
+                            <span className={styles.expiredBadge}>
+                              {getDaysAgo(deposit.endDate)}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -389,23 +502,24 @@ const MyDataHomepage: React.FC = () => {
       <div
         className={styles.section}
         style={{
-          minHeight: hasRenewals ? "auto" : "80px",
+          minHeight: hasAnyRenewals ? "auto" : "80px",
           marginTop: "10px",
         }}
       >
         <div
           className={styles.sectionHeader}
-          style={{ marginBottom: hasRenewals ? "15px" : "0" }}
+          style={{ marginBottom: hasAnyRenewals ? "15px" : "0" }}
         >
           <div className={styles.sectionTitle}>
-            Upcoming Renewals
-            {hasRenewals && (
+            Renewals
+            {hasAnyRenewals && (
               <span className={styles.maturityCount}>
-                ({upcomingRenewals.length})
+                ({hasUpcomingRenewals ? upcomingRenewals.length : 0} upcoming,{" "}
+                {hasExpiredRenewals ? expiredRenewals.length : 0} expired)
               </span>
             )}
           </div>
-          {hasRenewals && (
+          {hasAnyRenewals && (
             <button
               className={styles.viewAllButton}
               onClick={() =>
@@ -425,68 +539,143 @@ const MyDataHomepage: React.FC = () => {
             ></div>
             <div className={styles.emptyText}>Loading renewals...</div>
           </div>
-        ) : !hasRenewals ? (
+        ) : !hasAnyRenewals ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🔄</div>
-            <div className={styles.emptyText}>No upcoming renewals</div>
+            <div className={styles.emptyText}>No renewals found</div>
             <div className={styles.emptySubtext}>
               Add renewals to track them
             </div>
           </div>
         ) : (
-          <div className={styles.compactTable}>
-            {upcomingRenewals.map((renewal) => {
-              const daysUntil = Math.ceil(
-                (renewal.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-              );
-              const isImmediate = daysUntil <= 1;
+          <>
+            {/* Upcoming Renewals */}
+            {hasUpcomingRenewals && (
+              <div className={styles.maturitySection}>
+                <div className={styles.subsectionTitle}>Upcoming</div>
+                <div className={styles.compactTable}>
+                  {upcomingRenewals.map((renewal) => {
+                    const daysUntil = Math.ceil(
+                      (renewal.endDate - Date.now()) / (1000 * 60 * 60 * 24),
+                    );
+                    const isImmediate = daysUntil <= 1;
 
-              return (
-                <div
-                  key={renewal.id}
-                  className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
-                  style={{
-                    fontSize: "0.95rem",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  <div className={styles.compactCell} style={{ flex: 2 }}>
-                    <span
-                      className={styles.compactCellValue}
-                      style={{ fontSize: "0.95rem" }}
-                    >
-                      {renewal.name}
-                    </span>
-                  </div>
-                  <div className={styles.compactCell} style={{ flex: 1 }}>
-                    <span
-                      className={styles.compactCellValue}
-                      style={{ fontSize: "0.95rem" }}
-                    >
-                      {getShortComments(renewal.comments || "")}
-                    </span>
-                  </div>
-                  <div className={styles.compactCell} style={{ flex: 1 }}>
-                    <span
-                      className={styles.compactCellValue}
-                      style={{
-                        fontSize: "0.95rem",
-                        whiteSpace: "nowrap",
-                        textAlign: "right",
-                      }}
-                    >
-                      {formatDateShort(renewal.endDate)}
-                      {isImmediate && (
-                        <span className={styles.immediateBadge}>
-                          {daysUntil === 0 ? "Today" : "Tomorrow"}
-                        </span>
-                      )}
-                    </span>
-                  </div>
+                    return (
+                      <div
+                        key={renewal.id}
+                        className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
+                        style={{
+                          fontSize: "0.95rem",
+                          lineHeight: "1.2",
+                        }}
+                      >
+                        <div className={styles.compactCell} style={{ flex: 2 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {renewal.name}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {getShortComments(renewal.comments || "")}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              whiteSpace: "nowrap",
+                              textAlign: "right",
+                            }}
+                          >
+                            {formatDateShort(renewal.endDate)}
+                            {isImmediate && (
+                              <span className={styles.immediateBadge}>
+                                {daysUntil === 0 ? "Today" : "Tomorrow"}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            )}
+
+            {/* Expired Renewals */}
+            {hasExpiredRenewals && (
+              <div className={styles.maturitySection}>
+                <div
+                  className={styles.subsectionTitle}
+                  style={{ color: "#dc2626" }}
+                >
+                  Expired
+                </div>
+                <div className={styles.compactTable}>
+                  {expiredRenewals.map((renewal) => {
+                    return (
+                      <div
+                        key={renewal.id}
+                        className={styles.compactRow}
+                        style={{
+                          fontSize: "0.95rem",
+                          lineHeight: "1.2",
+                          opacity: 0.7,
+                          color: "#6b7280",
+                        }}
+                      >
+                        <div className={styles.compactCell} style={{ flex: 2 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              textDecoration: "line-through",
+                            }}
+                          >
+                            {renewal.name}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              color: "#6b7280",
+                            }}
+                          >
+                            {getShortComments(renewal.comments || "")}
+                          </span>
+                        </div>
+                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                          <span
+                            className={styles.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              whiteSpace: "nowrap",
+                              textAlign: "right",
+                              color: "#dc2626",
+                            }}
+                          >
+                            {formatDateShort(renewal.endDate)}
+                            <span className={styles.expiredBadge}>
+                              {getDaysAgo(renewal.endDate)}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 

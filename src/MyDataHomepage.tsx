@@ -316,7 +316,7 @@ const MyDataHomepage: React.FC = () => {
           style={{ marginBottom: hasAnyRenewals ? "15px" : "0" }}
         >
           <div className={styles.sectionTitle}>
-            Renewals
+            Due Dates
             {hasAnyRenewals && (
               <span className={styles.maturityCount}>
                 ({hasUpcomingRenewals ? upcomingRenewals.length : 0} upcoming,{" "}

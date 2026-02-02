@@ -9,7 +9,6 @@ import {
   collection,
 } from "firebase/firestore";
 import { Renewal } from "../types/online.types";
-import { onlineStyles } from "../styles/onlineStyles";
 
 const RenewalForm: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +19,7 @@ const RenewalForm: React.FC = () => {
     id: "",
     name: "",
     startDate: Date.now(),
-    endDate: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days from now
+    endDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
     comments: "",
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -46,7 +45,6 @@ const RenewalForm: React.FC = () => {
       if (renewalDoc.exists()) {
         const data = renewalDoc.data();
 
-        // Helper function to handle Firestore timestamps
         const getTimestamp = (field: any): number => {
           if (!field) return Date.now();
           if (field && typeof field === "object" && "toDate" in field) {
@@ -71,12 +69,12 @@ const RenewalForm: React.FC = () => {
         });
       } else {
         alert("Renewal not found");
-        navigate("/online", { state: { activeTab: "renewals" } }); // UPDATED
+        navigate("/online", { state: { activeTab: "renewals" } });
       }
     } catch (error) {
       console.error("Error fetching renewal:", error);
       alert("Failed to load renewal");
-      navigate("/online", { state: { activeTab: "renewals" } }); // UPDATED
+      navigate("/online", { state: { activeTab: "renewals" } });
     } finally {
       setLoading(false);
     }
@@ -116,7 +114,7 @@ const RenewalForm: React.FC = () => {
         alert("Renewal added successfully!");
       }
 
-      navigate("/online", { state: { activeTab: "renewals" } }); // UPDATED
+      navigate("/online", { state: { activeTab: "renewals" } });
     } catch (error) {
       console.error("Error saving renewal:", error);
       alert("Failed to save renewal");
@@ -127,64 +125,66 @@ const RenewalForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={onlineStyles.container}>
-        <div style={onlineStyles.loading}>
-          <div style={onlineStyles.spinner}></div>
-          <p>Loading renewal...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading renewal...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={onlineStyles.container}>
-      {/* Top Navigation with Save button */}
-      <div style={onlineStyles.topNav}>
-        <button
-          onClick={() =>
-            navigate("/online", { state: { activeTab: "renewals" } })
-          } // UPDATED
-          style={onlineStyles.navButton}
-          title="Back"
-        >
-          ←
-        </button>
-        <div style={onlineStyles.headerLeft}>
-          <div style={onlineStyles.navTitle}>
-            {isEditing ? "Edit Renewal" : "Add Renewal"}
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Navigation */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() =>
+                navigate("/online", { state: { activeTab: "renewals" } })
+              }
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Back"
+            >
+              ←
+            </button>
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">
+                {isEditing ? "Edit Renewal" : "Add Renewal"}
+              </h1>
+              <p className="text-sm text-gray-500">
+                {isEditing ? "Update renewal details" : "Create a new renewal"}
+              </p>
+            </div>
           </div>
-          <div style={onlineStyles.navSubtitle}>
-            {isEditing ? "Update renewal details" : "Create a new renewal"}
+          <div>
+            <button
+              type="submit"
+              form="renewal-form"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
+              disabled={saving}
+            >
+              {saving ? "Saving..." : isEditing ? "Update" : "Save"}
+            </button>
           </div>
-        </div>
-        <div style={onlineStyles.headerRight}>
-          <button
-            type="submit"
-            form="renewal-form"
-            style={onlineStyles.addButton}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : isEditing ? "Update" : "Save"}
-          </button>
         </div>
       </div>
 
       {/* Form */}
-      <div style={onlineStyles.section}>
-        <form
-          id="renewal-form"
-          onSubmit={handleSubmit}
-          style={onlineStyles.form}
-        >
-          <div style={onlineStyles.formGroup}>
-            <label style={onlineStyles.label}>Name *</label>
+      <div className="max-w-2xl mx-auto p-4">
+        <form id="renewal-form" onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Name *
+            </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              style={onlineStyles.input}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter renewal name"
               required
               disabled={saving}
@@ -192,9 +192,11 @@ const RenewalForm: React.FC = () => {
             />
           </div>
 
-          <div style={onlineStyles.formRow}>
-            <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
-              <label style={onlineStyles.label}>Start Date *</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Start Date *
+              </label>
               <input
                 type="date"
                 value={new Date(formData.startDate).toISOString().split("T")[0]}
@@ -204,14 +206,16 @@ const RenewalForm: React.FC = () => {
                     startDate: new Date(e.target.value).getTime(),
                   })
                 }
-                style={onlineStyles.input}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                 required
                 disabled={saving}
               />
             </div>
 
-            <div style={{ ...onlineStyles.formGroup, flex: 1 }}>
-              <label style={onlineStyles.label}>End Date *</label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                End Date *
+              </label>
               <input
                 type="date"
                 value={new Date(formData.endDate).toISOString().split("T")[0]}
@@ -221,21 +225,23 @@ const RenewalForm: React.FC = () => {
                     endDate: new Date(e.target.value).getTime(),
                   })
                 }
-                style={onlineStyles.input}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                 required
                 disabled={saving}
               />
             </div>
           </div>
 
-          <div style={onlineStyles.formGroup}>
-            <label style={onlineStyles.label}>Comments</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Comments
+            </label>
             <textarea
               value={formData.comments || ""}
               onChange={(e) =>
                 setFormData({ ...formData, comments: e.target.value })
               }
-              style={onlineStyles.textarea}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-y min-h-[80px] disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter any comments or notes"
               rows={3}
               disabled={saving}

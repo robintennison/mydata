@@ -238,7 +238,7 @@ const MyDataHomepage: React.FC = () => {
   const hasExpiredMaturities = expiredMaturities.length > 0;
   const hasUpcomingRenewals = upcomingRenewals.length > 0;
   const hasExpiredRenewals = expiredRenewals.length > 0;
-  //const hasAnyMaturities = hasUpcomingMaturities || hasExpiredMaturities;
+  const hasAnyMaturities = hasUpcomingMaturities || hasExpiredMaturities; // Restored this line
   const hasAnyRenewals = hasUpcomingRenewals || hasExpiredRenewals;
 
   // Helper function to calculate days ago for expired items
@@ -290,6 +290,7 @@ const MyDataHomepage: React.FC = () => {
           <div className={tw.cardSubtitle}>{activeDepositsCount} deposits</div>
         </div>
       </div>
+
       {/* Upcoming Renewals Section */}
       <div
         className={tw.section}
@@ -453,149 +454,200 @@ const MyDataHomepage: React.FC = () => {
         )}
       </div>
 
-      {/* Upcoming Maturities */}
-      {hasUpcomingMaturities && (
-        <div className="mb-4">
-          <div className="text-sm font-semibold text-gray-700 mb-2">
-            Upcoming Maturities
+      {/* Maturities Section - similar structure to renewals */}
+      <div
+        className={tw.section}
+        style={{
+          minHeight: hasAnyMaturities ? "auto" : "80px",
+          marginTop: "10px",
+        }}
+      >
+        <div
+          className={tw.sectionHeader}
+          style={{ marginBottom: hasAnyMaturities ? "15px" : "0" }}
+        >
+          <div className={tw.sectionTitle}>
+            Maturities
+            {hasAnyMaturities && (
+              <span className={tw.maturityCount}>
+                ({hasUpcomingMaturities ? upcomingMaturities.length : 0}{" "}
+                upcoming, {hasExpiredMaturities ? expiredMaturities.length : 0}{" "}
+                expired)
+              </span>
+            )}
           </div>
-          <div className={tw.compactTable}>
-            {upcomingMaturities.map((deposit) => {
-              const daysUntil = Math.ceil(
-                (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-              );
-              const isImmediate = daysUntil <= 1;
-
-              return (
-                <div
-                  key={deposit.id}
-                  className={`${tw.compactRow} ${isImmediate ? tw.immediateRow : ""}`}
-                  style={{
-                    fontSize: "0.95rem",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  {/* Account Column */}
-                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
-                    <span
-                      className={tw.compactCellValue}
-                      style={{ fontSize: "0.95rem" }}
-                    >
-                      {getAccountName(deposit.accountId)}
-                    </span>
-                  </div>
-
-                  {/* Amount Column */}
-                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
-                    <span
-                      className={`${tw.compactCellValue} text-blue-900`}
-                      style={{ fontSize: "0.95rem" }}
-                    >
-                      {formatLakhs(deposit.amount)}
-                    </span>
-                  </div>
-
-                  {/* Comments Column */}
-                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
-                    <span
-                      className={tw.compactCellValue}
-                      style={{ fontSize: "0.95rem" }}
-                    >
-                      {getShortComments(deposit.comments || "")}
-                    </span>
-                  </div>
-
-                  {/* Date Column */}
-                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
-                    <span
-                      className={`${tw.compactCellValue} whitespace-nowrap text-right`}
-                      style={{ fontSize: "0.95rem" }}
-                    >
-                      {formatDateShort(deposit.endDate)}
-                      {isImmediate && (
-                        <span className={tw.immediateBadge}>
-                          {daysUntil === 0 ? "Today" : "Tomorrow"}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          {hasAnyMaturities && (
+            <button
+              className={tw.viewAllButton}
+              onClick={() =>
+                navigate("/banking", { state: { activeTab: "deposits" } })
+              }
+            >
+              View All
+            </button>
+          )}
         </div>
-      )}
-      {/* Expired Maturities (only active deposits) */}
-      {hasExpiredMaturities && (
-        <div>
-          <div className="text-sm font-semibold text-red-600 mb-2">Expired</div>
-          <div className={tw.compactTable}>
-            {expiredMaturities.map((deposit) => {
-              return (
-                <div
-                  key={deposit.id}
-                  className={tw.compactRow}
-                  style={{
-                    fontSize: "0.95rem",
-                    lineHeight: "1.2",
-                    opacity: 0.7,
-                    color: "#6b7280",
-                  }}
-                >
-                  {/* Account Column */}
-                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
-                    <span
-                      className={`${tw.compactCellValue} line-through`}
-                      style={{ fontSize: "0.95rem" }}
-                    >
-                      {getAccountName(deposit.accountId)}
-                    </span>
-                  </div>
 
-                  {/* Amount Column */}
-                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
-                    <span
-                      className={tw.compactCellValue}
-                      style={{
-                        fontSize: "0.95rem",
-                        color: "#6b7280",
-                      }}
-                    >
-                      {formatLakhs(deposit.amount)}
-                    </span>
-                  </div>
-
-                  {/* Comments Column */}
-                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
-                    <span
-                      className={tw.compactCellValue}
-                      style={{
-                        fontSize: "0.95rem",
-                        color: "#6b7280",
-                      }}
-                    >
-                      {getShortComments(deposit.comments || "")}
-                    </span>
-                  </div>
-
-                  {/* Date Column */}
-                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
-                    <span
-                      className={`${tw.compactCellValue} whitespace-nowrap text-right text-red-600`}
-                      style={{ fontSize: "0.95rem" }}
-                    >
-                      {formatDateShort(deposit.endDate)}
-                      <span className="ml-1 bg-red-100 text-red-700 text-xs px-1.5 py-0.5 rounded">
-                        {getDaysAgo(deposit.endDate)}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+        {!hasAnyMaturities ? (
+          <div className={tw.emptyState}>
+            <div className={tw.emptyIcon}>📅</div>
+            <div className={tw.emptyText}>No maturities found</div>
+            <div className={tw.emptySubtext}>
+              No active deposits with maturity dates
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <>
+            {/* Upcoming Maturities */}
+            {hasUpcomingMaturities && (
+              <div className="mb-4">
+                <div className="text-sm font-semibold text-gray-700 mb-2">
+                  Upcoming
+                </div>
+                <div className={tw.compactTable}>
+                  {upcomingMaturities.map((deposit) => {
+                    const daysUntil = Math.ceil(
+                      (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
+                    );
+                    const isImmediate = daysUntil <= 1;
+
+                    return (
+                      <div
+                        key={deposit.id}
+                        className={`${tw.compactRow} ${isImmediate ? tw.immediateRow : ""}`}
+                        style={{
+                          fontSize: "0.95rem",
+                          lineHeight: "1.2",
+                        }}
+                      >
+                        {/* Account Column */}
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                          <span
+                            className={tw.compactCellValue}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {getAccountName(deposit.accountId)}
+                          </span>
+                        </div>
+
+                        {/* Amount Column */}
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                          <span
+                            className={`${tw.compactCellValue} text-blue-900`}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {formatLakhs(deposit.amount)}
+                          </span>
+                        </div>
+
+                        {/* Comments Column */}
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                          <span
+                            className={tw.compactCellValue}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {getShortComments(deposit.comments || "")}
+                          </span>
+                        </div>
+
+                        {/* Date Column */}
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                          <span
+                            className={`${tw.compactCellValue} whitespace-nowrap text-right`}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {formatDateShort(deposit.endDate)}
+                            {isImmediate && (
+                              <span className={tw.immediateBadge}>
+                                {daysUntil === 0 ? "Today" : "Tomorrow"}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Expired Maturities (only active deposits) */}
+            {hasExpiredMaturities && (
+              <div>
+                <div className="text-sm font-semibold text-red-600 mb-2">
+                  Expired
+                </div>
+                <div className={tw.compactTable}>
+                  {expiredMaturities.map((deposit) => {
+                    return (
+                      <div
+                        key={deposit.id}
+                        className={tw.compactRow}
+                        style={{
+                          fontSize: "0.95rem",
+                          lineHeight: "1.2",
+                          opacity: 0.7,
+                          color: "#6b7280",
+                        }}
+                      >
+                        {/* Account Column */}
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                          <span
+                            className={`${tw.compactCellValue} line-through`}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {getAccountName(deposit.accountId)}
+                          </span>
+                        </div>
+
+                        {/* Amount Column */}
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                          <span
+                            className={tw.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              color: "#6b7280",
+                            }}
+                          >
+                            {formatLakhs(deposit.amount)}
+                          </span>
+                        </div>
+
+                        {/* Comments Column */}
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                          <span
+                            className={tw.compactCellValue}
+                            style={{
+                              fontSize: "0.95rem",
+                              color: "#6b7280",
+                            }}
+                          >
+                            {getShortComments(deposit.comments || "")}
+                          </span>
+                        </div>
+
+                        {/* Date Column */}
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                          <span
+                            className={`${tw.compactCellValue} whitespace-nowrap text-right text-red-600`}
+                            style={{ fontSize: "0.95rem" }}
+                          >
+                            {formatDateShort(deposit.endDate)}
+                            <span className="ml-1 bg-red-100 text-red-700 text-xs px-1.5 py-0.5 rounded">
+                              {getDaysAgo(deposit.endDate)}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
       {/* Asset Distribution Chart */}
       <div className="mt-3.5 mb-1">
         <CombinedAssetBarChart

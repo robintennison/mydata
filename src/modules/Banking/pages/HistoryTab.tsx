@@ -4,117 +4,7 @@ import { useBankingData } from "../hooks/useBankingData";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { CSSProperties } from "react";
-
-// COMPACT STYLES - NO PADDING
-const compactHistoryStyles: { [key: string]: CSSProperties } = {
-  container: {
-    height: "100%",
-    display: "flex",
-    flexDirection: "column" as const,
-    padding: "0",
-    margin: "0",
-  },
-  chartContainer: {
-    backgroundColor: "white",
-    padding: "0",
-    margin: "0 0 16px 0", // Added vertical spacing
-    borderBottom: "1px solid #e9ecef",
-  },
-  header: {
-    padding: "4px 0", // Removed horizontal padding
-    backgroundColor: "#f9fafb",
-    borderBottom: "1px solid #e9ecef",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: "11px",
-    fontWeight: "600",
-    color: "#333",
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-    paddingLeft: "4px", // Slight indent for text
-  },
-  headerCount: {
-    fontSize: "10px",
-    color: "#666",
-    paddingRight: "4px", // Slight indent for text
-  },
-  tableHeader: {
-    display: "flex",
-    padding: "4px 0", // Removed horizontal padding
-    backgroundColor: "#f9fafb",
-    borderBottom: "1px solid #e9ecef",
-    fontWeight: "600",
-    fontSize: "10px",
-    color: "#374151",
-  },
-  tableRow: {
-    display: "flex",
-    alignItems: "center",
-    padding: "4px 0", // Removed horizontal padding
-    borderBottom: "1px solid #f3f4f6",
-    minHeight: "32px",
-  },
-  cellMonth: {
-    flex: 2,
-    padding: "0 2px 0 4px", // Adjusted padding
-    fontSize: "11px",
-    color: "#333",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  cellSavings: {
-    flex: 2,
-    padding: "0 2px",
-    fontSize: "11px",
-    fontWeight: "600",
-    color: "#48bb78",
-    textAlign: "right" as const,
-  },
-  cellDeposits: {
-    flex: 2,
-    padding: "0 2px",
-    fontSize: "11px",
-    fontWeight: "600",
-    color: "#ed8936",
-    textAlign: "right" as const,
-  },
-  cellTotal: {
-    flex: 2,
-    padding: "0 4px 0 2px", // Adjusted padding
-    fontSize: "11px",
-    fontWeight: "600",
-    color: "#1976d2",
-    textAlign: "right" as const,
-  },
-  editInput: {
-    width: "70px",
-    padding: "2px",
-    border: "1px solid #e9ecef",
-    borderRadius: "2px",
-    fontSize: "10px",
-  },
-  smallButton: {
-    width: "24px",
-    height: "24px",
-    padding: "0",
-    fontSize: "10px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonContainer: {
-    width: "60px",
-    display: "flex",
-    gap: "2px",
-    padding: "0 2px",
-  },
-};
+import { tw } from "../../../utils/tailwindMapping";
 
 const HistoryTab: React.FC = () => {
   const { settings } = useSettings();
@@ -196,119 +86,52 @@ const HistoryTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex" as const,
-          flexDirection: "column" as const,
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "60px 20px",
-        }}
-      >
-        <div
-          style={{
-            width: "40px",
-            height: "40px",
-            border: "4px solid #f3f3f3",
-            borderTop: "4px solid #4285f4",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-          }}
-        ></div>
-        <p>Loading history...</p>
+      <div className="flex flex-col items-center justify-center py-16 px-5">
+        <div className={tw.bankingSpinner}></div>
+        <p className="mt-4 text-gray-600">Loading history...</p>
       </div>
     );
   }
 
   return (
-    <div style={compactHistoryStyles.container}>
-      {/* Chart - NO PADDING */}
-      <div style={compactHistoryStyles.chartContainer}>
+    <div className="flex flex-col h-full">
+      {/* Chart */}
+      <div className="bg-white mb-4 border-b border-gray-300">
         <HistoryChart history={history} compact={true} />
       </div>
 
-      {/* Table - NO PADDING */}
-      <div style={{ flex: 1, overflowY: "auto" as const }}>
+      {/* Table */}
+      <div className="flex-1 overflow-y-auto">
         {/* Header */}
-        <div style={compactHistoryStyles.header}>
-          <div style={compactHistoryStyles.headerTitle}>
+        <div className="flex justify-between items-center py-1 bg-gray-50 border-b border-gray-300 px-1">
+          <div className="flex items-center gap-1">
             <span>📊</span>
-            <span>History</span>
+            <span className="text-xs font-semibold text-gray-800">History</span>
           </div>
-          <div style={compactHistoryStyles.headerCount}>
+          <div className="text-2xs text-gray-600">
             {history.length} record{history.length !== 1 ? "s" : ""}
           </div>
         </div>
 
         {filteredHistory.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center" as const,
-              padding: "40px 20px",
-              color: "#6c757d",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "48px",
-                marginBottom: "16px",
-                opacity: "0.5",
-              }}
-            >
-              📄
-            </div>
-            <div
-              style={{
-                fontSize: "16px",
-                fontWeight: "500",
-                color: "#6b7280",
-                marginBottom: "8px",
-              }}
-            >
+          <div className="text-center py-12 px-5 text-gray-500">
+            <div className="text-4xl mb-4 opacity-50">📄</div>
+            <div className="text-base font-medium text-gray-600 mb-2">
               No history records
             </div>
-            <div
-              style={{
-                fontSize: "14px",
-                color: "#9ca3af",
-              }}
-            >
+            <div className="text-sm text-gray-400">
               Update current month summary to create history
             </div>
           </div>
         ) : (
           <div>
             {/* Table Header */}
-            <div style={compactHistoryStyles.tableHeader}>
-              <div style={{ flex: 2, padding: "0 2px" }}>Month</div>
-              <div
-                style={{
-                  flex: 2,
-                  padding: "0 2px",
-                  textAlign: "right" as const,
-                }}
-              >
-                Savings
-              </div>
-              <div
-                style={{
-                  flex: 2,
-                  padding: "0 2px",
-                  textAlign: "right" as const,
-                }}
-              >
-                Deposits
-              </div>
-              <div
-                style={{
-                  flex: 2,
-                  padding: "0 2px",
-                  textAlign: "right" as const,
-                }}
-              >
-                Total
-              </div>
-              {settings?.showDelete && <div style={{ width: "60px" }}></div>}
+            <div className="flex items-center py-1 bg-gray-50 border-b border-gray-300 font-semibold text-2xs text-gray-700 px-1">
+              <div className="w-1/4 px-0.5">Month</div>
+              <div className="w-1/4 px-0.5 text-right">Savings</div>
+              <div className="w-1/4 px-0.5 text-right">Deposits</div>
+              <div className="w-1/4 px-0.5 text-right">Total</div>
+              {settings?.showDelete && <div className="w-14 px-0.5"></div>}
             </div>
 
             {/* Table Rows */}
@@ -319,65 +142,70 @@ const HistoryTab: React.FC = () => {
               const totalValue = savingsValue + depositsValue;
 
               return (
-                <div key={record.month} style={compactHistoryStyles.tableRow}>
+                <div
+                  key={record.month}
+                  className="flex items-center py-1 border-b border-gray-100 min-h-8 px-1"
+                >
                   {/* Month */}
-                  <div style={compactHistoryStyles.cellMonth}>
+                  <div className="w-1/4 px-0.5 text-xs text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
                     {record.month}
                   </div>
 
                   {/* Savings */}
-                  <div style={compactHistoryStyles.cellSavings}>
+                  <div className="w-1/4 px-0.5">
                     {isEditing ? (
                       <input
                         type="number"
                         value={editedSavings}
                         onChange={(e) => setEditedSavings(e.target.value)}
-                        style={compactHistoryStyles.editInput}
+                        className="w-16 p-1 border border-gray-300 rounded text-xs"
                         step="0.01"
                         min="0"
                         placeholder="0.00"
                         disabled={isSaving}
                       />
                     ) : (
-                      formatLakhs(savingsValue)
+                      <div className="text-xs font-semibold text-green-600 text-right">
+                        {formatLakhs(savingsValue)}
+                      </div>
                     )}
                   </div>
 
                   {/* Deposits */}
-                  <div style={compactHistoryStyles.cellDeposits}>
+                  <div className="w-1/4 px-0.5">
                     {isEditing ? (
                       <input
                         type="number"
                         value={editedDeposits}
                         onChange={(e) => setEditedDeposits(e.target.value)}
-                        style={compactHistoryStyles.editInput}
+                        className="w-16 p-1 border border-gray-300 rounded text-xs"
                         step="0.01"
                         min="0"
                         placeholder="0.00"
                         disabled={isSaving}
                       />
                     ) : (
-                      formatLakhs(depositsValue)
+                      <div className="text-xs font-semibold text-orange-500 text-right">
+                        {formatLakhs(depositsValue)}
+                      </div>
                     )}
                   </div>
 
                   {/* Total */}
-                  <div style={compactHistoryStyles.cellTotal}>
-                    {formatLakhs(totalValue)}
+                  <div className="w-1/4 px-0.5">
+                    <div className="text-xs font-semibold text-blue-600 text-right">
+                      {formatLakhs(totalValue)}
+                    </div>
                   </div>
 
                   {/* Actions */}
                   {settings?.showDelete && (
-                    <div style={compactHistoryStyles.buttonContainer}>
+                    <div className="w-14 flex gap-0.5 px-0.5">
                       {isEditing ? (
                         <>
                           <button
                             onClick={() => saveEdits(record.month)}
-                            style={{
-                              ...compactHistoryStyles.smallButton,
-                              backgroundColor: "#48bb78",
-                              color: "white",
-                            }}
+                            className="w-6 h-6 p-0 bg-green-500 text-white text-xs rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50"
                             disabled={isSaving}
                             title="Save"
                           >
@@ -385,11 +213,7 @@ const HistoryTab: React.FC = () => {
                           </button>
                           <button
                             onClick={cancelEditing}
-                            style={{
-                              ...compactHistoryStyles.smallButton,
-                              backgroundColor: "#a0aec0",
-                              color: "white",
-                            }}
+                            className="w-6 h-6 p-0 bg-gray-400 text-white text-xs rounded flex items-center justify-center hover:bg-gray-500"
                             title="Cancel"
                           >
                             ✕
@@ -405,11 +229,7 @@ const HistoryTab: React.FC = () => {
                                 record.totalDeposits,
                               )
                             }
-                            style={{
-                              ...compactHistoryStyles.smallButton,
-                              backgroundColor: "#4299e1",
-                              color: "white",
-                            }}
+                            className="w-6 h-6 p-0 bg-blue-500 text-white text-xs rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50"
                             disabled={editingMonth !== null}
                             title="Edit"
                           >
@@ -417,11 +237,7 @@ const HistoryTab: React.FC = () => {
                           </button>
                           <button
                             onClick={() => setDeleteConfirmMonth(record.month)}
-                            style={{
-                              ...compactHistoryStyles.smallButton,
-                              backgroundColor: "#f56565",
-                              color: "white",
-                            }}
+                            className="w-6 h-6 p-0 bg-red-500 text-white text-xs rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50"
                             disabled={editingMonth !== null}
                             title="Delete"
                           >
@@ -440,84 +256,25 @@ const HistoryTab: React.FC = () => {
 
       {/* Delete Confirmation */}
       {deleteConfirmMonth && (
-        <div
-          style={{
-            position: "fixed" as const,
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex" as const,
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              borderRadius: "12px",
-              padding: "20px",
-              maxWidth: "400px",
-              width: "100%",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 15px 0",
-                fontSize: "1.1rem",
-                fontWeight: "600",
-                color: "#333",
-              }}
-            >
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-50">
+          <div className="bg-white rounded-xl p-5 max-w-md w-full shadow-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
               Confirm Delete
             </h3>
-            <p
-              style={{
-                margin: "0 0 20px 0",
-                color: "#666",
-                lineHeight: "1.5",
-              }}
-            >
+            <p className="text-gray-600 mb-5 leading-relaxed">
               Are you sure you want to delete the history record for{" "}
               <strong>{deleteConfirmMonth}</strong>?
             </p>
-            <div
-              style={{
-                display: "flex" as const,
-                gap: "10px",
-              }}
-            >
+            <div className="flex gap-2.5">
               <button
                 onClick={() => setDeleteConfirmMonth(null)}
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
-                  borderRadius: "8px",
-                  color: "#495057",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
+                className="flex-1 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={executeDelete}
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: "#ea4335",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#ffffff",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
+                className="flex-1 py-2.5 bg-red-500 border-none rounded-lg text-white font-medium cursor-pointer hover:bg-red-600 transition-colors"
               >
                 Delete
               </button>
@@ -525,8 +282,6 @@ const HistoryTab: React.FC = () => {
           </div>
         </div>
       )}
-
-      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };

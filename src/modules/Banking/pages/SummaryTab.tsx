@@ -12,7 +12,7 @@ import {
 import { firestore } from "../../../lib/firebase";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { summaryTabStyles as styles } from "../styles/SummaryTab.styles";
+import { tw, cls } from "../../../utils/tailwindMapping";
 
 interface AccountSummary {
   accountId: string;
@@ -311,90 +311,53 @@ const SummaryTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p style={styles.loadingText}>Loading summary...</p>
+      <div className="flex flex-col items-center justify-center py-16 px-5">
+        <div className={tw.bankingSpinner}></div>
+        <p className="mt-4 text-gray-600">Loading summary...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "0 4px", width: "100%" }}>
+    <div className="px-1 w-full">
       {/* Error Message */}
       {saveError && (
-        <div style={styles.errorContainer}>
-          <div style={styles.errorIcon}>⚠️</div>
-          <div style={styles.errorText}>{saveError}</div>
-          <button onClick={() => setSaveError(null)} style={styles.errorClose}>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-red-500">⚠️</span>
+            <span className="text-sm text-red-700">{saveError}</span>
+          </div>
+          <button
+            onClick={() => setSaveError(null)}
+            className="text-red-500 hover:text-red-700 text-sm"
+          >
             ✕
           </button>
         </div>
       )}
       {accounts.length === 0 ? (
-        <div style={styles.emptyState}>
-          <div style={styles.emptyIcon}>📊</div>
-          <div style={styles.emptyText}>No accounts available</div>
-          <div style={styles.emptySubtext}>
+        <div className="text-center py-12 px-5 text-gray-500">
+          <div className="text-4xl mb-4 opacity-50">📊</div>
+          <div className="text-base font-medium text-gray-600 mb-2">
+            No accounts available
+          </div>
+          <div className="text-sm text-gray-400">
             Add accounts first from the Accounts page
           </div>
         </div>
       ) : (
         <>
           {/* Summary Table */}
-          <div style={styles.tableContainer}>
-            {/* Table Header - Smaller font size */}
-            <div style={styles.tableHeader}>
-              <div
-                style={{
-                  ...styles.headerCell,
-                  flex: 3,
-                  paddingLeft: "8px",
-                  minWidth: "100px",
-                  fontSize: "12px", // Reduced from default
-                  fontWeight: "600",
-                }}
-              >
-                Account
-              </div>
-              <div
-                style={{
-                  ...styles.headerCell,
-                  flex: 2,
-                  textAlign: "right",
-                  paddingRight: "12px",
-                  fontSize: "12px", // Reduced from default
-                  fontWeight: "600",
-                }}
-              >
-                Savings
-              </div>
-              <div
-                style={{
-                  ...styles.headerCell,
-                  flex: 2,
-                  textAlign: "right",
-                  paddingRight: "12px",
-                  fontSize: "12px", // Reduced from default
-                  fontWeight: "600",
-                }}
-              >
-                Deposits
-              </div>
-              <div
-                style={{
-                  ...styles.headerCell,
-                  flex: 0.8,
-                  textAlign: "center",
-                  minWidth: "40px",
-                  fontSize: "12px", // Reduced from default
-                  fontWeight: "600",
-                }}
-              >
-                Edit
-              </div>
+          <div className="bg-white rounded-lg border border-gray-300 overflow-hidden">
+            {/* Table Header */}
+            <div className="flex items-center py-2 bg-gray-50 border-b border-gray-300 text-xs font-semibold text-gray-700">
+              <div className="w-[38%] px-2">Account</div>
+              <div className="w-[25%] px-1 text-right">Savings</div>
+              <div className="w-[25%] px-1 text-right">Deposits</div>
+              <div className="w-[12%] px-1 text-center">Edit</div>
             </div>
 
-            {/* Table Rows - Smaller font size */}
+            {/* Table Rows */}
             <div>
               {summaries.map((summary, index) => {
                 const isEditing = editingAccountId === summary.accountId;
@@ -403,203 +366,78 @@ const SummaryTab: React.FC = () => {
                 return (
                   <div
                     key={summary.accountId}
-                    style={{
-                      ...styles.tableRow,
-                      width: "100%",
-                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
-                      borderBottom:
-                        index < summaries.length - 1
-                          ? "1px solid #f3f4f6"
-                          : "none",
-                      cursor: "pointer",
-                      fontSize: "13px", // Reduced font size for entire row
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isEditing)
-                        e.currentTarget.style.backgroundColor = "#f8f9fa";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isEditing)
-                        e.currentTarget.style.backgroundColor =
-                          index % 2 === 0 ? "#ffffff" : "#f9fafb";
-                    }}
+                    className={cls(
+                      "flex items-center py-2.5 border-b border-gray-100 text-sm",
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50",
+                      !isEditing && "hover:bg-gray-100 cursor-pointer",
+                    )}
                   >
                     {/* Account Code */}
-                    <div
-                      style={{
-                        ...styles.tableCell,
-                        flex: 3,
-                        paddingLeft: "8px",
-                        overflow: "hidden",
-                        minWidth: "100px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          ...styles.accountCode,
-                          fontSize: "13px", // Smaller font
-                          fontWeight: "500",
-                        }}
-                      >
+                    <div className="w-[38%] px-2 min-w-0">
+                      <div className="text-sm font-medium text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
                         {summary.accountCode}
                       </div>
                     </div>
 
                     {/* Savings Amount */}
-                    <div
-                      style={{
-                        ...styles.tableCell,
-                        flex: 2,
-                        textAlign: "right",
-                        paddingRight: "12px",
-                        minWidth: "80px",
-                      }}
-                    >
+                    <div className="w-[25%] px-1 text-right">
                       {isEditing ? (
-                        <div style={styles.editInputContainer}>
-                          <input
-                            type="number"
-                            value={editedSavings}
-                            onChange={(e) => setEditedSavings(e.target.value)}
-                            style={{
-                              ...styles.editInput,
-                              width: "100%",
-                              fontSize: "13px", // Smaller input font
-                              padding: "4px 6px",
-                            }}
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                            disabled={isSaving}
-                          />
-                        </div>
+                        <input
+                          type="number"
+                          value={editedSavings}
+                          onChange={(e) => setEditedSavings(e.target.value)}
+                          className="w-20 p-1 border border-gray-300 rounded text-sm text-right focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          disabled={isSaving}
+                        />
                       ) : (
-                        <div
-                          style={{
-                            ...styles.amountDisplay,
-                            color: "#1976d2",
-                            fontSize: "13px", // Smaller font
-                            fontWeight: "600",
-                          }}
-                        >
+                        <div className="text-sm font-semibold text-blue-600">
                           {summary.savingsInLakhs}
                         </div>
                       )}
                     </div>
 
                     {/* Deposits Amount */}
-                    <div
-                      style={{
-                        ...styles.tableCell,
-                        flex: 2,
-                        textAlign: "right",
-                        paddingRight: "12px",
-                        minWidth: "80px",
-                      }}
-                    >
+                    <div className="w-[25%] px-1 text-right">
                       {isEditing ? (
-                        <div style={styles.editInputContainer}>
-                          <input
-                            type="number"
-                            value={editedDeposits}
-                            onChange={(e) => setEditedDeposits(e.target.value)}
-                            style={{
-                              ...styles.editInput,
-                              width: "100%",
-                              fontSize: "13px", // Smaller input font
-                              padding: "4px 6px",
-                            }}
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                            disabled={isSaving}
-                          />
-                        </div>
+                        <input
+                          type="number"
+                          value={editedDeposits}
+                          onChange={(e) => setEditedDeposits(e.target.value)}
+                          className="w-20 p-1 border border-gray-300 rounded text-sm text-right focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          disabled={isSaving}
+                        />
                       ) : (
-                        <div
-                          style={{
-                            ...styles.amountDisplay,
-                            color: "#1976d2",
-                            fontSize: "13px", // Smaller font
-                            fontWeight: "600",
-                          }}
-                        >
+                        <div className="text-sm font-semibold text-blue-600">
                           {summary.depositsInLakhs}
                         </div>
                       )}
                     </div>
 
-                    {/* Action Column - Compact icon button */}
-                    <div
-                      style={{
-                        ...styles.tableCell,
-                        flex: 0.8,
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        minWidth: "40px",
-                        padding: "0 4px",
-                      }}
-                    >
+                    {/* Action Column */}
+                    <div className="w-[12%] px-1 flex justify-center">
                       {isEditing ? (
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "4px",
-                            alignItems: "center",
-                          }}
-                        >
+                        <div className="flex gap-1.5">
                           <button
                             onClick={() => saveEdits(summary.accountId)}
-                            style={{
-                              backgroundColor: "#10b981",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: isSaving ? "not-allowed" : "pointer",
-                              opacity: isSaving ? 0.6 : 1,
-                              padding: "4px 8px",
-                              minWidth: "28px",
-                              height: "28px",
-                              fontSize: "12px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
+                            className="w-7 h-7 bg-green-500 text-white rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Save"
                             disabled={isSaving}
                           >
                             {isSaving ? (
-                              <div
-                                style={{
-                                  width: "12px",
-                                  height: "12px",
-                                  border: "2px solid rgba(255,255,255,0.3)",
-                                  borderTopColor: "white",
-                                  borderRadius: "50%",
-                                  animation: "spin 0.8s linear infinite",
-                                }}
-                              ></div>
+                              <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                             ) : (
                               "✓"
                             )}
                           </button>
                           <button
                             onClick={cancelEditing}
-                            style={{
-                              backgroundColor: "#ef4444",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: isSaving ? "not-allowed" : "pointer",
-                              padding: "4px 8px",
-                              minWidth: "28px",
-                              height: "28px",
-                              fontSize: "12px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
+                            className="w-7 h-7 bg-red-500 text-white rounded flex items-center justify-center hover:bg-red-600"
                             title="Cancel"
                             disabled={isSaving}
                           >
@@ -615,31 +453,14 @@ const SummaryTab: React.FC = () => {
                               summary.deposits,
                             )
                           }
-                          style={{
-                            backgroundColor: "#3b82f6",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor:
-                              editingAccountId !== null
-                                ? "not-allowed"
-                                : "pointer",
-                            opacity: editingAccountId !== null ? 0.5 : 1,
-                            padding: "5px",
-                            minWidth: "30px",
-                            height: "30px",
-                            fontSize: "14px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
+                          className="w-7 h-7 bg-blue-500 text-white rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Edit"
                           disabled={editingAccountId !== null}
                         >
                           ✏️
                         </button>
                       ) : (
-                        <div style={{ width: "30px", height: "30px" }}></div>
+                        <div className="w-7 h-7"></div>
                       )}
                     </div>
                   </div>
@@ -647,124 +468,53 @@ const SummaryTab: React.FC = () => {
               })}
             </div>
 
-            {/* Totals Row - Smaller font size */}
-            <div style={styles.totalsRow}>
-              <div
-                style={{
-                  ...styles.totalsCell,
-                  flex: 3,
-                  paddingLeft: "8px",
-                  fontWeight: "600",
-                  fontSize: "13px", // Smaller font
-                }}
-              >
-                TOTAL
-              </div>
-              <div
-                style={{
-                  ...styles.totalsCell,
-                  flex: 2,
-                  textAlign: "right",
-                  paddingRight: "12px",
-                  color: "#1976d2",
-                  fontWeight: "600",
-                  fontSize: "13px", // Smaller font
-                }}
-              >
+            {/* Totals Row */}
+            <div className="flex items-center py-2.5 bg-gray-50 border-t border-gray-300 font-semibold text-sm">
+              <div className="w-[38%] px-2">TOTAL</div>
+              <div className="w-[25%] px-1 text-right text-blue-600">
                 {formatInLakhs(totalSavings)}
               </div>
-              <div
-                style={{
-                  ...styles.totalsCell,
-                  flex: 2,
-                  textAlign: "right",
-                  paddingRight: "12px",
-                  color: "#1976d2",
-                  fontWeight: "600",
-                  fontSize: "13px", // Smaller font
-                }}
-              >
+              <div className="w-[25%] px-1 text-right text-blue-600">
                 {formatInLakhs(totalDeposits)}
               </div>
-              <div
-                style={{
-                  ...styles.totalsCell,
-                  flex: 0.8,
-                  textAlign: "center",
-                  minWidth: "40px",
-                }}
-              >
-                {/* Empty for consistency */}
-              </div>
+              <div className="w-[12%] px-1"></div>
             </div>
           </div>
 
           {/* Summary Count Info */}
-          <div
-            style={{
-              fontSize: "11px", // Smaller font
-              color: "#6b7280",
-              textAlign: "center",
-              margin: "6px 0",
-              padding: "0 8px",
-            }}
-          >
+          <div className="text-xs text-gray-500 text-center mt-2 px-2">
             Showing {summaries.length} account
             {summaries.length !== 1 ? "s" : ""}
           </div>
 
           {/* History Update Section */}
-          <div style={styles.historySection}>
+          <div className="mt-4 flex flex-col items-center">
             <button
               onClick={handleHistoryUpdate}
-              style={{
-                ...styles.historyButton,
-                cursor:
-                  isUpdatingHistory || !currentMonth
-                    ? "not-allowed"
-                    : "pointer",
-                opacity: isUpdatingHistory || !currentMonth ? 0.6 : 1,
-                fontSize: "13px", // Smaller font
-                padding: "8px 16px",
-                minWidth: "220px",
-              }}
+              className={cls(
+                "px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium",
+                "hover:from-blue-600 hover:to-blue-700 transition-all",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "min-w-[220px] flex items-center justify-center",
+              )}
               disabled={isUpdatingHistory || !currentMonth}
             >
               {isUpdatingHistory ? (
                 <>
-                  <div style={styles.spinnerSmall}></div>
-                  <span style={{ marginLeft: "6px", fontSize: "13px" }}>
-                    Processing...
-                  </span>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  Processing...
                 </>
               ) : (
                 historyButtonText || "Loading..."
               )}
             </button>
-            <div
-              style={{
-                ...styles.historyNote,
-                fontSize: "11px", // Smaller font
-              }}
-            >
+            <div className="text-xs text-gray-500 mt-2 text-center">
               {historyButtonText?.includes("Update") ? "Updates" : "Creates"}{" "}
               record in history table for {currentMonth}
             </div>
           </div>
         </>
       )}
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
-        input:focus {
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-          outline: none;
-        }
-      `}</style>
     </div>
   );
 };

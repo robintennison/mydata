@@ -1,9 +1,9 @@
-// src/modules/banking/BankingHomePage.tsx (Updated)
+// src/modules/banking/BankingHomePage.tsx (Tailwind Version)
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { bankingHomeStyles } from "../styles/BankingHomePage.styles";
+import { tw, cls } from "../../../utils/tailwindMapping";
 import Header from "../../../components/Layout/Header"; // Import Header
 
 // Import the tab components
@@ -93,9 +93,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         return "Add";
     }
   };
-
-  // Rest of the component remains the same...
-  // [All the existing code for DashboardContent, calculations, etc.]
 
   // Format numbers in lakhs with 2 decimals (no currency symbol or "L" label)
   const formatLakhs = (amount: number): string => {
@@ -268,136 +265,38 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
   const lastMonthWithdrawal = calculateLastMonthWithdrawal();
 
-  // Styles matching HistoryTab
-  const compactHistoryStyles = {
-    container: {
-      height: "100%",
-      display: "flex",
-      flexDirection: "column" as const,
-      padding: "0",
-      margin: "0",
-    },
-    header: {
-      padding: "4px 0",
-      backgroundColor: "#f9fafb",
-      borderBottom: "1px solid #e9ecef",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    headerTitle: {
-      fontSize: "11px",
-      fontWeight: "600",
-      color: "#333",
-      display: "flex",
-      alignItems: "center",
-      gap: "4px",
-      paddingLeft: "4px",
-    },
-    headerCount: {
-      fontSize: "10px",
-      color: "#666",
-      paddingRight: "4px",
-    },
-    tableHeader: {
-      display: "flex",
-      padding: "4px 0",
-      backgroundColor: "#f9fafb",
-      borderBottom: "1px solid #e9ecef",
-      fontWeight: "600",
-      fontSize: "10px",
-      color: "#374151",
-    },
-    tableRow: {
-      display: "flex",
-      alignItems: "center",
-      padding: "4px 0",
-      borderBottom: "1px solid #f3f4f6",
-      minHeight: "32px",
-    },
-    cellMonth: {
-      flex: 2,
-      padding: "0 2px 0 4px",
-      fontSize: "11px",
-      color: "#333",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-    },
-    cellSavings: {
-      flex: 2,
-      padding: "0 2px",
-      fontSize: "11px",
-      fontWeight: "600",
-      color: "#48bb78",
-      textAlign: "right" as const,
-    },
-    cellDeposits: {
-      flex: 2,
-      padding: "0 2px",
-      fontSize: "11px",
-      fontWeight: "600",
-      color: "#ed8936",
-      textAlign: "right" as const,
-    },
-    cellTotal: {
-      flex: 2,
-      padding: "0 4px 0 2px",
-      fontSize: "11px",
-      fontWeight: "600",
-      color: "#1976d2",
-      textAlign: "right" as const,
-    },
-  };
-
   // Dashboard content component with HistoryTab-style table and Pie Charts
   const DashboardContent = () => (
     <>
       {/* Top 3 Cards in Single Row */}
-      <div style={bankingHomeStyles.sectionPadding}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "10px",
-            marginBottom: "15px",
-          }}
-        >
+      <div className="px-4 py-3">
+        <div className="grid grid-cols-3 gap-2.5 mb-4">
           {/* Total Savings Card */}
-          <div style={bankingHomeStyles.statsCard}>
-            <div style={bankingHomeStyles.statsLabel}>Savings</div>
-            <div
-              style={{
-                ...bankingHomeStyles.statsValue,
-                fontSize: "0.95rem",
-              }}
-            >
+          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+              Savings
+            </div>
+            <div className="text-lg font-bold text-gray-900">
               {formatLakhs(totalSavings)}
             </div>
           </div>
 
           {/* Total Deposits Card */}
-          <div style={bankingHomeStyles.statsCard}>
-            <div style={bankingHomeStyles.statsLabel}>Deposits</div>
-            <div
-              style={{
-                ...bankingHomeStyles.statsValue,
-                fontSize: "0.95rem",
-              }}
-            >
+          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+              Deposits
+            </div>
+            <div className="text-lg font-bold text-gray-900">
               {formatLakhs(totalDeposits)}
             </div>
           </div>
 
           {/* Total Bank Balance Card */}
-          <div style={bankingHomeStyles.statsCard}>
-            <div style={bankingHomeStyles.statsLabel}>Total</div>
-            <div
-              style={{
-                ...bankingHomeStyles.statsValue,
-                fontSize: "0.95rem",
-              }}
-            >
+          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+              Total
+            </div>
+            <div className="text-lg font-bold text-gray-900">
               {formatLakhs(totalBankBalance)}
             </div>
           </div>
@@ -405,125 +304,57 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
       </div>
 
       {/* EMW Section - Single Row */}
-      <div style={bankingHomeStyles.sectionPadding}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "10px",
-            marginBottom: "15px",
-          }}
-        >
+      <div className="px-4 py-3">
+        <div className="grid grid-cols-3 gap-2.5 mb-4">
           {/* EMW Card */}
-          <div style={bankingHomeStyles.statsCard}>
-            <div
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: 600,
-                color: "#1e40af",
-                marginBottom: "5px",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              <span
-                style={{
-                  backgroundColor: "#3b82f6",
-                  color: "white",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                  fontSize: "0.7rem",
-                }}
-              >
+          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+            <div className="text-xs font-semibold text-blue-800 mb-1.5 flex items-center justify-center gap-1">
+              <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-xs">
                 EMW
               </span>
               <span>Monthly</span>
             </div>
-            <div
-              style={{
-                fontSize: "1rem",
-                fontWeight: 700,
-                color: "#1e40af",
-              }}
-            >
+            <div className="text-lg font-bold text-blue-800">
               {formatLakhs(emwAmount)}
             </div>
-            <div
-              style={{
-                fontSize: "0.7rem",
-                color: "#6b7280",
-                marginTop: "2px",
-              }}
-            >
+            <div className="text-xs text-gray-500 mt-1">
               {emwSettings.interestRate}% interest
             </div>
           </div>
 
           {/* Actual Rate Card */}
-          <div style={bankingHomeStyles.statsCard}>
-            <div
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: 600,
-                color: "#64748b",
-                marginBottom: "5px",
-              }}
-            >
+          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+            <div className="text-xs font-semibold text-gray-700 mb-1.5">
               Actual (6m)
             </div>
             <div
-              style={{
-                fontSize: "1rem",
-                fontWeight: 700,
-                color:
-                  actualWithdrawalData.monthlyRate >= emwAmount
-                    ? "#dc2626"
-                    : "#059669",
-              }}
+              className={cls(
+                "text-lg font-bold",
+                actualWithdrawalData.monthlyRate >= emwAmount
+                  ? "text-red-600"
+                  : "text-green-600",
+              )}
             >
               {formatLakhs(actualWithdrawalData.monthlyRate)}
             </div>
-            <div
-              style={{
-                fontSize: "0.7rem",
-                color: "#6b7280",
-                marginTop: "2px",
-              }}
-            >
-              avg/month
-            </div>
+            <div className="text-xs text-gray-500 mt-1">avg/month</div>
           </div>
 
           {/* Last Month Card */}
-          <div style={bankingHomeStyles.statsCard}>
-            <div
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: 600,
-                color: "#64748b",
-                marginBottom: "5px",
-              }}
-            >
+          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+            <div className="text-xs font-semibold text-gray-700 mb-1.5">
               Last Month
             </div>
             <div
-              style={{
-                fontSize: "1rem",
-                fontWeight: 700,
-                color: lastMonthWithdrawal >= 0 ? "#dc2626" : "#059669",
-              }}
+              className={cls(
+                "text-lg font-bold",
+                lastMonthWithdrawal >= 0 ? "text-red-600" : "text-green-600",
+              )}
             >
               {lastMonthWithdrawal >= 0 ? "-" : "+"}
               {formatLakhs(Math.abs(lastMonthWithdrawal))}
             </div>
-            <div
-              style={{
-                fontSize: "0.7rem",
-                color: "#6b7280",
-                marginTop: "2px",
-              }}
-            >
+            <div className="text-xs text-gray-500 mt-1">
               {lastMonthWithdrawal >= 0 ? "withdrawal" : "deposit"}
             </div>
           </div>
@@ -531,60 +362,25 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
       </div>
 
       {/* Recent History */}
-      <div
-        style={{
-          padding: "0 0 8px 0",
-        }}
-      >
-        <div style={bankingHomeStyles.card}>
-          <div style={bankingHomeStyles.cardTitle}>
+      <div className="px-4 pb-3">
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
             <span>📅</span>
             <span>Recent History (Last 6 Months)</span>
           </div>
 
           {last6Months.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "12px",
-                color: "#6c757d",
-                fontSize: "12px",
-              }}
-            >
+            <div className="text-center py-3 text-gray-500 text-sm">
               No history data available
             </div>
           ) : (
             <div>
               {/* Table Header - Same as HistoryTab */}
-              <div style={compactHistoryStyles.tableHeader}>
-                <div style={{ flex: 2, padding: "0 2px" }}>Month</div>
-                <div
-                  style={{
-                    flex: 2,
-                    padding: "0 2px",
-                    textAlign: "right",
-                  }}
-                >
-                  Savings
-                </div>
-                <div
-                  style={{
-                    flex: 2,
-                    padding: "0 2px",
-                    textAlign: "right",
-                  }}
-                >
-                  Deposits
-                </div>
-                <div
-                  style={{
-                    flex: 2,
-                    padding: "0 2px",
-                    textAlign: "right",
-                  }}
-                >
-                  Total
-                </div>
+              <div className="flex items-center py-2 px-1 bg-gray-50 border-b border-gray-200 font-semibold text-xs text-gray-700">
+                <div className="flex-2 px-1">Month</div>
+                <div className="flex-2 px-1 text-right">Savings</div>
+                <div className="flex-2 px-1 text-right">Deposits</div>
+                <div className="flex-2 px-1 text-right">Total</div>
               </div>
 
               {/* Table Rows - Limited to 6 records */}
@@ -605,24 +401,27 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
                 });
 
                 return (
-                  <div key={record.month} style={compactHistoryStyles.tableRow}>
+                  <div
+                    key={record.month}
+                    className="flex items-center py-2 px-1 border-b border-gray-100 min-h-8"
+                  >
                     {/* Month */}
-                    <div style={compactHistoryStyles.cellMonth}>
+                    <div className="flex-2 px-1 text-sm text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap">
                       {monthName}
                     </div>
 
                     {/* Savings */}
-                    <div style={compactHistoryStyles.cellSavings}>
+                    <div className="flex-2 px-1 text-sm font-semibold text-green-600 text-right">
                       {savingsDisplay}
                     </div>
 
                     {/* Deposits */}
-                    <div style={compactHistoryStyles.cellDeposits}>
+                    <div className="flex-2 px-1 text-sm font-semibold text-orange-500 text-right">
                       {depositsDisplay}
                     </div>
 
                     {/* Total */}
-                    <div style={compactHistoryStyles.cellTotal}>
+                    <div className="flex-2 px-1 text-sm font-semibold text-blue-600 text-right">
                       {totalDisplay}
                     </div>
                   </div>
@@ -630,16 +429,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
               })}
 
               {/* Show count of records */}
-              <div
-                style={{
-                  fontSize: "10px",
-                  color: "#94a3b8",
-                  textAlign: "center",
-                  padding: "4px 0",
-                  borderTop: "1px solid #f3f4f6",
-                  backgroundColor: "#f9fafb",
-                }}
-              >
+              <div className="text-xs text-gray-400 text-center py-2 border-t border-gray-100 bg-gray-50">
                 Showing {Math.min(last6Months.length, 6)} of {history.length}{" "}
                 records
               </div>
@@ -649,14 +439,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
       </div>
 
       {/* Pie Charts Section - Below Recent History Table (One below the other) */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          padding: "0 0 8px 0",
-        }}
-      >
+      <div className="flex flex-col gap-4 px-4 pb-4">
         {/* Top: Savings Pie Chart */}
         <SavingsPieChart accounts={accounts} />
 
@@ -673,17 +456,17 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
   if (loading) {
     return (
-      <div style={bankingHomeStyles.centeredContainer}>
-        <div style={bankingHomeStyles.loading}>
-          <div style={bankingHomeStyles.spinner}></div>
-          <p>Loading banking data...</p>
+      <div className={tw.bankingCenteredContainer}>
+        <div className="flex flex-col items-center justify-center h-screen">
+          <div className="w-10 h-10 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-500">Loading banking data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div className="flex flex-col h-screen">
       {/* Header with Add button */}
       <Header
         showAddButton={shouldShowAddButton()}
@@ -692,48 +475,16 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
       />
 
       {/* Tabs Navigation */}
-      <div
-        style={{
-          width: "100%",
-          backgroundColor: "#ffffff",
-          borderBottom: "1px solid #e5e7eb",
-          position: "sticky",
-          top: 0, // Will be below header
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            overflowX: "auto",
-            padding: "0 4px",
-            gap: "1px",
-          }}
-        >
+      <div className="w-full bg-white border-b border-gray-200 sticky top-14 z-10">
+        <div className="flex overflow-x-auto px-1 gap-0.5">
           <button
             onClick={() => setActiveTab("dashboard")}
-            style={{
-              flex: "1 1 0",
-              minWidth: "0",
-              padding: "10px 4px",
-              backgroundColor:
-                activeTab === "dashboard" ? "#f0f9ff" : "transparent",
-              border: "none",
-              borderBottom:
-                activeTab === "dashboard"
-                  ? "3px solid #3b82f6"
-                  : "3px solid transparent",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              color: activeTab === "dashboard" ? "#3b82f6" : "#6b7280",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "3px",
-              transition: "all 0.2s ease",
-            }}
+            className={cls(
+              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+              activeTab === "dashboard"
+                ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
+                : "bg-transparent text-gray-500 border-b-2 border-transparent",
+            )}
             title="Dashboard"
           >
             📊 Dash
@@ -741,28 +492,12 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           <button
             onClick={() => setActiveTab("accounts")}
-            style={{
-              flex: "1 1 0",
-              minWidth: "0",
-              padding: "10px 4px",
-              backgroundColor:
-                activeTab === "accounts" ? "#f0f9ff" : "transparent",
-              border: "none",
-              borderBottom:
-                activeTab === "accounts"
-                  ? "3px solid #3b82f6"
-                  : "3px solid transparent",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              color: activeTab === "accounts" ? "#3b82f6" : "#6b7280",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "3px",
-              transition: "all 0.2s ease",
-            }}
+            className={cls(
+              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+              activeTab === "accounts"
+                ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
+                : "bg-transparent text-gray-500 border-b-2 border-transparent",
+            )}
             title="Accounts"
           >
             👥 Acct
@@ -770,28 +505,12 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           <button
             onClick={() => setActiveTab("deposits")}
-            style={{
-              flex: "1 1 0",
-              minWidth: "0",
-              padding: "10px 4px",
-              backgroundColor:
-                activeTab === "deposits" ? "#f0f9ff" : "transparent",
-              border: "none",
-              borderBottom:
-                activeTab === "deposits"
-                  ? "3px solid #3b82f6"
-                  : "3px solid transparent",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              color: activeTab === "deposits" ? "#3b82f6" : "#6b7280",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "3px",
-              transition: "all 0.2s ease",
-            }}
+            className={cls(
+              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+              activeTab === "deposits"
+                ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
+                : "bg-transparent text-gray-500 border-b-2 border-transparent",
+            )}
             title="Deposits"
           >
             💰 Depo
@@ -799,28 +518,12 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           <button
             onClick={() => setActiveTab("history")}
-            style={{
-              flex: "1 1 0",
-              minWidth: "0",
-              padding: "10px 4px",
-              backgroundColor:
-                activeTab === "history" ? "#f0f9ff" : "transparent",
-              border: "none",
-              borderBottom:
-                activeTab === "history"
-                  ? "3px solid #3b82f6"
-                  : "3px solid transparent",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              color: activeTab === "history" ? "#3b82f6" : "#6b7280",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "3px",
-              transition: "all 0.2s ease",
-            }}
+            className={cls(
+              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+              activeTab === "history"
+                ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
+                : "bg-transparent text-gray-500 border-b-2 border-transparent",
+            )}
             title="History"
           >
             📅 Hist
@@ -828,28 +531,12 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           <button
             onClick={() => setActiveTab("summary")}
-            style={{
-              flex: "1 1 0",
-              minWidth: "0",
-              padding: "10px 4px",
-              backgroundColor:
-                activeTab === "summary" ? "#f0f9ff" : "transparent",
-              border: "none",
-              borderBottom:
-                activeTab === "summary"
-                  ? "3px solid #3b82f6"
-                  : "3px solid transparent",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              color: activeTab === "summary" ? "#3b82f6" : "#6b7280",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "3px",
-              transition: "all 0.2s ease",
-            }}
+            className={cls(
+              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+              activeTab === "summary"
+                ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
+                : "bg-transparent text-gray-500 border-b-2 border-transparent",
+            )}
             title="Summary"
           >
             📈 Summ
@@ -859,18 +546,14 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
       {/* Tab Content */}
       <div
-        style={{
-          flex: 1,
-          width: "100%",
-          maxWidth: "800px",
-          padding:
-            activeTab === "history" ||
+        className={cls(
+          "flex-1 w-full max-w-2xl mx-auto overflow-y-auto",
+          activeTab === "history" ||
             activeTab === "summary" ||
             activeTab === "dashboard"
-              ? "8px 4px" // Reduced horizontal padding
-              : "16px",
-          overflowY: "auto",
-        }}
+            ? "px-1 py-2" // Reduced horizontal padding
+            : "p-4",
+        )}
       >
         {activeTab === "dashboard" && <DashboardContent />}
         {activeTab === "accounts" && <AccountsTab />}
@@ -878,8 +561,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         {activeTab === "history" && <HistoryTab />}
         {activeTab === "summary" && <SummaryTab />}
       </div>
-
-      {/* REMOVED: FAB button (now in header) */}
     </div>
   );
 };

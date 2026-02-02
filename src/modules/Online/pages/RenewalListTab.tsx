@@ -8,7 +8,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { Renewal } from "../types/online.types";
-import { onlineStyles } from "../styles/onlineStyles";
+import { cls } from "../../../utils/tailwindMapping";
 
 const RenewalListTab: React.FC = () => {
   const navigate = useNavigate();
@@ -100,258 +100,149 @@ const RenewalListTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={onlineStyles.loading}>
-        <div style={onlineStyles.spinner}></div>
-        <p>Loading renewals...</p>
+      <div className="flex flex-col items-center justify-center py-15 px-5 flex-1">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-600">Loading renewals...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100%" }}>
-      <div
-        style={{
-          padding: "8px",
-          backgroundColor: "white",
-          borderBottom: "1px solid #e9ecef",
-          flexShrink: 0, // Prevent this from shrinking
-        }}
-      >
-        <div style={{ position: "relative" }}>
+    <div className="min-h-full">
+      <div className="p-2 bg-white border-b border-gray-200 shrink-0">
+        <div className="relative">
           <input
             type="text"
             placeholder="Search renewals..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              ...onlineStyles.searchInput,
-              padding: "10px 35px 10px 12px",
-              fontSize: "0.9rem",
-              width: "100%",
-              boxSizing: "border-box",
-            }}
+            className="w-full p-2.5 pl-3 pr-10 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
           />
-          <span
-            style={{
-              position: "absolute",
-              right: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#a0aec0",
-            }}
-          >
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
             🔍
           </span>
         </div>
       </div>
 
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div className="flex-1 min-h-0">
         {filteredRenewals.length === 0 ? (
-          <div style={onlineStyles.emptyState}>
-            <div style={onlineStyles.emptyIcon}>🔄</div>
-            <div style={onlineStyles.emptyText}>
+          <div className="flex flex-col items-center justify-center py-20 px-5 text-center flex-1">
+            <div className="text-4xl mb-4 opacity-50">🔄</div>
+            <div className="text-lg font-medium text-gray-600 mb-2">
               {searchTerm ? "No matching renewals found" : "No renewals yet"}
             </div>
-            <div style={onlineStyles.emptySubtext}>
+            <div className="text-sm text-gray-400">
               {!searchTerm && "Add your first renewal"}
             </div>
           </div>
         ) : (
-          <div style={{ padding: "8px" }}>
+          <div className="p-2">
             {/* Results Info */}
-            <div
-              style={{
-                padding: "4px 0",
-                fontSize: "0.8rem",
-                color: "#6b7280",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "8px",
-              }}
-            >
-              <span>
+            <div className="flex justify-between items-center mb-2 px-1 py-1">
+              <span className="text-xs text-gray-600">
                 {filteredRenewals.length} renewal
                 {filteredRenewals.length !== 1 ? "s" : ""}
               </span>
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm("")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#3b82f6",
-                    fontSize: "0.8rem",
-                    cursor: "pointer",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    backgroundColor: "#f0f9ff",
-                  }}
+                  className="text-xs text-blue-500 cursor-pointer px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors"
                 >
                   Clear search
                 </button>
               )}
             </div>
 
-            {filteredRenewals.map((renewal) => {
-              const now = Date.now();
-              const endDate = renewal.endDate;
-              const daysUntilExpiry = Math.ceil(
-                (endDate - now) / (1000 * 60 * 60 * 24),
-              );
+            <div className="space-y-2">
+              {filteredRenewals.map((renewal) => {
+                const now = Date.now();
+                const endDate = renewal.endDate;
+                const daysUntilExpiry = Math.ceil(
+                  (endDate - now) / (1000 * 60 * 60 * 24),
+                );
 
-              // Determine status
-              let statusStyle = {};
-              let statusText = "";
+                // Determine status
+                let statusClasses = "";
+                let statusText = "";
 
-              if (endDate < now) {
-                statusStyle = { backgroundColor: "#fee2e2", color: "#dc2626" };
-                statusText = "Expired";
-              } else if (daysUntilExpiry <= 7) {
-                statusStyle = { backgroundColor: "#fef3c7", color: "#d97706" };
-                statusText = `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? "s" : ""} left`;
-              } else if (daysUntilExpiry <= 30) {
-                statusStyle = { backgroundColor: "#dbeafe", color: "#1d4ed8" };
-                statusText = `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? "s" : ""} left`;
-              } else {
-                statusStyle = { backgroundColor: "#dcfce7", color: "#166534" };
-                statusText = "Active";
-              }
+                if (endDate < now) {
+                  statusClasses = "bg-red-100 text-red-700";
+                  statusText = "Expired";
+                } else if (daysUntilExpiry <= 7) {
+                  statusClasses = "bg-yellow-100 text-yellow-800";
+                  statusText = `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? "s" : ""} left`;
+                } else if (daysUntilExpiry <= 30) {
+                  statusClasses = "bg-blue-100 text-blue-700";
+                  statusText = `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? "s" : ""} left`;
+                } else {
+                  statusClasses = "bg-green-100 text-green-700";
+                  statusText = "Active";
+                }
 
-              return (
-                <div
-                  key={renewal.id}
-                  style={{
-                    backgroundColor: "white",
-                    marginBottom: "8px",
-                    borderRadius: "8px",
-                    border: "1px solid #e9ecef",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                  onClick={() =>
-                    navigate(`/online/renewals/edit/${renewal.id}`)
-                  }
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#3b82f6";
-                    e.currentTarget.style.boxShadow =
-                      "0 2px 8px rgba(59, 130, 246, 0.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "#e9ecef";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
+                return (
                   <div
-                    style={{
-                      padding: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      minHeight: "48px",
-                    }}
+                    key={renewal.id}
+                    className="bg-white rounded-lg border border-gray-200 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm"
+                    onClick={() =>
+                      navigate(`/online/renewals/edit/${renewal.id}`)
+                    }
                   >
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          marginBottom: "4px",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "0.95rem",
-                            fontWeight: "600",
-                            color: "#111827",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {renewal.name}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: "0.7rem",
-                            fontWeight: "600",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                            ...statusStyle,
-                          }}
-                        >
-                          {statusText}
-                        </span>
-                      </div>
+                    <div className="p-3">
+                      <div className="flex items-start">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className="text-sm font-semibold text-gray-900 truncate">
+                              {renewal.name}
+                            </span>
+                            <span
+                              className={cls(
+                                "text-xs font-semibold px-2 py-0.5 rounded",
+                                statusClasses,
+                              )}
+                            >
+                              {statusText}
+                            </span>
+                          </div>
 
-                      {renewal.comments && (
-                        <div
-                          style={{
-                            fontSize: "0.8rem",
-                            color: "#666",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            lineHeight: "1.4",
-                          }}
-                        >
-                          {renewal.comments}
+                          {renewal.comments && (
+                            <div className="text-xs text-gray-600 truncate leading-relaxed mb-2">
+                              {renewal.comments}
+                            </div>
+                          )}
+
+                          <div className="text-xs text-gray-500">
+                            Expires: {formatDate(renewal.endDate)}
+                          </div>
                         </div>
-                      )}
 
-                      <div
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "#9ca3af",
-                          marginTop: "4px",
-                        }}
-                      >
-                        Expires: {formatDate(renewal.endDate)}
+                        <div className="ml-2 flex gap-1">
+                          <button
+                            className="px-2.5 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/online/renewals/edit/${renewal.id}`);
+                            }}
+                            title="Edit"
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            className="px-2.5 py-1.5 bg-red-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-red-600 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(renewal.id, renewal.name);
+                            }}
+                            title="Delete"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                        marginLeft: "8px",
-                      }}
-                    >
-                      <button
-                        style={{
-                          ...onlineStyles.editButton,
-                          padding: "6px 8px",
-                          fontSize: "12px",
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/online/renewals/edit/${renewal.id}`);
-                        }}
-                        title="Edit"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        style={{
-                          ...onlineStyles.deleteButton,
-                          padding: "6px 8px",
-                          fontSize: "12px",
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(renewal.id, renewal.name);
-                        }}
-                        title="Delete"
-                      >
-                        🗑️
-                      </button>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

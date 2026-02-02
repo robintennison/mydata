@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBankingData } from "./modules/Banking/hooks/useBankingData";
 import { useSettings } from "./contexts/SettingsContext";
-import styles from "./MyDataHomepage.module.css";
+import { tw } from "./utils/tailwindMapping"; // Import your Tailwind mapping
 import {
   calculateTotalBalance,
   getNextMaturities,
@@ -225,9 +225,9 @@ const MyDataHomepage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
+      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
+        <div className={tw.loading}>
+          <div className={tw.spinner}></div>
           <p>Loading MyData...</p>
         </div>
       </div>
@@ -238,7 +238,7 @@ const MyDataHomepage: React.FC = () => {
   const hasExpiredMaturities = expiredMaturities.length > 0;
   const hasUpcomingRenewals = upcomingRenewals.length > 0;
   const hasExpiredRenewals = expiredRenewals.length > 0;
-  const hasAnyMaturities = hasUpcomingMaturities || hasExpiredMaturities;
+  //const hasAnyMaturities = hasUpcomingMaturities || hasExpiredMaturities;
   const hasAnyRenewals = hasUpcomingRenewals || hasExpiredRenewals;
 
   // Helper function to calculate days ago for expired items
@@ -252,73 +252,60 @@ const MyDataHomepage: React.FC = () => {
   return (
     <>
       {/* EMW Stats Row */}
-      <div className={styles.statsRow}>
+      <div className={tw.statsRow}>
         {/* EMW Card */}
-        <div className={styles.statCard}>
-          <div className={styles.cardTitle}>
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <span
-                style={{
-                  backgroundColor: "#3b82f6",
-                  color: "white",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                  fontSize: "0.7rem",
-                }}
-              >
+        <div className={tw.statCard}>
+          <div className={tw.cardTitle}>
+            <div className="flex items-center gap-1">
+              <span className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs">
                 EMW
               </span>
               <span>Monthly</span>
             </div>
           </div>
-          <div className={styles.cardValue} style={{ color: "#1e40af" }}>
+          <div className={`${tw.cardValue} text-blue-900`}>
             {formatLakhs(emwAmount)}
           </div>
-          <div className={styles.cardSubtitle}>
+          <div className={tw.cardSubtitle}>
             {emwSettings.interestRate}% interest
           </div>
         </div>
 
         {/* Total Balance Card */}
         <div
-          className={styles.statCard}
+          className={`${tw.statCard} cursor-pointer`}
           onClick={() => navigate("/banking")}
-          style={{ cursor: "pointer" }}
         >
-          <div className={styles.cardTitle}>Total Balance</div>
-          <div className={styles.cardValue}>{formatLakhs(totalBalance)}</div>
+          <div className={tw.cardTitle}>Total Balance</div>
+          <div className={tw.cardValue}>{formatLakhs(totalBalance)}</div>
         </div>
 
         {/* Total Accounts Card */}
         <div
-          className={styles.statCard}
+          className={`${tw.statCard} cursor-pointer`}
           onClick={() => navigate("/banking/accounts")}
-          style={{ cursor: "pointer" }}
         >
-          <div className={styles.cardTitle}>Accounts</div>
-          <div className={styles.cardValue}>{accounts.length}</div>
-          <div className={styles.cardSubtitle}>
-            {activeDepositsCount} deposits
-          </div>
+          <div className={tw.cardTitle}>Accounts</div>
+          <div className={tw.cardValue}>{accounts.length}</div>
+          <div className={tw.cardSubtitle}>{activeDepositsCount} deposits</div>
         </div>
       </div>
-
       {/* Upcoming Renewals Section */}
       <div
-        className={styles.section}
+        className={tw.section}
         style={{
           minHeight: hasAnyRenewals ? "auto" : "80px",
           marginTop: "10px",
         }}
       >
         <div
-          className={styles.sectionHeader}
+          className={tw.sectionHeader}
           style={{ marginBottom: hasAnyRenewals ? "15px" : "0" }}
         >
-          <div className={styles.sectionTitle}>
+          <div className={tw.sectionTitle}>
             Due Dates
             {hasAnyRenewals && (
-              <span className={styles.maturityCount}>
+              <span className={tw.maturityCount}>
                 ({hasUpcomingRenewals ? upcomingRenewals.length : 0} upcoming,{" "}
                 {hasExpiredRenewals ? expiredRenewals.length : 0} expired)
               </span>
@@ -326,7 +313,7 @@ const MyDataHomepage: React.FC = () => {
           </div>
           {hasAnyRenewals && (
             <button
-              className={styles.viewAllButton}
+              className={tw.viewAllButton}
               onClick={() =>
                 navigate("/online", { state: { activeTab: "renewals" } })
               }
@@ -337,28 +324,25 @@ const MyDataHomepage: React.FC = () => {
         </div>
 
         {renewalsLoading ? (
-          <div className={styles.emptyState}>
-            <div
-              className={styles.spinner}
-              style={{ margin: "0 auto 10px" }}
-            ></div>
-            <div className={styles.emptyText}>Loading renewals...</div>
+          <div className={tw.emptyState}>
+            <div className={`${tw.spinner} mx-auto mb-2.5`}></div>
+            <div className={tw.emptyText}>Loading renewals...</div>
           </div>
         ) : !hasAnyRenewals ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>🔄</div>
-            <div className={styles.emptyText}>No renewals found</div>
-            <div className={styles.emptySubtext}>
-              Add renewals to track them
-            </div>
+          <div className={tw.emptyState}>
+            <div className={tw.emptyIcon}>🔄</div>
+            <div className={tw.emptyText}>No renewals found</div>
+            <div className={tw.emptySubtext}>Add renewals to track them</div>
           </div>
         ) : (
           <>
             {/* Upcoming Renewals */}
             {hasUpcomingRenewals && (
-              <div className={styles.maturitySection}>
-                <div className={styles.subsectionTitle}>Upcoming</div>
-                <div className={styles.compactTable}>
+              <div className="mb-4">
+                <div className="text-sm font-semibold text-gray-700 mb-2">
+                  Upcoming
+                </div>
+                <div className={tw.compactTable}>
                   {upcomingRenewals.map((renewal) => {
                     const daysUntil = Math.ceil(
                       (renewal.endDate - Date.now()) / (1000 * 60 * 60 * 24),
@@ -368,40 +352,36 @@ const MyDataHomepage: React.FC = () => {
                     return (
                       <div
                         key={renewal.id}
-                        className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
+                        className={`${tw.compactRow} ${isImmediate ? tw.immediateRow : ""}`}
                         style={{
                           fontSize: "0.95rem",
                           lineHeight: "1.2",
                         }}
                       >
-                        <div className={styles.compactCell} style={{ flex: 2 }}>
+                        <div className={`${tw.compactCell} ${tw.cellFlex2}`}>
                           <span
-                            className={styles.compactCellValue}
+                            className={tw.compactCellValue}
                             style={{ fontSize: "0.95rem" }}
                           >
                             {renewal.name}
                           </span>
                         </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
                           <span
-                            className={styles.compactCellValue}
+                            className={tw.compactCellValue}
                             style={{ fontSize: "0.95rem" }}
                           >
                             {getShortComments(renewal.comments || "")}
                           </span>
                         </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
                           <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              whiteSpace: "nowrap",
-                              textAlign: "right",
-                            }}
+                            className={`${tw.compactCellValue} whitespace-nowrap text-right`}
+                            style={{ fontSize: "0.95rem" }}
                           >
                             {formatDateShort(renewal.endDate)}
                             {isImmediate && (
-                              <span className={styles.immediateBadge}>
+                              <span className={tw.immediateBadge}>
                                 {daysUntil === 0 ? "Today" : "Tomorrow"}
                               </span>
                             )}
@@ -416,19 +396,16 @@ const MyDataHomepage: React.FC = () => {
 
             {/* Expired Renewals */}
             {hasExpiredRenewals && (
-              <div className={styles.maturitySection}>
-                <div
-                  className={styles.subsectionTitle}
-                  style={{ color: "#dc2626" }}
-                >
+              <div>
+                <div className="text-sm font-semibold text-red-600 mb-2">
                   Expired
                 </div>
-                <div className={styles.compactTable}>
+                <div className={tw.compactTable}>
                   {expiredRenewals.map((renewal) => {
                     return (
                       <div
                         key={renewal.id}
-                        className={styles.compactRow}
+                        className={tw.compactRow}
                         style={{
                           fontSize: "0.95rem",
                           lineHeight: "1.2",
@@ -436,20 +413,17 @@ const MyDataHomepage: React.FC = () => {
                           color: "#6b7280",
                         }}
                       >
-                        <div className={styles.compactCell} style={{ flex: 2 }}>
+                        <div className={`${tw.compactCell} ${tw.cellFlex2}`}>
                           <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              textDecoration: "line-through",
-                            }}
+                            className={`${tw.compactCellValue} line-through`}
+                            style={{ fontSize: "0.95rem" }}
                           >
                             {renewal.name}
                           </span>
                         </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
                           <span
-                            className={styles.compactCellValue}
+                            className={tw.compactCellValue}
                             style={{
                               fontSize: "0.95rem",
                               color: "#6b7280",
@@ -458,18 +432,13 @@ const MyDataHomepage: React.FC = () => {
                             {getShortComments(renewal.comments || "")}
                           </span>
                         </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
+                        <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
                           <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              whiteSpace: "nowrap",
-                              textAlign: "right",
-                              color: "#dc2626",
-                            }}
+                            className={`${tw.compactCellValue} whitespace-nowrap text-right text-red-600`}
+                            style={{ fontSize: "0.95rem" }}
                           >
                             {formatDateShort(renewal.endDate)}
-                            <span className={styles.expiredBadge}>
+                            <span className="ml-1 bg-red-100 text-red-700 text-xs px-1.5 py-0.5 rounded">
                               {getDaysAgo(renewal.endDate)}
                             </span>
                           </span>
@@ -484,203 +453,151 @@ const MyDataHomepage: React.FC = () => {
         )}
       </div>
 
-      {/* Upcoming Maturities Section */}
-      <div
-        className={styles.section}
-        style={{
-          minHeight: hasAnyMaturities ? "auto" : "80px",
-          marginTop: "10px",
-        }}
-      >
-        <div
-          className={styles.sectionHeader}
-          style={{ marginBottom: hasAnyMaturities ? "15px" : "0" }}
-        >
-          <div className={styles.sectionTitle}>
-            Maturities
-            {hasAnyMaturities && (
-              <span className={styles.maturityCount}>
-                ({hasUpcomingMaturities ? upcomingMaturities.length : 0}{" "}
-                upcoming, {hasExpiredMaturities ? expiredMaturities.length : 0}{" "}
-                expired)
-              </span>
-            )}
+      {/* Upcoming Maturities */}
+      {hasUpcomingMaturities && (
+        <div className="mb-4">
+          <div className="text-sm font-semibold text-gray-700 mb-2">
+            Upcoming Maturities
           </div>
-          {hasAnyMaturities && (
-            <button
-              className={styles.viewAllButton}
-              onClick={() =>
-                navigate("/banking", { state: { activeTab: "deposits" } })
-              }
-            >
-              View All
-            </button>
-          )}
-        </div>
+          <div className={tw.compactTable}>
+            {upcomingMaturities.map((deposit) => {
+              const daysUntil = Math.ceil(
+                (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
+              );
+              const isImmediate = daysUntil <= 1;
 
-        {!hasAnyMaturities ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>📅</div>
-            <div className={styles.emptyText}>No maturities found</div>
-            <div className={styles.emptySubtext}>
-              No active deposits with maturity dates
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Upcoming Maturities */}
-            {hasUpcomingMaturities && (
-              <div className={styles.maturitySection}>
-                <div className={styles.subsectionTitle}>Upcoming</div>
-                <div className={styles.compactTable}>
-                  {upcomingMaturities.map((deposit) => {
-                    const daysUntil = Math.ceil(
-                      (deposit.endDate - Date.now()) / (1000 * 60 * 60 * 24),
-                    );
-                    const isImmediate = daysUntil <= 1;
-
-                    // Combine amount and short comments
-                    const amountWithComments = `${formatLakhs(deposit.amount)}${deposit.comments ? ` • ${getShortComments(deposit.comments)}` : ""}`;
-
-                    return (
-                      <div
-                        key={deposit.id}
-                        className={`${styles.compactRow} ${isImmediate ? styles.immediateRow : ""}`}
-                        style={{
-                          fontSize: "0.95rem",
-                          lineHeight: "1.2",
-                        }}
-                      >
-                        <div
-                          className={styles.compactCell}
-                          style={{ flex: 1.5 }}
-                        >
-                          <span
-                            className={styles.compactCellValue}
-                            style={{ fontSize: "0.95rem" }}
-                          >
-                            {getAccountName(deposit.accountId)}
-                          </span>
-                        </div>
-                        <div
-                          className={styles.compactCell}
-                          style={{ flex: 1.5 }}
-                        >
-                          <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              color: "#1e40af",
-                            }}
-                          >
-                            {amountWithComments}
-                          </span>
-                        </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
-                          <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              whiteSpace: "nowrap",
-                              textAlign: "right",
-                            }}
-                          >
-                            {formatDateShort(deposit.endDate)}
-                            {isImmediate && (
-                              <span className={styles.immediateBadge}>
-                                {daysUntil === 0 ? "Today" : "Tomorrow"}
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Expired Maturities (only active deposits) */}
-            {hasExpiredMaturities && (
-              <div className={styles.maturitySection}>
+              return (
                 <div
-                  className={styles.subsectionTitle}
-                  style={{ color: "#dc2626" }}
+                  key={deposit.id}
+                  className={`${tw.compactRow} ${isImmediate ? tw.immediateRow : ""}`}
+                  style={{
+                    fontSize: "0.95rem",
+                    lineHeight: "1.2",
+                  }}
                 >
-                  Expired
-                </div>
-                <div className={styles.compactTable}>
-                  {expiredMaturities.map((deposit) => {
-                    // Combine amount and short comments
-                    const amountWithComments = `${formatLakhs(deposit.amount)}${deposit.comments ? ` • ${getShortComments(deposit.comments)}` : ""}`;
+                  {/* Account Column */}
+                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                    <span
+                      className={tw.compactCellValue}
+                      style={{ fontSize: "0.95rem" }}
+                    >
+                      {getAccountName(deposit.accountId)}
+                    </span>
+                  </div>
 
-                    return (
-                      <div
-                        key={deposit.id}
-                        className={styles.compactRow}
-                        style={{
-                          fontSize: "0.95rem",
-                          lineHeight: "1.2",
-                          opacity: 0.7,
-                          color: "#6b7280",
-                        }}
-                      >
-                        <div
-                          className={styles.compactCell}
-                          style={{ flex: 1.5 }}
-                        >
-                          <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              textDecoration: "line-through",
-                            }}
-                          >
-                            {getAccountName(deposit.accountId)}
-                          </span>
-                        </div>
-                        <div
-                          className={styles.compactCell}
-                          style={{ flex: 1.5 }}
-                        >
-                          <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              color: "#6b7280",
-                            }}
-                          >
-                            {amountWithComments}
-                          </span>
-                        </div>
-                        <div className={styles.compactCell} style={{ flex: 1 }}>
-                          <span
-                            className={styles.compactCellValue}
-                            style={{
-                              fontSize: "0.95rem",
-                              whiteSpace: "nowrap",
-                              textAlign: "right",
-                              color: "#dc2626",
-                            }}
-                          >
-                            {formatDateShort(deposit.endDate)}
-                            <span className={styles.expiredBadge}>
-                              {getDaysAgo(deposit.endDate)}
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+                  {/* Amount Column */}
+                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                    <span
+                      className={`${tw.compactCellValue} text-blue-900`}
+                      style={{ fontSize: "0.95rem" }}
+                    >
+                      {formatLakhs(deposit.amount)}
+                    </span>
+                  </div>
 
+                  {/* Comments Column */}
+                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                    <span
+                      className={tw.compactCellValue}
+                      style={{ fontSize: "0.95rem" }}
+                    >
+                      {getShortComments(deposit.comments || "")}
+                    </span>
+                  </div>
+
+                  {/* Date Column */}
+                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                    <span
+                      className={`${tw.compactCellValue} whitespace-nowrap text-right`}
+                      style={{ fontSize: "0.95rem" }}
+                    >
+                      {formatDateShort(deposit.endDate)}
+                      {isImmediate && (
+                        <span className={tw.immediateBadge}>
+                          {daysUntil === 0 ? "Today" : "Tomorrow"}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {/* Expired Maturities (only active deposits) */}
+      {hasExpiredMaturities && (
+        <div>
+          <div className="text-sm font-semibold text-red-600 mb-2">Expired</div>
+          <div className={tw.compactTable}>
+            {expiredMaturities.map((deposit) => {
+              return (
+                <div
+                  key={deposit.id}
+                  className={tw.compactRow}
+                  style={{
+                    fontSize: "0.95rem",
+                    lineHeight: "1.2",
+                    opacity: 0.7,
+                    color: "#6b7280",
+                  }}
+                >
+                  {/* Account Column */}
+                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                    <span
+                      className={`${tw.compactCellValue} line-through`}
+                      style={{ fontSize: "0.95rem" }}
+                    >
+                      {getAccountName(deposit.accountId)}
+                    </span>
+                  </div>
+
+                  {/* Amount Column */}
+                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                    <span
+                      className={tw.compactCellValue}
+                      style={{
+                        fontSize: "0.95rem",
+                        color: "#6b7280",
+                      }}
+                    >
+                      {formatLakhs(deposit.amount)}
+                    </span>
+                  </div>
+
+                  {/* Comments Column */}
+                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                    <span
+                      className={tw.compactCellValue}
+                      style={{
+                        fontSize: "0.95rem",
+                        color: "#6b7280",
+                      }}
+                    >
+                      {getShortComments(deposit.comments || "")}
+                    </span>
+                  </div>
+
+                  {/* Date Column */}
+                  <div className={`${tw.compactCell} ${tw.cellFlex1}`}>
+                    <span
+                      className={`${tw.compactCellValue} whitespace-nowrap text-right text-red-600`}
+                      style={{ fontSize: "0.95rem" }}
+                    >
+                      {formatDateShort(deposit.endDate)}
+                      <span className="ml-1 bg-red-100 text-red-700 text-xs px-1.5 py-0.5 rounded">
+                        {getDaysAgo(deposit.endDate)}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {/* Asset Distribution Chart */}
-      <div style={{ marginTop: "15px", marginBottom: "5px" }}>
+      <div className="mt-3.5 mb-1">
         <CombinedAssetBarChart
           accounts={accounts}
           deposits={deposits}

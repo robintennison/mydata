@@ -1,11 +1,11 @@
-// src/modules/banking/DepositsTab.tsx (FIXED VERSION)
+// src/modules/banking/DepositsTab.tsx (Tailwind Version)
 
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { Deposit, BankAccount } from "../../../types/banking.types";
-import { bankingStyles } from "../styles";
+import { tw, cls } from "../../../utils/tailwindMapping";
 
 // Custom formatter for Lakhs - REMOVED "L" suffix
 const formatInLakhs = (amount: number): string => {
@@ -105,62 +105,26 @@ const DepositsTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "60px 20px",
-        }}
-      >
-        <div style={bankingStyles.spinner}></div>
-        <p>Loading deposits...</p>
+      <div className="flex flex-col items-center justify-center py-16 px-5">
+        <div className={tw.bankingSpinner}></div>
+        <p className="mt-4 text-gray-600">Loading deposits...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div className="flex flex-col h-full">
       {/* Filter and Sort Row - COMPACT */}
-      <div
-        style={{
-          padding: "6px 8px", // Reduced padding
-          backgroundColor: "white",
-          borderBottom: "1px solid #e9ecef",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "8px", // Reduced gap
-        }}
-      >
+      <div className="flex justify-between items-center gap-2 px-3 py-1.5 bg-white border-b border-gray-200">
         {/* Filter Button */}
-        <div style={{ position: "relative" }}>
+        <div className="relative">
           <button
             onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-            style={{
-              padding: "6px 8px", // Reduced padding
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
-              borderRadius: "4px", // Smaller radius
-              cursor: "pointer",
-              fontSize: "12px", // Smaller font
-              display: "flex",
-              alignItems: "center",
-              gap: "4px", // Reduced gap
-              minWidth: "80px", // Smaller min width
-            }}
+            className="flex items-center gap-1 px-2 py-1.5 bg-gray-50 border border-gray-300 rounded text-xs cursor-pointer min-w-20 hover:bg-gray-100"
             title="Filter by Account"
           >
             <span>🔍</span>
-            <span
-              style={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                fontSize: "11px", // Smaller
-              }}
-            >
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs">
               {filterAccount === "All" ? "All" : filterAccount}
             </span>
           </button>
@@ -169,41 +133,14 @@ const DepositsTab: React.FC = () => {
           {showFilterDropdown && (
             <>
               <div
-                style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  zIndex: 99,
-                }}
+                className="fixed inset-0 z-50"
                 onClick={() => setShowFilterDropdown(false)}
               />
               <div
                 ref={filterDropdownRef}
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "6px", // Smaller
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.1)", // Lighter shadow
-                  zIndex: 100,
-                  width: "150px", // Smaller
-                  maxHeight: "250px", // Smaller
-                  overflowY: "auto",
-                  marginTop: "2px", // Reduced margin
-                }}
+                className="absolute top-full left-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 w-40 max-h-64 overflow-y-auto mt-0.5"
               >
-                <div
-                  style={{
-                    padding: "8px 12px", // Reduced
-                    fontSize: "12px", // Smaller
-                    color: "#666",
-                    borderBottom: "1px solid #f0f0f0",
-                  }}
-                >
+                <div className="px-3 py-2 text-xs text-gray-600 border-b border-gray-200">
                   Filter by Account
                 </div>
 
@@ -213,19 +150,12 @@ const DepositsTab: React.FC = () => {
                       setFilterAccount("All");
                       setShowFilterDropdown(false);
                     }}
-                    style={{
-                      width: "100%",
-                      padding: "8px 12px", // Reduced
-                      textAlign: "left",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "13px", // Smaller
-                      color: filterAccount === "All" ? "#1976d2" : "#333",
-                      backgroundColor:
-                        filterAccount === "All" ? "#e3f2fd" : "transparent",
-                      borderBottom: "1px solid #f0f0f0",
-                    }}
+                    className={cls(
+                      "w-full px-3 py-2 text-left text-sm cursor-pointer border-b border-gray-100",
+                      filterAccount === "All"
+                        ? "bg-blue-50 text-blue-600"
+                        : "bg-transparent text-gray-800 hover:bg-gray-50",
+                    )}
                   >
                     All Accounts
                   </button>
@@ -241,24 +171,12 @@ const DepositsTab: React.FC = () => {
                           setFilterAccount(account.acctCode);
                           setShowFilterDropdown(false);
                         }}
-                        style={{
-                          width: "100%",
-                          padding: "8px 12px", // Reduced
-                          textAlign: "left",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: "13px", // Smaller
-                          color:
-                            filterAccount === account.acctCode
-                              ? "#1976d2"
-                              : "#333",
-                          backgroundColor:
-                            filterAccount === account.acctCode
-                              ? "#e3f2fd"
-                              : "transparent",
-                          borderBottom: "1px solid #f0f0f0",
-                        }}
+                        className={cls(
+                          "w-full px-3 py-2 text-left text-sm cursor-pointer border-b border-gray-100",
+                          filterAccount === account.acctCode
+                            ? "bg-blue-50 text-blue-600"
+                            : "bg-transparent text-gray-800 hover:bg-gray-50",
+                        )}
                       >
                         {account.acctCode}
                       </button>
@@ -270,20 +188,10 @@ const DepositsTab: React.FC = () => {
         </div>
 
         {/* Sort Button */}
-        <div style={{ position: "relative" }}>
+        <div className="relative">
           <button
             onClick={() => setShowSortDropdown(!showSortDropdown)}
-            style={{
-              padding: "6px 8px", // Reduced
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #e9ecef",
-              borderRadius: "4px", // Smaller
-              cursor: "pointer",
-              fontSize: "12px", // Smaller
-              display: "flex",
-              alignItems: "center",
-              gap: "4px", // Reduced
-            }}
+            className="flex items-center gap-1 px-2 py-1.5 bg-gray-50 border border-gray-300 rounded text-xs cursor-pointer hover:bg-gray-100"
             title={`Sort by ${sortBy === "account" ? "Account Code" : "End Date"}`}
           >
             <span>{sortBy === "account" ? "🔢" : "📅"}</span>
@@ -293,71 +201,31 @@ const DepositsTab: React.FC = () => {
           {showSortDropdown && (
             <>
               <div
-                style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  zIndex: 99,
-                }}
+                className="fixed inset-0 z-50"
                 onClick={() => setShowSortDropdown(false)}
               />
               <div
                 ref={sortDropdownRef}
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  right: 0,
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "6px", // Smaller
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.1)", // Lighter
-                  zIndex: 100,
-                  minWidth: "150px", // Smaller
-                  maxHeight: "300px",
-                  overflow: "hidden",
-                  marginTop: "2px", // Reduced
-                }}
+                className="absolute top-full right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 min-w-40 max-h-80 overflow-hidden mt-0.5"
               >
-                <div
-                  style={{
-                    padding: "8px 12px", // Reduced
-                    fontSize: "12px", // Smaller
-                    color: "#666",
-                    borderBottom: "1px solid #f0f0f0",
-                  }}
-                >
+                <div className="px-3 py-2 text-xs text-gray-600 border-b border-gray-200">
                   Sort By
                 </div>
 
-                <div style={{ maxHeight: "250px", overflowY: "auto" }}>
+                <div className="max-h-64 overflow-y-auto">
                   <button
                     onClick={() => {
                       setSortBy("account");
                       setShowSortDropdown(false);
                     }}
-                    style={{
-                      width: "100%",
-                      padding: "8px 12px", // Reduced
-                      textAlign: "left",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "13px", // Smaller
-                      color: sortBy === "account" ? "#1976d2" : "#333",
-                      backgroundColor:
-                        sortBy === "account" ? "#e3f2fd" : "transparent",
-                      borderBottom: "1px solid #f0f0f0",
-                    }}
+                    className={cls(
+                      "w-full px-3 py-2 text-left text-sm cursor-pointer border-b border-gray-100",
+                      sortBy === "account"
+                        ? "bg-blue-50 text-blue-600"
+                        : "bg-transparent text-gray-800 hover:bg-gray-50",
+                    )}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px", // Reduced
-                      }}
-                    >
+                    <div className="flex items-center gap-1.5">
                       <span>🔢</span>
                       <span>Account Code</span>
                     </div>
@@ -368,26 +236,14 @@ const DepositsTab: React.FC = () => {
                       setSortBy("date");
                       setShowSortDropdown(false);
                     }}
-                    style={{
-                      width: "100%",
-                      padding: "8px 12px", // Reduced
-                      textAlign: "left",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "13px", // Smaller
-                      color: sortBy === "date" ? "#1976d2" : "#333",
-                      backgroundColor:
-                        sortBy === "date" ? "#e3f2fd" : "transparent",
-                    }}
+                    className={cls(
+                      "w-full px-3 py-2 text-left text-sm cursor-pointer",
+                      sortBy === "date"
+                        ? "bg-blue-50 text-blue-600"
+                        : "bg-transparent text-gray-800 hover:bg-gray-50",
+                    )}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px", // Reduced
-                      }}
-                    >
+                    <div className="flex items-center gap-1.5">
                       <span>📅</span>
                       <span>End Date</span>
                     </div>
@@ -400,61 +256,32 @@ const DepositsTab: React.FC = () => {
       </div>
 
       {/* Deposits List - SIMPLE TABLE ROWS */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      <div className="flex-1 overflow-y-auto">
         {filteredDeposits.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 20px",
-              color: "#6c757d",
-            }}
-          >
-            <div
-              style={{ fontSize: "48px", marginBottom: "16px", opacity: "0.5" }}
-            >
-              💰
-            </div>
-            <div
-              style={{
-                fontSize: "16px",
-                fontWeight: "500",
-                color: "#6b7280",
-                marginBottom: "8px",
-              }}
-            >
+          <div className="text-center py-12 px-5 text-gray-500">
+            <div className="text-4xl mb-4 opacity-50">💰</div>
+            <div className="text-base font-medium text-gray-600 mb-2">
               {filterAccount !== "All"
                 ? `No deposits for ${filterAccount}`
                 : settings?.showInactive
                   ? "No deposits available"
                   : "No active deposits available"}
             </div>
-            <div style={{ fontSize: "14px", color: "#9ca3af" }}>
+            <div className="text-sm text-gray-400">
               {filterAccount === "All" && "Add your first deposit"}
             </div>
           </div>
         ) : (
           <div>
-            {/* Table Header - SIMPLE */}
-            <div
-              style={{
-                display: "flex",
-                padding: "6px 4px", // Reduced
-                backgroundColor: "#f9fafb",
-                borderBottom: "1px solid #e9ecef",
-                fontWeight: "600",
-                fontSize: "11px", // Smaller
-                color: "#374151",
-              }}
-            >
-              <div style={{ flex: 3, padding: "0 4px" }}>Account</div>
-              <div style={{ flex: 2, padding: "0 4px" }}>Date</div>
-              <div style={{ flex: 2, padding: "0 4px", textAlign: "right" }}>
-                Amount
-              </div>
-              {settings?.showDelete && <div style={{ width: "30px" }}></div>}
+            {/* Table Header - SIMPLE - FIXED WIDTHS */}
+            <div className="flex items-center py-1.5 px-2 bg-gray-50 border-b border-gray-300 font-semibold text-xs text-gray-700">
+              <div className="w-2/5 px-1">Account</div>
+              <div className="w-1/4 px-1 text-xs">Date</div>
+              <div className="w-1/3 px-1 text-right">Amount</div>
+              {settings?.showDelete && <div className="w-12 px-1"></div>}
             </div>
 
-            {/* Table Rows - SIMPLE */}
+            {/* Table Rows - SIMPLE - FIXED WIDTHS */}
             <div>
               {filteredDeposits.map((deposit) => {
                 const accountName = getAccountName(deposit.accountId);
@@ -462,41 +289,16 @@ const DepositsTab: React.FC = () => {
                 return (
                   <div
                     key={deposit.id}
-                    style={{
-                      backgroundColor: "white",
-                      borderBottom: "1px solid #f3f4f6",
-                      cursor: "pointer",
-                    }}
+                    className="bg-white border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => handleRowClick(deposit.id)}
                   >
-                    <div
-                      style={{
-                        padding: "6px 4px", // Reduced
-                        display: "flex",
-                        alignItems: "center",
-                        minHeight: "36px", // Reduced
-                      }}
-                    >
+                    <div className="flex items-center py-1.5 px-2 min-h-9">
                       {/* Account */}
-                      <div style={{ flex: 3, padding: "0 4px", minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontSize: "12px", // Smaller
-                            color: "#333",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
+                      <div className="w-2/5 px-1 min-w-0">
+                        <div className="text-xs text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
                           {accountName}
                           {deposit.comments && (
-                            <span
-                              style={{
-                                fontSize: "10px", // Smaller
-                                color: "#718096",
-                                marginLeft: "4px",
-                              }}
-                            >
+                            <span className="text-[10px] text-gray-500 ml-1">
                               {deposit.comments.length > 10
                                 ? `${deposit.comments.substring(0, 10)}...`
                                 : deposit.comments}
@@ -505,62 +307,25 @@ const DepositsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Date */}
-                      <div style={{ flex: 2, padding: "0 4px" }}>
-                        <div
-                          style={{
-                            fontSize: "11px", // Smaller
-                            color: "#666",
-                            fontFamily: "monospace",
-                          }}
-                        >
+                      {/* Date - FIXED: Same font size as other columns */}
+                      <div className="w-1/4 px-1">
+                        <div className="text-xs text-gray-600 font-mono tracking-tight">
                           {formatDate(deposit.endDate)}
                         </div>
                       </div>
 
-                      {/* Amount */}
-                      <div
-                        style={{
-                          flex: 2,
-                          padding: "0 4px",
-                          textAlign: "right",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: "12px", // Smaller
-                            fontWeight: "600",
-                            color: "#1976d2",
-                          }}
-                        >
+                      {/* Amount - FIXED: Proper width */}
+                      <div className="w-1/3 px-1 text-right">
+                        <div className="text-xs font-semibold text-blue-600">
                           {formatInLakhs(deposit.amount)}
                         </div>
                       </div>
 
                       {/* Edit button */}
                       {settings?.showDelete && (
-                        <div
-                          style={{
-                            width: "30px",
-                            display: "flex",
-                            justifyContent: "center",
-                            paddingRight: "2px",
-                          }}
-                        >
+                        <div className="w-12 flex justify-center px-1">
                           <button
-                            style={{
-                              padding: "2px", // Reduced
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              color: "#6b7280",
-                              fontSize: "12px", // Smaller
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              width: "26px", // Smaller
-                              height: "26px", // Smaller
-                            }}
+                            className="p-0.5 bg-transparent border-none cursor-pointer text-gray-500 text-xs flex items-center justify-center w-6 h-6 hover:text-blue-600"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(`/banking/deposits/edit/${deposit.id}`);
@@ -578,61 +343,25 @@ const DepositsTab: React.FC = () => {
             </div>
 
             {/* Total Summary Footer - SIMPLE */}
-            <div
-              style={{
-                padding: "8px 4px", // Reduced
-                backgroundColor: "#f3f4f6",
-                borderTop: "1px solid #e9ecef",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "4px", // Reduced
-                }}
-              >
-                <div style={{ fontSize: "11px", color: "#6b7280" }}>
+            <div className="bg-gray-50 border-t border-gray-300 px-2 py-2">
+              <div className="flex justify-between items-center mb-1">
+                <div className="text-2xs text-gray-600">
                   {filteredDeposits.length} deposit
                   {filteredDeposits.length !== 1 ? "s" : ""}
                   {filterAccount !== "All" && ` for ${filterAccount}`}
                 </div>
-                <div style={{ textAlign: "right" }}>
-                  <div
-                    style={{
-                      fontSize: "10px", // Smaller
-                      color: "#64748b",
-                      fontWeight: "600",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
+                <div className="text-right">
+                  <div className="text-2xs text-gray-500 font-semibold uppercase tracking-wider">
                     Total
                   </div>
-                  <div
-                    style={{
-                      fontSize: "14px", // Smaller
-                      fontWeight: "700",
-                      color: "#1976d2",
-                    }}
-                  >
+                  <div className="text-sm font-bold text-blue-600">
                     {formatInLakhs(totalAmount)}
                   </div>
                 </div>
               </div>
 
               {/* Sort Info - Compact */}
-              <div
-                style={{
-                  fontSize: "10px", // Smaller
-                  color: "#94a3b8",
-                  textAlign: "center",
-                  paddingTop: "2px",
-                  borderTop: "1px dashed #e5e7eb",
-                  marginTop: "4px",
-                }}
-              >
+              <div className="text-2xs text-gray-400 text-center pt-1 border-t border-dashed border-gray-300 mt-1">
                 Sorted by {sortBy === "account" ? "account code" : "end date"}
               </div>
             </div>

@@ -1,11 +1,16 @@
 
 /* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* Keep your existing styles for now */
 html {
   height: 100%;
 }

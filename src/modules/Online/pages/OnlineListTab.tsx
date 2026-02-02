@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { OnlineItem } from "../types/online.types";
-import { onlineStyles } from "../styles/onlineStyles";
 
 const OnlineListTab: React.FC = () => {
   const navigate = useNavigate();
@@ -71,75 +70,37 @@ const OnlineListTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={onlineStyles.loading}>
-        <div style={onlineStyles.spinner}></div>
-        <p>Loading items...</p>
+      <div className="flex flex-col items-center justify-center py-15 px-5 flex-1">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-600">Loading items...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100%" }}>
-      {/* Search and Filter Row - Removed sticky positioning to avoid conflicts */}
-      <div
-        style={{
-          padding: "8px",
-          backgroundColor: "white",
-          borderBottom: "1px solid #e9ecef",
-          display: "flex",
-          gap: "8px",
-          alignItems: "center",
-          flexShrink: 0, // Prevent this from shrinking
-        }}
-      >
+    <div className="min-h-full">
+      {/* Search and Filter Row */}
+      <div className="p-2 bg-white border-b border-gray-200 flex gap-2 items-center shrink-0">
         {/* Search Input */}
-        <div style={{ flex: 2, minWidth: 0, position: "relative" }}>
+        <div className="flex-[2] min-w-0 relative">
           <input
             type="text"
             placeholder="Search items..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              ...onlineStyles.searchInput,
-              padding: "10px 35px 10px 12px",
-              fontSize: "0.9rem",
-              width: "100%",
-              boxSizing: "border-box",
-            }}
+            className="w-full p-2.5 pl-3 pr-10 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
           />
-          <span
-            style={{
-              position: "absolute",
-              right: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#a0aec0",
-              fontSize: "14px",
-            }}
-          >
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
             🔍
           </span>
         </div>
 
         {/* Category Filter Dropdown */}
-        <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+        <div className="flex-1 min-w-0 relative">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px 12px",
-              fontSize: "0.9rem",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              backgroundColor: "white",
-              color: "#374151",
-              cursor: "pointer",
-              appearance: "none",
-              WebkitAppearance: "none",
-              MozAppearance: "none",
-              boxSizing: "border-box",
-            }}
+            className="w-full p-2.5 pl-3 pr-8 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 cursor-pointer appearance-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
           >
             {categories.map((category) => (
               <option key={category} value={category}>
@@ -147,53 +108,33 @@ const OnlineListTab: React.FC = () => {
               </option>
             ))}
           </select>
-          <div
-            style={{
-              position: "absolute",
-              right: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#6b7280",
-              fontSize: "10px",
-              pointerEvents: "none",
-            }}
-          >
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs pointer-events-none">
             ▼
           </div>
         </div>
       </div>
 
-      {/* Items List Container - This will scroll within the parent container */}
-      <div style={{ flex: 1, minHeight: 0 }}>
+      {/* Items List Container */}
+      <div className="flex-1 min-h-0">
         {filteredItems.length === 0 ? (
-          <div style={onlineStyles.emptyState}>
-            <div style={onlineStyles.emptyIcon}>🛒</div>
-            <div style={onlineStyles.emptyText}>
+          <div className="flex flex-col items-center justify-center py-20 px-5 text-center flex-1">
+            <div className="text-4xl mb-4 opacity-50">🛒</div>
+            <div className="text-lg font-medium text-gray-600 mb-2">
               {searchTerm || selectedCategory !== "All"
                 ? "No matching items found"
                 : "No items yet"}
             </div>
-            <div style={onlineStyles.emptySubtext}>
+            <div className="text-sm text-gray-400">
               {!searchTerm &&
                 selectedCategory === "All" &&
                 "Add your first item using the ＋ button"}
             </div>
           </div>
         ) : (
-          <div style={{ padding: "8px" }}>
+          <div className="p-2">
             {/* Results Info */}
-            <div
-              style={{
-                padding: "4px 0",
-                fontSize: "0.8rem",
-                color: "#6b7280",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "8px",
-              }}
-            >
-              <span>
+            <div className="flex justify-between items-center mb-2 px-1 py-1">
+              <span className="text-xs text-gray-600">
                 {filteredItems.length} item
                 {filteredItems.length !== 1 ? "s" : ""}
                 {selectedCategory !== "All" && ` in ${selectedCategory}`}
@@ -204,16 +145,7 @@ const OnlineListTab: React.FC = () => {
                     setSearchTerm("");
                     setSelectedCategory("All");
                   }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#3b82f6",
-                    fontSize: "0.8rem",
-                    cursor: "pointer",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    backgroundColor: "#f0f9ff",
-                  }}
+                  className="text-xs text-blue-500 cursor-pointer px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors"
                 >
                   Clear filters
                 </button>
@@ -221,145 +153,60 @@ const OnlineListTab: React.FC = () => {
             </div>
 
             {/* Items List */}
-            {filteredItems.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  backgroundColor: "white",
-                  marginBottom: "8px",
-                  borderRadius: "8px",
-                  border: "1px solid #e9ecef",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-                onClick={() => navigate(`/online/items/view/${item.id}`)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "#3b82f6";
-                  e.currentTarget.style.boxShadow =
-                    "0 2px 8px rgba(59, 130, 246, 0.1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#e9ecef";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
+            <div className="space-y-2">
+              {filteredItems.map((item) => (
                 <div
-                  style={{
-                    padding: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    minHeight: "48px",
-                  }}
+                  key={item.id}
+                  className="bg-white rounded-lg border border-gray-200 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm"
+                  onClick={() => navigate(`/online/items/view/${item.id}`)}
                 >
-                  {/* Image thumbnail if available */}
-                  {(item.image1 || item.image2) && (
-                    <div
-                      style={{
-                        width: "48px",
-                        height: "48px",
-                        borderRadius: "6px",
-                        overflow: "hidden",
-                        marginRight: "12px",
-                        flexShrink: 0,
-                        backgroundColor: "#f9fafb",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <img
-                        src={item.image1 || item.image2}
-                        alt={item.name}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginBottom: "4px",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "0.95rem",
-                          fontWeight: "600",
-                          color: "#111827",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {item.name}
-                      </span>
-                      {item.category && (
-                        <span
-                          style={{
-                            fontSize: "0.7rem",
-                            fontWeight: "600",
-                            color: "#4299e1",
-                            backgroundColor: "#ebf8ff",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            maxWidth: "120px",
-                          }}
-                        >
-                          {item.category}
-                        </span>
-                      )}
-                    </div>
-                    {item.detail && (
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "#666",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          lineHeight: "1.4",
-                        }}
-                      >
-                        {item.detail}
+                  <div className="p-3 flex items-center min-h-12">
+                    {/* Image thumbnail if available */}
+                    {(item.image1 || item.image2) && (
+                      <div className="w-12 h-12 rounded-lg overflow-hidden mr-3 flex-shrink-0 bg-gray-50 flex items-center justify-center">
+                        <img
+                          src={item.image1 || item.image2}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     )}
-                  </div>
 
-                  {/* Edit button only */}
-                  <div
-                    style={{
-                      marginLeft: "8px",
-                    }}
-                  >
-                    <button
-                      style={{
-                        ...onlineStyles.editButton,
-                        padding: "6px 12px",
-                        fontSize: "12px",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/online/items/edit/${item.id}`);
-                      }}
-                      title="Edit"
-                    >
-                      ✏️ Edit
-                    </button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-sm font-semibold text-gray-900 truncate">
+                          {item.name}
+                        </span>
+                        {item.category && (
+                          <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded truncate max-w-[120px]">
+                            {item.category}
+                          </span>
+                        )}
+                      </div>
+                      {item.detail && (
+                        <div className="text-xs text-gray-600 truncate leading-relaxed">
+                          {item.detail}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Edit button only */}
+                    <div className="ml-2">
+                      <button
+                        className="px-3 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/online/items/edit/${item.id}`);
+                        }}
+                        title="Edit"
+                      >
+                        ✏️ Edit
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>

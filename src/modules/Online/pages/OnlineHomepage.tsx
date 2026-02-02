@@ -2,21 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { useAuth } from "../../../contexts/AuthContext";
-import { onlineStyles } from "../styles/onlineStyles";
+import { tw, cls } from "../../../utils/tailwindMapping";
 import OnlineListTab from "./OnlineListTab";
 import RenewalListTab from "./RenewalListTab";
 import CategoryListTab from "./CategoryListTab";
-import styles from "../../../App.module.css"; // Import the CSS module
+import styles from "../../../App.module.css"; // Keep CSS module for header for now
 
 // Tab components
 const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
-  // Use scrollableArea style for tab content
-  const tabContainerStyle = {
-    ...onlineStyles.scrollableArea,
-  };
-
   return (
-    <div style={tabContainerStyle}>
+    <div className={tw.scrollableArea}>
       {(() => {
         switch (activeTab) {
           case "items":
@@ -200,7 +195,7 @@ const OnlineHomepage: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={onlineStyles.container}>
+      <div className={tw.container}>
         {/* Header during loading (without add button) */}
         <header className={styles.header}>
           <div className={styles.headerContent}>
@@ -262,8 +257,8 @@ const OnlineHomepage: React.FC = () => {
           </div>
         </header>
 
-        <div style={onlineStyles.loading}>
-          <div style={onlineStyles.spinner}></div>
+        <div className={tw.loading}>
+          <div className={tw.spinner}></div>
           <p>Loading online module...</p>
         </div>
       </div>
@@ -271,7 +266,7 @@ const OnlineHomepage: React.FC = () => {
   }
 
   return (
-    <div style={onlineStyles.container}>
+    <div className={tw.container}>
       {/* Header with add button */}
       <header className={styles.header}>
         <div className={styles.headerContent}>
@@ -344,63 +339,21 @@ const OnlineHomepage: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <div style={onlineStyles.contentWrapper}>
-        {/* Tab Navigation */}
-        <div
-          style={{
-            display: "flex",
-            backgroundColor: "white",
-            borderBottom: "1px solid #e9ecef",
-            padding: "0 4px",
-            flexShrink: 0, // Prevent tab navigation from shrinking
-          }}
-        >
+      <div className={tw.contentWrapper}>
+        {/* Tab Navigation with Tailwind */}
+        <div className="flex bg-white border-b border-gray-200 px-1 shrink-0">
           <button
             onClick={() => setActiveTab("items")}
-            style={{
-              flex: 1,
-              padding: "12px 0",
-              backgroundColor: "transparent",
-              border: "none",
-              borderBottom:
-                activeTab === "items"
-                  ? "3px solid #48bb78"
-                  : "3px solid transparent",
-              color: activeTab === "items" ? "#48bb78" : "#666",
-              fontWeight: activeTab === "items" ? "600" : "500",
-              fontSize: "0.9rem",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              position: "relative",
-              whiteSpace: "nowrap",
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== "items") {
-                e.currentTarget.style.backgroundColor = "#f8f9fa";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== "items") {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }
-            }}
+            className={cls(
+              "flex-1 py-3 bg-transparent border-none relative whitespace-nowrap transition-all duration-200",
+              activeTab === "items"
+                ? "border-b-2 border-blue-500 text-blue-500 font-semibold"
+                : "border-b-2 border-transparent text-gray-600 font-medium hover:bg-gray-50",
+            )}
           >
             Items
             {counts.items > 0 && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: "6px",
-                  right: "8px",
-                  backgroundColor: "#48bb78",
-                  color: "white",
-                  fontSize: "0.65rem",
-                  padding: "1px 5px",
-                  borderRadius: "10px",
-                  minWidth: "18px",
-                  textAlign: "center",
-                }}
-              >
+              <span className="absolute top-1.5 right-2 bg-green-500 text-white text-xs px-1.5 rounded-full min-w-[18px] text-center">
                 {counts.items}
               </span>
             )}
@@ -408,61 +361,24 @@ const OnlineHomepage: React.FC = () => {
 
           <button
             onClick={() => setActiveTab("renewals")}
-            style={{
-              flex: 1,
-              padding: "12px 0",
-              backgroundColor: "transparent",
-              border: "none",
-              borderBottom:
-                activeTab === "renewals"
-                  ? "3px solid #ed8936"
-                  : "3px solid transparent",
-              color: activeTab === "renewals" ? "#ed8936" : "#666",
-              fontWeight: activeTab === "renewals" ? "600" : "500",
-              fontSize: "0.9rem",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              position: "relative",
-              whiteSpace: "nowrap",
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== "renewals") {
-                e.currentTarget.style.backgroundColor = "#f8f9fa";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== "renewals") {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }
-            }}
+            className={cls(
+              "flex-1 py-3 bg-transparent border-none relative whitespace-nowrap transition-all duration-200",
+              activeTab === "renewals"
+                ? "border-b-2 border-orange-500 text-orange-500 font-semibold"
+                : "border-b-2 border-transparent text-gray-600 font-medium hover:bg-gray-50",
+            )}
           >
             Renewals
             {counts.renewals > 0 && (
               <span
-                style={{
-                  position: "absolute",
-                  top: "6px",
-                  right: "8px",
-                  backgroundColor:
-                    counts.expiringSoon > 0 ? "#ed8936" : "#4299e1",
-                  color: "white",
-                  fontSize: "0.65rem",
-                  padding: "1px 5px",
-                  borderRadius: "10px",
-                  minWidth: "18px",
-                  textAlign: "center",
-                }}
+                className={cls(
+                  "absolute top-1.5 right-2 text-white text-xs px-1.5 rounded-full min-w-[18px] text-center",
+                  counts.expiringSoon > 0 ? "bg-orange-500" : "bg-blue-500",
+                )}
               >
                 {counts.renewals}
                 {counts.expiringSoon > 0 && (
-                  <span
-                    style={{
-                      display: "block",
-                      fontSize: "0.55rem",
-                      marginTop: "1px",
-                      color: "#fffaf0",
-                    }}
-                  >
+                  <span className="block text-[0.55rem] mt-0.5 text-orange-50">
                     {counts.expiringSoon} soon
                   </span>
                 )}
@@ -472,65 +388,24 @@ const OnlineHomepage: React.FC = () => {
 
           <button
             onClick={() => setActiveTab("categories")}
-            style={{
-              flex: 1,
-              padding: "12px 0",
-              backgroundColor: "transparent",
-              border: "none",
-              borderBottom:
-                activeTab === "categories"
-                  ? "3px solid #4299e1"
-                  : "3px solid transparent",
-              color: activeTab === "categories" ? "#4299e1" : "#666",
-              fontWeight: activeTab === "categories" ? "600" : "500",
-              fontSize: "0.9rem",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              position: "relative",
-              whiteSpace: "nowrap",
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== "categories") {
-                e.currentTarget.style.backgroundColor = "#f8f9fa";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== "categories") {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }
-            }}
+            className={cls(
+              "flex-1 py-3 bg-transparent border-none relative whitespace-nowrap transition-all duration-200",
+              activeTab === "categories"
+                ? "border-b-2 border-blue-500 text-blue-500 font-semibold"
+                : "border-b-2 border-transparent text-gray-600 font-medium hover:bg-gray-50",
+            )}
           >
             Categories
             {counts.categories > 0 && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: "6px",
-                  right: "8px",
-                  backgroundColor: "#9f7aea",
-                  color: "white",
-                  fontSize: "0.65rem",
-                  padding: "1px 5px",
-                  borderRadius: "10px",
-                  minWidth: "18px",
-                  textAlign: "center",
-                }}
-              >
+              <span className="absolute top-1.5 right-2 bg-purple-400 text-white text-xs px-1.5 rounded-full min-w-[18px] text-center">
                 {counts.categories}
               </span>
             )}
           </button>
         </div>
 
-        {/* Tab Content Area - Flex container for proper sizing */}
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            minHeight: 0, // Crucial for flex scrolling
-          }}
-        >
+        {/* Tab Content Area */}
+        <div className="flex-1 flex flex-col min-h-0">
           <TabContent activeTab={activeTab} />
         </div>
       </div>

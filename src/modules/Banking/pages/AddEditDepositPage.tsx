@@ -5,7 +5,7 @@ import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
 import { Deposit, DepositFormData } from "../../../types/banking.types";
 import { formatDate } from "../../../utils/formatters";
-import { bankingStyles } from "../styles";
+import { tw, cls } from "../../../utils/tailwindMapping";
 
 interface AddEditDepositPageProps {
   isEdit?: boolean;
@@ -207,7 +207,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
     // Empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} style={{ padding: "10px 0" }}></div>);
+      days.push(<div key={`empty-${i}`} className="py-2.5"></div>);
     }
 
     // Days of the month
@@ -223,28 +223,13 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         <button
           key={day}
           onClick={() => selectDate(date, showCalendar!)}
-          style={{
-            padding: "10px 0",
-            background: "none",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "0.9rem",
-            color: "#333",
-            transition: "all 0.2s",
-            ...(isSelected
-              ? {
-                  backgroundColor: "#3b82f6",
-                  color: "#fff",
-                  fontWeight: 600,
-                }
-              : {}),
-            ...(isTodayDate
-              ? {
-                  border: "2px solid #3b82f6",
-                }
-              : {}),
-          }}
+          className={cls(
+            "py-2.5 bg-transparent border-none rounded text-sm transition-all",
+            isSelected
+              ? "bg-blue-500 text-white font-semibold"
+              : "text-gray-800 hover:bg-gray-100",
+            isTodayDate && !isSelected ? "border-2 border-blue-500" : "",
+          )}
         >
           {day}
         </button>,
@@ -264,17 +249,12 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         <button
           key={year}
           onClick={() => selectYear(year)}
-          style={{
-            padding: "10px 0",
-            background: year === currentYear ? "#3b82f6" : "none",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "0.9rem",
-            color: year === currentYear ? "#fff" : "#333",
-            fontWeight: year === currentYear ? 600 : 400,
-            transition: "all 0.2s",
-          }}
+          className={cls(
+            "py-2.5 border-none rounded text-sm transition-all",
+            year === currentYear
+              ? "bg-blue-500 text-white font-semibold"
+              : "bg-transparent text-gray-800 hover:bg-gray-100",
+          )}
         >
           {year}
         </button>,
@@ -282,16 +262,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
     }
 
     return (
-      <div
-        style={{
-          maxHeight: "300px",
-          overflowY: "auto",
-          padding: "10px",
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "8px",
-        }}
-      >
+      <div className="max-h-72 overflow-y-auto p-2.5 grid grid-cols-4 gap-2">
         {years}
       </div>
     );
@@ -398,71 +369,48 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
   if (dataLoading && isEdit) {
     return (
-      <div style={bankingStyles.container}>
-        <div style={bankingStyles.loading}>
-          <div style={bankingStyles.spinner}></div>
-          <p>Loading deposit details...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className={tw.bankingSpinner}></div>
+        <p className="mt-4 text-gray-600">Loading deposit details...</p>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} style={bankingStyles.container}>
+    <div ref={containerRef} className="min-h-screen bg-gray-50">
       {/* Top Navigation - Simplified with only back button */}
-      <div style={bankingStyles.topNav}>
+      <div className="flex justify-between items-center px-4 py-3 bg-white border-b border-gray-200">
         <button
           onClick={handleCancel}
-          style={bankingStyles.navButton}
+          className="bg-transparent border-none text-xl cursor-pointer p-2 text-blue-500 flex items-center justify-center w-10 h-10 hover:bg-blue-50 transition-colors rounded-lg"
           title="Back"
           disabled={saving || deleting}
         >
           ←
         </button>
-        <div style={bankingStyles.navTitle}>
+        <div className="text-base font-semibold text-gray-800 flex-1 text-center">
           Banking / {isEdit ? "Edit Deposit" : "Add Deposit"}
         </div>
-        <div style={{ width: "44px" }}></div> {/* Spacer for alignment */}
+        <div className="w-11"></div> {/* Spacer for alignment */}
       </div>
 
       {/* Form */}
-      <div style={{ padding: "15px 0", position: "relative" }}>
+      <div className="p-4">
         {/* Error Message */}
         {error && (
-          <div
-            style={{
-              backgroundColor: "#fee2e2",
-              border: "1px solid #ef4444",
-              color: "#dc2626",
-              padding: "12px 16px",
-              borderRadius: "8px",
-              marginBottom: "16px",
-              fontSize: "0.9rem",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "8px",
-            }}
-          >
-            <div style={{ fontSize: "1.2rem" }}>⚠️</div>
-            <div>{error}</div>
+          <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg mb-4 flex items-start gap-2">
+            <div className="text-lg">⚠️</div>
+            <div className="flex-1 text-sm">{error}</div>
           </div>
         )}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="flex flex-col gap-4">
           {/* Account Dropdown */}
-          <div style={{ position: "relative", width: "100%" }}>
-            <label
-              style={{
-                fontSize: "0.9rem",
-                color: "#495057",
-                marginBottom: "4px",
-                display: "block",
-                fontWeight: 500,
-              }}
-            >
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Account *
             </label>
-            <div style={{ position: "relative", width: "100%" }}>
+            <div className="relative">
               <input
                 ref={inputRef}
                 type="text"
@@ -482,30 +430,21 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                       ? "Select account"
                       : "No accounts available"
                 }
+                className={cls(
+                  tw.bankingInput,
+                  "pr-10 w-full",
+                  localAccounts.length > 0
+                    ? "cursor-pointer"
+                    : "cursor-not-allowed opacity-70",
+                )}
                 style={{
-                  ...bankingStyles.input,
-                  cursor: localAccounts.length > 0 ? "pointer" : "not-allowed",
-                  paddingRight: "40px",
-                  backgroundColor: "#fff",
-                  opacity: localAccounts.length > 0 ? 1 : 0.7,
-                  width: "100%",
-                  boxSizing: "border-box",
                   borderColor:
-                    error && !formData.accountId ? "#dc2626" : "#e0e0e0",
+                    error && !formData.accountId ? "#dc2626" : undefined,
                 }}
                 disabled={localAccounts.length === 0}
               />
               {localAccounts.length > 0 && (
-                <div
-                  style={{
-                    position: "absolute",
-                    right: "12px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#6c757d",
-                    pointerEvents: "none",
-                  }}
-                >
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
                   ▼
                 </div>
               )}
@@ -515,68 +454,29 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
             {showAccountDropdown && localAccounts.length > 0 && (
               <div
                 ref={dropdownRef}
+                className="fixed left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-xl z-50 w-[calc(100%-30px)] max-w-2xl max-h-[60vh] overflow-hidden mt-1"
                 style={{
-                  position: "fixed",
                   top: inputRef.current
-                    ? inputRef.current.getBoundingClientRect().bottom +
-                      window.scrollY +
-                      4
+                    ? `${
+                        inputRef.current.getBoundingClientRect().bottom +
+                        window.scrollY +
+                        4
+                      }px`
                     : "200px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: "calc(100% - 30px)",
-                  maxWidth: "600px",
-                  backgroundColor: "#fff",
-                  border: "1px solid #e9ecef",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                  zIndex: 9999,
-                  maxHeight: "60vh",
-                  overflow: "hidden",
-                  marginTop: "4px",
                 }}
               >
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    borderBottom: "1px solid #f0f0f0",
-                    backgroundColor: "#f8f9fa",
-                    fontSize: "0.9rem",
-                    fontWeight: 500,
-                    color: "#495057",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1,
-                  }}
-                >
-                  Select Account ({localAccounts.length} available)
+                <div className="p-3 bg-gray-50 border-b border-gray-100 text-sm font-medium text-gray-700 sticky top-0 z-10 flex justify-between items-center">
+                  <span>Select Account ({localAccounts.length} available)</span>
                   <button
                     onClick={() => setShowAccountDropdown(false)}
-                    style={{
-                      position: "absolute",
-                      right: "12px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      background: "none",
-                      border: "none",
-                      fontSize: "1.2rem",
-                      cursor: "pointer",
-                      color: "#666",
-                      padding: "4px",
-                    }}
+                    className="text-gray-500 text-lg hover:text-gray-700 p-1"
                     title="Close"
                   >
                     ×
                   </button>
                 </div>
 
-                <div
-                  style={{
-                    maxHeight: "calc(60vh - 60px)",
-                    overflowY: "auto",
-                    padding: "4px 0",
-                  }}
-                >
+                <div className="max-h-[calc(60vh-60px)] overflow-y-auto py-1">
                   {localAccounts
                     .sort((a, b) => a.acctCode.localeCompare(b.acctCode))
                     .map((account) => (
@@ -585,76 +485,30 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                         onClick={() =>
                           handleAccountSelect(account.id, account.acctCode)
                         }
-                        style={{
-                          width: "100%",
-                          padding: "12px 16px",
-                          textAlign: "left",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: "0.95rem",
-                          color: "#333",
-                          borderBottom: "1px solid #f5f5f5",
-                          backgroundColor:
-                            formData.accountId === account.id
-                              ? "#e8f0fe"
-                              : "transparent",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          transition: "background-color 0.2s",
-                        }}
-                        onMouseEnter={(e) => {
-                          if (formData.accountId !== account.id) {
-                            e.currentTarget.style.backgroundColor = "#f8f9fa";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (formData.accountId !== account.id) {
-                            e.currentTarget.style.backgroundColor =
-                              "transparent";
-                          }
-                        }}
+                        className={cls(
+                          "w-full px-4 py-3 text-left text-sm border-b border-gray-100 flex justify-between items-start transition-colors",
+                          formData.accountId === account.id
+                            ? "bg-blue-50"
+                            : "bg-transparent hover:bg-gray-50",
+                        )}
                       >
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div
-                            style={{
-                              fontWeight: 500,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate">
                             {account.acctCode}
                           </div>
                           {account.acctDetails && (
-                            <div
-                              style={{
-                                fontSize: "0.8rem",
-                                color: "#666",
-                                marginTop: "2px",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
+                            <div className="text-xs text-gray-500 mt-0.5 truncate">
                               {account.acctDetails.split("\n")[0]}
                             </div>
                           )}
                         </div>
                         <div
-                          style={{
-                            fontSize: "0.85rem",
-                            fontWeight: 600,
-                            color:
-                              account.savingsAmount >= 0
-                                ? "#10b981"
-                                : "#dc2626",
-                            whiteSpace: "nowrap",
-                            marginLeft: "12px",
-                            textAlign: "right" as const,
-                            minWidth: "80px",
-                          }}
+                          className={cls(
+                            "text-xs font-semibold whitespace-nowrap ml-3 text-right min-w-20",
+                            account.savingsAmount >= 0
+                              ? "text-green-600"
+                              : "text-red-600",
+                          )}
                         >
                           ₹
                           {(account.savingsAmount || 0).toLocaleString("en-IN")}
@@ -668,15 +522,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
           {/* Amount */}
           <div>
-            <label
-              style={{
-                fontSize: "0.9rem",
-                color: "#495057",
-                marginBottom: "4px",
-                display: "block",
-                fontWeight: 500,
-              }}
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Amount (₹) *
             </label>
             <input
@@ -686,13 +532,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 handleInputChange("amount", parseFloat(e.target.value) || 0)
               }
               placeholder="Enter amount"
-              style={{
-                ...bankingStyles.input,
-                width: "100%",
-                boxSizing: "border-box",
-                borderColor:
-                  error && formData.amount <= 0 ? "#dc2626" : "#e0e0e0",
-              }}
+              className={cls(
+                tw.bankingInput,
+                "w-full",
+                error && formData.amount <= 0 ? "border-red-300" : "",
+              )}
               min="0"
               step="1000"
             />
@@ -700,18 +544,10 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
           {/* Start Date with Calendar */}
           <div>
-            <label
-              style={{
-                fontSize: "0.9rem",
-                color: "#495057",
-                marginBottom: "4px",
-                display: "block",
-                fontWeight: 500,
-              }}
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Start Date
             </label>
-            <div style={{ position: "relative" }}>
+            <div className="relative">
               <input
                 type="text"
                 value={formatDate(formData.startDate, "en-IN", {
@@ -721,30 +557,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 })}
                 readOnly
                 onClick={() => openCalendar("start")}
-                className="date-input"
-                style={{
-                  ...bankingStyles.input,
-                  cursor: "pointer",
-                  paddingRight: "40px",
-                  backgroundColor: "#fff",
-                  width: "100%",
-                  boxSizing: "border-box",
-                }}
+                className="date-input cursor-pointer pr-10 w-full"
               />
               <button
                 onClick={() => openCalendar("start")}
-                style={{
-                  position: "absolute",
-                  right: "8px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#6c757d",
-                  fontSize: "1.2rem",
-                  padding: "4px",
-                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 p-1"
                 title="Pick start date"
                 type="button"
               >
@@ -755,18 +572,10 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
           {/* End Date with Calendar */}
           <div>
-            <label
-              style={{
-                fontSize: "0.9rem",
-                color: "#495057",
-                marginBottom: "4px",
-                display: "block",
-                fontWeight: 500,
-              }}
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               End Date
             </label>
-            <div style={{ position: "relative" }}>
+            <div className="relative">
               <input
                 type="text"
                 value={formatDate(formData.endDate, "en-IN", {
@@ -776,30 +585,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 })}
                 readOnly
                 onClick={() => openCalendar("end")}
-                className="date-input"
-                style={{
-                  ...bankingStyles.input,
-                  cursor: "pointer",
-                  paddingRight: "40px",
-                  backgroundColor: "#fff",
-                  width: "100%",
-                  boxSizing: "border-box",
-                }}
+                className="date-input cursor-pointer pr-10 w-full"
               />
               <button
                 onClick={() => openCalendar("end")}
-                style={{
-                  position: "absolute",
-                  right: "8px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#6c757d",
-                  fontSize: "1.2rem",
-                  padding: "4px",
-                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 p-1"
                 title="Pick end date"
                 type="button"
               >
@@ -812,45 +602,13 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           {showCalendar && (
             <div
               ref={calendarRef}
-              style={{
-                position: "fixed",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                backgroundColor: "#fff",
-                border: "1px solid #e0e0e0",
-                borderRadius: "12px",
-                boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-                zIndex: 10001,
-                padding: "20px",
-                minWidth: showYearSelector ? "350px" : "300px",
-                maxWidth: showYearSelector ? "400px" : "350px",
-                width: "90%",
-                maxHeight: "80vh",
-                overflow: "hidden",
-              }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 rounded-xl shadow-2xl z-[10001] p-5 w-[90%] max-w-sm max-h-[80vh] overflow-hidden"
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "15px",
-                }}
-              >
-                <div style={{ display: "flex", gap: "8px" }}>
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex gap-2">
                   <button
                     onClick={() => navigateYear("prev")}
-                    style={{
-                      background: "none",
-                      border: "1px solid #e0e0e0",
-                      borderRadius: "6px",
-                      padding: "6px 10px",
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                      color: "#333",
-                      minWidth: "40px",
-                    }}
+                    className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
                     title="Previous Year"
                     type="button"
                   >
@@ -858,16 +616,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   </button>
                   <button
                     onClick={() => navigateMonth("prev")}
-                    style={{
-                      background: "none",
-                      border: "1px solid #e0e0e0",
-                      borderRadius: "6px",
-                      padding: "6px 10px",
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                      color: "#333",
-                      minWidth: "40px",
-                    }}
+                    className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
                     title="Previous Month"
                     type="button"
                   >
@@ -875,55 +624,22 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   </button>
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
+                <button
+                  onClick={() => setShowYearSelector(!showYearSelector)}
+                  className="px-2 py-1 text-sm font-semibold text-gray-800 hover:bg-gray-100 rounded"
+                  title="Select Year"
+                  type="button"
                 >
-                  <button
-                    onClick={() => setShowYearSelector(!showYearSelector)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "1.1rem",
-                      fontWeight: 600,
-                      color: "#333",
-                      padding: "4px 8px",
-                      borderRadius: "4px",
-                      transition: "background-color 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f0f0f0";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
-                    title="Select Year"
-                    type="button"
-                  >
-                    {currentMonth.toLocaleDateString("en-US", {
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </button>
-                </div>
+                  {currentMonth.toLocaleDateString("en-US", {
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </button>
 
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div className="flex gap-2">
                   <button
                     onClick={() => navigateMonth("next")}
-                    style={{
-                      background: "none",
-                      border: "1px solid #e0e0e0",
-                      borderRadius: "6px",
-                      padding: "6px 10px",
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                      color: "#333",
-                      minWidth: "40px",
-                    }}
+                    className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
                     title="Next Month"
                     type="button"
                   >
@@ -931,16 +647,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                   </button>
                   <button
                     onClick={() => navigateYear("next")}
-                    style={{
-                      background: "none",
-                      border: "1px solid #e0e0e0",
-                      borderRadius: "6px",
-                      padding: "6px 10px",
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                      color: "#333",
-                      minWidth: "40px",
-                    }}
+                    className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
                     title="Next Year"
                     type="button"
                   >
@@ -953,65 +660,30 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 renderYearSelector()
               ) : (
                 <>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(7, 1fr)",
-                      marginBottom: "8px",
-                    }}
-                  >
+                  <div className="grid grid-cols-7 mb-2">
                     {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
                       <div
                         key={day}
-                        style={{
-                          textAlign: "center" as const,
-                          fontSize: "0.85rem",
-                          color: "#666",
-                          fontWeight: 500,
-                          padding: "4px 0",
-                        }}
+                        className="text-center text-xs text-gray-500 font-medium py-1"
                       >
                         {day}
                       </div>
                     ))}
                   </div>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(7, 1fr)",
-                      gap: "4px",
-                    }}
-                  >
+                  <div className="grid grid-cols-7 gap-1">
                     {renderCalendar()}
                   </div>
                 </>
               )}
 
-              <div
-                style={{
-                  marginTop: "15px",
-                  textAlign: "center",
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "10px",
-                }}
-              >
+              <div className="flex justify-center gap-2.5 mt-4">
                 <button
                   onClick={() => {
-                    // Set to today
                     const today = new Date();
                     selectDate(today, showCalendar!);
                   }}
-                  style={{
-                    padding: "8px 16px",
-                    backgroundColor: "#3b82f6",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
-                    color: "#fff",
-                  }}
+                  className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600"
                   type="button"
                 >
                   Today
@@ -1021,14 +693,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                     setShowCalendar(null);
                     setShowYearSelector(false);
                   }}
-                  style={{
-                    padding: "8px 20px",
-                    backgroundColor: "#f0f0f0",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
-                  }}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300"
                   type="button"
                 >
                   Close
@@ -1039,74 +704,33 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
           {/* Comments */}
           <div>
-            <label
-              style={{
-                fontSize: "0.9rem",
-                color: "#495057",
-                marginBottom: "4px",
-                display: "block",
-                fontWeight: 500,
-              }}
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Comments
             </label>
             <textarea
               value={formData.comments}
               onChange={(e) => handleInputChange("comments", e.target.value)}
               placeholder="Enter comments (optional)"
-              style={{
-                ...bankingStyles.input,
-                minHeight: "80px",
-                resize: "vertical",
-                fontFamily: "inherit",
-                lineHeight: "1.5",
-                width: "100%",
-                boxSizing: "border-box",
-              }}
+              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white resize-y min-h-20 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
               maxLength={500}
             />
-            <div
-              style={{
-                fontSize: "0.8rem",
-                color: "#6c757d",
-                textAlign: "right" as const,
-                marginTop: "4px",
-              }}
-            >
+            <div className="text-xs text-gray-500 text-right mt-1">
               {formData.comments.length}/500
             </div>
           </div>
 
           {/* Active Checkbox */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "8px",
-              backgroundColor: "#f8f9fa",
-              borderRadius: "8px",
-            }}
-          >
+          <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
             <input
               type="checkbox"
               checked={formData.active}
               onChange={(e) => handleInputChange("active", e.target.checked)}
               id="active-checkbox"
-              style={{
-                width: "20px",
-                height: "20px",
-                cursor: "pointer",
-              }}
+              className="w-5 h-5 cursor-pointer"
             />
             <label
               htmlFor="active-checkbox"
-              style={{
-                fontSize: "0.95rem",
-                color: "#495057",
-                cursor: "pointer",
-                fontWeight: 500,
-              }}
+              className="text-sm text-gray-700 cursor-pointer font-medium"
             >
               Active
             </label>
@@ -1114,34 +738,17 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div style={{ marginTop: "32px", display: "flex", gap: "12px" }}>
+        <div className="mt-8 flex gap-3">
           {/* Cancel Button */}
           <button
             onClick={handleCancel}
             disabled={saving || deleting}
-            style={{
-              flex: 1,
-              padding: "14px 20px",
-              backgroundColor: "transparent",
-              border: "1px solid #e0e0e0",
-              borderRadius: "8px",
-              color: "#666",
-              fontWeight: 600,
-              fontSize: "1rem",
-              cursor: saving || deleting ? "not-allowed" : "pointer",
-              opacity: saving || deleting ? 0.7 : 1,
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              if (!saving && !deleting) {
-                e.currentTarget.style.backgroundColor = "#f8f9fa";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!saving && !deleting) {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }
-            }}
+            className={cls(
+              "flex-1 py-3.5 border border-gray-300 rounded-lg text-gray-600 font-semibold text-sm transition-colors",
+              saving || deleting
+                ? "opacity-70 cursor-not-allowed"
+                : "hover:bg-gray-50",
+            )}
           >
             Cancel
           </button>
@@ -1151,29 +758,12 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
             <button
               onClick={() => setShowDeleteConfirm(true)}
               disabled={saving || deleting}
-              style={{
-                flex: 1,
-                padding: "14px 20px",
-                backgroundColor: saving || deleting ? "#9ca3af" : "#dc2626",
-                border: "none",
-                borderRadius: "8px",
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: "1rem",
-                cursor: saving || deleting ? "not-allowed" : "pointer",
-                opacity: saving || deleting ? 0.7 : 1,
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                if (!saving && !deleting) {
-                  e.currentTarget.style.backgroundColor = "#b91c1c";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!saving && !deleting) {
-                  e.currentTarget.style.backgroundColor = "#dc2626";
-                }
-              }}
+              className={cls(
+                "flex-1 py-3.5 bg-red-500 text-white font-semibold text-sm rounded-lg transition-colors",
+                saving || deleting
+                  ? "opacity-70 cursor-not-allowed bg-gray-400"
+                  : "hover:bg-red-600",
+              )}
             >
               {deleting ? "Deleting..." : "Delete"}
             </button>
@@ -1185,162 +775,53 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
             disabled={
               saving || deleting || !formData.accountId || formData.amount <= 0
             }
-            style={{
-              flex: 1,
-              padding: "14px 20px",
-              backgroundColor:
-                saving || deleting
-                  ? "#94a3b8"
-                  : !formData.accountId || formData.amount <= 0
-                    ? "#cbd5e1"
-                    : "#10b981",
-              border: "none",
-              borderRadius: "8px",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: "1rem",
-              cursor:
-                saving ||
-                deleting ||
-                !formData.accountId ||
-                formData.amount <= 0
-                  ? "not-allowed"
-                  : "pointer",
-              opacity:
-                saving ||
-                deleting ||
-                !formData.accountId ||
-                formData.amount <= 0
-                  ? 0.7
-                  : 1,
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              if (
-                !saving &&
-                !deleting &&
-                formData.accountId &&
-                formData.amount > 0
-              ) {
-                e.currentTarget.style.backgroundColor = "#059669";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (
-                !saving &&
-                !deleting &&
-                formData.accountId &&
-                formData.amount > 0
-              ) {
-                e.currentTarget.style.backgroundColor = "#10b981";
-              }
-            }}
+            className={cls(
+              "flex-1 py-3.5 text-white font-semibold text-sm rounded-lg transition-colors",
+              saving || deleting
+                ? "bg-gray-400 cursor-not-allowed opacity-70"
+                : !formData.accountId || formData.amount <= 0
+                  ? "bg-gray-400 cursor-not-allowed opacity-70"
+                  : "bg-green-500 hover:bg-green-600",
+            )}
           >
             {saving ? "Saving..." : "Save"}
           </button>
         </div>
 
         {/* Required Fields Note */}
-        <div
-          style={{
-            marginTop: "12px",
-            fontSize: "0.85rem",
-            color: "#6c757d",
-            textAlign: "center" as const,
-          }}
-        >
+        <div className="mt-3 text-xs text-gray-500 text-center">
           * Required fields
         </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 10000,
-            padding: "20px",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "12px",
-              padding: "24px",
-              maxWidth: "400px",
-              width: "100%",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 12px 0",
-                fontSize: "1.25rem",
-                fontWeight: 600,
-                color: "#333",
-              }}
-            >
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-[10000]">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
               Delete Deposit
             </h3>
-            <p
-              style={{
-                margin: "0 0 24px 0",
-                color: "#666",
-                lineHeight: "1.5",
-                fontSize: "0.95rem",
-              }}
-            >
+            <p className="text-gray-600 mb-6 leading-relaxed text-sm">
               Are you sure you want to delete this deposit? This action cannot
               be undone.
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "flex-end",
-              }}
-            >
+            <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "transparent",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
-                  color: "#666",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  fontSize: "0.95rem",
-                  minWidth: "80px",
-                  opacity: deleting ? 0.7 : 1,
-                }}
+                className="px-4 py-2 border border-gray-300 text-gray-600 font-medium text-sm rounded-lg hover:bg-gray-50 disabled:opacity-70"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: deleting ? "#9ca3af" : "#dc2626",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#fff",
-                  fontWeight: 500,
-                  cursor: deleting ? "not-allowed" : "pointer",
-                  fontSize: "0.95rem",
-                  minWidth: "80px",
-                  opacity: deleting ? 0.7 : 1,
-                }}
+                className={cls(
+                  "px-4 py-2 text-white font-medium text-sm rounded-lg",
+                  deleting
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600",
+                )}
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>

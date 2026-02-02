@@ -273,15 +273,19 @@ const DepositsTab: React.FC = () => {
           </div>
         ) : (
           <div>
-            {/* Table Header - SIMPLE - FIXED WIDTHS */}
+            {/* Table Header - FLEXIBLE WITH MIN-WIDTHS */}
             <div className="flex items-center py-1.5 px-2 bg-gray-50 border-b border-gray-300 font-semibold text-xs text-gray-700">
-              <div className="w-2/5 px-1">Account</div>
-              <div className="w-1/4 px-1 text-xs">Date</div>
-              <div className="w-1/3 px-1 text-right">Amount</div>
-              {settings?.showDelete && <div className="w-12 px-1"></div>}
+              <div className="flex-grow px-1 min-w-[100px]">Account</div>
+              <div className="px-1 min-w-[80px] flex-shrink-0">Date</div>
+              <div className="px-1 min-w-[70px] text-right flex-shrink-0">
+                Amount
+              </div>
+              {settings?.showDelete && (
+                <div className="w-12 px-1 flex-shrink-0"></div>
+              )}
             </div>
 
-            {/* Table Rows - SIMPLE - FIXED WIDTHS */}
+            {/* Table Rows - FLEXIBLE WITH MIN-WIDTHS */}
             <div>
               {filteredDeposits.map((deposit) => {
                 const accountName = getAccountName(deposit.accountId);
@@ -293,8 +297,8 @@ const DepositsTab: React.FC = () => {
                     onClick={() => handleRowClick(deposit.id)}
                   >
                     <div className="flex items-center py-1.5 px-2 min-h-9">
-                      {/* Account */}
-                      <div className="w-2/5 px-1 min-w-0">
+                      {/* Account - Flexible */}
+                      <div className="flex-grow px-1 min-w-0">
                         <div className="text-xs text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
                           {accountName}
                           {deposit.comments && (
@@ -307,15 +311,15 @@ const DepositsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Date - FIXED: Same font size as other columns */}
-                      <div className="w-1/4 px-1">
-                        <div className="text-xs text-gray-600 font-mono tracking-tight">
+                      {/* Date - Fixed minimum width */}
+                      <div className="px-1 min-w-[80px] flex-shrink-0">
+                        <div className="text-xs text-gray-600 font-mono tracking-tight whitespace-nowrap">
                           {formatDate(deposit.endDate)}
                         </div>
                       </div>
 
-                      {/* Amount - FIXED: Proper width */}
-                      <div className="w-1/3 px-1 text-right">
+                      {/* Amount - Fixed minimum width */}
+                      <div className="px-1 min-w-[70px] text-right flex-shrink-0">
                         <div className="text-xs font-semibold text-blue-600">
                           {formatInLakhs(deposit.amount)}
                         </div>
@@ -323,7 +327,7 @@ const DepositsTab: React.FC = () => {
 
                       {/* Edit button */}
                       {settings?.showDelete && (
-                        <div className="w-12 flex justify-center px-1">
+                        <div className="w-12 flex justify-center px-1 flex-shrink-0">
                           <button
                             className="p-0.5 bg-transparent border-none cursor-pointer text-gray-500 text-xs flex items-center justify-center w-6 h-6 hover:text-blue-600"
                             onClick={(e) => {

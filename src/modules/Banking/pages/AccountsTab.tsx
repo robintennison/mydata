@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
-import { bankingStyles } from "../styles/BankingStyles";
+import { tw, cls } from "../../../utils/tailwindMapping";
 
 const AccountsTab: React.FC = () => {
   const navigate = useNavigate();
@@ -80,12 +80,8 @@ const AccountsTab: React.FC = () => {
   // Handle row click - view mode when showDelete is false, edit mode when showDelete is true
   const handleRowClick = (accountId: string) => {
     if (settings?.showDelete) {
-      // When showDelete is true, open in edit mode
       navigate(`/banking/accounts/edit/${accountId}`);
     } else {
-      // When showDelete is false, open in view mode
-      // You need to create a view route or modify the existing edit route to handle view mode
-      // For now, we'll use the same edit route but the component should handle view mode
       navigate(`/banking/accounts/view/${accountId}`);
     }
   };
@@ -100,115 +96,46 @@ const AccountsTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "60px 20px",
-        }}
-      >
-        <div style={bankingStyles.spinner}></div>
-        <p>Loading accounts...</p>
+      <div className="flex flex-col items-center justify-center py-16 px-5">
+        <div className={tw.bankingSpinner}></div>
+        <p className="mt-4 text-gray-600">Loading accounts...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div className="flex flex-col h-full">
       {/* Accounts List */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      <div className="flex-1 overflow-y-auto">
         {sortedAccounts.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 20px",
-              color: "#6c757d",
-            }}
-          >
-            <div
-              style={{ fontSize: "48px", marginBottom: "16px", opacity: "0.5" }}
-            >
-              🏦
-            </div>
-            <div
-              style={{
-                fontSize: "16px",
-                fontWeight: "500",
-                color: "#6b7280",
-                marginBottom: "8px",
-              }}
-            >
+          <div className="text-center py-12 px-5 text-gray-500">
+            <div className="text-4xl mb-4 opacity-50">🏦</div>
+            <div className="text-base font-medium text-gray-600 mb-2">
               {settings?.showInactive
                 ? "No accounts found"
                 : "No active accounts found"}
             </div>
-            <div style={{ fontSize: "14px", color: "#9ca3af" }}>
+            <div className="text-sm text-gray-400">
               Add your first account to get started
             </div>
           </div>
         ) : (
           <div>
-            {/* Table Header - ALL LEFT ALIGNED - REDUCED PADDING */}
-            <div
-              style={{
-                display: "flex",
-                padding: "10px 12px", // Reduced from 12px 16px
-                backgroundColor: "#f9fafb",
-                borderBottom: "1px solid #e9ecef",
-                fontWeight: "600",
-                fontSize: "12px",
-                color: "#374151",
-                alignItems: "center",
-              }}
-            >
-              {/* Account Column */}
-              <div
-                style={{
-                  flex: 4,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                }}
-              >
-                Account
-              </div>
-              {/* Savings Column - CHANGED to left align */}
-              <div
-                style={{
-                  flex: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                }}
-              >
-                Savings
-              </div>
-              {/* MPIN Column */}
-              <div
-                style={{
-                  flex: 3,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                }}
-              >
-                MPIN
-              </div>
+            {/* Table Header - IMPROVED SPACING */}
+            <div className="flex items-center py-2.5 px-4 bg-gray-50 border-b border-gray-300 font-semibold text-xs text-gray-700">
+              {/* Account Column - Takes most space */}
+              <div className="w-[45%] px-1 text-left">Account</div>
+              {/* Savings Column - With some spacing */}
+              <div className="w-[25%] px-2 text-left">Savings</div>
+              {/* MPIN Column - With more spacing from Savings */}
+              <div className="w-[20%] px-2 text-left">MPIN</div>
+              {/* Edit Button Column - Pushed to end */}
               {settings?.showDelete && (
-                <div
-                  style={{
-                    width: "28px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-start",
-                  }}
-                ></div>
+                <div className="w-[10%] px-1 flex justify-end"></div>
               )}
             </div>
 
-            {/* Accounts Rows - ALL LEFT ALIGNED - REDUCED PADDING */}
+            {/* Accounts Rows */}
             <div>
               {sortedAccounts.map((account) => {
                 const isActive = isAccountActive(account);
@@ -218,134 +145,56 @@ const AccountsTab: React.FC = () => {
                 return (
                   <div
                     key={account.id}
-                    style={{
-                      backgroundColor: "white",
-                      borderBottom: "1px solid #f3f4f6",
-                      cursor: "pointer",
-                    }}
+                    className="bg-white border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => handleRowClick(account.id)}
                   >
-                    <div
-                      style={{
-                        padding: "10px 12px", // Reduced from 12px 16px
-                        display: "flex",
-                        alignItems: "center",
-                        minHeight: "44px",
-                      }}
-                    >
-                      {/* Account Column - LEFT ALIGNED */}
-                      <div
-                        style={{
-                          flex: 4,
-                          minWidth: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "flex-start",
-                          paddingRight: "6px", // Reduced from 8px
-                        }}
-                      >
+                    <div className="flex items-center py-2.5 px-4 min-h-11">
+                      {/* Account Column */}
+                      <div className="w-[45%] min-w-0 text-left px-1">
                         <div
-                          style={{
-                            fontWeight: "500",
-                            color: isActive ? "#1e293b" : "#6c757d",
-                            fontSize: "13px",
-                            textDecoration: isActive ? "none" : "line-through",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
+                          className={cls(
+                            "text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap",
+                            isActive ? "text-gray-800" : "text-gray-500",
+                            !isActive && "line-through",
+                          )}
                           title={
                             accountCode.length > 15 ? accountCode : undefined
                           }
                         >
                           {truncatedAccountCode}
                           {!isActive && (
-                            <span
-                              style={{
-                                fontSize: "9px",
-                                color: "#dc2626",
-                                marginLeft: "3px",
-                                fontWeight: "normal",
-                              }}
-                            >
+                            <span className="text-[9px] text-red-600 ml-0.5 font-normal">
                               (inactive)
                             </span>
                           )}
                         </div>
                       </div>
 
-                      {/* Savings Column - LEFT ALIGNED */}
-                      <div
-                        style={{
-                          flex: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "flex-start",
-                          paddingRight: "6px", // Reduced from 8px
-                        }}
-                      >
+                      {/* Savings Column - With right padding for spacing */}
+                      <div className="w-[25%] text-left px-2">
                         <div
-                          style={{
-                            fontSize: "13px",
-                            fontWeight: "600",
-                            color: isActive ? "#4285f4" : "#6c757d",
-                            whiteSpace: "nowrap",
-                          }}
+                          className={cls(
+                            "text-xs font-semibold whitespace-nowrap",
+                            isActive ? "text-blue-600" : "text-gray-500",
+                          )}
                         >
                           {formatCurrency(account.savingsAmount)}
                         </div>
                       </div>
 
-                      {/* MPIN Column - LEFT ALIGNED, BLACK FONT */}
-                      <div
-                        style={{
-                          flex: 3,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "flex-start",
-                          paddingRight: "6px", // Reduced from 8px
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: "'Courier New', monospace",
-                            fontSize: "14px",
-                            color: "#000000",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            fontWeight: "500",
-                          }}
-                        >
+                      {/* MPIN Column - With left padding for spacing from Savings */}
+                      <div className="w-[20%] text-left px-2">
+                        <div className="font-mono text-xs text-black overflow-hidden text-ellipsis whitespace-nowrap font-medium">
                           {account.mpin || "••••"}
                         </div>
                       </div>
 
-                      {/* Edit Button Column - LEFT ALIGNED */}
+                      {/* Edit Button Column - Pushed to end */}
                       {settings?.showDelete && (
-                        <div
-                          style={{
-                            width: "28px",
-                            display: "flex",
-                            justifyContent: "flex-start",
-                            alignItems: "center",
-                          }}
-                        >
+                        <div className="w-[10%] flex justify-end items-center px-1">
                           <button
                             onClick={(e) => handleEditClick(account.id, e)}
-                            style={{
-                              padding: "2px",
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              color: "#6b7280",
-                              fontSize: "14px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              width: "26px",
-                              height: "26px",
-                            }}
+                            className="p-0.5 bg-transparent border-none cursor-pointer text-gray-500 text-xs flex items-center justify-center w-6 h-6 hover:text-blue-600"
                             title="Edit Account"
                           >
                             ✏️
@@ -358,67 +207,24 @@ const AccountsTab: React.FC = () => {
               })}
             </div>
 
-            {/* Total Savings Footer - REDUCED PADDING */}
-            <div
-              style={{
-                padding: "10px 12px", // Reduced from 12px 16px
-                backgroundColor: "#f3f4f6",
-                borderTop: "1px solid #e9ecef",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                <div style={{ fontSize: "11px", color: "#6b7280" }}>
+            {/* Total Savings Footer */}
+            <div className="bg-gray-50 border-t border-gray-300 px-4 py-2.5 flex justify-between items-center">
+              <div className="flex flex-col justify-center">
+                <div className="text-2xs text-gray-600">
                   {settings?.showInactive
                     ? `${sortedAccounts.length} of ${accounts.length} accounts`
                     : `${sortedAccounts.length} active accounts`}
                 </div>
-                <div
-                  style={{
-                    fontSize: "9px",
-                    color: "#94a3b8",
-                    marginTop: "1px",
-                  }}
-                >
+                <div className="text-3xs text-gray-400 mt-0.5">
                   ({activeAccountsCount} active, {inactiveAccountsCount}{" "}
                   inactive)
                 </div>
               </div>
-              <div
-                style={{
-                  textAlign: "right",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "flex-end",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "10px",
-                    color: "#64748b",
-                    fontWeight: "600",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}
-                >
+              <div className="text-right flex flex-col justify-center items-end">
+                <div className="text-2xs text-gray-500 font-semibold uppercase tracking-wider">
                   Total Savings
                 </div>
-                <div
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "700",
-                    color: "#4285f4",
-                  }}
-                >
+                <div className="text-sm font-bold text-blue-600">
                   {formatCurrency(totalSavings)}
                 </div>
               </div>
@@ -429,86 +235,29 @@ const AccountsTab: React.FC = () => {
 
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && accountToDelete && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              borderRadius: "12px",
-              padding: "20px",
-              maxWidth: "400px",
-              width: "100%",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 15px 0",
-                fontSize: "1.1rem",
-                fontWeight: "600",
-                color: "#333",
-              }}
-            >
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-50">
+          <div className="bg-white rounded-xl p-5 max-w-md w-full shadow-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
               Delete Account?
             </h3>
-            <p
-              style={{ margin: "0 0 20px 0", color: "#666", lineHeight: "1.5" }}
-            >
+            <p className="text-gray-600 mb-5 leading-relaxed">
               Are you sure you want to delete account{" "}
-              <span style={{ fontWeight: "600" }}>
-                {accountToDelete.acctCode}
-              </span>
-              ? This action cannot be undone.
+              <span className="font-semibold">{accountToDelete.acctCode}</span>?
+              This action cannot be undone.
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-              }}
-            >
+            <div className="flex gap-2.5">
               <button
                 onClick={() => {
                   setShowDeleteDialog(false);
                   setAccountToDelete(null);
                 }}
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #e9ecef",
-                  borderRadius: "8px",
-                  color: "#495057",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
+                className="flex-1 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: "#ea4335",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#ffffff",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
+                className="flex-1 py-2.5 bg-red-500 border-none rounded-lg text-white font-medium cursor-pointer hover:bg-red-600 transition-colors"
               >
                 Delete
               </button>

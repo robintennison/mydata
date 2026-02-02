@@ -62,11 +62,11 @@ const AccountsTab: React.FC = () => {
     (account) => !isAccountActive(account),
   ).length;
 
-  // Truncate account code to 15 characters
+  // Truncate account code to 12 characters
   const truncateAccountCode = (code: string): string => {
     if (!code) return "";
-    if (code.length <= 15) return code;
-    return `${code.substring(0, 15)}...`;
+    if (code.length <= 12) return code;
+    return `${code.substring(0, 12)}...`;
   };
 
   const confirmDelete = () => {
@@ -121,21 +121,21 @@ const AccountsTab: React.FC = () => {
           </div>
         ) : (
           <div>
-            {/* Table Header - IMPROVED SPACING */}
-            <div className="flex items-center py-2.5 px-4 bg-gray-50 border-b border-gray-300 font-semibold text-xs text-gray-700">
-              {/* Account Column - Takes most space */}
-              <div className="w-[45%] px-1 text-left">Account</div>
-              {/* Savings Column - With some spacing */}
-              <div className="w-[25%] px-2 text-left">Savings</div>
-              {/* MPIN Column - With more spacing from Savings */}
-              <div className="w-[20%] px-2 text-left">MPIN</div>
-              {/* Edit Button Column - Pushed to end */}
+            {/* Table Header - COMPACT */}
+            <div className="flex items-center py-2.5 px-3 bg-gray-50 border-b border-gray-300 font-semibold text-xs text-gray-700">
+              {/* Account Column */}
+              <div className="w-[38%] px-1 text-left">Account</div>
+              {/* Savings Column */}
+              <div className="w-[27%] px-1 text-left">Savings</div>
+              {/* MPIN Column - More space */}
+              <div className="w-[28%] px-1 text-left">MPIN</div>
+              {/* Edit Button Column - Minimal space */}
               {settings?.showDelete && (
-                <div className="w-[10%] px-1 flex justify-end"></div>
+                <div className="w-[7%] flex justify-end pr-0.5"></div>
               )}
             </div>
 
-            {/* Accounts Rows */}
+            {/* Accounts Rows - COMPACT */}
             <div>
               {sortedAccounts.map((account) => {
                 const isActive = isAccountActive(account);
@@ -148,9 +148,9 @@ const AccountsTab: React.FC = () => {
                     className="bg-white border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => handleRowClick(account.id)}
                   >
-                    <div className="flex items-center py-2.5 px-4 min-h-11">
+                    <div className="flex items-center py-2.5 px-3 min-h-11">
                       {/* Account Column */}
-                      <div className="w-[45%] min-w-0 text-left px-1">
+                      <div className="w-[38%] min-w-0 text-left px-1">
                         <div
                           className={cls(
                             "text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap",
@@ -158,7 +158,7 @@ const AccountsTab: React.FC = () => {
                             !isActive && "line-through",
                           )}
                           title={
-                            accountCode.length > 15 ? accountCode : undefined
+                            accountCode.length > 12 ? accountCode : undefined
                           }
                         >
                           {truncatedAccountCode}
@@ -170,8 +170,8 @@ const AccountsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Savings Column - With right padding for spacing */}
-                      <div className="w-[25%] text-left px-2">
+                      {/* Savings Column */}
+                      <div className="w-[27%] text-left px-1">
                         <div
                           className={cls(
                             "text-xs font-semibold whitespace-nowrap",
@@ -182,19 +182,19 @@ const AccountsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* MPIN Column - With left padding for spacing from Savings */}
-                      <div className="w-[20%] text-left px-2">
+                      {/* MPIN Column - More space now */}
+                      <div className="w-[28%] text-left px-1">
                         <div className="font-mono text-xs text-black overflow-hidden text-ellipsis whitespace-nowrap font-medium">
                           {account.mpin || "••••"}
                         </div>
                       </div>
 
-                      {/* Edit Button Column - Pushed to end */}
+                      {/* Edit Button Column - Minimal space */}
                       {settings?.showDelete && (
-                        <div className="w-[10%] flex justify-end items-center px-1">
+                        <div className="w-[7%] flex justify-end items-center pr-0.5">
                           <button
                             onClick={(e) => handleEditClick(account.id, e)}
-                            className="p-0.5 bg-transparent border-none cursor-pointer text-gray-500 text-xs flex items-center justify-center w-6 h-6 hover:text-blue-600"
+                            className="p-0 bg-transparent border-none cursor-pointer text-gray-500 text-2xs flex items-center justify-center w-5 h-5 hover:text-blue-600"
                             title="Edit Account"
                           >
                             ✏️
@@ -208,7 +208,7 @@ const AccountsTab: React.FC = () => {
             </div>
 
             {/* Total Savings Footer */}
-            <div className="bg-gray-50 border-t border-gray-300 px-4 py-2.5 flex justify-between items-center">
+            <div className="bg-gray-50 border-t border-gray-300 px-3 py-2.5 flex justify-between items-center">
               <div className="flex flex-col justify-center">
                 <div className="text-2xs text-gray-600">
                   {settings?.showInactive

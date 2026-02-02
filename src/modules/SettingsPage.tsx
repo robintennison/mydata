@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../contexts/SettingsContext";
-import { settingsStyles } from "./SettingsPageStyles";
 
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -141,7 +140,7 @@ const SettingsPage: React.FC = () => {
 
   const handleToggle = (
     field: "showInactive" | "showDelete",
-    value: boolean
+    value: boolean,
   ) => {
     updateSettings({ [field]: value } as any);
   };
@@ -164,7 +163,7 @@ const SettingsPage: React.FC = () => {
 
   const handleEditListItem = (
     type: "location" | "boughtFor",
-    oldValue: string
+    oldValue: string,
   ) => {
     setRenameDialog({ type, oldValue });
     setRenameValue(oldValue);
@@ -219,27 +218,20 @@ const SettingsPage: React.FC = () => {
     value: number,
     suffix: string = "",
     prefix: string = "",
-    showEditIcon: boolean = true
+    showEditIcon: boolean = true,
   ) => {
     const isEditing = editingField === field;
 
     return (
-      <div style={settingsStyles.toggleContainer}>
-        <div style={settingsStyles.toggleLabel}>
-          <div style={settingsStyles.toggleTitle}>{label}</div>
+      <div className="flex justify-between items-center py-3 border-b border-slate-50">
+        <div className="flex-1 pr-4">
+          <div className="font-medium text-slate-900 mb-1 text-sm">{label}</div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="flex items-center gap-2">
           {isEditing ? (
             <>
               {prefix && (
-                <span
-                  style={{
-                    ...settingsStyles.currencySymbol,
-                    position: "static",
-                    transform: "none",
-                    color: "#495057",
-                  }}
-                >
+                <span className="text-slate-700 font-medium text-sm">
                   {prefix}
                 </span>
               )}
@@ -247,50 +239,24 @@ const SettingsPage: React.FC = () => {
                 type="text"
                 value={editValue}
                 onChange={(e) => handleEditValueChange(e.target.value)}
-                style={{
-                  width: "80px",
-                  padding: "8px 12px",
-                  border: "1px solid #d1d5db",
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                  textAlign: "right",
-                }}
+                className="w-20 p-2 text-sm border border-slate-300 rounded text-right"
                 autoFocus
                 onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
               />
               {suffix && (
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "#495057",
-                  }}
-                >
-                  {suffix}
-                </span>
+                <span className="text-slate-700 text-sm">{suffix}</span>
               )}
-              <div style={{ display: "flex", gap: "4px" }}>
+              <div className="flex gap-1">
                 <button
                   onClick={handleSaveEdit}
-                  style={{
-                    ...settingsStyles.iconButton,
-                    ...settingsStyles.saveButton,
-                    padding: "6px 8px",
-                    minWidth: "30px",
-                    height: "32px",
-                  }}
+                  className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-emerald-500 text-white hover:bg-emerald-600"
                   title="Save"
                 >
                   ✓
                 </button>
                 <button
                   onClick={handleCancelEdit}
-                  style={{
-                    ...settingsStyles.iconButton,
-                    ...settingsStyles.cancelButton,
-                    padding: "6px 8px",
-                    minWidth: "30px",
-                    height: "32px",
-                  }}
+                  className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-red-500 text-white hover:bg-red-600"
                   title="Cancel"
                 >
                   ✕
@@ -299,16 +265,7 @@ const SettingsPage: React.FC = () => {
             </>
           ) : (
             <>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#333",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "2px",
-                }}
-              >
+              <div className="text-sm font-semibold text-slate-700 flex items-center gap-1">
                 {prefix && <span>{prefix}</span>}
                 {formatNumber(value)}
                 {suffix && <span>{suffix}</span>}
@@ -316,14 +273,7 @@ const SettingsPage: React.FC = () => {
               {showEditIcon && (
                 <button
                   onClick={() => handleStartEdit(field, value)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    color: "#6b7280",
-                    padding: "2px",
-                  }}
+                  className="bg-transparent border-none text-base cursor-pointer text-slate-500 p-0.5 hover:text-slate-700"
                   title="Edit"
                 >
                   ✏️
@@ -340,25 +290,19 @@ const SettingsPage: React.FC = () => {
     label: string,
     description: string,
     field: "showInactive" | "showDelete",
-    value: boolean
+    value: boolean,
   ) => (
-    <div style={settingsStyles.toggleContainer}>
-      <div style={settingsStyles.toggleLabel}>
-        <div style={settingsStyles.toggleTitle}>{label}</div>
-        <div style={settingsStyles.toggleDescription}>{description}</div>
+    <div className="flex justify-between items-center py-3 border-b border-slate-50">
+      <div className="flex-1 pr-4">
+        <div className="font-medium text-slate-900 mb-1 text-sm">{label}</div>
+        <div className="text-xs text-slate-500 leading-snug">{description}</div>
       </div>
       <div
-        style={{
-          ...settingsStyles.toggleSwitch,
-          ...(value ? settingsStyles.toggleSwitchOn : {}),
-        }}
+        className={`w-14 h-8 rounded-full relative cursor-pointer transition-colors duration-200 ease-in-out flex-shrink-0 ${value ? "bg-blue-600" : "bg-slate-300"}`}
         onClick={() => handleToggle(field, !value)}
       >
         <div
-          style={{
-            ...settingsStyles.toggleKnob,
-            ...(value ? settingsStyles.toggleKnobOn : {}),
-          }}
+          className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-200 ease-in-out ${value ? "translate-x-6" : ""}`}
         />
       </div>
     </div>
@@ -371,27 +315,26 @@ const SettingsPage: React.FC = () => {
     setIsExpanded: (val: boolean) => void,
     setShowAdd: (val: boolean) => void,
     items: string[],
-    type: "location" | "boughtFor"
+    type: "location" | "boughtFor",
   ) => (
-    <div style={settingsStyles.listSection}>
-      <div style={settingsStyles.listHeader}>
-        <div style={settingsStyles.listTitleContainer}>
-          <h3 style={settingsStyles.listTitle}>{title}</h3>
-          <div style={settingsStyles.listCount}>{count} items</div>
+    <div className="mb-6 px-1.5">
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex-1">
+          <h3 className="m-0 mb-1 text-lg font-semibold text-slate-900">
+            {title}
+          </h3>
+          <div className="text-xs text-slate-500">{count} items</div>
         </div>
-        <div style={settingsStyles.listActions}>
+        <div className="flex gap-2">
           <button
             onClick={() => setShowAdd(true)}
-            style={settingsStyles.listButton}
+            className="px-4 py-2 bg-indigo-100 border border-indigo-200 rounded text-indigo-600 font-medium cursor-pointer text-sm transition-all hover:bg-indigo-200 min-w-15"
           >
             Add
           </button>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            style={{
-              ...settingsStyles.expandButton,
-              ...(isExpanded ? { backgroundColor: "#c7d2fe" } : {}),
-            }}
+            className={`p-2 bg-indigo-100 border border-indigo-200 rounded text-indigo-600 cursor-pointer text-sm flex items-center justify-center w-10 h-10 transition-all hover:bg-indigo-200 ${isExpanded ? "bg-indigo-200" : ""}`}
           >
             {isExpanded ? "Hide" : "Show"}
           </button>
@@ -399,38 +342,31 @@ const SettingsPage: React.FC = () => {
       </div>
 
       {isExpanded && (
-        <div style={settingsStyles.listContainer}>
+        <div className="border border-slate-200 rounded overflow-hidden mt-2.5">
           {items.length === 0 ? (
-            <div style={settingsStyles.emptyList}>
+            <div className="p-5 text-center text-slate-500 italic">
               No {title.toLowerCase()} yet.
             </div>
           ) : (
             items.map((item, index) => (
               <div
                 key={index}
-                style={{
-                  ...settingsStyles.listItem,
-                  ...(index % 2 === 0 ? {} : settingsStyles.listItemEven),
-                }}
+                className={`flex justify-between items-center p-3 border-b border-slate-100 transition-colors ${index % 2 !== 0 ? "bg-slate-50" : "bg-white"}`}
               >
-                <span style={settingsStyles.listItemText}>{item}</span>
-                <div style={settingsStyles.listItemActions}>
+                <span className="text-sm text-slate-900 flex-1 pr-2.5">
+                  {item}
+                </span>
+                <div className="flex gap-2 flex-shrink-0">
                   <button
                     onClick={() => handleEditListItem(type, item)}
-                    style={{
-                      ...settingsStyles.iconActionButton,
-                      ...settingsStyles.editButton,
-                    }}
+                    className="p-1.5 border rounded cursor-pointer text-sm flex items-center justify-center w-8 h-8 transition-all bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
                     title="Edit"
                   >
                     ✏️
                   </button>
                   <button
                     onClick={() => handleDelete(type, item)}
-                    style={{
-                      ...settingsStyles.iconActionButton,
-                      ...settingsStyles.deleteButton,
-                    }}
+                    className="p-1.5 border rounded cursor-pointer text-sm flex items-center justify-center w-8 h-8 transition-all bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
                     title="Delete"
                   >
                     🗑️
@@ -450,38 +386,33 @@ const SettingsPage: React.FC = () => {
     setValue: (val: string) => void,
     onSave: () => void,
     onCancel: () => void,
-    placeholder: string
+    placeholder: string,
   ) => (
-    <div style={settingsStyles.dialogOverlay}>
-      <div style={settingsStyles.dialog}>
-        <h3 style={settingsStyles.dialogTitle}>{title}</h3>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-5">
+      <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+        <h3 className="m-0 mb-4 text-lg font-semibold text-slate-900">
+          {title}
+        </h3>
         <input
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder}
-          style={settingsStyles.input}
+          className="w-full p-3 border border-slate-300 rounded text-sm text-slate-900 bg-white mb-4"
           autoFocus
           onKeyPress={(e) => e.key === "Enter" && onSave()}
         />
-        <div style={settingsStyles.dialogActions}>
+        <div className="flex gap-3 justify-end">
           <button
             onClick={onCancel}
-            style={{
-              ...settingsStyles.dialogButton,
-              ...settingsStyles.cancelDialogButton,
-            }}
+            className="px-5 py-2.5 rounded font-medium cursor-pointer text-sm transition-all min-w-20 bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200"
           >
             Cancel
           </button>
           <button
             onClick={onSave}
             disabled={!value.trim()}
-            style={{
-              ...settingsStyles.dialogButton,
-              ...settingsStyles.confirmDialogButton,
-              ...(!value.trim() ? settingsStyles.disabledButton : {}),
-            }}
+            className={`px-5 py-2.5 rounded font-medium cursor-pointer text-sm transition-all min-w-20 bg-emerald-500 text-white hover:bg-emerald-600 ${!value.trim() ? "bg-slate-400 cursor-not-allowed opacity-60" : ""}`}
           >
             Save
           </button>
@@ -492,85 +423,88 @@ const SettingsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={settingsStyles.loadingContainer}>
-        <div style={settingsStyles.loadingSpinner}></div>
-        <p style={settingsStyles.loadingText}>Loading settings...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] bg-slate-50">
+        <div className="w-10 h-10 border-3 border-slate-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <p className="text-slate-500 text-sm font-medium">
+          Loading settings...
+        </p>
       </div>
     );
   }
 
   return (
-    <div style={{ ...settingsStyles.container, maxWidth: "600px" }}>
+    <div className="min-h-screen bg-slate-50 max-w-2xl mx-auto shadow-lg">
       {/* Compact Header - Single row */}
-      <div style={settingsStyles.topNav}>
+      <div className="flex items-center justify-between p-3 px-5 bg-white border-b border-slate-200">
         <button
           onClick={() => navigate(-1)}
-          style={settingsStyles.navButton}
+          className="w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-900 text-2xl cursor-pointer transition-all hover:bg-slate-50"
           title="Go Back"
         >
           ←
         </button>
-        <h1 style={settingsStyles.navTitle}>System / Settings</h1>
+        <h1 className="text-lg font-semibold text-slate-900">
+          System / Settings
+        </h1>
         <button
           onClick={() => navigate("/banking")}
-          style={{
-            ...settingsStyles.navButton,
-            fontSize: "20px",
-            border: "none",
-            backgroundColor: "transparent",
-          }}
+          className="w-10 h-10 text-2xl border-none bg-transparent hover:bg-transparent flex items-center justify-center text-slate-900 cursor-pointer"
           title="Home"
         >
           🏠
         </button>
       </div>
 
-      <div style={settingsStyles.content}>
+      <div className="p-0 bg-white min-h-[calc(100vh-160px)]">
         {/* Display Settings at TOP - Compact */}
-        <div style={settingsStyles.section}>
-          <h3 style={settingsStyles.sectionTitle}>Display Settings</h3>
+        <div className="mb-6 px-1.5">
+          <h3 className="m-0 mb-4 text-lg font-semibold text-slate-900 flex items-center justify-between">
+            Display Settings
+          </h3>
           {renderToggleField(
             "Show Inactive Items",
             "Show inactive jewellery in lists and gallery",
             "showInactive",
-            settings?.showInactive || false
+            settings?.showInactive || false,
           )}
           {renderToggleField(
             "Show Delete Action",
             "Display the delete control on Edit screen",
             "showDelete",
-            settings?.showDelete || false
+            settings?.showDelete || false,
           )}
         </div>
 
         {/* Financial Settings - Compact */}
-        <div style={settingsStyles.section}>
-          <h3 style={settingsStyles.sectionTitle}>Financial Settings</h3>
+        <div className="mb-6 px-1.5">
+          <h3 className="m-0 mb-4 text-lg font-semibold text-slate-900 flex items-center justify-between">
+            Financial Settings
+          </h3>
           {renderEditableField(
             "Gold Rate per gram",
             "goldRate",
             financialSettings.goldRate,
             "",
-            "₹"
+            "₹",
           )}
           {renderEditableField(
             "Making Tax",
             "makingTax",
             financialSettings.makingTax,
-            "%"
+            "%",
           )}
           {renderEditableField(
             "Resale Discount",
             "resaleDiscount",
             financialSettings.resaleDiscount,
-            "%"
+            "%",
           )}
           {renderEditableField(
             "Liabilities",
             "liabilities",
             financialSettings.liabilities,
             "",
-            "₹"
+            "₹",
           )}
         </div>
 
@@ -582,7 +516,7 @@ const SettingsPage: React.FC = () => {
           setLocExpanded,
           setShowAddLoc,
           settings?.locations || [],
-          "location"
+          "location",
         )}
 
         {/* Bought For Management - Compact */}
@@ -593,70 +527,52 @@ const SettingsPage: React.FC = () => {
           setBfExpanded,
           setShowAddBf,
           settings?.boughtFor || [],
-          "boughtFor"
+          "boughtFor",
         )}
 
         {/* EMW Settings at BOTTOM - Compact */}
-        <div style={{ ...settingsStyles.section, paddingBottom: "80px" }}>
-          <h3 style={settingsStyles.sectionTitle}>
+        <div className="mb-6 px-1.5 pb-20">
+          <h3 className="m-0 mb-4 text-lg font-semibold text-slate-900 flex items-center justify-between">
             EMW (Equated Monthly Withdrawal) Settings
           </h3>
           {renderEditableField(
             "EMW Interest Rate",
             "emwInterest",
             financialSettings.emwInterest,
-            "%"
+            "%",
           )}
 
           {/* EMW Target Date */}
-          <div style={settingsStyles.toggleContainer}>
-            <div style={settingsStyles.toggleLabel}>
-              <div style={settingsStyles.toggleTitle}>EMW Target Date</div>
+          <div className="flex justify-between items-center py-3 border-b border-slate-50">
+            <div className="flex-1 pr-4">
+              <div className="font-medium text-slate-900 mb-1 text-sm">
+                EMW Target Date
+              </div>
             </div>
             {editingEmwDate ? (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
+              <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={emwDateValue}
                   onChange={(e) => setEmwDateValue(e.target.value)}
                   placeholder="YYYY-MM"
-                  style={{
-                    width: "90px",
-                    padding: "8px 12px",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "6px",
-                    fontSize: "14px",
-                  }}
+                  className="w-22 p-2 text-sm border border-slate-300 rounded"
                   autoFocus
                   onKeyPress={(e) =>
                     e.key === "Enter" && handleSaveEmwDateEdit()
                   }
                 />
-                <div style={{ display: "flex", gap: "4px" }}>
+                <div className="flex gap-1">
                   <button
                     onClick={handleSaveEmwDateEdit}
-                    style={{
-                      ...settingsStyles.iconButton,
-                      ...settingsStyles.saveButton,
-                      padding: "6px 8px",
-                      minWidth: "30px",
-                      height: "32px",
-                    }}
+                    className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-emerald-500 text-white hover:bg-emerald-600"
                     title="Save"
                   >
                     ✓
                   </button>
                   <button
                     onClick={handleCancelEmwDateEdit}
-                    style={{
-                      ...settingsStyles.iconButton,
-                      ...settingsStyles.cancelButton,
-                      padding: "6px 8px",
-                      minWidth: "30px",
-                      height: "32px",
-                    }}
+                    className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-red-500 text-white hover:bg-red-600"
                     title="Cancel"
                   >
                     ✕
@@ -664,38 +580,18 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <div
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "#333",
-                    textAlign: "right",
-                  }}
-                >
-                  <div>{formatEmwDate(emwDate)}</div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#6b7280",
-                      fontWeight: "normal",
-                    }}
-                  >
+              <div className="flex items-center gap-2">
+                <div>
+                  <div className="text-sm font-semibold text-slate-700 text-right">
+                    {formatEmwDate(emwDate)}
+                  </div>
+                  <div className="text-xs text-slate-500 font-normal">
                     ({emwDate})
                   </div>
                 </div>
                 <button
                   onClick={handleStartEmwDateEdit}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    color: "#6b7280",
-                    padding: "2px",
-                  }}
+                  className="bg-transparent border-none text-base cursor-pointer text-slate-500 p-0.5 hover:text-slate-700"
                   title="Edit"
                 >
                   ✏️
@@ -714,7 +610,7 @@ const SettingsPage: React.FC = () => {
           setNewLocation,
           handleAddLocation,
           () => setShowAddLoc(false),
-          "Enter location name"
+          "Enter location name",
         )}
 
       {/* Add Bought For Dialog */}
@@ -725,7 +621,7 @@ const SettingsPage: React.FC = () => {
           setNewBoughtFor,
           handleAddBoughtFor,
           () => setShowAddBf(false),
-          "Enter purpose"
+          "Enter purpose",
         )}
 
       {/* Rename Dialog */}
@@ -741,7 +637,7 @@ const SettingsPage: React.FC = () => {
             setRenameDialog(null);
             setRenameValue("");
           },
-          "Enter new value"
+          "Enter new value",
         )}
     </div>
   );

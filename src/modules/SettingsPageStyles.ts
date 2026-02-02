@@ -490,3 +490,93 @@ export const settingsStyles = {
     opacity: 0.6,
   } as React.CSSProperties,
 };
+
+
+// New Tailwind styles
+export const settingsTw = {
+  // Layout
+  container: "min-h-screen bg-slate-50 max-w-2xl mx-auto shadow-lg",
+  content: "p-0 bg-white min-h-[calc(100vh-160px)]",
+  
+  // Navigation
+  topNav: "flex items-center justify-between p-3 px-5 bg-white border-b border-slate-200",
+  navButton: "w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-900 text-2xl cursor-pointer transition-all hover:bg-slate-50",
+  navTitle: "text-lg font-semibold text-slate-900",
+  navHomeButton: "text-2xl border-none bg-transparent hover:bg-transparent",
+  
+  // Sections
+  section: "mb-6 px-1.5",
+  sectionTitle: "m-0 mb-4 text-lg font-semibold text-slate-900 flex items-center justify-between",
+  
+  // Toggle Fields - Preserving the working toggle structure
+  toggleContainer: "flex justify-between items-center py-3 border-b border-slate-50",
+  toggleLabel: "flex-1 pr-4",
+  toggleTitle: "font-medium text-slate-900 mb-1 text-sm",
+  toggleDescription: "text-xs text-slate-500 leading-snug",
+  toggleSwitch: "w-12 h-7 bg-slate-300 rounded-full relative cursor-pointer transition-colors flex-shrink-0",
+  toggleSwitchOn: "bg-blue-600",
+  toggleKnob: "absolute top-1.5 left-1.5 w-4 h-4 bg-white rounded-full transition-all",
+  toggleKnobOn: "left-6.5",
+  
+  // Editable Fields
+  editableValue: "text-sm font-semibold text-slate-700 flex items-center gap-1",
+  editButton: "bg-transparent border-none text-base cursor-pointer text-slate-500 p-0.5 hover:text-slate-700",
+  
+  // Edit Input
+  editInputContainer: "flex items-center gap-2",
+  editInput: "w-20 p-2 text-sm border border-slate-300 rounded text-right",
+  iconButton: "p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all",
+  saveButton: "bg-emerald-500 text-white hover:bg-emerald-600",
+  cancelButton: "bg-red-500 text-white hover:bg-red-600",
+  
+  // List Sections
+  listSection: "mb-6 px-1.5",
+  listHeader: "flex justify-between items-center mb-4",
+  listTitleContainer: "flex-1",
+  listTitle: "m-0 mb-1 text-lg font-semibold text-slate-900",
+  listCount: "text-xs text-slate-500",
+  listActions: "flex gap-2",
+  listButton: "px-4 py-2 bg-indigo-100 border border-indigo-200 rounded text-indigo-600 font-medium cursor-pointer text-sm transition-all hover:bg-indigo-200 min-w-15",
+  expandButton: "p-2 bg-indigo-100 border border-indigo-200 rounded text-indigo-600 cursor-pointer text-sm flex items-center justify-center w-10 h-10 transition-all hover:bg-indigo-200",
+  expandButtonActive: "bg-indigo-200",
+  
+  // List Items
+  listContainer: "border border-slate-200 rounded overflow-hidden mt-2.5",
+  listItem: "flex justify-between items-center p-3 border-b border-slate-100 bg-white transition-colors",
+  listItemEven: "bg-slate-50",
+  listItemText: "text-sm text-slate-900 flex-1 pr-2.5",
+  listItemActions: "flex gap-2 flex-shrink-0",
+  
+  // Icon Action Buttons
+  iconActionButton: "p-1.5 border rounded cursor-pointer text-sm flex items-center justify-center w-8 h-8 transition-all",
+  editActionButton: "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100",
+  deleteActionButton: "bg-red-50 border-red-200 text-red-600 hover:bg-red-100",
+  
+  // Empty States
+  emptyList: "p-5 text-center text-slate-500 italic",
+  
+  // Loading
+  loadingContainer: "flex flex-col items-center justify-center min-h-[60vh] bg-slate-50",
+  loadingSpinner: "w-10 h-10 border-3 border-slate-200 border-t-blue-500 rounded-full animate-spin mb-4",
+  loadingText: "text-slate-500 text-sm font-medium",
+  
+  // Dialogs
+  dialogOverlay: "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-5",
+  dialog: "bg-white rounded-xl p-6 max-w-sm w-full shadow-xl",
+  dialogTitle: "m-0 mb-4 text-lg font-semibold text-slate-900",
+  dialogInput: "w-full p-3 border border-slate-300 rounded text-sm text-slate-900 bg-white mb-4",
+  dialogActions: "flex gap-3 justify-end",
+  dialogButton: "px-5 py-2.5 rounded font-medium cursor-pointer text-sm transition-all min-w-20",
+  cancelDialogButton: "bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200",
+  confirmDialogButton: "bg-emerald-500 text-white hover:bg-emerald-600",
+  disabledButton: "bg-slate-400 cursor-not-allowed opacity-60",
+  
+  // EMW Date Display
+  emwDateContainer: "flex items-center gap-2",
+  emwDateValue: "text-sm font-semibold text-slate-700 text-right",
+  emwDateSubtext: "text-xs text-slate-500 font-normal",
+};
+
+// Helper function for conditional classes
+export const cls = (...classes: (string | boolean | undefined)[]) => 
+  classes.filter(Boolean).join(' ');

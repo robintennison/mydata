@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { Jewellery, VerificationStatus } from "../models/types";
-import { tw } from "../../../utils/tailwindMapping";
 
 interface Bill {
   id: string;
@@ -319,23 +318,11 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
     return "📎";
   };
 
-  const getVerificationBadgeClass = (status: string) => {
-    switch (status) {
-      case VerificationStatus.VERIFIED:
-        return tw.verifiedBadge;
-      case VerificationStatus.MISSING:
-        return tw.missingBadge;
-      case VerificationStatus.NOT_VERIFIED:
-      default:
-        return tw.notVerifiedBadge;
-    }
-  };
-
   if (loading) {
     return (
-      <div className={tw.container}>
-        <div className={tw.loading}>
-          <div className={tw.spinner}></div>
+      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-gray-50 text-gray-700 m-0 p-0">
+          <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
           <p>Loading jewellery details...</p>
         </div>
       </div>
@@ -344,11 +331,11 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
 
   if (!item) {
     return (
-      <div className={tw.container}>
-        <div className={tw.topNav}>
+      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
+        <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
           <button
             onClick={() => navigate("/jewellery/list")}
-            className={tw.navButton}
+            className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
             title="Back to Jewellery"
           >
             ←
@@ -356,13 +343,13 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
           <div className="text-lg font-semibold text-gray-900 flex-1 text-center">
             Jewellery Not Found
           </div>
-          <div style={{ width: "40px" }}></div>
+          <div className="w-10"></div>
         </div>
-        <div className={tw.notFoundContainer}>
+        <div className="p-5 text-center">
           <p className="mb-4">The requested jewellery item was not found.</p>
           <button
             onClick={() => navigate("/jewellery/list")}
-            className={tw.notFoundButton}
+            className="px-5 py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm hover:bg-blue-600 transition-colors"
           >
             Back to Jewellery List
           </button>
@@ -372,12 +359,12 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
   }
 
   return (
-    <div className={tw.container}>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
       {/* Top Navigation */}
-      <div className={tw.topNav}>
+      <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
         <button
           onClick={() => navigate("/jewellery/list")}
-          className={tw.navButton}
+          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
           title="Back to Jewellery"
         >
           ←
@@ -398,22 +385,22 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
 
       {/* Content */}
       <div className="p-4">
-        <div className={tw.card}>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {item.code}
           </h3>
 
           {item.imageUrl && (
-            <div className={tw.imageContainer}>
+            <div className="mb-5 text-center relative">
               <img
                 src={item.imageUrl}
                 alt={item.code}
-                className={tw.jewelleryImage}
+                className="max-w-full max-h-[300px] rounded-lg"
               />
               <button
                 onClick={handleDownloadImage}
                 disabled={downloadingImage}
-                className={tw.imageDownloadButton}
+                className="absolute bottom-3 right-3 bg-black/70 text-white border-none rounded-lg px-3 py-2 cursor-pointer text-sm flex items-center gap-1.5 hover:bg-black/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                 title="Download Image"
               >
                 {downloadingImage ? (
@@ -431,30 +418,40 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
             </div>
           )}
 
-          <div className={tw.detailGrid}>
-            <div className={tw.detailItem}>
-              <span className={tw.detailLabel}>Code:</span>
-              <span className={tw.detailValue}>{item.code}</span>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-700 mb-0.5">Code:</span>
+              <span className="text-gray-900">{item.code}</span>
             </div>
-            <div className={tw.detailItem}>
-              <span className={tw.detailLabel}>Description:</span>
-              <span className={tw.detailValue}>{item.description}</span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-700 mb-0.5">
+                Description:
+              </span>
+              <span className="text-gray-900">{item.description}</span>
             </div>
-            <div className={tw.detailItem}>
-              <span className={tw.detailLabel}>Weight:</span>
-              <span className={tw.detailValue}>{item.weight}g</span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-700 mb-0.5">
+                Weight:
+              </span>
+              <span className="text-gray-900">{item.weight}g</span>
             </div>
-            <div className={tw.detailItem}>
-              <span className={tw.detailLabel}>Location:</span>
-              <span className={tw.detailValue}>{item.location}</span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-700 mb-0.5">
+                Location:
+              </span>
+              <span className="text-gray-900">{item.location}</span>
             </div>
-            <div className={tw.detailItem}>
-              <span className={tw.detailLabel}>Bought For:</span>
-              <span className={tw.detailValue}>{item.boughtFor}</span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-700 mb-0.5">
+                Bought For:
+              </span>
+              <span className="text-gray-900">{item.boughtFor}</span>
             </div>
-            <div className={tw.detailItem}>
-              <span className={tw.detailLabel}>Purchase Date:</span>
-              <span className={tw.detailValue}>
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-700 mb-0.5">
+                Purchase Date:
+              </span>
+              <span className="text-gray-900">
                 {item.purchaseDate
                   ? new Date(item.purchaseDate).toLocaleDateString()
                   : "Not specified"}
@@ -463,16 +460,18 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
 
             {/* Bill Information Section */}
             {item.billId && (
-              <div className={tw.billSection}>
-                <div className={tw.billHeader}>
-                  <div className={tw.billTitle}>Attached Bill</div>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-3">
+                <div className="flex justify-between items-center mb-3">
+                  <div className="text-base font-semibold text-gray-900">
+                    Attached Bill
+                  </div>
                   {billLoading && (
-                    <span className={`${tw.billStatus} ${tw.billLoading}`}>
+                    <span className="text-xs px-2 py-1 rounded-full text-gray-600">
                       Loading bill...
                     </span>
                   )}
                   {billError && (
-                    <span className={`${tw.billStatus} ${tw.billError}`}>
+                    <span className="text-xs px-2 py-1 rounded-full text-red-600">
                       {billError}
                     </span>
                   )}
@@ -480,7 +479,7 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
 
                 {bill ? (
                   <>
-                    <div className={tw.billInfo}>
+                    <div className="mb-3 space-y-1.5">
                       <div>
                         <strong>Notes:</strong> {bill.notes || "No notes"}
                       </div>
@@ -493,10 +492,10 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
                       <div>
                         <strong>Status:</strong>{" "}
                         <span
-                          className={`${tw.billStatus} ${
+                          className={`text-xs px-2 py-1 rounded-full ${
                             bill.downloadUrl
-                              ? tw.billAvailable
-                              : tw.billUnavailable
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                           }`}
                         >
                           {bill.downloadUrl ? "Available" : "No download URL"}
@@ -506,20 +505,20 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
 
                     {/* Bill Action Buttons */}
                     {bill.downloadUrl && (
-                      <div className={tw.billActions}>
+                      <div className="flex gap-3 mt-4">
                         <button
                           onClick={handleViewBill}
-                          className={tw.billViewButton}
+                          className="flex-1 py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors"
                           title="View Bill"
                         >
-                          <span className={tw.fileTypeIcon}>
+                          <span className="text-base">
                             {getFileTypeIcon(bill.mimeType)}
                           </span>
                           <span>View Bill</span>
                         </button>
                         <button
                           onClick={handleDownloadBill}
-                          className={tw.billDownloadButton}
+                          className="flex-1 py-2.5 bg-green-500 text-white border-none rounded-lg cursor-pointer flex items-center justify-center gap-2 hover:bg-green-600 transition-colors"
                           title="Download Bill"
                         >
                           <span>📥</span>
@@ -529,7 +528,7 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
                     )}
 
                     {!bill.downloadUrl && (
-                      <div className={tw.billWarning}>
+                      <div className="p-3 bg-yellow-100 rounded-lg text-yellow-800 text-sm">
                         ⚠️ Bill document exists but no download URL is
                         available.
                       </div>
@@ -543,33 +542,45 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
               </div>
             )}
 
-            <div className={tw.detailItem}>
-              <span className={tw.detailLabel}>Status:</span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-700 mb-0.5">
+                Status:
+              </span>
               <span
-                className={`${tw.verificationBadge} ${getVerificationBadgeClass(
-                  item.verificationStatus,
-                )}`}
+                className={`inline-block px-2 py-1 rounded-full text-xs font-medium text-white ${
+                  item.verificationStatus === VerificationStatus.VERIFIED
+                    ? "bg-green-500"
+                    : item.verificationStatus === VerificationStatus.MISSING
+                      ? "bg-red-500"
+                      : "bg-gray-500"
+                }`}
               >
                 {item.verificationStatus}
               </span>
             </div>
             {item.verificationNotes && (
-              <div className={tw.detailItem}>
-                <span className={tw.detailLabel}>Verification Notes:</span>
-                <span className={tw.detailValue}>{item.verificationNotes}</span>
+              <div className="flex flex-col">
+                <span className="font-semibold text-gray-700 mb-0.5">
+                  Verification Notes:
+                </span>
+                <span className="text-gray-900">{item.verificationNotes}</span>
               </div>
             )}
             {item.lastVerified > 0 && (
-              <div className={tw.detailItem}>
-                <span className={tw.detailLabel}>Last Verified:</span>
-                <span className={tw.detailValue}>
+              <div className="flex flex-col">
+                <span className="font-semibold text-gray-700 mb-0.5">
+                  Last Verified:
+                </span>
+                <span className="text-gray-900">
                   {new Date(item.lastVerified).toLocaleDateString()}
                 </span>
               </div>
             )}
-            <div className={tw.detailItem}>
-              <span className={tw.detailLabel}>Active:</span>
-              <span className={tw.detailValue}>
+            <div className="flex flex-col">
+              <span className="font-semibold text-gray-700 mb-0.5">
+                Active:
+              </span>
+              <span className="text-gray-900">
                 {item.active ? "Yes" : "No"}
               </span>
             </div>

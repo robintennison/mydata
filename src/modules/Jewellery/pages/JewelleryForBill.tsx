@@ -12,7 +12,6 @@ import {
   doc,
 } from "firebase/firestore";
 import { Jewellery } from "../models/types";
-import { tw } from "../../../utils/tailwindMapping";
 
 // Interface for Bill data
 interface Bill {
@@ -143,19 +142,19 @@ const JewelleryForBill: React.FC = () => {
   const getStatusClass = (status: string) => {
     switch (status) {
       case "Verified":
-        return tw.linkedStatusVerified;
+        return "bg-green-500";
       case "Missing":
-        return tw.linkedStatusMissing;
+        return "bg-red-500";
       default:
-        return tw.linkedStatusDefault;
+        return "bg-gray-300";
     }
   };
 
   if (loading) {
     return (
-      <div className={tw.container}>
-        <div className={tw.loading}>
-          <div className={tw.spinner}></div>
+      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-gray-50 text-gray-700 m-0 p-0">
+          <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
           <p>Loading jewellery items for bill...</p>
         </div>
       </div>
@@ -163,12 +162,12 @@ const JewelleryForBill: React.FC = () => {
   }
 
   return (
-    <div className={tw.container}>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
       {/* Top Navigation */}
-      <div className={tw.topNav}>
+      <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
         <button
           onClick={() => navigate("/jewellery/bills")}
-          className={tw.navButton}
+          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
           title="Back to Bills"
         >
           ←
@@ -187,24 +186,24 @@ const JewelleryForBill: React.FC = () => {
 
       {/* Bill Header Information */}
       {bill && (
-        <div className={tw.billHeader}>
-          <div className={tw.billHeaderContent}>
-            <span className={tw.billIcon}>{getFileIcon(bill.mimeType)}</span>
-            <div className={tw.billInfo}>
-              <div className={tw.billType}>
+        <div className="p-3 bg-blue-50 border-b border-blue-200 mb-2">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-2xl">{getFileIcon(bill.mimeType)}</span>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-gray-900 text-sm">
                 {bill.mimeType.includes("pdf")
                   ? "PDF Bill"
                   : bill.mimeType.includes("image")
                     ? "Image Bill"
                     : "Bill Document"}
               </div>
-              <div className={tw.billDate}>
+              <div className="text-xs text-gray-600">
                 Uploaded: {formatDate(bill.uploadedAt)}
               </div>
             </div>
             <button
               onClick={() => window.open(bill.downloadUrl, "_blank")}
-              className={tw.openBillButton}
+              className="px-3 py-1.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-xs hover:bg-blue-600 transition-colors"
             >
               Open Bill
             </button>
@@ -215,17 +214,20 @@ const JewelleryForBill: React.FC = () => {
               <strong>Notes:</strong> {bill.notes}
             </div>
           )}
-          <div className={tw.billId}>
-            Bill ID: <code className={tw.billCode}>{bill.id}</code>
+          <div className="text-xs text-gray-500 mt-1">
+            Bill ID:{" "}
+            <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">
+              {bill.id}
+            </code>
           </div>
         </div>
       )}
 
       {/* Content */}
-      <div className={tw.contentWrapper}>
+      <div className="flex-1 flex flex-col w-full overflow-hidden min-h-0">
         {/* Items Count */}
         {jewelleryItems.length > 0 && (
-          <div className={tw.linkedHeader}>
+          <div className="text-xs text-gray-600 px-3 pt-3 pb-1 text-right">
             {jewelleryItems.length} items linked to this bill
           </div>
         )}
@@ -233,12 +235,12 @@ const JewelleryForBill: React.FC = () => {
         {/* Items List */}
         <div className="pb-1">
           {jewelleryItems.length === 0 ? (
-            <div className={tw.emptyStateContainer}>
-              <div className={tw.emptyIcon}>💎</div>
-              <div className={tw.emptyTitle}>
+            <div className="text-center py-10 px-4 text-gray-500">
+              <div className="text-5xl mb-4 opacity-50">💎</div>
+              <div className="text-base font-medium text-gray-600 mb-2">
                 No jewellery items linked to this bill.
               </div>
-              <div className={tw.emptySubtitle}>
+              <div className="text-sm text-gray-500 mb-4">
                 Link jewellery items by setting their Bill ID to: <br />
                 <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono mt-1 inline-block">
                   {bill?.id}
@@ -246,8 +248,8 @@ const JewelleryForBill: React.FC = () => {
               </div>
 
               {/* Quick Instructions */}
-              <div className={tw.instructionsBox}>
-                <div className={tw.instructionsTitle}>
+              <div className="bg-yellow-50 p-4 rounded-lg my-4 max-w-lg mx-auto text-xs text-yellow-800">
+                <div className="font-semibold mb-2 flex items-center gap-1.5">
                   <span>💡</span>
                   <span>How to link items:</span>
                 </div>
@@ -267,16 +269,16 @@ const JewelleryForBill: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className={tw.actionButtons}>
+              <div className="flex gap-3 justify-center flex-wrap mt-5">
                 <button
                   onClick={() => navigate("/jewellery/list")}
-                  className={`${tw.actionButton} ${tw.listButton}`}
+                  className="px-4 py-2.5 text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-colors bg-blue-500 hover:bg-blue-600"
                 >
                   📋 Go to Jewellery List
                 </button>
                 <button
                   onClick={() => navigate("/jewellery/add")}
-                  className={`${tw.actionButton} ${tw.addButton}`}
+                  className="px-4 py-2.5 text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-colors bg-green-500 hover:bg-green-600"
                 >
                   ➕ Add New Jewellery
                 </button>
@@ -290,13 +292,15 @@ const JewelleryForBill: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className={tw.linkedItem}
+                    className="bg-white p-3 border-b border-gray-100 cursor-pointer flex items-center gap-3 hover:bg-gray-50 transition-colors"
                     onClick={() => navigate(`/jewellery/detail/${item.id}`)}
                   >
                     {/* Item Image */}
                     <div
-                      className={`${tw.linkedImage} ${
-                        !item.active ? tw.linkedImageInactive : ""
+                      className={`w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden ${
+                        !item.active
+                          ? "border border-dashed border-gray-300"
+                          : ""
                       }`}
                     >
                       {item.imageUrl ? (
@@ -311,12 +315,12 @@ const JewelleryForBill: React.FC = () => {
                     </div>
 
                     {/* Item Details */}
-                    <div className={tw.linkedDetails}>
+                    <div className="flex-1 min-w-0">
                       {/* ROW 1: Code + Description + Weight */}
-                      <div className={tw.linkedRow1}>
+                      <div className="flex items-baseline justify-between mb-1 gap-2">
                         <div className="flex items-baseline gap-1.5 min-w-0 flex-1">
                           <div
-                            className={`${tw.linkedCode} ${
+                            className={`font-semibold text-gray-900 text-sm whitespace-nowrap ${
                               !item.active ? "text-gray-500" : ""
                             }`}
                           >
@@ -327,15 +331,17 @@ const JewelleryForBill: React.FC = () => {
                               Inactive
                             </span>
                           )}
-                          <div className={tw.linkedDescription}>
+                          <div className="text-sm text-gray-600 truncate min-w-0 flex-1">
                             {item.description}
                           </div>
                         </div>
-                        <div className={tw.linkedWeight}>{item.weight}g</div>
+                        <div className="text-sm text-gray-900 font-medium whitespace-nowrap flex-shrink-0">
+                          {item.weight}g
+                        </div>
                       </div>
 
                       {/* ROW 2: Location • Bought For • Purchase Date */}
-                      <div className={tw.linkedRow2}>
+                      <div className="flex items-center text-xs text-gray-500 gap-1.5 flex-wrap">
                         {item.location && (
                           <>
                             <span>{item.location}</span>
@@ -365,7 +371,7 @@ const JewelleryForBill: React.FC = () => {
 
                     {/* Status Indicator */}
                     <div
-                      className={`${tw.linkedStatus} ${getStatusClass(
+                      className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${getStatusClass(
                         item.verificationStatus,
                       )}`}
                       title={item.verificationStatus}
@@ -374,7 +380,7 @@ const JewelleryForBill: React.FC = () => {
                     {/* Edit Button */}
                     <button
                       onClick={(e) => handleEditClick(e, item.id)}
-                      className={tw.editButtonSmall}
+                      className="bg-transparent border-none text-blue-500 cursor-pointer p-1.5 rounded-lg hover:bg-blue-50 transition-colors w-8 h-8 flex items-center justify-center flex-shrink-0"
                       title="Edit"
                     >
                       ✏️

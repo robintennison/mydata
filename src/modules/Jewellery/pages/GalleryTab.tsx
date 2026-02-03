@@ -8,7 +8,6 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { Jewellery, VerificationStatus } from "../models/types";
-import styles from "./GalleryPage.module.css";
 
 interface GalleryTabProps {
   compact?: boolean; // Prop to control if it should show in compact mode
@@ -129,123 +128,33 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "40px 20px",
-          color: "#9ca3af",
-        }}
-      >
-        <div
-          style={{
-            width: "30px",
-            height: "30px",
-            border: "3px solid #f3f4f6",
-            borderTop: "3px solid #3b82f6",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-            margin: "0 auto 16px auto",
-          }}
-        ></div>
+      <div className="text-center py-10 px-5 text-gray-400 flex flex-col items-center">
+        <div className="w-[30px] h-[30px] border-[3px] border-gray-100 border-t-blue-500 rounded-full animate-spin mb-4"></div>
         <p>Loading gallery...</p>
-        <style>
-          {`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}
-        </style>
       </div>
     );
   }
 
   if (compact) {
     return (
-      <div
-        style={{
-          backgroundColor: "white",
-          borderRadius: "10px",
-          padding: "15px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          marginBottom: "15px",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "16px",
-            fontWeight: "600",
-            color: "#333",
-            marginBottom: "15px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+      <div className="bg-white rounded-lg p-[15px] shadow-sm mb-[15px]">
+        <div className="text-base font-semibold text-[#333] mb-[15px] flex justify-between items-center">
           <span>Gallery Summary</span>
-          <span
-            style={{
-              fontSize: "12px",
-              color: "#6b7280",
-              fontWeight: "normal",
-            }}
-          >
+          <span className="text-xs text-gray-500 font-normal">
             {filteredItems.length} items
           </span>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "10px",
-            marginBottom: "15px",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              borderRadius: "8px",
-              padding: "12px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#3b82f6",
-                marginBottom: "4px",
-              }}
-            >
+        <div className="grid grid-cols-3 gap-[10px] mb-[15px]">
+          <div className="bg-slate-50 rounded-lg p-3 text-center">
+            <div className="text-lg font-semibold text-blue-500 mb-1">
               {jewelleryItems.filter((item) => item.active).length}
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#6b7280",
-              }}
-            >
-              Active
-            </div>
+            <div className="text-[11px] text-gray-500">Active</div>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "#fef3c7",
-              borderRadius: "8px",
-              padding: "12px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#d97706",
-                marginBottom: "4px",
-              }}
-            >
+          <div className="bg-amber-50 rounded-lg p-3 text-center">
+            <div className="text-lg font-semibold text-amber-600 mb-1">
               {
                 jewelleryItems.filter(
                   (item) =>
@@ -254,32 +163,11 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                 ).length
               }
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#d97706",
-              }}
-            >
-              To Verify
-            </div>
+            <div className="text-[11px] text-amber-600">To Verify</div>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "#fef2f2",
-              borderRadius: "8px",
-              padding: "12px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#dc2626",
-                marginBottom: "4px",
-              }}
-            >
+          <div className="bg-red-50 rounded-lg p-3 text-center">
+            <div className="text-lg font-semibold text-red-600 mb-1">
               {
                 jewelleryItems.filter(
                   (item) =>
@@ -288,47 +176,22 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                 ).length
               }
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#dc2626",
-              }}
-            >
-              Missing
-            </div>
+            <div className="text-[11px] text-red-600">Missing</div>
           </div>
         </div>
 
-        <div
-          style={{
-            marginBottom: "15px",
-            display: "flex",
-            gap: "8px",
-          }}
-        >
+        <div className="mb-[15px] flex gap-2">
           <input
             type="text"
             placeholder="Search items..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              flex: 1,
-              padding: "8px 12px",
-              border: "1px solid #e5e7eb",
-              borderRadius: "6px",
-              fontSize: "14px",
-            }}
+            className="flex-1 py-2 px-3 border border-gray-200 rounded-md text-sm"
           />
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            style={{
-              padding: "8px",
-              border: "1px solid #e5e7eb",
-              borderRadius: "6px",
-              fontSize: "12px",
-              minWidth: "60px",
-            }}
+            className="p-2 border border-gray-200 rounded-md text-xs min-w-[60px]"
             title="Location"
           >
             {locationOptions.slice(0, 1).map((location) => (
@@ -341,21 +204,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
 
         <button
           onClick={() => navigate("/jewellery/gallery")}
-          style={{
-            width: "100%",
-            padding: "10px",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "500",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          }}
+          className="w-full p-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2"
         >
           View Full Gallery
           <span>→</span>
@@ -365,13 +214,13 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
   }
 
   return (
-    <div className={styles.container}>
+    <div className="flex flex-col min-h-screen bg-slate-50 max-w-[600px] mx-auto p-0 w-full">
       {/* Compact Top Bar - All in one row */}
-      <div className={styles.compactTopBar}>
+      <div className="flex items-center gap-1 px-2 py-1.5 bg-white border-b border-gray-200 sticky top-0 z-10 flex-nowrap overflow-x-auto min-h-[44px] m-0 w-full scrollbar-none">
         {/* Back Button */}
         <button
           onClick={() => navigate("/jewellery")}
-          className={styles.backButton}
+          className="bg-transparent border-none p-1.5 text-sm cursor-pointer text-gray-700 rounded flex items-center justify-center min-w-[28px] min-h-[28px] shrink-0 hover:bg-gray-100"
           title="Back to Jewellery"
         >
           ←
@@ -383,19 +232,23 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
           placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.compactSearch}
+          className="flex-1 min-w-0 py-1 px-1.5 rounded border border-gray-300 text-[11px] bg-white text-gray-900 shrink max-w-[120px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 placeholder:text-[11px]"
         />
 
         {/* Location Filter - Compact */}
-        <div className={styles.filterContainer}>
+        <div className="flex shrink-0 min-w-0">
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            className={styles.compactSelect}
+            className="py-1 px-1.5 pr-5 rounded border border-gray-300 text-[11px] bg-white text-gray-700 cursor-pointer min-w-0 max-w-[80px] shrink whitespace-nowrap overflow-hidden text-ellipsis appearance-none focus:outline-none focus:border-blue-500 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236b7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_4px_center] bg-[length:12px]"
             title="Location"
           >
             {locationOptions.map((location) => (
-              <option key={location} value={location}>
+              <option
+                key={location}
+                value={location}
+                className="bg-white text-gray-900 p-2 text-xs"
+              >
                 {location === "All" ? "📍 All" : `📍 ${location}`}
               </option>
             ))}
@@ -403,15 +256,19 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
         </div>
 
         {/* Bought For Filter - Compact */}
-        <div className={styles.filterContainer}>
+        <div className="flex shrink-0 min-w-0">
           <select
             value={boughtForFilter}
             onChange={(e) => setBoughtForFilter(e.target.value)}
-            className={styles.compactSelect}
+            className="py-1 px-1.5 pr-5 rounded border border-gray-300 text-[11px] bg-white text-gray-700 cursor-pointer min-w-0 max-w-[80px] shrink whitespace-nowrap overflow-hidden text-ellipsis appearance-none focus:outline-none focus:border-blue-500 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236b7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_4px_center] bg-[length:12px]"
             title="Bought For"
           >
             {boughtForOptions.map((boughtFor) => (
-              <option key={boughtFor} value={boughtFor}>
+              <option
+                key={boughtFor}
+                value={boughtFor}
+                className="bg-white text-gray-900 p-2 text-xs"
+              >
                 {boughtFor === "All" ? "👤 All" : `👤 ${boughtFor}`}
               </option>
             ))}
@@ -421,30 +278,33 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
         {/* Settings Icon */}
         <button
           onClick={() => navigate("/settings")}
-          className={styles.settingsButton}
+          className="bg-transparent border-none p-1.5 text-sm cursor-pointer text-gray-700 rounded flex items-center justify-center min-w-[28px] min-h-[28px] shrink-0 hover:bg-gray-100"
           title="Settings"
         >
           ⚙️
         </button>
 
         {/* Show Inactive Toggle (very small) */}
-        <label className={styles.inactiveToggle} title="Show Inactive">
+        <label
+          className="flex items-center gap-0.5 text-[10px] text-gray-500 cursor-pointer whitespace-nowrap shrink-0 p-1 rounded bg-gray-100 min-w-[34px] hover:bg-gray-200"
+          title="Show Inactive"
+        >
           <input
             type="checkbox"
             checked={showInactive}
             onChange={(e) => setShowInactive(e.target.checked)}
-            className={styles.inactiveCheckbox}
+            className="m-0 cursor-pointer w-3 h-3"
           />
-          <span className={styles.toggleLabel}>In</span>
+          <span className="cursor-pointer text-[9px]">In</span>
         </label>
       </div>
 
       {/* Gallery Grid - Starts immediately below top bar */}
-      <div className={styles.galleryContainer}>
+      <div className="flex-1 p-0 bg-slate-50 m-0 w-full">
         {filteredItems.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>🖼️</div>
-            <p className={styles.emptyMessage}>
+          <div className="flex flex-col items-center justify-center min-h-[50vh] p-5 text-gray-500 m-0">
+            <div className="text-5xl mb-3 opacity-50">🖼️</div>
+            <p className="text-sm text-gray-500 text-center">
               {searchTerm ||
               locationFilter !== "All" ||
               boughtForFilter !== "All"
@@ -453,27 +313,29 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
             </p>
           </div>
         ) : (
-          <div className={styles.gridContainer}>
+          <div className="grid grid-cols-3 gap-px m-0 w-full p-0">
             {filteredItems.map((item) => (
               <div
                 key={item.id}
                 onClick={() => handleImageClick(item)}
-                className={`${styles.galleryItem} ${!item.active ? styles.inactive : ""}`}
+                className={`relative cursor-pointer overflow-hidden aspect-square w-full bg-white border border-gray-200 rounded-none m-0 ${!item.active ? "opacity-50" : ""}`}
               >
                 {/* Image Container with Overlay Info */}
-                <div className={styles.imageContainer}>
+                <div className="w-full h-full relative bg-gray-50 m-0 p-0">
                   {item.imageUrl ? (
                     <>
                       <img
                         src={item.imageUrl}
                         alt={item.code}
-                        className={styles.image}
+                        className="w-full h-full object-cover block m-0 p-0"
                       />
                       {/* Overlay for Code and Weight */}
-                      <div className={styles.imageOverlay}>
-                        <div className={styles.overlayContent}>
-                          <div className={styles.overlayCode}>{item.code}</div>
-                          <div className={styles.overlayWeight}>
+                      <div className="absolute bottom-0 left-0 right-0 bg-transparent p-1.5 px-1 text-white m-0">
+                        <div className="flex flex-col items-start gap-px m-0">
+                          <div className="text-xs font-semibold text-white m-0 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+                            {item.code}
+                          </div>
+                          <div className="text-[10px] text-white m-0 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
                             {item.weight}g
                           </div>
 
@@ -481,11 +343,11 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                           {item.verificationStatus !==
                             VerificationStatus.VERIFIED && (
                             <div
-                              className={`${styles.overlayStatus} ${
+                              className={`text-[8px] px-1 py-px rounded-[3px] font-semibold tracking-wide uppercase mt-0.5 bg-white/90 text-gray-900 ${
                                 item.verificationStatus ===
                                 VerificationStatus.MISSING
-                                  ? styles.missing
-                                  : styles.notVerified
+                                  ? "bg-red-100 text-red-600"
+                                  : "bg-gray-100 text-gray-500"
                               }`}
                             >
                               {item.verificationStatus ===
@@ -498,13 +360,13 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                       </div>
                     </>
                   ) : (
-                    <div className={styles.placeholderContainer}>
-                      <div className={styles.placeholder}>💎</div>
-                      <div className={styles.placeholderInfo}>
-                        <div className={styles.placeholderCode}>
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-500 m-0 p-0">
+                      <div className="text-[32px] mb-1.5 opacity-50">💎</div>
+                      <div className="flex flex-col items-center gap-px text-center m-0 p-0">
+                        <div className="text-xs font-semibold text-gray-700 m-0">
                           {item.code}
                         </div>
-                        <div className={styles.placeholderWeight}>
+                        <div className="text-[10px] text-gray-400 m-0">
                           {item.weight}g
                         </div>
 
@@ -512,11 +374,11 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                         {item.verificationStatus !==
                           VerificationStatus.VERIFIED && (
                           <div
-                            className={`${styles.placeholderStatus} ${
+                            className={`text-[8px] px-1 py-px rounded-[3px] font-semibold tracking-wide uppercase mt-1 bg-white/90 ${
                               item.verificationStatus ===
                               VerificationStatus.MISSING
-                                ? styles.missing
-                                : styles.notVerified
+                                ? "bg-red-100 text-red-600"
+                                : "bg-gray-100 text-gray-500"
                             }`}
                           >
                             {item.verificationStatus ===
@@ -536,7 +398,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
       </div>
 
       {/* Simple counter at bottom */}
-      <div className={styles.counter}>
+      <div className="p-2 bg-white text-gray-500 text-[11px] text-center border-t border-gray-200 m-0">
         {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
       </div>
     </div>
@@ -544,3 +406,4 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
 };
 
 export default GalleryTab;
+

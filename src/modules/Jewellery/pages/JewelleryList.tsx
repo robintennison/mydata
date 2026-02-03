@@ -11,7 +11,6 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { Jewellery } from "../models/types";
-import { tw } from "../../../utils/tailwindMapping";
 import { useJewellerySettings } from "../hooks/useSettingsData";
 
 // Interface for Bill data
@@ -336,23 +335,25 @@ const JewelleryList: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={tw.container}>
-        <div className={tw.loading}>
-          <div className={tw.spinner}></div>
-          <p>Loading jewellery items and bills...</p>
+      <div className="w-full h-screen flex flex-col bg-gray-50">
+        <div className="flex flex-col items-center justify-center flex-1">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600">
+            Loading jewellery items and bills...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={tw.container}>
+    <div className="w-full h-screen flex flex-col bg-gray-50">
       {/* Top Navigation with Search */}
-      <div className={`${tw.topNav} flex items-center p-2 gap-2`}>
+      <div className="flex items-center bg-white border-b border-gray-200 p-2 gap-2">
         {/* Back Button */}
         <button
           onClick={() => navigate("/jewellery")}
-          className={`${tw.navButton} p-1.5 text-base w-9 h-9 flex-shrink-0 flex items-center justify-center`}
+          className="w-9 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-full flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 p-1.5"
           title="Back to Jewellery"
         >
           ←
@@ -365,7 +366,7 @@ const JewelleryList: React.FC = () => {
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-2.5 py-1.5 rounded-full border border-gray-200 text-sm bg-white text-gray-700"
+            className="w-full px-2.5 py-1.5 rounded-full border border-gray-200 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -378,7 +379,7 @@ const JewelleryList: React.FC = () => {
               setShowBoughtForFilter(false);
               setShowLocationFilter(!showLocationFilter);
             }}
-            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center ${selectedLocation ? "bg-blue-50" : ""}`}
+            className={`w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 p-1.25 ${selectedLocation ? "bg-blue-50" : ""}`}
             title={`Filter by location${selectedLocation ? `: ${selectedLocation}` : ""}`}
           >
             📍
@@ -391,7 +392,7 @@ const JewelleryList: React.FC = () => {
               setShowLocationFilter(false);
               setShowBoughtForFilter(!showBoughtForFilter);
             }}
-            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center ${selectedBoughtFor ? "bg-blue-50" : ""}`}
+            className={`w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 p-1.25 ${selectedBoughtFor ? "bg-blue-50" : ""}`}
             title={`Filter by purpose${selectedBoughtFor ? `: ${selectedBoughtFor}` : ""}`}
           >
             🎁
@@ -400,7 +401,7 @@ const JewelleryList: React.FC = () => {
           {/* Batch Edit Button */}
           <button
             onClick={() => navigate("/jewellery/batch-edit")}
-            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center bg-blue-50`}
+            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 p-1.25 bg-blue-50"
             title="Batch Edit Locations"
           >
             🔄
@@ -409,7 +410,7 @@ const JewelleryList: React.FC = () => {
           {/* Add Button */}
           <button
             onClick={() => navigate("/jewellery/add")}
-            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center`}
+            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 p-1.25"
             title="Add New"
           >
             ➕
@@ -418,7 +419,7 @@ const JewelleryList: React.FC = () => {
           {/* Settings Button */}
           <button
             onClick={() => navigate("/settings")}
-            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center`}
+            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 p-1.25"
             title="Settings"
           >
             ⚙️
@@ -429,12 +430,12 @@ const JewelleryList: React.FC = () => {
       {/* Inactive Items Toggle */}
       {showInactiveSetting && (
         <div className="px-3 py-2 bg-slate-50 border-b border-gray-200 text-xs flex items-center gap-2">
-          <label className="flex items-center gap-1.5">
+          <label className="flex items-center gap-1.5 cursor-pointer">
             <input
               type="checkbox"
               checked={showInactive}
               onChange={(e) => setShowInactive(e.target.checked)}
-              className="w-4 h-4"
+              className="w-4 h-4 cursor-pointer"
             />
             <span>Show inactive items</span>
           </label>
@@ -463,7 +464,7 @@ const JewelleryList: React.FC = () => {
               setSelectedLocation("");
               setShowLocationFilter(false);
             }}
-            className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-1 flex items-center gap-2 text-gray-700 ${!selectedLocation ? "bg-gray-100" : ""}`}
+            className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-1 flex items-center gap-2 text-gray-700 hover:bg-gray-100 ${!selectedLocation ? "bg-gray-100" : ""}`}
           >
             <span>📍</span>
             <span>All Locations</span>
@@ -475,7 +476,7 @@ const JewelleryList: React.FC = () => {
                 setSelectedLocation(location);
                 setShowLocationFilter(false);
               }}
-              className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-0.5 flex items-center gap-2 text-gray-700 ${selectedLocation === location ? "bg-blue-50" : ""}`}
+              className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 ${selectedLocation === location ? "bg-blue-50" : ""}`}
             >
               <span>📍</span>
               <span>{location}</span>
@@ -502,7 +503,7 @@ const JewelleryList: React.FC = () => {
               setSelectedBoughtFor("");
               setShowBoughtForFilter(false);
             }}
-            className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-1 flex items-center gap-2 text-gray-700 ${!selectedBoughtFor ? "bg-gray-100" : ""}`}
+            className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-1 flex items-center gap-2 text-gray-700 hover:bg-gray-100 ${!selectedBoughtFor ? "bg-gray-100" : ""}`}
           >
             <span>🎁</span>
             <span>All Purposes</span>
@@ -514,7 +515,7 @@ const JewelleryList: React.FC = () => {
                 setSelectedBoughtFor(boughtFor);
                 setShowBoughtForFilter(false);
               }}
-              className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-0.5 flex items-center gap-2 text-gray-700 ${selectedBoughtFor === boughtFor ? "bg-blue-50" : ""}`}
+              className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 ${selectedBoughtFor === boughtFor ? "bg-blue-50" : ""}`}
             >
               <span>🎁</span>
               <span>{boughtFor}</span>
@@ -533,7 +534,7 @@ const JewelleryList: React.FC = () => {
           </div>
           <button
             onClick={clearFilters}
-            className="bg-red-50 text-red-500 cursor-pointer text-[11px] px-1.5 py-0.5 rounded"
+            className="bg-red-50 text-red-500 cursor-pointer text-[11px] px-1.5 py-0.5 rounded hover:bg-red-100 focus:outline-none focus:ring-1 focus:ring-red-300"
           >
             Clear Filters
           </button>
@@ -541,10 +542,10 @@ const JewelleryList: React.FC = () => {
       )}
 
       {/* ALL CONTENT INSIDE SCROLLABLE WRAPPER */}
-      <div className={tw.contentWrapper}>
+      <div className="flex-1 overflow-y-auto">
         {/* Error Display */}
         {error && (
-          <div className="my-2.5 p-2.5 bg-amber-50 border border-amber-500 rounded text-amber-800 text-xs">
+          <div className="my-2.5 p-2.5 bg-amber-50 border border-amber-500 rounded text-amber-800 text-xs mx-3">
             <div className="flex items-center gap-1.5">
               <span>⚠️</span>
               <strong>Index Required</strong>
@@ -558,13 +559,13 @@ const JewelleryList: React.FC = () => {
                   setShowInactive(true);
                   setError("Showing all items without sorting.");
                 }}
-                className="px-2 py-1 bg-amber-500 text-white rounded cursor-pointer text-[11px]"
+                className="px-2 py-1 bg-amber-500 text-white rounded cursor-pointer text-[11px] hover:bg-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-300"
               >
                 Show All
               </button>
               <button
                 onClick={handleRefresh}
-                className="px-2 py-1 bg-blue-600 text-white rounded cursor-pointer text-[11px]"
+                className="px-2 py-1 bg-blue-600 text-white rounded cursor-pointer text-[11px] hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-300"
               >
                 Try Again
               </button>
@@ -596,7 +597,7 @@ const JewelleryList: React.FC = () => {
               {(searchTerm || selectedLocation || selectedBoughtFor) && (
                 <button
                   onClick={clearFilters}
-                  className="px-3 py-1.5 bg-blue-600 text-white rounded cursor-pointer text-sm mt-2"
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded cursor-pointer text-sm mt-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   Clear Filters
                 </button>
@@ -615,7 +616,7 @@ const JewelleryList: React.FC = () => {
                   <div
                     key={item.id}
                     onClick={() => navigate(`/jewellery/detail/${item.id}`)}
-                    className={`bg-white px-2.5 py-1.5 min-h-[50px] cursor-pointer flex items-center gap-2 relative ${index < filteredItems.length - 1 ? "border-b border-gray-200" : ""} ${item.active ? "" : "opacity-70"}`}
+                    className={`bg-white px-2.5 py-1.5 min-h-[50px] cursor-pointer flex items-center gap-2 relative hover:bg-gray-50 ${index < filteredItems.length - 1 ? "border-b border-gray-200" : ""} ${item.active ? "" : "opacity-70"}`}
                   >
                     {/* Item Image */}
                     <div
@@ -703,7 +704,7 @@ const JewelleryList: React.FC = () => {
                     {showDeleteSetting && (
                       <button
                         onClick={(e) => handleEditClick(e, item.id)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent text-blue-600 cursor-pointer p-1 rounded flex items-center justify-center w-7 h-7 z-10 hover:bg-blue-50"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent text-blue-600 cursor-pointer p-1 rounded flex items-center justify-center w-7 h-7 z-10 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         title="Edit"
                       >
                         ✏️

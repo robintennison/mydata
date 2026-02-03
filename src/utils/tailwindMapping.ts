@@ -358,6 +358,47 @@ notFoundButton: "px-5 py-2.5 bg-blue-500 text-white border-none rounded-lg curso
 // ===== FILE TYPE =====
 fileTypeIcon: "text-base",
 
+// Add these to your existing tw object in tailwindMapping.ts:
+
+// ===== BILL HEADER =====
+//billHeader: "p-3 bg-blue-50 border-b border-blue-200 mb-2",
+billHeaderContent: "flex items-center gap-3 mb-2",
+billIcon: "text-2xl",
+//billInfo: "flex-1 min-w-0",
+billType: "font-semibold text-gray-900 text-sm",
+billDate: "text-xs text-gray-600",
+//billId: "text-xs text-gray-500 mt-1",
+billCode: "bg-gray-100 px-2 py-1 rounded text-xs font-mono",
+openBillButton: "px-3 py-1.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-xs hover:bg-blue-600 transition-colors",
+
+// ===== LINKED JEWELLERY LIST =====
+linkedHeader: "text-xs text-gray-600 px-3 pt-3 pb-1 text-right",
+linkedItem: "bg-white p-3 border-b border-gray-100 cursor-pointer flex items-center gap-3 hover:bg-gray-50 transition-colors",
+linkedImage: "w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden",
+linkedImageInactive: "border border-dashed border-gray-300",
+linkedDetails: "flex-1 min-w-0",
+linkedRow1: "flex items-baseline justify-between mb-1 gap-2",
+linkedCode: "font-semibold text-gray-900 text-sm whitespace-nowrap",
+linkedDescription: "text-sm text-gray-600 truncate min-w-0 flex-1",
+linkedWeight: "text-sm text-gray-900 font-medium whitespace-nowrap flex-shrink-0",
+linkedRow2: "flex items-center text-xs text-gray-500 gap-1.5 flex-wrap",
+linkedStatus: "w-2.5 h-2.5 rounded-full flex-shrink-0 mr-2",
+linkedStatusVerified: "bg-green-500",
+linkedStatusMissing: "bg-red-500",
+linkedStatusDefault: "bg-gray-300",
+editButtonSmall: "bg-transparent border-none text-blue-500 cursor-pointer p-1.5 rounded-lg hover:bg-blue-50 transition-colors w-8 h-8 flex items-center justify-center flex-shrink-0",
+
+// ===== EMPTY STATE =====
+emptyStateContainer: "text-center py-10 px-4 text-gray-500",
+//emptyIcon: "text-5xl mb-4 opacity-50",
+emptyTitle: "text-base font-medium text-gray-600 mb-2",
+emptySubtitle: "text-sm text-gray-500 mb-4",
+instructionsBox: "bg-yellow-50 p-4 rounded-lg my-4 max-w-lg mx-auto text-xs text-yellow-800",
+instructionsTitle: "font-semibold mb-2 flex items-center gap-1.5",
+actionButtons: "flex gap-3 justify-center flex-wrap mt-5",
+actionButton: "px-4 py-2.5 text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-colors",
+listButton: "bg-blue-500 hover:bg-blue-600",
+//addButton: "bg-green-500 hover:bg-green-600",
 
 } as const; // Added 'as const' for better TypeScript inference
 

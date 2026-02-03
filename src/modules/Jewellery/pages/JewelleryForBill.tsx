@@ -12,7 +12,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { Jewellery } from "../models/types";
-import { jewelleryStyles } from "../styles/jewelleryStyles";
+import { tw } from "../../../utils/tailwindMapping";
 
 // Interface for Bill data
 interface Bill {
@@ -140,11 +140,22 @@ const JewelleryForBill: React.FC = () => {
     return "📎";
   };
 
+  const getStatusClass = (status: string) => {
+    switch (status) {
+      case "Verified":
+        return tw.linkedStatusVerified;
+      case "Missing":
+        return tw.linkedStatusMissing;
+      default:
+        return tw.linkedStatusDefault;
+    }
+  };
+
   if (loading) {
     return (
-      <div style={jewelleryStyles.container}>
-        <div style={jewelleryStyles.loading}>
-          <div style={jewelleryStyles.spinner}></div>
+      <div className={tw.container}>
+        <div className={tw.loading}>
+          <div className={tw.spinner}></div>
           <p>Loading jewellery items for bill...</p>
         </div>
       </div>
@@ -152,24 +163,22 @@ const JewelleryForBill: React.FC = () => {
   }
 
   return (
-    <div style={jewelleryStyles.container}>
+    <div className={tw.container}>
       {/* Top Navigation */}
-      <div style={jewelleryStyles.topNav}>
+      <div className={tw.topNav}>
         <button
           onClick={() => navigate("/jewellery/bills")}
-          style={jewelleryStyles.navButton}
+          className={tw.navButton}
           title="Back to Bills"
         >
           ←
         </button>
-        <div style={jewelleryStyles.navTitle}>Linked Jewellery Items</div>
+        <div className="text-lg font-semibold text-gray-900 flex-1 text-center">
+          Linked Jewellery Items
+        </div>
         <button
           onClick={handleRefresh}
-          style={{
-            ...jewelleryStyles.navButton,
-            fontSize: "12px",
-            padding: "4px 8px",
-          }}
+          className="px-2 py-1 bg-transparent border border-gray-300 rounded-lg cursor-pointer text-xs hover:bg-gray-100 transition-colors"
           title="Refresh"
         >
           ↻
@@ -178,151 +187,71 @@ const JewelleryForBill: React.FC = () => {
 
       {/* Bill Header Information */}
       {bill && (
-        <div
-          style={{
-            padding: "12px 15px",
-            backgroundColor: "#f0f9ff",
-            borderBottom: "1px solid #bae6fd",
-            marginBottom: "8px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "8px",
-            }}
-          >
-            <span style={{ fontSize: "24px" }}>
-              {getFileIcon(bill.mimeType)}
-            </span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: "600", fontSize: "16px" }}>
+        <div className={tw.billHeader}>
+          <div className={tw.billHeaderContent}>
+            <span className={tw.billIcon}>{getFileIcon(bill.mimeType)}</span>
+            <div className={tw.billInfo}>
+              <div className={tw.billType}>
                 {bill.mimeType.includes("pdf")
                   ? "PDF Bill"
                   : bill.mimeType.includes("image")
                     ? "Image Bill"
                     : "Bill Document"}
               </div>
-              <div style={{ fontSize: "12px", color: "#6b7280" }}>
+              <div className={tw.billDate}>
                 Uploaded: {formatDate(bill.uploadedAt)}
               </div>
             </div>
             <button
               onClick={() => window.open(bill.downloadUrl, "_blank")}
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "12px",
-              }}
+              className={tw.openBillButton}
             >
               Open Bill
             </button>
           </div>
 
           {bill.notes && (
-            <div style={{ fontSize: "13px", marginBottom: "4px" }}>
+            <div className="text-sm mb-2">
               <strong>Notes:</strong> {bill.notes}
             </div>
           )}
-          <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
-            Bill ID:{" "}
-            <code
-              style={{
-                backgroundColor: "#e5e7eb",
-                padding: "2px 6px",
-                borderRadius: "4px",
-              }}
-            >
-              {bill.id}
-            </code>
+          <div className={tw.billId}>
+            Bill ID: <code className={tw.billCode}>{bill.id}</code>
           </div>
         </div>
       )}
 
-      {/* ALL CONTENT INSIDE SCROLLABLE WRAPPER */}
-      <div style={jewelleryStyles.contentWrapper}>
+      {/* Content */}
+      <div className={tw.contentWrapper}>
         {/* Items Count */}
         {jewelleryItems.length > 0 && (
-          <div
-            style={{
-              fontSize: "11px",
-              color: "#6b7280",
-              padding: "6px 15px 2px",
-              textAlign: "right",
-            }}
-          >
+          <div className={tw.linkedHeader}>
             {jewelleryItems.length} items linked to this bill
           </div>
         )}
 
         {/* Items List */}
-        <div style={{ padding: "0 0 5px 0" }}>
+        <div className="pb-1">
           {jewelleryItems.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "40px 20px",
-                color: "#9ca3af",
-                fontSize: "13px",
-              }}
-            >
-              <div style={{ fontSize: "48px", marginBottom: "16px" }}>💎</div>
-              <p style={{ marginBottom: "8px", fontSize: "16px" }}>
+            <div className={tw.emptyStateContainer}>
+              <div className={tw.emptyIcon}>💎</div>
+              <div className={tw.emptyTitle}>
                 No jewellery items linked to this bill.
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  color: "#6b7280",
-                  marginBottom: "20px",
-                }}
-              >
+              </div>
+              <div className={tw.emptySubtitle}>
                 Link jewellery items by setting their Bill ID to: <br />
-                <code
-                  style={{
-                    backgroundColor: "#e5e7eb",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    marginTop: "4px",
-                    display: "inline-block",
-                  }}
-                >
+                <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono mt-1 inline-block">
                   {bill?.id}
                 </code>
-              </p>
+              </div>
 
               {/* Quick Instructions */}
-              <div
-                style={{
-                  backgroundColor: "#fef3c7",
-                  padding: "15px",
-                  borderRadius: "8px",
-                  margin: "20px auto",
-                  maxWidth: "500px",
-                  fontSize: "12px",
-                  color: "#92400e",
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: "600",
-                    marginBottom: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
-                >
+              <div className={tw.instructionsBox}>
+                <div className={tw.instructionsTitle}>
                   <span>💡</span>
                   <span>How to link items:</span>
                 </div>
-                <ol style={{ paddingLeft: "20px", marginBottom: "0" }}>
+                <ol className="pl-5 space-y-1 mb-0">
                   <li>
                     Go to <strong>Jewellery List</strong>
                   </li>
@@ -338,187 +267,75 @@ const JewelleryForBill: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  justifyContent: "center",
-                  flexWrap: "wrap",
-                  marginTop: "20px",
-                }}
-              >
+              <div className={tw.actionButtons}>
                 <button
                   onClick={() => navigate("/jewellery/list")}
-                  style={{
-                    padding: "10px 20px",
-                    backgroundColor: "#3b82f6",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                  }}
+                  className={`${tw.actionButton} ${tw.listButton}`}
                 >
                   📋 Go to Jewellery List
                 </button>
                 <button
                   onClick={() => navigate("/jewellery/add")}
-                  style={{
-                    padding: "10px 20px",
-                    backgroundColor: "#10b981",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                  }}
+                  className={`${tw.actionButton} ${tw.addButton}`}
                 >
                   ➕ Add New Jewellery
                 </button>
               </div>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {jewelleryItems.map((item, index) => {
+            <div className="flex flex-col">
+              {jewelleryItems.map((item) => {
                 const formattedDate = formatDate(item.purchaseDate);
 
                 return (
                   <div
                     key={item.id}
-                    style={{
-                      backgroundColor: "white",
-                      padding: "12px 15px",
-                      minHeight: "60px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      borderBottom:
-                        index < jewelleryItems.length - 1
-                          ? "1px solid #e5e7eb"
-                          : "none",
-                      opacity: item.active ? 1 : 0.7,
-                      position: "relative",
-                    }}
+                    className={tw.linkedItem}
                     onClick={() => navigate(`/jewellery/detail/${item.id}`)}
                   >
                     {/* Item Image */}
                     <div
-                      style={{
-                        width: "48px",
-                        height: "48px",
-                        flexShrink: 0,
-                        backgroundColor: "#f3f4f6",
-                        borderRadius: "6px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                        border: !item.active ? "1px dashed #9ca3af" : "none",
-                      }}
+                      className={`${tw.linkedImage} ${
+                        !item.active ? tw.linkedImageInactive : ""
+                      }`}
                     >
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
                           alt={item.code}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div style={{ fontSize: "20px", color: "#9ca3af" }}>
-                          💎
-                        </div>
+                        <div className="text-xl text-gray-400">💎</div>
                       )}
                     </div>
 
                     {/* Item Details */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className={tw.linkedDetails}>
                       {/* ROW 1: Code + Description + Weight */}
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "baseline",
-                          justifyContent: "space-between",
-                          marginBottom: "4px",
-                          gap: "8px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "baseline",
-                            gap: "6px",
-                            minWidth: 0,
-                            flex: 1,
-                          }}
-                        >
+                      <div className={tw.linkedRow1}>
+                        <div className="flex items-baseline gap-1.5 min-w-0 flex-1">
                           <div
-                            style={{
-                              fontWeight: "600",
-                              fontSize: "15px",
-                              color: item.active ? "#111827" : "#6b7280",
-                              whiteSpace: "nowrap",
-                            }}
+                            className={`${tw.linkedCode} ${
+                              !item.active ? "text-gray-500" : ""
+                            }`}
                           >
                             {item.code}
                           </div>
                           {!item.active && (
-                            <span
-                              style={{
-                                fontSize: "10px",
-                                backgroundColor: "#9ca3af",
-                                color: "white",
-                                padding: "2px 6px",
-                                borderRadius: "8px",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
+                            <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded whitespace-nowrap">
                               Inactive
                             </span>
                           )}
-                          <div
-                            style={{
-                              fontSize: "13px",
-                              color: "#6b7280",
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              flex: 1,
-                              minWidth: 0,
-                            }}
-                          >
+                          <div className={tw.linkedDescription}>
                             {item.description}
                           </div>
                         </div>
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            color: "#374151",
-                            fontWeight: "500",
-                            whiteSpace: "nowrap",
-                            flexShrink: 0,
-                          }}
-                        >
-                          {item.weight}g
-                        </div>
+                        <div className={tw.linkedWeight}>{item.weight}g</div>
                       </div>
 
                       {/* ROW 2: Location • Bought For • Purchase Date */}
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          fontSize: "11px",
-                          color: "#9ca3af",
-                          gap: "6px",
-                          flexWrap: "wrap",
-                        }}
-                      >
+                      <div className={tw.linkedRow2}>
                         {item.location && (
                           <>
                             <span>{item.location}</span>
@@ -541,56 +358,24 @@ const JewelleryForBill: React.FC = () => {
                         {!item.location &&
                           !item.boughtFor &&
                           !formattedDate && (
-                            <span style={{ fontStyle: "italic" }}>
-                              No details
-                            </span>
+                            <span className="italic">No details</span>
                           )}
                       </div>
                     </div>
 
                     {/* Status Indicator */}
                     <div
-                      style={{
-                        width: "10px",
-                        height: "10px",
-                        borderRadius: "50%",
-                        backgroundColor:
-                          item.verificationStatus === "Verified"
-                            ? "#10b981"
-                            : item.verificationStatus === "Missing"
-                              ? "#ef4444"
-                              : "#d1d5db",
-                        flexShrink: 0,
-                        marginRight: "8px",
-                      }}
+                      className={`${tw.linkedStatus} ${getStatusClass(
+                        item.verificationStatus,
+                      )}`}
                       title={item.verificationStatus}
                     />
 
                     {/* Edit Button */}
                     <button
                       onClick={(e) => handleEditClick(e, item.id)}
-                      style={{
-                        backgroundColor: "transparent",
-                        border: "none",
-                        fontSize: "16px",
-                        color: "#3b82f6",
-                        cursor: "pointer",
-                        padding: "6px",
-                        borderRadius: "6px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "32px",
-                        height: "32px",
-                        flexShrink: 0,
-                      }}
+                      className={tw.editButtonSmall}
                       title="Edit"
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = "#e0f2fe";
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }}
                     >
                       ✏️
                     </button>
@@ -602,7 +387,7 @@ const JewelleryForBill: React.FC = () => {
         </div>
 
         {/* Minimal bottom spacing */}
-        <div style={{ height: "5px" }}></div>
+        <div className="h-1"></div>
       </div>
     </div>
   );

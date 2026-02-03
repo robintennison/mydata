@@ -258,6 +258,34 @@ batchInfo: "text-sm text-gray-600 mb-3 flex justify-between items-center",
 batchCounter: "text-xs text-gray-500 text-center mb-2",
 emptyStateIcon: "text-5xl mb-4 opacity-50",
 
+// Add these to your existing tw object in tailwindMapping.ts:
+
+// ===== FILE UPLOAD =====
+fileUploadContainer: "border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300",
+fileUploadIcon: "text-5xl mb-4 text-gray-400",
+fileUploadText: "text-sm font-medium text-gray-700 mb-1",
+fileUploadSubtext: "text-xs text-gray-500",
+fileUploadHint: "text-xs text-gray-400 mt-1",
+fileRequired: "text-xs text-red-600 mt-2",
+
+// ===== IMAGE UPLOAD (for reuse) =====
+imageUploadContainer: "border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300",
+imageUploadIcon: "text-5xl mb-4 text-gray-400",
+imageUploadText: "text-sm font-medium text-gray-700 mb-1",
+imageUploadSubtext: "text-xs text-gray-500",
+
+// ===== FORM SPECIFIC =====
+formContainer: "p-4",
+formActions: "flex flex-col gap-3 mt-8",
+
+// ===== FILE DISPLAY =====
+fileName: "text-sm font-medium text-gray-900 truncate",
+fileInfo: "text-xs text-gray-500 mt-1",
+fileChangeText: "text-xs text-blue-500 mt-2",
+
+// ===== BILL FORM SPECIFIC =====
+billForm: "max-w-lg mx-auto w-full",
+
 
 } as const; // Added 'as const' for better TypeScript inference
 

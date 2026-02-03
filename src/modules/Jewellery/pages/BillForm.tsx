@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { jewelleryStyles } from "../styles/jewelleryStyles";
+import { tw } from "../../../utils/tailwindMapping";
 import { Bill } from "../models/types";
 
 const BillForm: React.FC = () => {
@@ -85,9 +85,9 @@ const BillForm: React.FC = () => {
 
   if (loading && isEditMode) {
     return (
-      <div style={jewelleryStyles.container}>
-        <div style={jewelleryStyles.loading}>
-          <div style={jewelleryStyles.spinner}></div>
+      <div className={tw.container}>
+        <div className={tw.loading}>
+          <div className={tw.spinner}></div>
           <p>Loading bill data...</p>
         </div>
       </div>
@@ -95,30 +95,30 @@ const BillForm: React.FC = () => {
   }
 
   return (
-    <div style={jewelleryStyles.container}>
+    <div className={tw.container}>
       {/* Top Navigation */}
-      <div style={jewelleryStyles.topNav}>
+      <div className={tw.topNav}>
         <button
           onClick={() => navigate("/jewellery/bills")}
-          style={jewelleryStyles.navButton}
+          className={tw.navButton}
           title="Back to Bills"
         >
           ←
         </button>
-        <div style={jewelleryStyles.navTitle}>
+        <div className="text-lg font-semibold text-gray-900 flex-1 text-center">
           {isEditMode ? "Edit Bill" : "Add Bill"}
         </div>
         <div style={{ width: "40px" }}></div>
       </div>
 
-      <form onSubmit={handleSubmit} style={jewelleryStyles.formContainer}>
+      <form onSubmit={handleSubmit} className="p-4 max-w-lg mx-auto w-full">
         {/* File Upload */}
-        <div style={jewelleryStyles.formGroup}>
-          <label style={jewelleryStyles.label}>
+        <div className="mb-6">
+          <label className={tw.label}>
             {isEditMode ? "Replace File" : "Upload File"}
           </label>
           <div
-            style={jewelleryStyles.imageUploadContainer}
+            className={tw.fileUploadContainer}
             onClick={() => document.getElementById("fileInput")?.click()}
           >
             <input
@@ -126,65 +126,49 @@ const BillForm: React.FC = () => {
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
               onChange={handleFileSelect}
-              style={{ display: "none" }}
+              className="hidden"
             />
             {fileName ? (
               <>
-                <div style={{ fontSize: "3rem", marginBottom: "10px" }}>📄</div>
-                <div
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    color: "#333",
-                    marginBottom: "5px",
-                  }}
-                >
+                <div className="text-5xl mb-3">📄</div>
+                <div className="text-sm font-medium text-gray-900 mb-1 truncate">
                   {fileName}
                 </div>
-                <div style={{ fontSize: "12px", color: "#6b7280" }}>
-                  Tap to change file
+                <div className="text-xs text-gray-500 mb-2">
+                  {isEditMode ? "Tap to change file" : "File selected"}
+                </div>
+                <div className="text-xs text-blue-500">
+                  Click to select different file
                 </div>
               </>
             ) : (
               <>
-                <div style={{ fontSize: "3rem", marginBottom: "10px" }}>📁</div>
-                <div style={{ fontSize: "14px", color: "#6b7280" }}>
+                <div className="text-5xl mb-3 text-gray-400">📁</div>
+                <div className="text-sm font-medium text-gray-700 mb-1">
                   Tap to select file
                 </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#9ca3af",
-                    marginTop: "5px",
-                  }}
-                >
+                <div className="text-xs text-gray-500">
                   PDF, JPG, PNG files accepted
                 </div>
               </>
             )}
           </div>
           {!isEditMode && !file && (
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#ef4444",
-                marginTop: "5px",
-              }}
-            >
+            <div className="text-xs text-red-600 mt-2">
               * File is required for new bills
             </div>
           )}
         </div>
 
         {/* Notes */}
-        <div style={jewelleryStyles.formGroup}>
-          <label style={jewelleryStyles.label}>Notes</label>
+        <div className="mb-6">
+          <label className={tw.label}>Notes</label>
           <textarea
             value={formData.notes || ""}
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
             }
-            style={jewelleryStyles.textarea}
+            className={tw.textarea}
             placeholder="Add notes about this bill (optional)"
             rows={3}
           />
@@ -192,8 +176,8 @@ const BillForm: React.FC = () => {
 
         {/* Creation Date */}
         {isEditMode && (
-          <div style={jewelleryStyles.formGroup}>
-            <label style={jewelleryStyles.label}>Created Date</label>
+          <div className="mb-6">
+            <label className={tw.label}>Created Date</label>
             <input
               type="date"
               value={new Date(formData.createdAt).toISOString().split("T")[0]}
@@ -203,28 +187,34 @@ const BillForm: React.FC = () => {
                   createdAt: new Date(e.target.value).getTime(),
                 })
               }
-              style={jewelleryStyles.input}
+              className={tw.input}
             />
           </div>
         )}
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          style={jewelleryStyles.primaryButton}
-          disabled={loading || (!isEditMode && !file)}
-        >
-          {loading ? "Saving..." : isEditMode ? "Update Bill" : "Add Bill"}
-        </button>
+        {/* Submit Buttons */}
+        <div className="flex flex-col gap-3 mt-8">
+          <button
+            type="submit"
+            className={`px-8 py-3 rounded-lg font-medium text-base transition-colors ${
+              loading || (!isEditMode && !file)
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-br from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 cursor-pointer"
+            }`}
+            disabled={loading || (!isEditMode && !file)}
+          >
+            {loading ? "Saving..." : isEditMode ? "Update Bill" : "Add Bill"}
+          </button>
 
-        <button
-          type="button"
-          onClick={() => navigate("/jewellery/bills")}
-          style={jewelleryStyles.secondaryButton}
-          disabled={loading}
-        >
-          Cancel
-        </button>
+          <button
+            type="button"
+            onClick={() => navigate("/jewellery/bills")}
+            className="px-8 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors"
+            disabled={loading}
+          >
+            Cancel
+          </button>
+        </div>
       </form>
     </div>
   );

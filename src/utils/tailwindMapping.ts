@@ -57,8 +57,8 @@ export const tw = {
   // General Cards
   card: "bg-white rounded-xl p-4 shadow-sm border border-gray-200",
   section: "bg-white rounded-xl my-2.5 p-3 shadow-sm border border-gray-200 shrink-0",
-  sectionHeader: "flex justify-between items-center mb-2", // Added back
-  maturityCount: "text-xs text-gray-600 ml-1 font-normal", // Added back
+  sectionHeader: "flex justify-between items-center mb-2",
+  maturityCount: "text-xs text-gray-600 ml-1 font-normal",
   
   // Stats Cards
   statsRow: "grid grid-cols-3 gap-2 p-0 mb-4",
@@ -227,291 +227,178 @@ export const tw = {
   hoverLift: "hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200",
   clickScale: "active:scale-95 transition-transform",
 
-  // Add these to your existing tw object in tailwindMapping.ts:
+  // ===== CHECKBOXES & SELECTION =====
+  checkbox: "w-5 h-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500",
+  checkboxLabel: "flex items-center gap-3 cursor-pointer text-sm",
 
-// ===== CHECKBOXES & SELECTION =====
-checkbox: "w-5 h-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500",
-checkboxLabel: "flex items-center gap-3 cursor-pointer text-sm",
+  // ===== LIST ITEMS =====
+  listItem: "bg-white p-3 border-b border-gray-100 last:border-b-0",
+  listItemContent: "flex-1 min-w-0",
+  listItemHeader: "flex justify-between items-start mb-1",
+  listItemTitle: "font-semibold text-gray-900 text-base",
+  listItemDescription: "text-sm text-gray-600 truncate",
+  listItemMeta: "flex items-center gap-3 text-xs text-gray-500",
 
-// ===== LIST ITEMS =====
-listItem: "bg-white p-3 border-b border-gray-100 last:border-b-0",
-listItemContent: "flex-1 min-w-0",
-listItemHeader: "flex justify-between items-start mb-1",
-listItemTitle: "font-semibold text-gray-900 text-base",
-listItemDescription: "text-sm text-gray-600 truncate",
-listItemMeta: "flex items-center gap-3 text-xs text-gray-500",
+  // ===== BADGES & INDICATORS =====
+  statusBadge: "text-xs px-2 py-1 rounded-full font-medium",
+  activeBadge: "bg-green-100 text-green-800",
+  inactiveBadge: "bg-gray-100 text-gray-800",
 
-// ===== BADGES & INDICATORS =====
-statusBadge: "text-xs px-2 py-1 rounded-full font-medium",
-activeBadge: "bg-green-100 text-green-800",
-inactiveBadge: "bg-gray-100 text-gray-800",
-locationBadge: "bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded",
+  // ===== MESSAGES & ALERTS =====
+  message: "mt-3 p-3 rounded-lg text-sm text-center",
+  successMessage: "bg-green-100 text-green-800",
+  errorMessage: "bg-red-100 text-red-800",
+  infoMessage: "bg-blue-100 text-blue-800",
 
-// ===== MESSAGES & ALERTS =====
-message: "mt-3 p-3 rounded-lg text-sm text-center",
-successMessage: "bg-green-100 text-green-800",
-errorMessage: "bg-red-100 text-red-800",
-infoMessage: "bg-blue-100 text-blue-800",
+  // ===== FILE UPLOAD =====
+  fileUploadContainer: "border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300",
+  fileUploadIcon: "text-5xl mb-4 text-gray-400",
+  fileUploadText: "text-sm font-medium text-gray-700 mb-1",
+  fileUploadSubtext: "text-xs text-gray-500",
+  fileUploadHint: "text-xs text-gray-400 mt-1",
+  fileRequired: "text-xs text-red-600 mt-2",
 
-// ===== SPECIFIC FOR BATCH EDIT =====
-batchInfo: "text-sm text-gray-600 mb-3 flex justify-between items-center",
-batchCounter: "text-xs text-gray-500 text-center mb-2",
-emptyStateIcon: "text-5xl mb-4 opacity-50",
+  // ===== IMAGE UPLOAD (for reuse) =====
+  imageUploadContainer: "border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300",
+  imageUploadIcon: "text-5xl mb-4 text-gray-400",
+  imageUploadText: "text-sm font-medium text-gray-700 mb-1",
+  imageUploadSubtext: "text-xs text-gray-500",
 
-// Add these to your existing tw object in tailwindMapping.ts:
+  // ===== FORM SPECIFIC =====
+  formContainer: "p-4",
+  formActions: "flex flex-col gap-3 mt-8",
 
-// ===== FILE UPLOAD =====
-fileUploadContainer: "border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300",
-fileUploadIcon: "text-5xl mb-4 text-gray-400",
-fileUploadText: "text-sm font-medium text-gray-700 mb-1",
-fileUploadSubtext: "text-xs text-gray-500",
-fileUploadHint: "text-xs text-gray-400 mt-1",
-fileRequired: "text-xs text-red-600 mt-2",
+  // ===== FILE DISPLAY =====
+  fileName: "text-sm font-medium text-gray-900 truncate",
+  fileInfo: "text-xs text-gray-500 mt-1",
+  fileChangeText: "text-xs text-blue-500 mt-2",
 
-// ===== IMAGE UPLOAD (for reuse) =====
-imageUploadContainer: "border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300",
-imageUploadIcon: "text-5xl mb-4 text-gray-400",
-imageUploadText: "text-sm font-medium text-gray-700 mb-1",
-imageUploadSubtext: "text-xs text-gray-500",
+  // ===== BILL FORM SPECIFIC =====
+  billForm: "max-w-lg mx-auto w-full",
 
-// ===== FORM SPECIFIC =====
-formContainer: "p-4",
-formActions: "flex flex-col gap-3 mt-8",
+  // ===== IMAGE DISPLAY =====
+  imageContainer: "mb-5 text-center relative",
+  imageDownloadButton: "absolute bottom-3 right-3 bg-black/70 text-white border-none rounded-lg px-3 py-2 cursor-pointer text-sm flex items-center gap-1.5 hover:bg-black/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed",
 
-// ===== FILE DISPLAY =====
-fileName: "text-sm font-medium text-gray-900 truncate",
-fileInfo: "text-xs text-gray-500 mt-1",
-fileChangeText: "text-xs text-blue-500 mt-2",
+  // ===== NOT FOUND STATE =====
+  notFoundContainer: "p-5 text-center",
+  notFoundButton: "px-5 py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm hover:bg-blue-600 transition-colors",
 
-// ===== BILL FORM SPECIFIC =====
-billForm: "max-w-lg mx-auto w-full",
+  // ===== FILE TYPE =====
+  fileTypeIcon: "text-base",
 
-// Add these to your existing tw object in tailwindMapping.ts:
+  // ===== EMPTY STATE =====
+  emptyStateContainer: "text-center py-10 px-4 text-gray-500",
+  emptyTitle: "text-base font-medium text-gray-600 mb-2",
+  emptySubtitle: "text-sm text-gray-500 mb-4",
+  instructionsBox: "bg-yellow-50 p-4 rounded-lg my-4 max-w-lg mx-auto text-xs text-yellow-800",
+  instructionsTitle: "font-semibold mb-2 flex items-center gap-1.5",
+  actionButtons: "flex gap-3 justify-center flex-wrap mt-5",
+  actionButton: "px-4 py-2.5 text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-colors",
+  listButton: "bg-blue-500 hover:bg-blue-600",
 
-// ===== BILLS LIST SPECIFIC =====
-billListItem: "bg-white p-3 border-b border-gray-100 cursor-pointer transition-colors hover:bg-gray-50",
-billListItemLinked: "border-l-4 border-blue-500",
-billListItemUnlinked: "border-l-4 border-transparent",
-billListHeader: "text-xs text-gray-600 px-3 pt-3 pb-1 text-right",
-billItemContent: "flex items-center justify-between min-w-0",
-billInfo: "flex-1 min-w-0 pr-3",
-billTitle: "font-medium text-gray-900 text-sm mb-1",
-billMetaRow: "flex items-center gap-2",
-linkedBadge: "inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full",
-linkedBadgeWithItems: "bg-blue-100 text-blue-800",
-linkedBadgeNoItems: "bg-gray-100 text-gray-600",
-billId: "text-xs text-gray-400 font-mono truncate",
-actionIcons: "flex items-center gap-2 flex-shrink-0",
-actionIcon: "bg-transparent border-none text-base cursor-pointer p-1.5 rounded-lg transition-colors hover:bg-gray-100",
-viewIcon: "text-blue-500 flex flex-col items-center",
-editIcon: "text-blue-500",
-deleteIconLinked: "text-yellow-500",
-deleteIconUnlinked: "text-red-500",
+  // ===== FORM LAYOUT =====
+  formSection: "mb-4",
+  formSectionTitle: "text-sm font-medium text-gray-700 mb-2",
 
-// ===== SUMMARY SECTION =====
-summarySection: "p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600",
-summaryContent: "flex justify-between items-center",
-legend: "flex items-center gap-4",
-legendItem: "flex items-center gap-2",
-legendDot: "w-2 h-2 rounded-full",
-legendDotLinked: "bg-blue-500",
-legendDotUnlinked: "bg-gray-400",
+  // ===== IMAGE UPLOAD FORM =====
+  imageSection: "mb-4",
+  imagePreviewContainer: "mb-3 text-center relative",
+  imagePreview: "max-w-[300px] max-h-[300px] rounded-lg border border-gray-200 shadow-sm mx-auto",
+  deleteImageButton: "absolute top-2 right-2 bg-red-600/90 text-white border-none rounded-full w-8 h-8 cursor-pointer flex items-center justify-center text-sm hover:bg-red-700/90 disabled:opacity-70 transition-colors",
+  imageUploadArea: "flex flex-col gap-2",
+  imageUploadRow: "flex gap-2 items-start",
+  fileInput: "w-full p-2 border border-gray-300 rounded text-sm bg-white file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200",
+  uploadButton: "px-3 py-2 bg-green-500 text-white border-none rounded text-sm cursor-pointer flex items-center gap-1.5 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed",
+  cancelUploadButton: "px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded text-sm cursor-pointer hover:bg-gray-200",
+  imageError: "p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600",
+  noImagePlaceholder: "p-5 border-2 border-dashed border-gray-300 rounded text-center text-gray-500",
+  placeholderIcon: "text-2xl mb-2",
+  placeholderText: "text-sm",
+  placeholderSubtext: "text-xs mt-1",
 
-// Add these to your existing tw object in tailwindMapping.ts:
+  // ===== FORM ROWS =====
+  formField: "flex-1",
+  formLabel: "block text-xs text-gray-600 mb-1",
+  formInput: "w-full p-2 border border-gray-300 rounded text-sm bg-white",
+  formSelect: "w-full p-2 border border-gray-300 rounded text-sm bg-white",
 
-// ===== IMAGE DISPLAY =====
-imageContainer: "mb-5 text-center relative",
-jewelleryImage: "max-w-full max-h-[300px] rounded-lg",
-imageDownloadButton: "absolute bottom-3 right-3 bg-black/70 text-white border-none rounded-lg px-3 py-2 cursor-pointer text-sm flex items-center gap-1.5 hover:bg-black/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed",
+  // ===== CALENDAR =====
+  dateInputContainer: "relative",
+  dateInput: "w-full p-2 pr-10 border border-gray-300 rounded text-sm bg-white cursor-pointer",
+  calendarButton: "absolute right-2 top-1/2 transform -translate-y-1/2 bg-none border-none cursor-pointer text-gray-500 p-1",
+  calendarPopup: "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 p-5 min-w-[300px] max-w-[400px] w-[90%] max-h-[80vh] overflow-hidden",
+  yearSelectorPopup: "min-w-[350px] max-w-[400px]",
+  calendarHeader: "flex justify-between items-center mb-3",
+  calendarNavButtons: "flex gap-2",
+  calendarNavButton: "bg-white border border-gray-200 rounded p-1.5 cursor-pointer text-sm text-gray-700 min-w-10 hover:bg-gray-50",
+  calendarTitle: "text-base font-semibold text-gray-900 cursor-pointer px-2 py-1 rounded hover:bg-gray-100",
+  daysGrid: "grid grid-cols-7 gap-1 mb-2",
+  dayHeader: "text-center text-sm text-gray-600 font-medium py-1",
+  calendarGrid: "grid grid-cols-7 gap-1",
+  calendarDay: "p-2 bg-none border-none rounded cursor-pointer text-sm transition-colors hover:bg-gray-100",
+  selectedDay: "bg-blue-500 text-white hover:bg-blue-600",
+  todayDay: "border border-blue-500",
+  calendarActions: "mt-3 text-center flex justify-center gap-2",
+  todayButton: "px-3 py-1.5 bg-blue-500 text-white border-none rounded cursor-pointer text-sm",
+  closeCalendarButton: "px-3 py-1.5 bg-gray-100 border-none rounded cursor-pointer text-sm",
+  yearSelectorGrid: "max-h-[300px] overflow-y-auto p-2 grid grid-cols-4 gap-2",
+  yearButton: "p-2 bg-none border-none rounded cursor-pointer text-sm",
 
-// ===== BILL SECTION =====
-billSection: "bg-gray-50 p-4 rounded-lg border border-gray-200 mt-3",
-billHeader: "flex justify-between items-center mb-3",
-//billTitle: "text-base font-semibold text-gray-900",
-billStatus: "text-xs px-2 py-1 rounded-full",
-billAvailable: "bg-green-100 text-green-800",
-billUnavailable: "bg-red-100 text-red-800",
-billLoading: "text-gray-600",
-billError: "text-red-600",
-//billInfo: "mb-3 space-y-1.5",
-billActions: "flex gap-3 mt-4",
-billViewButton: "flex-1 py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors",
-billDownloadButton: "flex-1 py-2.5 bg-green-500 text-white border-none rounded-lg cursor-pointer flex items-center justify-center gap-2 hover:bg-green-600 transition-colors",
-billWarning: "p-3 bg-yellow-100 rounded-lg text-yellow-800 text-sm",
+  // ===== BILL FORM SECTION =====
+  billFormSection: "mt-5 pt-4 border-t border-gray-200",
+  billCard: "p-3 bg-gray-50 border border-gray-200 rounded",
+  billFormHeader: "flex justify-between items-center mb-2",
+  billFormInfo: "flex items-center gap-2",
+  billFormIcon: "text-blue-500",
+  billFormTitle: "font-medium text-gray-900 text-sm",
+  billFormActions: "flex gap-2 mt-2",
+  billFormViewButton: "px-2 py-1 bg-blue-500 text-white border-none rounded text-xs cursor-pointer flex items-center gap-1 hover:bg-blue-600",
+  billFormDownloadButton: "px-2 py-1 bg-green-500 text-white border-none rounded text-xs cursor-pointer flex items-center gap-1 hover:bg-green-600",
+  billFormWarning: "px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs flex items-center gap-1",
+  changeBillButton: "ml-auto px-2 py-1 bg-gray-100 text-gray-700 border border-gray-300 rounded text-xs cursor-pointer hover:bg-gray-200",
+  noBillCard: "p-3 bg-gray-50 border border-dashed border-gray-300 rounded text-gray-600 text-center",
+  addBillButton: "px-3 py-2 bg-green-500 text-white border-none rounded text-sm cursor-pointer flex items-center gap-1.5 hover:bg-green-600",
+  billSelectRow: "flex gap-2",
+  billSelect: "flex-1 p-2 border border-gray-300 rounded text-sm bg-white",
+  billCancelButton: "px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded text-sm cursor-pointer hover:bg-gray-200",
 
-// ===== DETAIL ITEMS =====
-detailGrid: "flex flex-col gap-3",
-detailItem: "flex flex-col",
-detailLabel: "font-semibold text-gray-700 mb-0.5",
-detailValue: "text-gray-900",
+  // ===== FORM ACTIONS =====
+  actionButtonsRow: "flex gap-3 justify-center mb-3",
+  formCancelButton: "px-6 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded cursor-pointer text-base font-medium flex items-center gap-1.5 hover:bg-gray-200",
+  formDeleteButton: "px-6 py-2.5 bg-red-600 text-white border-none rounded cursor-pointer text-base font-medium flex items-center gap-1.5 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed",
+  formSubmitButton: "px-6 py-2.5 bg-blue-500 text-white border-none rounded cursor-pointer text-base font-medium hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed",
 
-// ===== STATUS BADGES =====
-verificationBadge: "inline-block px-2 py-1 rounded-full text-xs font-medium text-white",
-verifiedBadge: "bg-green-500",
-missingBadge: "bg-red-500",
-notVerifiedBadge: "bg-gray-500",
+  // ===== MODAL =====
+  modalOverlay: "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4",
+  modalContainer: "bg-white rounded-xl p-6 max-w-[400px] w-full shadow-2xl",
+  modalTitle: "text-xl font-semibold text-gray-900 mb-3",
+  modalContent: "text-gray-600 mb-6",
+  modalActions: "flex gap-3 justify-end",
+  modalCancelButton: "px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer",
+  modalConfirmButton: "px-4 py-2 bg-red-600 text-white border-none rounded-lg cursor-pointer hover:bg-red-700",
 
-// ===== NOT FOUND STATE =====
-notFoundContainer: "p-5 text-center",
-notFoundButton: "px-5 py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm hover:bg-blue-600 transition-colors",
+  // ===== LOADING STATES =====
+  loadingText: "p-3 border border-gray-300 rounded bg-gray-100 text-gray-600 text-center",
 
-// ===== FILE TYPE =====
-fileTypeIcon: "text-base",
+  // ===== UTILITIES =====
+  flexCenter: "flex items-center",
+  flexBetween: "flex justify-between items-center",
 
-// Add these to your existing tw object in tailwindMapping.ts:
+  // ===== LOADING OVERLAY =====
+  loadingOverlay: "absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-100",
 
-// ===== BILL HEADER =====
-//billHeader: "p-3 bg-blue-50 border-b border-blue-200 mb-2",
-billHeaderContent: "flex items-center gap-3 mb-2",
-billIcon: "text-2xl",
-//billInfo: "flex-1 min-w-0",
-billType: "font-semibold text-gray-900 text-sm",
-billDate: "text-xs text-gray-600",
-//billId: "text-xs text-gray-500 mt-1",
-billCode: "bg-gray-100 px-2 py-1 rounded text-xs font-mono",
-openBillButton: "px-3 py-1.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-xs hover:bg-blue-600 transition-colors",
+  // ===== ERROR CONTAINERS =====
+  errorHeader: "flex items-center gap-2 mb-2 text-lg text-red-600",
+  errorButtons: "flex gap-3 mt-4",
+  errorButton: "px-5 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded cursor-pointer text-sm hover:bg-gray-200",
+  errorAlert: "bg-red-50 border border-red-200 rounded-lg p-3 mb-5 flex items-start gap-2 text-sm text-red-600",
+  errorAlertIcon: "text-base flex-shrink-0",
 
-// ===== LINKED JEWELLERY LIST =====
-linkedHeader: "text-xs text-gray-600 px-3 pt-3 pb-1 text-right",
-linkedItem: "bg-white p-3 border-b border-gray-100 cursor-pointer flex items-center gap-3 hover:bg-gray-50 transition-colors",
-linkedImage: "w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden",
-linkedImageInactive: "border border-dashed border-gray-300",
-linkedDetails: "flex-1 min-w-0",
-linkedRow1: "flex items-baseline justify-between mb-1 gap-2",
-linkedCode: "font-semibold text-gray-900 text-sm whitespace-nowrap",
-linkedDescription: "text-sm text-gray-600 truncate min-w-0 flex-1",
-linkedWeight: "text-sm text-gray-900 font-medium whitespace-nowrap flex-shrink-0",
-linkedRow2: "flex items-center text-xs text-gray-500 gap-1.5 flex-wrap",
-linkedStatus: "w-2.5 h-2.5 rounded-full flex-shrink-0 mr-2",
-linkedStatusVerified: "bg-green-500",
-linkedStatusMissing: "bg-red-500",
-linkedStatusDefault: "bg-gray-300",
-editButtonSmall: "bg-transparent border-none text-blue-500 cursor-pointer p-1.5 rounded-lg hover:bg-blue-50 transition-colors w-8 h-8 flex items-center justify-center flex-shrink-0",
+  // ===== FORM WRAPPER =====
+  formContentWrapper: "max-w-lg mx-auto w-full",
 
-// ===== EMPTY STATE =====
-emptyStateContainer: "text-center py-10 px-4 text-gray-500",
-//emptyIcon: "text-5xl mb-4 opacity-50",
-emptyTitle: "text-base font-medium text-gray-600 mb-2",
-emptySubtitle: "text-sm text-gray-500 mb-4",
-instructionsBox: "bg-yellow-50 p-4 rounded-lg my-4 max-w-lg mx-auto text-xs text-yellow-800",
-instructionsTitle: "font-semibold mb-2 flex items-center gap-1.5",
-actionButtons: "flex gap-3 justify-center flex-wrap mt-5",
-actionButton: "px-4 py-2.5 text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-colors",
-listButton: "bg-blue-500 hover:bg-blue-600",
-//addButton: "bg-green-500 hover:bg-green-600",
-
-// Add these to the existing tw object:
-
-// ===== FORM LAYOUT =====
-// formContainer: "max-w-lg mx-auto w-full pb-4",
-formSection: "mb-4",
-formSectionTitle: "text-sm font-medium text-gray-700 mb-2",
-
-// ===== IMAGE UPLOAD FORM =====
-imageSection: "mb-4",
-imagePreviewContainer: "mb-3 text-center relative",
-imagePreview: "max-w-[300px] max-h-[300px] rounded-lg border border-gray-200 shadow-sm mx-auto",
-deleteImageButton: "absolute top-2 right-2 bg-red-600/90 text-white border-none rounded-full w-8 h-8 cursor-pointer flex items-center justify-center text-sm hover:bg-red-700/90 disabled:opacity-70 transition-colors",
-imageUploadArea: "flex flex-col gap-2",
-imageUploadRow: "flex gap-2 items-start",
-fileInput: "w-full p-2 border border-gray-300 rounded text-sm bg-white file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200",
-uploadButton: "px-3 py-2 bg-green-500 text-white border-none rounded text-sm cursor-pointer flex items-center gap-1.5 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed",
-cancelUploadButton: "px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded text-sm cursor-pointer hover:bg-gray-200",
-// fileInfo: "p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600",
-imageError: "p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600",
-noImagePlaceholder: "p-5 border-2 border-dashed border-gray-300 rounded text-center text-gray-500",
-placeholderIcon: "text-2xl mb-2",
-placeholderText: "text-sm",
-placeholderSubtext: "text-xs mt-1",
-
-// ===== FORM ROWS =====
-// formRow: "flex gap-3 mb-3",
-formField: "flex-1",
-formLabel: "block text-xs text-gray-600 mb-1",
-formInput: "w-full p-2 border border-gray-300 rounded text-sm bg-white",
-formSelect: "w-full p-2 border border-gray-300 rounded text-sm bg-white",
-
-// ===== CALENDAR =====
-dateInputContainer: "relative",
-dateInput: "w-full p-2 pr-10 border border-gray-300 rounded text-sm bg-white cursor-pointer",
-calendarButton: "absolute right-2 top-1/2 transform -translate-y-1/2 bg-none border-none cursor-pointer text-gray-500 p-1",
-calendarPopup: "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 p-5 min-w-[300px] max-w-[400px] w-[90%] max-h-[80vh] overflow-hidden",
-yearSelectorPopup: "min-w-[350px] max-w-[400px]",
-calendarHeader: "flex justify-between items-center mb-3",
-calendarNavButtons: "flex gap-2",
-calendarNavButton: "bg-white border border-gray-200 rounded p-1.5 cursor-pointer text-sm text-gray-700 min-w-10 hover:bg-gray-50",
-calendarTitle: "text-base font-semibold text-gray-900 cursor-pointer px-2 py-1 rounded hover:bg-gray-100",
-daysGrid: "grid grid-cols-7 gap-1 mb-2",
-dayHeader: "text-center text-sm text-gray-600 font-medium py-1",
-calendarGrid: "grid grid-cols-7 gap-1",
-calendarDay: "p-2 bg-none border-none rounded cursor-pointer text-sm transition-colors hover:bg-gray-100",
-selectedDay: "bg-blue-500 text-white hover:bg-blue-600",
-todayDay: "border border-blue-500",
-calendarActions: "mt-3 text-center flex justify-center gap-2",
-todayButton: "px-3 py-1.5 bg-blue-500 text-white border-none rounded cursor-pointer text-sm",
-closeCalendarButton: "px-3 py-1.5 bg-gray-100 border-none rounded cursor-pointer text-sm",
-yearSelectorGrid: "max-h-[300px] overflow-y-auto p-2 grid grid-cols-4 gap-2",
-yearButton: "p-2 bg-none border-none rounded cursor-pointer text-sm",
-
-// ===== BILL FORM SECTION =====
-billFormSection: "mt-5 pt-4 border-t border-gray-200",
-billCard: "p-3 bg-gray-50 border border-gray-200 rounded",
-billFormHeader: "flex justify-between items-center mb-2",
-billFormInfo: "flex items-center gap-2",
-billFormIcon: "text-blue-500",
-billFormTitle: "font-medium text-gray-900 text-sm",
-billFormActions: "flex gap-2 mt-2",
-billFormViewButton: "px-2 py-1 bg-blue-500 text-white border-none rounded text-xs cursor-pointer flex items-center gap-1 hover:bg-blue-600",
-billFormDownloadButton: "px-2 py-1 bg-green-500 text-white border-none rounded text-xs cursor-pointer flex items-center gap-1 hover:bg-green-600",
-billFormWarning: "px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs flex items-center gap-1",
-changeBillButton: "ml-auto px-2 py-1 bg-gray-100 text-gray-700 border border-gray-300 rounded text-xs cursor-pointer hover:bg-gray-200",
-noBillCard: "p-3 bg-gray-50 border border-dashed border-gray-300 rounded text-gray-600 text-center",
-addBillButton: "px-3 py-2 bg-green-500 text-white border-none rounded text-sm cursor-pointer flex items-center gap-1.5 hover:bg-green-600",
-billSelectRow: "flex gap-2",
-billSelect: "flex-1 p-2 border border-gray-300 rounded text-sm bg-white",
-billCancelButton: "px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded text-sm cursor-pointer hover:bg-gray-200",
-
-// ===== FORM ACTIONS =====
-// formActions: "mt-6",
-actionButtonsRow: "flex gap-3 justify-center mb-3",
-formCancelButton: "px-6 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded cursor-pointer text-base font-medium flex items-center gap-1.5 hover:bg-gray-200",
-formDeleteButton: "px-6 py-2.5 bg-red-600 text-white border-none rounded cursor-pointer text-base font-medium flex items-center gap-1.5 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed",
-formSubmitButton: "px-6 py-2.5 bg-blue-500 text-white border-none rounded cursor-pointer text-base font-medium hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed",
-
-// ===== MODAL =====
-modalOverlay: "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4",
-modalContainer: "bg-white rounded-xl p-6 max-w-[400px] w-full shadow-2xl",
-modalTitle: "text-xl font-semibold text-gray-900 mb-3",
-modalContent: "text-gray-600 mb-6",
-modalActions: "flex gap-3 justify-end",
-modalCancelButton: "px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer",
-modalConfirmButton: "px-4 py-2 bg-red-600 text-white border-none rounded-lg cursor-pointer hover:bg-red-700",
-
-// ===== LOADING STATES =====
-loadingText: "p-3 border border-gray-300 rounded bg-gray-100 text-gray-600 text-center",
-
-// ===== UTILITIES =====
-flexCenter: "flex items-center",
-flexBetween: "flex justify-between items-center",
-
-// Add these to your existing tw object in tailwindMapping.ts if not already present:
-
-// ===== LOADING OVERLAY =====
-loadingOverlay: "absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-100",
-
-// ===== ERROR CONTAINERS =====
-// errorContainer: "p-5 max-w-lg mx-auto",
-errorHeader: "flex items-center gap-2 mb-2 text-lg text-red-600",
-// errorMessage: "my-3 text-gray-600",
-errorButtons: "flex gap-3 mt-4",
-errorButton: "px-5 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded cursor-pointer text-sm hover:bg-gray-200",
-errorAlert: "bg-red-50 border border-red-200 rounded-lg p-3 mb-5 flex items-start gap-2 text-sm text-red-600",
-errorAlertIcon: "text-base flex-shrink-0",
-
-// ===== FORM WRAPPER =====
-formContentWrapper: "max-w-lg mx-auto w-full",
-
-} as const; // Added 'as const' for better TypeScript inference
+} as const;
 
 // Banking-specific color variants
 export const bankingColors = {

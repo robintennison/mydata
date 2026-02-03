@@ -100,7 +100,7 @@ const DepositsTab: React.FC = () => {
 
   // Handle row click - FIXED: Always go to edit for now
   const handleRowClick = (depositId: string) => {
-    navigate(`/banking/deposits/edit/${depositId}`);
+    navigate(`/banking/deposits/view/${depositId}`);
   };
 
   if (loading) {

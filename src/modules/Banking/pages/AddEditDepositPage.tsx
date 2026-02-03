@@ -5,7 +5,6 @@ import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
 import { Deposit, DepositFormData } from "../../../types/banking.types";
 import { formatDate } from "../../../utils/formatters";
-import { tw, cls } from "../../../utils/tailwindMapping";
 
 interface AddEditDepositPageProps {
   isEdit?: boolean;
@@ -223,13 +222,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         <button
           key={day}
           onClick={() => selectDate(date, showCalendar!)}
-          className={cls(
-            "py-2.5 bg-transparent border-none rounded text-sm transition-all",
+          className={`py-2.5 bg-transparent border-none rounded text-sm transition-all ${
             isSelected
               ? "bg-blue-500 text-white font-semibold"
-              : "text-gray-800 hover:bg-gray-100",
-            isTodayDate && !isSelected ? "border-2 border-blue-500" : "",
-          )}
+              : "text-gray-800 hover:bg-gray-100"
+          } ${isTodayDate && !isSelected ? "border-2 border-blue-500" : ""}`}
         >
           {day}
         </button>,
@@ -249,12 +246,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         <button
           key={year}
           onClick={() => selectYear(year)}
-          className={cls(
-            "py-2.5 border-none rounded text-sm transition-all",
+          className={`py-2.5 border-none rounded text-sm transition-all ${
             year === currentYear
               ? "bg-blue-500 text-white font-semibold"
-              : "bg-transparent text-gray-800 hover:bg-gray-100",
-          )}
+              : "bg-transparent text-gray-800 hover:bg-gray-100"
+          }`}
         >
           {year}
         </button>,
@@ -370,7 +366,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   if (dataLoading && isEdit) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <div className={tw.bankingSpinner}></div>
+        <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
         <p className="mt-4 text-gray-600">Loading deposit details...</p>
       </div>
     );
@@ -430,13 +426,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                       ? "Select account"
                       : "No accounts available"
                 }
-                className={cls(
-                  tw.bankingInput,
-                  "pr-10 w-full",
+                className={`w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed pr-10 ${
                   localAccounts.length > 0
                     ? "cursor-pointer"
-                    : "cursor-not-allowed opacity-70",
-                )}
+                    : "cursor-not-allowed opacity-70"
+                }`}
                 style={{
                   borderColor:
                     error && !formData.accountId ? "#dc2626" : undefined,
@@ -485,12 +479,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                         onClick={() =>
                           handleAccountSelect(account.id, account.acctCode)
                         }
-                        className={cls(
-                          "w-full px-4 py-3 text-left text-sm border-b border-gray-100 flex justify-between items-start transition-colors",
+                        className={`w-full px-4 py-3 text-left text-sm border-b border-gray-100 flex justify-between items-start transition-colors ${
                           formData.accountId === account.id
                             ? "bg-blue-50"
-                            : "bg-transparent hover:bg-gray-50",
-                        )}
+                            : "bg-transparent hover:bg-gray-50"
+                        }`}
                       >
                         <div className="flex-1 min-w-0">
                           <div className="font-medium truncate">
@@ -503,12 +496,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                           )}
                         </div>
                         <div
-                          className={cls(
-                            "text-xs font-semibold whitespace-nowrap ml-3 text-right min-w-20",
+                          className={`text-xs font-semibold whitespace-nowrap ml-3 text-right min-w-20 ${
                             account.savingsAmount >= 0
                               ? "text-green-600"
-                              : "text-red-600",
-                          )}
+                              : "text-red-600"
+                          }`}
                         >
                           ₹
                           {(account.savingsAmount || 0).toLocaleString("en-IN")}
@@ -532,11 +524,9 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 handleInputChange("amount", parseFloat(e.target.value) || 0)
               }
               placeholder="Enter amount"
-              className={cls(
-                tw.bankingInput,
-                "w-full",
-                error && formData.amount <= 0 ? "border-red-300" : "",
-              )}
+              className={`w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                error && formData.amount <= 0 ? "border-red-300" : ""
+              }`}
               min="0"
               step="1000"
             />
@@ -557,7 +547,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 })}
                 readOnly
                 onClick={() => openCalendar("start")}
-                className="date-input cursor-pointer pr-10 w-full"
+                className="date-input w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition cursor-pointer pr-10"
               />
               <button
                 onClick={() => openCalendar("start")}
@@ -585,7 +575,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 })}
                 readOnly
                 onClick={() => openCalendar("end")}
-                className="date-input cursor-pointer pr-10 w-full"
+                className="date-input w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition cursor-pointer pr-10"
               />
               <button
                 onClick={() => openCalendar("end")}
@@ -743,12 +733,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           <button
             onClick={handleCancel}
             disabled={saving || deleting}
-            className={cls(
-              "flex-1 py-3.5 border border-gray-300 rounded-lg text-gray-600 font-semibold text-sm transition-colors",
+            className={`flex-1 py-3.5 border border-gray-300 rounded-lg text-gray-600 font-semibold text-sm transition-colors ${
               saving || deleting
                 ? "opacity-70 cursor-not-allowed"
-                : "hover:bg-gray-50",
-            )}
+                : "hover:bg-gray-50"
+            }`}
           >
             Cancel
           </button>
@@ -758,12 +747,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
             <button
               onClick={() => setShowDeleteConfirm(true)}
               disabled={saving || deleting}
-              className={cls(
-                "flex-1 py-3.5 bg-red-500 text-white font-semibold text-sm rounded-lg transition-colors",
+              className={`flex-1 py-3.5 text-white font-semibold text-sm rounded-lg transition-colors ${
                 saving || deleting
                   ? "opacity-70 cursor-not-allowed bg-gray-400"
-                  : "hover:bg-red-600",
-              )}
+                  : "bg-red-500 hover:bg-red-600"
+              }`}
             >
               {deleting ? "Deleting..." : "Delete"}
             </button>
@@ -775,14 +763,13 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
             disabled={
               saving || deleting || !formData.accountId || formData.amount <= 0
             }
-            className={cls(
-              "flex-1 py-3.5 text-white font-semibold text-sm rounded-lg transition-colors",
+            className={`flex-1 py-3.5 text-white font-semibold text-sm rounded-lg transition-colors ${
               saving || deleting
                 ? "bg-gray-400 cursor-not-allowed opacity-70"
                 : !formData.accountId || formData.amount <= 0
                   ? "bg-gray-400 cursor-not-allowed opacity-70"
-                  : "bg-green-500 hover:bg-green-600",
-            )}
+                  : "bg-green-500 hover:bg-green-600"
+            }`}
           >
             {saving ? "Saving..." : "Save"}
           </button>
@@ -816,12 +803,11 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className={cls(
-                  "px-4 py-2 text-white font-medium text-sm rounded-lg",
+                className={`px-4 py-2 text-white font-medium text-sm rounded-lg ${
                   deleting
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-red-500 hover:bg-red-600",
-                )}
+                    : "bg-red-500 hover:bg-red-600"
+                }`}
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>

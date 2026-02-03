@@ -5,7 +5,6 @@ import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { Deposit } from "../../../types/banking.types";
 import { formatDate } from "../../../utils/formatters";
-import { tw, banking } from "../../../utils/tailwindMapping";
 
 const ViewDepositPage: React.FC = () => {
   const { depositId } = useParams();
@@ -50,27 +49,29 @@ const ViewDepositPage: React.FC = () => {
 
   if (dataLoading || !deposit) {
     return (
-      <div className={tw.bankingContainer}>
-        <div className={tw.bankingLoading}>
-          <div className={tw.bankingSpinner}></div>
-          <p>Loading deposit details...</p>
+      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
+        <div className="flex flex-col items-center justify-center h-screen">
+          <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-500">Loading deposit details...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={tw.bankingContainer}>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
       {/* Top Navigation */}
-      <div className={tw.bankingTopNav}>
+      <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200 mb-4">
         <button
           onClick={handleBack}
-          className={tw.bankingNavButton}
+          className="w-10 h-10 bg-white border border-gray-300 rounded-lg text-xl cursor-pointer flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Back"
         >
           ←
         </button>
-        <div className={tw.bankingNavTitle}>Banking / View Deposit</div>
+        <div className="text-xl font-bold text-gray-900">
+          Banking / View Deposit
+        </div>
 
         {/* EDIT button in top nav - only show if showDelete setting is true */}
         {settings?.showDelete && (
@@ -86,7 +87,7 @@ const ViewDepositPage: React.FC = () => {
 
       {/* Deposit Details Card */}
       <div className="py-5">
-        <div className={tw.bankingCard}>
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 mb-4">
           {/* Account */}
           <div className="mb-5">
             <div className="text-sm text-gray-600 mb-1 font-medium">
@@ -154,9 +155,7 @@ const ViewDepositPage: React.FC = () => {
           <div className="mb-5">
             <div className="text-sm text-gray-600 mb-1 font-medium">Status</div>
             <div
-              className={banking.statusBadge(
-                deposit.active ? "active" : "inactive",
-              )}
+              className={`px-2 py-1 rounded-lg text-xs font-medium inline-block ${deposit.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}
             >
               {deposit.active ? "● Active" : "● Inactive"}
             </div>

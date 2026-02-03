@@ -81,15 +81,15 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
         {
           data: finalSummaries.map((s) => s.value),
           backgroundColor: [
-            "rgba(66, 133, 244, 0.7)",  // blue
-            "rgba(52, 168, 83, 0.7)",   // green
-            "rgba(251, 188, 5, 0.7)",   // yellow
-            "rgba(234, 67, 53, 0.7)",   // red
-            "rgba(156, 39, 176, 0.7)",  // purple
-            "rgba(0, 188, 212, 0.7)",   // cyan
-            "rgba(255, 152, 0, 0.7)",   // orange
-            "rgba(121, 85, 72, 0.7)",   // brown
-            "rgba(96, 125, 139, 0.7)",  // blue grey
+            "rgba(66, 133, 244, 0.7)", // blue
+            "rgba(52, 168, 83, 0.7)", // green
+            "rgba(251, 188, 5, 0.7)", // yellow
+            "rgba(234, 67, 53, 0.7)", // red
+            "rgba(156, 39, 176, 0.7)", // purple
+            "rgba(0, 188, 212, 0.7)", // cyan
+            "rgba(255, 152, 0, 0.7)", // orange
+            "rgba(121, 85, 72, 0.7)", // brown
+            "rgba(96, 125, 139, 0.7)", // blue grey
           ],
           borderColor: [
             "#4285f4",
@@ -136,13 +136,14 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
           size: 10,
         },
         formatter: (value: number, context: any) => {
-          const label = context.chart.data.labels?.[context.dataIndex] as string || "";
-          
+          const label =
+            (context.chart.data.labels?.[context.dataIndex] as string) || "";
+
           // Don't truncate "Others"
           if (label === "Others") {
             return `Others\n${value.toFixed(2)}`;
           }
-          
+
           // Truncate first 3 characters for other accounts
           const displayLabel = label.length > 3 ? label.substring(3) : label;
           return `${displayLabel}\n${value.toFixed(2)}`;
@@ -151,8 +152,10 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
         padding: 4,
         clip: false, // Ensure labels are never clipped
         display: (context) => {
-          const label = context.chart.data.labels?.[context.dataIndex] as string;
-          if (label === "Others") return true; 
+          const label = context.chart.data.labels?.[
+            context.dataIndex
+          ] as string;
+          if (label === "Others") return true;
           const value = context.dataset.data[context.dataIndex] as number;
           return value >= 0.1;
         },
@@ -177,7 +180,7 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
           <span>📊</span>
           <span>Deposit Distribution</span>
         </div>
-        <div style={{ height: "360px", position: "relative" }}>
+        <div className="h-[360px] relative">
           <Pie data={chartData} options={chardOptions} />
         </div>
       </div>

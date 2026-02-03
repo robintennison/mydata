@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { tw, cls } from "../../../utils/tailwindMapping";
 import Header from "../../../components/Layout/Header"; // Import Header
 
 // Import the tab components
@@ -328,12 +327,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
               Actual (6m)
             </div>
             <div
-              className={cls(
-                "text-lg font-bold",
+              className={`text-lg font-bold ${
                 actualWithdrawalData.monthlyRate >= emwAmount
                   ? "text-red-600"
-                  : "text-green-600",
-              )}
+                  : "text-green-600"
+              }`}
             >
               {formatLakhs(actualWithdrawalData.monthlyRate)}
             </div>
@@ -346,10 +344,9 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
               Last Month
             </div>
             <div
-              className={cls(
-                "text-lg font-bold",
-                lastMonthWithdrawal >= 0 ? "text-red-600" : "text-green-600",
-              )}
+              className={`text-lg font-bold ${
+                lastMonthWithdrawal >= 0 ? "text-red-600" : "text-green-600"
+              }`}
             >
               {lastMonthWithdrawal >= 0 ? "-" : "+"}
               {formatLakhs(Math.abs(lastMonthWithdrawal))}
@@ -456,11 +453,9 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
   if (loading) {
     return (
-      <div className={tw.bankingCenteredContainer}>
-        <div className="flex flex-col items-center justify-center h-screen">
-          <div className="w-10 h-10 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-500">Loading banking data...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="w-10 h-10 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-500">Loading banking data...</p>
       </div>
     );
   }
@@ -479,12 +474,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         <div className="flex overflow-x-auto px-1 gap-0.5">
           <button
             onClick={() => setActiveTab("dashboard")}
-            className={cls(
-              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
               activeTab === "dashboard"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
-                : "bg-transparent text-gray-500 border-b-2 border-transparent",
-            )}
+                : "bg-transparent text-gray-500 border-b-2 border-transparent"
+            }`}
             title="Dashboard"
           >
             📊 Dash
@@ -492,12 +486,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           <button
             onClick={() => setActiveTab("accounts")}
-            className={cls(
-              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
               activeTab === "accounts"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
-                : "bg-transparent text-gray-500 border-b-2 border-transparent",
-            )}
+                : "bg-transparent text-gray-500 border-b-2 border-transparent"
+            }`}
             title="Accounts"
           >
             👥 Acct
@@ -505,12 +498,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           <button
             onClick={() => setActiveTab("deposits")}
-            className={cls(
-              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
               activeTab === "deposits"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
-                : "bg-transparent text-gray-500 border-b-2 border-transparent",
-            )}
+                : "bg-transparent text-gray-500 border-b-2 border-transparent"
+            }`}
             title="Deposits"
           >
             💰 Depo
@@ -518,12 +510,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           <button
             onClick={() => setActiveTab("history")}
-            className={cls(
-              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
               activeTab === "history"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
-                : "bg-transparent text-gray-500 border-b-2 border-transparent",
-            )}
+                : "bg-transparent text-gray-500 border-b-2 border-transparent"
+            }`}
             title="History"
           >
             📅 Hist
@@ -531,12 +522,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           <button
             onClick={() => setActiveTab("summary")}
-            className={cls(
-              "flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200",
+            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
               activeTab === "summary"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
-                : "bg-transparent text-gray-500 border-b-2 border-transparent",
-            )}
+                : "bg-transparent text-gray-500 border-b-2 border-transparent"
+            }`}
             title="Summary"
           >
             📈 Summ
@@ -546,14 +536,13 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
       {/* Tab Content */}
       <div
-        className={cls(
-          "flex-1 w-full max-w-2xl mx-auto overflow-y-auto",
+        className={`flex-1 w-full max-w-2xl mx-auto overflow-y-auto ${
           activeTab === "history" ||
-            activeTab === "summary" ||
-            activeTab === "dashboard"
+          activeTab === "summary" ||
+          activeTab === "dashboard"
             ? "px-1 py-2" // Reduced horizontal padding
-            : "p-4",
-        )}
+            : "p-4"
+        }`}
       >
         {activeTab === "dashboard" && <DashboardContent />}
         {activeTab === "accounts" && <AccountsTab />}

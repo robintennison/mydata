@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { Deposit, BankAccount } from "../../../types/banking.types";
-import { tw, cls } from "../../../utils/tailwindMapping";
 
 // Custom formatter for Lakhs - REMOVED "L" suffix
 const formatInLakhs = (amount: number): string => {
@@ -106,7 +105,7 @@ const DepositsTab: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-5">
-        <div className={tw.bankingSpinner}></div>
+        <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
         <p className="mt-4 text-gray-600">Loading deposits...</p>
       </div>
     );
@@ -150,12 +149,11 @@ const DepositsTab: React.FC = () => {
                       setFilterAccount("All");
                       setShowFilterDropdown(false);
                     }}
-                    className={cls(
-                      "w-full px-3 py-2 text-left text-sm cursor-pointer border-b border-gray-100",
+                    className={`w-full px-3 py-2 text-left text-sm cursor-pointer border-b border-gray-100 ${
                       filterAccount === "All"
                         ? "bg-blue-50 text-blue-600"
-                        : "bg-transparent text-gray-800 hover:bg-gray-50",
-                    )}
+                        : "bg-transparent text-gray-800 hover:bg-gray-50"
+                    }`}
                   >
                     All Accounts
                   </button>
@@ -171,12 +169,11 @@ const DepositsTab: React.FC = () => {
                           setFilterAccount(account.acctCode);
                           setShowFilterDropdown(false);
                         }}
-                        className={cls(
-                          "w-full px-3 py-2 text-left text-sm cursor-pointer border-b border-gray-100",
+                        className={`w-full px-3 py-2 text-left text-sm cursor-pointer border-b border-gray-100 ${
                           filterAccount === account.acctCode
                             ? "bg-blue-50 text-blue-600"
-                            : "bg-transparent text-gray-800 hover:bg-gray-50",
-                        )}
+                            : "bg-transparent text-gray-800 hover:bg-gray-50"
+                        }`}
                       >
                         {account.acctCode}
                       </button>
@@ -218,12 +215,11 @@ const DepositsTab: React.FC = () => {
                       setSortBy("account");
                       setShowSortDropdown(false);
                     }}
-                    className={cls(
-                      "w-full px-3 py-2 text-left text-sm cursor-pointer border-b border-gray-100",
+                    className={`w-full px-3 py-2 text-left text-sm cursor-pointer border-b border-gray-100 ${
                       sortBy === "account"
                         ? "bg-blue-50 text-blue-600"
-                        : "bg-transparent text-gray-800 hover:bg-gray-50",
-                    )}
+                        : "bg-transparent text-gray-800 hover:bg-gray-50"
+                    }`}
                   >
                     <div className="flex items-center gap-1.5">
                       <span>🔢</span>
@@ -236,12 +232,11 @@ const DepositsTab: React.FC = () => {
                       setSortBy("date");
                       setShowSortDropdown(false);
                     }}
-                    className={cls(
-                      "w-full px-3 py-2 text-left text-sm cursor-pointer",
+                    className={`w-full px-3 py-2 text-left text-sm cursor-pointer ${
                       sortBy === "date"
                         ? "bg-blue-50 text-blue-600"
-                        : "bg-transparent text-gray-800 hover:bg-gray-50",
-                    )}
+                        : "bg-transparent text-gray-800 hover:bg-gray-50"
+                    }`}
                   >
                     <div className="flex items-center gap-1.5">
                       <span>📅</span>
@@ -349,13 +344,13 @@ const DepositsTab: React.FC = () => {
             {/* Total Summary Footer - SIMPLE */}
             <div className="bg-gray-50 border-t border-gray-300 px-2 py-2">
               <div className="flex justify-between items-center mb-1">
-                <div className="text-2xs text-gray-600">
+                <div className="text-[10px] text-gray-600">
                   {filteredDeposits.length} deposit
                   {filteredDeposits.length !== 1 ? "s" : ""}
                   {filterAccount !== "All" && ` for ${filterAccount}`}
                 </div>
                 <div className="text-right">
-                  <div className="text-2xs text-gray-500 font-semibold uppercase tracking-wider">
+                  <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
                     Total
                   </div>
                   <div className="text-sm font-bold text-blue-600">
@@ -365,7 +360,7 @@ const DepositsTab: React.FC = () => {
               </div>
 
               {/* Sort Info - Compact */}
-              <div className="text-2xs text-gray-400 text-center pt-1 border-t border-dashed border-gray-300 mt-1">
+              <div className="text-[10px] text-gray-400 text-center pt-1 border-t border-dashed border-gray-300 mt-1">
                 Sorted by {sortBy === "account" ? "account code" : "end date"}
               </div>
             </div>

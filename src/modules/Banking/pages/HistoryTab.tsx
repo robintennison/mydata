@@ -4,7 +4,6 @@ import { useBankingData } from "../hooks/useBankingData";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { tw } from "../../../utils/tailwindMapping";
 
 const HistoryTab: React.FC = () => {
   const { settings } = useSettings();
@@ -87,7 +86,7 @@ const HistoryTab: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-5">
-        <div className={tw.bankingSpinner}></div>
+        <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
         <p className="mt-4 text-gray-600">Loading history...</p>
       </div>
     );
@@ -108,7 +107,7 @@ const HistoryTab: React.FC = () => {
             <span>📊</span>
             <span className="text-xs font-semibold text-gray-800">History</span>
           </div>
-          <div className="text-2xs text-gray-600">
+          <div className="text-[10px] text-gray-600">
             {history.length} record{history.length !== 1 ? "s" : ""}
           </div>
         </div>
@@ -126,7 +125,7 @@ const HistoryTab: React.FC = () => {
         ) : (
           <div>
             {/* Table Header */}
-            <div className="flex items-center py-1 bg-gray-50 border-b border-gray-300 font-semibold text-2xs text-gray-700 px-1">
+            <div className="flex items-center py-1 bg-gray-50 border-b border-gray-300 font-semibold text-[10px] text-gray-700 px-1">
               <div className="w-1/4 px-0.5">Month</div>
               <div className="w-1/4 px-0.5 text-right">Savings</div>
               <div className="w-1/4 px-0.5 text-right">Deposits</div>

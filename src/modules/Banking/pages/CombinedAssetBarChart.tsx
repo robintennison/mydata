@@ -280,16 +280,15 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
           </div>
         </div>
         <div
-          className="text-center p-3 text-gray-500"
+          className="text-center p-3 text-gray-500 flex items-center justify-center"
           style={{
             height: "360px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
           }}
         >
           <div>
-            <div className="text-sm font-medium mb-0.5">No asset data available</div>
+            <div className="text-sm font-medium mb-0.5">
+              No asset data available
+            </div>
             <div className="text-xs">
               Add accounts and deposits to see the distribution
             </div>
@@ -305,15 +304,11 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
         <div className="text-sm font-semibold text-gray-800">
           <span>📊</span> Asset Distribution
         </div>
-        <div
-          style={{ fontSize: "0.75rem", color: "#666", fontWeight: "normal" }}
-        >
+        <div className="text-xs text-gray-600 font-normal">
           S=Savings | D=Deposits
         </div>
       </div>
-      <div style={{ height: "450px", position: "relative" }}>
-        {" "}
-        {/* Increased height */}
+      <div className="h-[450px] relative">
         <Bar data={chartData.chartData} options={chartOptions} />
       </div>
     </div>

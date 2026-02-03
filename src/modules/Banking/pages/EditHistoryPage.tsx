@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { tw } from "../../../utils/tailwindMapping";
 import { useBankingData } from "../hooks/useBankingData";
 
 const EditHistoryPage: React.FC = () => {
@@ -55,10 +54,10 @@ const EditHistoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={tw.bankingContainer}>
-        <div className={tw.bankingLoading}>
-          <div className={tw.bankingSpinner}></div>
-          <p>Loading...</p>
+      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen">
+        <div className="flex flex-col items-center justify-center h-screen">
+          <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-500">Loading...</p>
         </div>
       </div>
     );

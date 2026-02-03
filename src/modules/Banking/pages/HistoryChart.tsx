@@ -14,7 +14,6 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { tw } from "../../../utils/tailwindMapping";
 
 // Register Chart.js components
 ChartJS.register(
@@ -245,7 +244,13 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
 
   if (history.length < 2) {
     return (
-      <div className={compact ? "" : tw.section}>
+      <div
+        className={
+          compact
+            ? ""
+            : "bg-white rounded-xl my-3 p-3 shadow-sm border border-gray-200"
+        }
+      >
         {!compact && (
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -271,7 +276,13 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
   }
 
   return (
-    <div className={compact ? "" : tw.section}>
+    <div
+      className={
+        compact
+          ? ""
+          : "bg-white rounded-xl my-3 p-3 shadow-sm border border-gray-200"
+      }
+    >
       {!compact && (
         <div className="flex items-center justify-between mb-4">
           <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">

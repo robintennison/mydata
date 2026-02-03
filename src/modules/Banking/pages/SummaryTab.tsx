@@ -12,7 +12,6 @@ import {
 import { firestore } from "../../../lib/firebase";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { tw, cls } from "../../../utils/tailwindMapping";
 
 interface AccountSummary {
   accountId: string;
@@ -312,7 +311,7 @@ const SummaryTab: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-5">
-        <div className={tw.bankingSpinner}></div>
+        <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
         <p className="mt-4 text-gray-600">Loading summary...</p>
       </div>
     );
@@ -366,11 +365,9 @@ const SummaryTab: React.FC = () => {
                 return (
                   <div
                     key={summary.accountId}
-                    className={cls(
-                      "flex items-center py-2.5 border-b border-gray-100 text-sm",
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50",
-                      !isEditing && "hover:bg-gray-100 cursor-pointer",
-                    )}
+                    className={`flex items-center py-2.5 border-b border-gray-100 text-sm ${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } ${!isEditing ? "hover:bg-gray-100 cursor-pointer" : ""}`}
                   >
                     {/* Account Code */}
                     <div className="w-[38%] px-2 min-w-0">
@@ -491,12 +488,7 @@ const SummaryTab: React.FC = () => {
           <div className="mt-4 flex flex-col items-center">
             <button
               onClick={handleHistoryUpdate}
-              className={cls(
-                "px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium",
-                "hover:from-blue-600 hover:to-blue-700 transition-all",
-                "disabled:opacity-50 disabled:cursor-not-allowed",
-                "min-w-[220px] flex items-center justify-center",
-              )}
+              className={`px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[220px] flex items-center justify-center`}
               disabled={isUpdatingHistory || !currentMonth}
             >
               {isUpdatingHistory ? (

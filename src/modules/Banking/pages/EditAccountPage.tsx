@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
-import { tw } from "../../../utils/tailwindMapping";
 import type { BankAccount } from "../../../types/banking.types";
 
 const EditAccountPage: React.FC = () => {
@@ -217,16 +216,16 @@ const EditAccountPage: React.FC = () => {
 
   if (dataLoading) {
     return (
-      <div className={tw.loadingContainer}>
-        <div className={tw.spinner}></div>
-        <p>Loading account details...</p>
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-500">Loading account details...</p>
       </div>
     );
   }
 
   if (!account && !dataLoading) {
     return (
-      <div className={tw.bankingContainer}>
+      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
         <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200 mb-4">
           <h1 className="text-xl font-bold text-gray-900">Account Not Found</h1>
         </div>
@@ -248,18 +247,20 @@ const EditAccountPage: React.FC = () => {
   }
 
   return (
-    <div className={tw.bankingContainer}>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
       {/* Top Navigation */}
-      <div className={tw.bankingTopNav}>
+      <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200 mb-4">
         <button
           onClick={handleCancel}
-          className={tw.bankingNavButton}
+          className="w-10 h-10 bg-white border border-gray-300 rounded-lg text-xl cursor-pointer flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Back to Accounts"
           disabled={submitting}
         >
           ←
         </button>
-        <div className={tw.bankingNavTitle}>Banking / {getPageTitle()}</div>
+        <div className="text-xl font-bold text-gray-900">
+          Banking / {getPageTitle()}
+        </div>
         <div className="w-10"></div>
       </div>
 
@@ -360,7 +361,7 @@ const EditAccountPage: React.FC = () => {
                 placeholder="Bank name, branch, account type, etc."
                 value={formData.acctDetails}
                 onChange={(e) => handleChange("acctDetails", e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 resize-vertical"
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 resize-y"
                 style={{ height: `${textareaHeight}px` }}
                 required
                 disabled={submitting}
@@ -440,7 +441,7 @@ const EditAccountPage: React.FC = () => {
 
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Delete Account?
@@ -466,23 +467,6 @@ const EditAccountPage: React.FC = () => {
           </div>
         </div>
       )}
-
-      <style>
-        {`
-          /* Ensure textarea is fully editable */
-          textarea {
-            -webkit-user-select: text !important;
-            -moz-user-select: text !important;
-            -ms-user-select: text !important;
-            user-select: text !important;
-            pointer-events: auto !important;
-          }
-          
-          .resize-vertical {
-            resize: vertical;
-          }
-        `}
-      </style>
     </div>
   );
 };

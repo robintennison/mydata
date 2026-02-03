@@ -55,15 +55,15 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
         {
           data: finalSummaries.map((s) => s.value),
           backgroundColor: [
-            "rgba(52, 168, 83, 0.7)",   // green
-            "rgba(66, 133, 244, 0.7)",  // blue
-            "rgba(251, 188, 5, 0.7)",   // yellow
-            "rgba(234, 67, 53, 0.7)",   // red
-            "rgba(156, 39, 176, 0.7)",  // purple
-            "rgba(0, 188, 212, 0.7)",   // cyan
-            "rgba(255, 152, 0, 0.7)",   // orange
-            "rgba(121, 85, 72, 0.7)",   // brown
-            "rgba(96, 125, 139, 0.7)",  // blue grey
+            "rgba(52, 168, 83, 0.7)", // green
+            "rgba(66, 133, 244, 0.7)", // blue
+            "rgba(251, 188, 5, 0.7)", // yellow
+            "rgba(234, 67, 53, 0.7)", // red
+            "rgba(156, 39, 176, 0.7)", // purple
+            "rgba(0, 188, 212, 0.7)", // cyan
+            "rgba(255, 152, 0, 0.7)", // orange
+            "rgba(121, 85, 72, 0.7)", // brown
+            "rgba(96, 125, 139, 0.7)", // blue grey
           ],
           borderColor: [
             "#34a853",
@@ -110,12 +110,13 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
           size: 10,
         },
         formatter: (value: number, context: any) => {
-          const label = context.chart.data.labels?.[context.dataIndex] as string || "";
-          
+          const label =
+            (context.chart.data.labels?.[context.dataIndex] as string) || "";
+
           if (label === "Others") {
             return `Others\n${value}`;
           }
-          
+
           const displayLabel = label.length > 3 ? label.substring(3) : label;
           return `${displayLabel}\n${value}`;
         },
@@ -123,8 +124,10 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
         padding: 4,
         clip: false,
         display: (context) => {
-          const label = context.chart.data.labels?.[context.dataIndex] as string;
-          if (label === "Others") return true; 
+          const label = context.chart.data.labels?.[
+            context.dataIndex
+          ] as string;
+          if (label === "Others") return true;
           const value = context.dataset.data[context.dataIndex] as number;
           return value >= 0.01; // Show even small labels if they aren't 'Others'
         },
@@ -149,7 +152,7 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
           <span>📊</span>
           <span>Savings Distribution</span>
         </div>
-        <div style={{ height: "360px", position: "relative" }}>
+        <div className="h-[360px] relative">
           <Pie data={chartData} options={chardOptions} />
         </div>
       </div>

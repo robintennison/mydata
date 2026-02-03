@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { jewelleryStyles } from "../styles/jewelleryStyles";
 import { Jewellery } from "../models/types";
 
 const JewelleryStats: React.FC = () => {
@@ -47,54 +46,66 @@ const JewelleryStats: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={jewelleryStyles.container}>
-        <div style={jewelleryStyles.loading}>
-          <div style={jewelleryStyles.spinner}></div>
-          <p>Loading statistics...</p>
+      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
+        <div className="flex flex-col items-center justify-center h-64">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600">Loading statistics...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={jewelleryStyles.container}>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
       {/* Top Navigation */}
-      <div style={jewelleryStyles.topNav}>
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 py-2 px-3 flex items-center justify-between">
         <button
           onClick={() => navigate("/jewellery")}
-          style={jewelleryStyles.navButton}
+          className="px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded text-base"
           title="Back to Jewellery"
         >
           ←
         </button>
-        <div style={jewelleryStyles.navTitle}>Jewellery Statistics</div>
-        <div style={{ width: "40px" }}></div>
+        <div className="font-semibold text-gray-800">Jewellery Statistics</div>
+        <div className="w-10"></div>
       </div>
 
       {/* Stats Cards */}
-      <div style={{ padding: "15px" }}>
-        <div style={jewelleryStyles.statsCard}>
-          <h3 style={{ margin: "0 0 15px 0", color: "#333" }}>
+      <div className="p-4">
+        {/* Stats Card Container */}
+        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Overview Statistics
           </h3>
-          <div style={jewelleryStyles.statsGrid}>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>Total Items</div>
-              <div style={jewelleryStyles.statValue}>{stats.totalItems}</div>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Total Items */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm text-gray-500 mb-1">Total Items</div>
+              <div className="text-2xl font-bold text-gray-800">
+                {stats.totalItems}
+              </div>
             </div>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>Total Weight</div>
-              <div style={jewelleryStyles.statValue}>
+
+            {/* Total Weight */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm text-gray-500 mb-1">Total Weight</div>
+              <div className="text-2xl font-bold text-gray-800">
                 {stats.totalWeight.toFixed(1)}g
               </div>
             </div>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>Verified</div>
-              <div style={jewelleryStyles.statValue}>{stats.verifiedCount}</div>
+
+            {/* Verified */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm text-gray-500 mb-1">Verified</div>
+              <div className="text-2xl font-bold text-emerald-600">
+                {stats.verifiedCount}
+              </div>
             </div>
-            <div style={jewelleryStyles.statItem}>
-              <div style={jewelleryStyles.statLabel}>Not Verified</div>
-              <div style={jewelleryStyles.statValue}>
+
+            {/* Not Verified */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm text-gray-500 mb-1">Not Verified</div>
+              <div className="text-2xl font-bold text-gray-600">
                 {stats.notVerifiedCount}
               </div>
             </div>
@@ -102,62 +113,42 @@ const JewelleryStats: React.FC = () => {
         </div>
 
         {/* Verification Status Chart */}
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "12px",
-            padding: "20px",
-            marginTop: "15px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          }}
-        >
-          <h4 style={{ margin: "0 0 15px 0", color: "#333" }}>
+        <div className="bg-white rounded-lg p-5 mt-4 shadow-sm border border-gray-200">
+          <h4 className="text-md font-semibold text-gray-800 mb-4">
             Verification Status
           </h4>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  backgroundColor: "#10b981",
-                  borderRadius: "2px",
-                }}
-              ></div>
-              <div style={{ flex: 1 }}>Verified</div>
-              <div style={{ fontWeight: "600" }}>{stats.verifiedCount}</div>
+          <div className="flex flex-col gap-3">
+            {/* Verified */}
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-emerald-500 rounded"></div>
+              <div className="flex-1 text-gray-700">Verified</div>
+              <div className="font-semibold text-gray-800">
+                {stats.verifiedCount}
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  backgroundColor: "#ef4444",
-                  borderRadius: "2px",
-                }}
-              ></div>
-              <div style={{ flex: 1 }}>Missing</div>
-              <div style={{ fontWeight: "600" }}>{stats.missingCount}</div>
+
+            {/* Missing */}
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-red-500 rounded"></div>
+              <div className="flex-1 text-gray-700">Missing</div>
+              <div className="font-semibold text-gray-800">
+                {stats.missingCount}
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  backgroundColor: "#6b7280",
-                  borderRadius: "2px",
-                }}
-              ></div>
-              <div style={{ flex: 1 }}>Not Verified</div>
-              <div style={{ fontWeight: "600" }}>{stats.notVerifiedCount}</div>
+
+            {/* Not Verified */}
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-gray-400 rounded"></div>
+              <div className="flex-1 text-gray-700">Not Verified</div>
+              <div className="font-semibold text-gray-800">
+                {stats.notVerifiedCount}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div style={{ height: "20px" }}></div>
+      <div className="h-5"></div>
     </div>
   );
 };

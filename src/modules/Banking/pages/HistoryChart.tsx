@@ -14,7 +14,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import styles from "../styles/HistoryListPage.styles";
+import { tw } from "../../../utils/tailwindMapping";
 
 // Register Chart.js components
 ChartJS.register(
@@ -26,7 +26,7 @@ ChartJS.register(
   Tooltip,
   Legend,
   Filler,
-  ChartDataLabels // Register datalabels plugin
+  ChartDataLabels, // Register datalabels plugin
 );
 
 interface HistoryChartProps {
@@ -34,7 +34,10 @@ interface HistoryChartProps {
   compact?: boolean;
 }
 
-const HistoryChart: React.FC<HistoryChartProps> = ({ history, compact = false }) => {
+const HistoryChart: React.FC<HistoryChartProps> = ({
+  history,
+  compact = false,
+}) => {
   const [chartData, setChartData] = useState<ChartData<"line"> | null>(null);
 
   // Format month for chart display
@@ -73,13 +76,13 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history, compact = false })
       .slice(-6);
 
     const labels = chartHistory.map((record) =>
-      formatMonthForChart(record.month)
+      formatMonthForChart(record.month),
     );
     const depositsData = chartHistory.map((record) =>
-      parseFloat((record.totalDeposits / 100000).toFixed(2))
+      parseFloat((record.totalDeposits / 100000).toFixed(2)),
     );
     const totalData = chartHistory.map((record) =>
-      parseFloat(((record.savings + record.totalDeposits) / 100000).toFixed(2))
+      parseFloat(((record.savings + record.totalDeposits) / 100000).toFixed(2)),
     );
 
     const data: ChartData<"line"> = {
@@ -124,7 +127,6 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history, compact = false })
     plugins: {
       legend: {
         position: "top",
-        // Hide legend in compact mode to save space, or make it smaller
         display: !compact,
         labels: {
           font: {
@@ -214,7 +216,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history, compact = false })
             size: 9,
           },
           padding: 2,
-          display: !compact, // Hide y-axis labels in compact mode to save width
+          display: !compact,
           callback: function (value) {
             if (value === null || value === undefined) return "";
             if (typeof value === "number") return `${value}`;
@@ -237,54 +239,57 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ history, compact = false })
       mode: "index",
     },
     layout: {
-      padding: compact ? 0 : undefined
-    }
+      padding: compact ? 0 : undefined,
+    },
   };
 
-  const sectionStyle = compact 
-    ? { ...styles.chartSection, padding: "0", margin: "0", border: "none", boxShadow: "none" }
-    : styles.chartSection;
+  if (history.length < 2) {
+    return (
+      <div className={compact ? "" : tw.section}>
+        {!compact && (
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+              <span>📈</span>
+              Last 6 Months Trend
+            </div>
+          </div>
+        )}
 
-  const headerStyle = compact
-    ? { ...styles.sectionHeader, padding: "8px 4px 4px 4px", marginBottom: "4px" }
-    : styles.sectionHeader;
-
-  const chartWrapperStyle = compact
-    ? { ...styles.chartWrapper, height: "160px", marginTop: "0" }
-    : styles.chartWrapper;
+        <div className="text-center py-8 bg-white rounded-xl border border-gray-100">
+          <div className="text-3xl mb-2 opacity-50">📊</div>
+          <div className="text-sm font-medium text-gray-600 mb-1">
+            {history.length === 0
+              ? "No history data"
+              : "Need more data for chart"}
+          </div>
+          <div className="text-xs text-gray-500">
+            Add at least 2 months of history
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={sectionStyle}>
+    <div className={compact ? "" : tw.section}>
       {!compact && (
-        <div style={headerStyle}>
-          <div style={styles.sectionTitle}>
-            <span style={styles.sectionIcon}>📈</span>
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+            <span>📈</span>
             Last 6 Months Trend
           </div>
         </div>
       )}
 
-      {history.length < 2 ? (
-        <div style={styles.emptyChart}>
-          <div style={styles.emptyChartIcon}>📊</div>
-          <div style={styles.emptyChartText}>
-            {history.length === 0
-              ? "No history data"
-              : "Need more data for chart"}
-          </div>
-          <div style={styles.emptyChartSubtext}>
-            Add at least 2 months of history
-          </div>
-        </div>
-      ) : chartData ? (
-        <div style={chartWrapperStyle}>
+      {chartData && (
+        <div className={compact ? "h-40" : "h-64"}>
           <Line
             data={chartData}
             options={chartOptions}
             plugins={[ChartDataLabels]}
           />
         </div>
-      ) : null}
+      )}
     </div>
   );
 };

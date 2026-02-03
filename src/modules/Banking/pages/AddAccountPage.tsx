@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
-import { tw } from "../../../utils/tailwindMapping";
 
 const AddAccountPage: React.FC = () => {
   const navigate = useNavigate();
@@ -124,7 +123,7 @@ const AddAccountPage: React.FC = () => {
   };
 
   return (
-    <div className={tw.bankingContainer}>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200 mb-4">
         <button

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
-import { tw, cls } from "../../../utils/tailwindMapping";
 
 const AccountsTab: React.FC = () => {
   const navigate = useNavigate();
@@ -97,7 +96,7 @@ const AccountsTab: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-5">
-        <div className={tw.bankingSpinner}></div>
+        <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
         <p className="mt-4 text-gray-600">Loading accounts...</p>
       </div>
     );
@@ -152,11 +151,9 @@ const AccountsTab: React.FC = () => {
                       {/* Account Column */}
                       <div className="w-[38%] min-w-0 text-left px-1">
                         <div
-                          className={cls(
-                            "text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap",
-                            isActive ? "text-gray-800" : "text-gray-500",
-                            !isActive && "line-through",
-                          )}
+                          className={`text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap ${
+                            isActive ? "text-gray-800" : "text-gray-500"
+                          } ${!isActive ? "line-through" : ""}`}
                           title={
                             accountCode.length > 12 ? accountCode : undefined
                           }
@@ -173,10 +170,9 @@ const AccountsTab: React.FC = () => {
                       {/* Savings Column */}
                       <div className="w-[27%] text-left px-1">
                         <div
-                          className={cls(
-                            "text-xs font-semibold whitespace-nowrap",
-                            isActive ? "text-blue-600" : "text-gray-500",
-                          )}
+                          className={`text-xs font-semibold whitespace-nowrap ${
+                            isActive ? "text-blue-600" : "text-gray-500"
+                          }`}
                         >
                           {formatCurrency(account.savingsAmount)}
                         </div>
@@ -194,7 +190,7 @@ const AccountsTab: React.FC = () => {
                         <div className="w-[7%] flex justify-end items-center pr-0.5">
                           <button
                             onClick={(e) => handleEditClick(account.id, e)}
-                            className="p-0 bg-transparent border-none cursor-pointer text-gray-500 text-2xs flex items-center justify-center w-5 h-5 hover:text-blue-600"
+                            className="p-0 bg-transparent border-none cursor-pointer text-gray-500 text-[10px] flex items-center justify-center w-5 h-5 hover:text-blue-600"
                             title="Edit Account"
                           >
                             ✏️
@@ -210,18 +206,18 @@ const AccountsTab: React.FC = () => {
             {/* Total Savings Footer */}
             <div className="bg-gray-50 border-t border-gray-300 px-3 py-2.5 flex justify-between items-center">
               <div className="flex flex-col justify-center">
-                <div className="text-2xs text-gray-600">
+                <div className="text-[10px] text-gray-600">
                   {settings?.showInactive
                     ? `${sortedAccounts.length} of ${accounts.length} accounts`
                     : `${sortedAccounts.length} active accounts`}
                 </div>
-                <div className="text-3xs text-gray-400 mt-0.5">
+                <div className="text-[8px] text-gray-400 mt-0.5">
                   ({activeAccountsCount} active, {inactiveAccountsCount}{" "}
                   inactive)
                 </div>
               </div>
               <div className="text-right flex flex-col justify-center items-end">
-                <div className="text-2xs text-gray-500 font-semibold uppercase tracking-wider">
+                <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
                   Total Savings
                 </div>
                 <div className="text-sm font-bold text-blue-600">

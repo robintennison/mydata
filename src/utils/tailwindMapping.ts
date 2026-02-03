@@ -286,6 +286,37 @@ fileChangeText: "text-xs text-blue-500 mt-2",
 // ===== BILL FORM SPECIFIC =====
 billForm: "max-w-lg mx-auto w-full",
 
+// Add these to your existing tw object in tailwindMapping.ts:
+
+// ===== BILLS LIST SPECIFIC =====
+billListItem: "bg-white p-3 border-b border-gray-100 cursor-pointer transition-colors hover:bg-gray-50",
+billListItemLinked: "border-l-4 border-blue-500",
+billListItemUnlinked: "border-l-4 border-transparent",
+billListHeader: "text-xs text-gray-600 px-3 pt-3 pb-1 text-right",
+billItemContent: "flex items-center justify-between min-w-0",
+billInfo: "flex-1 min-w-0 pr-3",
+billTitle: "font-medium text-gray-900 text-sm mb-1",
+billMetaRow: "flex items-center gap-2",
+linkedBadge: "inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full",
+linkedBadgeWithItems: "bg-blue-100 text-blue-800",
+linkedBadgeNoItems: "bg-gray-100 text-gray-600",
+billId: "text-xs text-gray-400 font-mono truncate",
+actionIcons: "flex items-center gap-2 flex-shrink-0",
+actionIcon: "bg-transparent border-none text-base cursor-pointer p-1.5 rounded-lg transition-colors hover:bg-gray-100",
+viewIcon: "text-blue-500 flex flex-col items-center",
+editIcon: "text-blue-500",
+deleteIconLinked: "text-yellow-500",
+deleteIconUnlinked: "text-red-500",
+
+// ===== SUMMARY SECTION =====
+summarySection: "p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600",
+summaryContent: "flex justify-between items-center",
+legend: "flex items-center gap-4",
+legendItem: "flex items-center gap-2",
+legendDot: "w-2 h-2 rounded-full",
+legendDotLinked: "bg-blue-500",
+legendDotUnlinked: "bg-gray-400",
+
 
 } as const; // Added 'as const' for better TypeScript inference
 

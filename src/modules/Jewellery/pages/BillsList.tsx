@@ -7,7 +7,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { jewelleryStyles } from "../styles/jewelleryStyles";
+import { tw } from "../../../utils/tailwindMapping";
 
 interface Bill {
   id: string;
@@ -106,9 +106,9 @@ const BillsList: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={jewelleryStyles.container}>
-        <div style={jewelleryStyles.loading}>
-          <div style={jewelleryStyles.spinner}></div>
+      <div className={tw.container}>
+        <div className={tw.loading}>
+          <div className={tw.spinner}></div>
           <p>Loading bills...</p>
         </div>
       </div>
@@ -116,24 +116,22 @@ const BillsList: React.FC = () => {
   }
 
   return (
-    <div style={jewelleryStyles.container}>
+    <div className={tw.container}>
       {/* Top Navigation */}
-      <div style={jewelleryStyles.topNav}>
+      <div className={tw.topNav}>
         <button
           onClick={() => navigate("/jewellery")}
-          style={jewelleryStyles.navButton}
+          className={tw.navButton}
           title="Back to Jewellery"
         >
           ←
         </button>
-        <div style={jewelleryStyles.navTitle}>Bills</div>
+        <div className="text-lg font-semibold text-gray-900 flex-1 text-center">
+          Bills
+        </div>
         <button
           onClick={() => navigate("/jewellery/bills/add")}
-          style={{
-            ...jewelleryStyles.navButton,
-            padding: "6px 12px",
-            fontSize: "14px",
-          }}
+          className="px-3 py-1.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors"
           title="Add New Bill"
         >
           + Add
@@ -141,107 +139,54 @@ const BillsList: React.FC = () => {
       </div>
 
       {/* Bills List */}
-      <div style={jewelleryStyles.contentWrapper}>
+      <div className={tw.contentWrapper}>
         {bills.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 20px",
-              color: "#9ca3af",
-            }}
-          >
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>📄</div>
-            <p style={{ marginBottom: "16px" }}>No bills found.</p>
+          <div className="text-center py-12 px-4 text-gray-500">
+            <div className="text-5xl mb-4 opacity-50">📄</div>
+            <p className="mb-4">No bills found.</p>
             <button
               onClick={() => navigate("/jewellery/bills/add")}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
+              className="px-5 py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors"
             >
               Add your first bill
             </button>
           </div>
         ) : (
           <>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#6b7280",
-                padding: "6px 12px 2px",
-                textAlign: "right",
-              }}
-            >
+            <div className="text-xs text-gray-600 px-3 pt-3 pb-1 text-right">
               {bills.length} bills •{" "}
               {bills.filter((b) => b.hasLinkedJewellery).length} with jewellery
             </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div className="flex flex-col">
               {bills.map((bill) => (
                 <div
                   key={bill.id}
-                  style={{
-                    backgroundColor: "white",
-                    padding: "12px",
-                    borderBottom: "1px solid #e5e7eb",
-                    cursor: bill.hasLinkedJewellery ? "pointer" : "default",
-                    borderLeft: bill.hasLinkedJewellery
-                      ? "4px solid #3b82f6"
-                      : "4px solid transparent",
-                  }}
+                  className={`${tw.billListItem} ${
+                    bill.hasLinkedJewellery
+                      ? tw.billListItemLinked
+                      : tw.billListItemUnlinked
+                  }`}
                   onClick={() =>
                     bill.hasLinkedJewellery &&
                     handleViewLinkedJewellery(bill.id)
                   }
                 >
                   {/* Single Row Layout */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
+                  <div className={tw.billItemContent}>
                     {/* Bill Info */}
-                    <div style={{ flex: 1, minWidth: 0, paddingRight: "10px" }}>
-                      <div
-                        style={{
-                          fontWeight: "500",
-                          fontSize: "14px",
-                          color: "#111827",
-                          marginBottom: "4px",
-                        }}
-                      >
+                    <div className={tw.billInfo}>
+                      <div className={tw.billTitle}>
                         {bill.notes || "No notes"}
                       </div>
 
                       {/* Link Status Indicator */}
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        }}
-                      >
+                      <div className={tw.billMetaRow}>
                         <div
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "2px",
-                            fontSize: "11px",
-                            padding: "2px 6px",
-                            borderRadius: "12px",
-                            backgroundColor: bill.hasLinkedJewellery
-                              ? "#dbeafe"
-                              : "#f3f4f6",
-                            color: bill.hasLinkedJewellery
-                              ? "#1e40af"
-                              : "#6b7280",
-                          }}
+                          className={`${tw.linkedBadge} ${
+                            bill.hasLinkedJewellery
+                              ? tw.linkedBadgeWithItems
+                              : tw.linkedBadgeNoItems
+                          }`}
                         >
                           {bill.hasLinkedJewellery ? (
                             <>
@@ -260,47 +205,28 @@ const BillsList: React.FC = () => {
                         </div>
 
                         {/* Bill ID (truncated) */}
-                        <div
-                          style={{
-                            fontSize: "10px",
-                            color: "#9ca3af",
-                            fontFamily: "monospace",
-                          }}
-                        >
+                        <div className={tw.billId}>
                           {bill.id.substring(0, 8)}...
                         </div>
                       </div>
                     </div>
 
                     {/* Action Icons */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        flexShrink: 0,
-                      }}
-                    >
+                    <div className={tw.actionIcons}>
                       {/* View Linked Jewellery Button (only if has links) */}
                       {bill.hasLinkedJewellery && (
                         <button
-                          onClick={() => handleViewLinkedJewellery(bill.id)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            fontSize: "14px",
-                            color: "#3b82f6",
-                            cursor: "pointer",
-                            padding: "6px",
-                            borderRadius: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            flexDirection: "column",
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewLinkedJewellery(bill.id);
                           }}
-                          title={`View ${bill.jewelleryCount} linked item${bill.jewelleryCount !== 1 ? "s" : ""}`}
+                          className={`${tw.actionIcon} ${tw.viewIcon}`}
+                          title={`View ${bill.jewelleryCount} linked item${
+                            bill.jewelleryCount !== 1 ? "s" : ""
+                          }`}
                         >
                           <span>🔍</span>
-                          <span style={{ fontSize: "9px", marginTop: "2px" }}>
+                          <span className="text-[9px] mt-0.5">
                             {bill.jewelleryCount}
                           </span>
                         </button>
@@ -309,17 +235,7 @@ const BillsList: React.FC = () => {
                       {/* Edit Icon */}
                       <button
                         onClick={(e) => handleEditBill(e, bill.id)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          fontSize: "16px",
-                          color: "#3b82f6",
-                          cursor: "pointer",
-                          padding: "6px",
-                          borderRadius: "6px",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
+                        className={`${tw.actionIcon} ${tw.editIcon}`}
                         title="Edit Bill"
                       >
                         ✏️
@@ -328,10 +244,13 @@ const BillsList: React.FC = () => {
                       {/* Delete Icon - Show warning if bill has linked jewellery */}
                       <button
                         onClick={(e) => {
+                          e.stopPropagation();
                           if (bill.hasLinkedJewellery) {
                             if (
                               window.confirm(
-                                `This bill is linked to ${bill.jewelleryCount} jewellery item${bill.jewelleryCount !== 1 ? "s" : ""}. ` +
+                                `This bill is linked to ${bill.jewelleryCount} jewellery item${
+                                  bill.jewelleryCount !== 1 ? "s" : ""
+                                }. ` +
                                   `Deleting it will remove the link from those items. Are you sure you want to delete?`,
                               )
                             ) {
@@ -341,22 +260,16 @@ const BillsList: React.FC = () => {
                             handleDeleteBill(e, bill.id);
                           }
                         }}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          fontSize: "16px",
-                          color: bill.hasLinkedJewellery
-                            ? "#f59e0b"
-                            : "#ef4444",
-                          cursor: "pointer",
-                          padding: "6px",
-                          borderRadius: "6px",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
+                        className={`${tw.actionIcon} ${
+                          bill.hasLinkedJewellery
+                            ? tw.deleteIconLinked
+                            : tw.deleteIconUnlinked
+                        }`}
                         title={
                           bill.hasLinkedJewellery
-                            ? `Delete bill (linked to ${bill.jewelleryCount} item${bill.jewelleryCount !== 1 ? "s" : ""})`
+                            ? `Delete bill (linked to ${bill.jewelleryCount} item${
+                                bill.jewelleryCount !== 1 ? "s" : ""
+                              })`
                             : "Delete bill"
                         }
                       >
@@ -369,50 +282,27 @@ const BillsList: React.FC = () => {
             </div>
 
             {/* Summary Section */}
-            <div
-              style={{
-                padding: "12px",
-                backgroundColor: "#f8fafc",
-                borderTop: "1px solid #e5e7eb",
-                fontSize: "12px",
-                color: "#64748b",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div>
-                <span style={{ fontWeight: "500" }}>Summary:</span>{" "}
-                {bills.filter((b) => b.hasLinkedJewellery).length} bills with
-                jewellery, {bills.filter((b) => !b.hasLinkedJewellery).length}{" "}
-                without
-              </div>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                >
-                  <div
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      backgroundColor: "#3b82f6",
-                      borderRadius: "50%",
-                    }}
-                  ></div>
-                  <span>Has jewellery</span>
+            <div className={tw.summarySection}>
+              <div className={tw.summaryContent}>
+                <div>
+                  <span className="font-medium">Summary:</span>{" "}
+                  {bills.filter((b) => b.hasLinkedJewellery).length} bills with
+                  jewellery, {bills.filter((b) => !b.hasLinkedJewellery).length}{" "}
+                  without
                 </div>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                >
-                  <div
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      backgroundColor: "#d1d5db",
-                      borderRadius: "50%",
-                    }}
-                  ></div>
-                  <span>No jewellery</span>
+                <div className={tw.legend}>
+                  <div className={tw.legendItem}>
+                    <div
+                      className={`${tw.legendDot} ${tw.legendDotLinked}`}
+                    ></div>
+                    <span>Has jewellery</span>
+                  </div>
+                  <div className={tw.legendItem}>
+                    <div
+                      className={`${tw.legendDot} ${tw.legendDotUnlinked}`}
+                    ></div>
+                    <span>No jewellery</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -420,7 +310,7 @@ const BillsList: React.FC = () => {
         )}
       </div>
 
-      <div style={{ height: "5px" }}></div>
+      <div className="h-1"></div>
     </div>
   );
 };

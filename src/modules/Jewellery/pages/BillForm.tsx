@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { tw } from "../../../utils/tailwindMapping";
 import { Bill } from "../models/types";
 
 const BillForm: React.FC = () => {
@@ -85,9 +84,9 @@ const BillForm: React.FC = () => {
 
   if (loading && isEditMode) {
     return (
-      <div className={tw.container}>
-        <div className={tw.loading}>
-          <div className={tw.spinner}></div>
+      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-gray-50 text-gray-700 m-0 p-0">
+          <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
           <p>Loading bill data...</p>
         </div>
       </div>
@@ -95,12 +94,12 @@ const BillForm: React.FC = () => {
   }
 
   return (
-    <div className={tw.container}>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
       {/* Top Navigation */}
-      <div className={tw.topNav}>
+      <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
         <button
           onClick={() => navigate("/jewellery/bills")}
-          className={tw.navButton}
+          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
           title="Back to Bills"
         >
           ←
@@ -108,17 +107,17 @@ const BillForm: React.FC = () => {
         <div className="text-lg font-semibold text-gray-900 flex-1 text-center">
           {isEditMode ? "Edit Bill" : "Add Bill"}
         </div>
-        <div style={{ width: "40px" }}></div>
+        <div className="w-10"></div>
       </div>
 
       <form onSubmit={handleSubmit} className="p-4 max-w-lg mx-auto w-full">
         {/* File Upload */}
         <div className="mb-6">
-          <label className={tw.label}>
+          <label className="block mb-1.5 text-sm font-medium text-gray-700">
             {isEditMode ? "Replace File" : "Upload File"}
           </label>
           <div
-            className={tw.fileUploadContainer}
+            className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300"
             onClick={() => document.getElementById("fileInput")?.click()}
           >
             <input
@@ -162,13 +161,15 @@ const BillForm: React.FC = () => {
 
         {/* Notes */}
         <div className="mb-6">
-          <label className={tw.label}>Notes</label>
+          <label className="block mb-1.5 text-sm font-medium text-gray-700">
+            Notes
+          </label>
           <textarea
             value={formData.notes || ""}
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
             }
-            className={tw.textarea}
+            className="w-full p-3 border border-gray-300 rounded text-sm font-sans leading-normal text-gray-900 bg-white resize-y min-h-[150px] max-h-[400px] overflow-y-auto box-border"
             placeholder="Add notes about this bill (optional)"
             rows={3}
           />
@@ -177,7 +178,9 @@ const BillForm: React.FC = () => {
         {/* Creation Date */}
         {isEditMode && (
           <div className="mb-6">
-            <label className={tw.label}>Created Date</label>
+            <label className="block mb-1.5 text-sm font-medium text-gray-700">
+              Created Date
+            </label>
             <input
               type="date"
               value={new Date(formData.createdAt).toISOString().split("T")[0]}
@@ -187,7 +190,7 @@ const BillForm: React.FC = () => {
                   createdAt: new Date(e.target.value).getTime(),
                 })
               }
-              className={tw.input}
+              className="w-full p-2.5 px-3 border border-gray-300 rounded text-sm bg-white box-border"
             />
           </div>
         )}

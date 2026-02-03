@@ -339,7 +339,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           <select
             value={selectedLocation}
             onChange={(e) => setSelectedLocation(e.target.value)}
-            className="flex-1 px-2 py-2 border border-gray-200 rounded text-sm bg-white"
+            className="flex-1 px-2 py-2 border border-gray-200 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Locations</option>
             {locations.map((location) => (
@@ -354,7 +354,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
               onClick={() =>
                 handleBulkUpdate(selectedLocation, VerificationStatus.VERIFIED)
               }
-              className="px-3 py-2 bg-emerald-600 text-white border-none rounded cursor-pointer text-sm font-medium"
+              className="px-3 py-2 bg-emerald-600 text-white border-none rounded cursor-pointer text-sm font-medium hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
             >
               ✓ All
             </button>
@@ -363,7 +363,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
 
         <button
           onClick={() => navigate("/jewellery/verification")}
-          className="w-full py-2.5 px-4 bg-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2"
+          className="w-full py-2.5 px-4 bg-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           Start Verification
           <span>→</span>
@@ -416,12 +416,12 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
             placeholder="Search items..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-3 py-2 border border-gray-200 rounded text-sm"
+            className="flex-1 px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           <select
             value={selectedLocation}
             onChange={(e) => setSelectedLocation(e.target.value)}
-            className="px-3 py-2 border border-gray-200 rounded text-sm min-w-30"
+            className="px-3 py-2 border border-gray-200 rounded text-sm min-w-30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Locations</option>
             {locations.map((location) => (
@@ -438,7 +438,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
               onClick={() =>
                 handleBulkUpdate(selectedLocation, VerificationStatus.VERIFIED)
               }
-              className="flex-1 px-3 py-1.5 bg-emerald-600 text-white border-none rounded cursor-pointer text-xs font-medium"
+              className="flex-1 px-3 py-1.5 bg-emerald-600 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
             >
               ✓ Mark All Verified
             </button>
@@ -449,7 +449,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                   VerificationStatus.NOT_VERIFIED,
                 )
               }
-              className="flex-1 px-3 py-1.5 bg-amber-500 text-white border-none rounded cursor-pointer text-xs font-medium"
+              className="flex-1 px-3 py-1.5 bg-amber-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
             >
               ⟲ Reset All
             </button>
@@ -465,7 +465,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
             <p>No jewellery items found</p>
             <button
               onClick={() => navigate("/jewellery")}
-              className="px-4 py-2 bg-blue-600 text-white border-none rounded cursor-pointer text-sm mt-3"
+              className="px-4 py-2 bg-blue-600 text-white border-none rounded cursor-pointer text-sm mt-3 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               Add Jewellery Items
             </button>
@@ -541,10 +541,10 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       }
                       disabled={isUpdating}
                       title="Mark as Verified"
-                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer ${
+                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                         item.verificationStatus === VerificationStatus.VERIFIED
-                          ? "bg-emerald-600 text-white border-emerald-600"
-                          : "bg-emerald-50 text-emerald-600 border-emerald-200"
+                          ? "bg-emerald-600 text-white border-emerald-600 focus:ring-emerald-500"
+                          : "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 focus:ring-emerald-300"
                       } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       ✓
@@ -559,11 +559,11 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       }
                       disabled={isUpdating}
                       title="Mark as Not Verified"
-                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer ${
+                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                         item.verificationStatus ===
                         VerificationStatus.NOT_VERIFIED
-                          ? "bg-amber-500 text-white border-amber-500"
-                          : "bg-amber-50 text-amber-600 border-amber-200"
+                          ? "bg-amber-500 text-white border-amber-500 focus:ring-amber-500"
+                          : "bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100 focus:ring-amber-300"
                       } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       !
@@ -578,10 +578,10 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       }
                       disabled={isUpdating}
                       title="Mark as Missing"
-                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer ${
+                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                         item.verificationStatus === VerificationStatus.MISSING
-                          ? "bg-red-500 text-white border-red-500"
-                          : "bg-red-50 text-red-600 border-red-200"
+                          ? "bg-red-500 text-white border-red-500 focus:ring-red-500"
+                          : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 focus:ring-red-300"
                       } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       ✗
@@ -590,11 +590,11 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                     <button
                       onClick={() => toggleNotes(item)}
                       title={hasNotes ? "View notes" : "Add notes"}
-                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer border ${
+                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer border focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-transform duration-200 ${
                         hasNotes
-                          ? "bg-blue-100 text-blue-700 border-blue-300"
-                          : "bg-transparent text-gray-500 border-gray-300"
-                      } transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                          ? "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200"
+                          : "bg-transparent text-gray-500 border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                      } ${isExpanded ? "rotate-180" : ""}`}
                     >
                       ↓
                     </button>
@@ -639,20 +639,20 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                         }))
                       }
                       placeholder="Add verification notes..."
-                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm font-inherit resize-y min-h-10 mb-2"
+                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm font-inherit resize-y min-h-10 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       disabled={isUpdating}
                     />
                     <div className="flex gap-1.5 justify-end">
                       <button
                         onClick={() => saveNotes(item.id)}
-                        className={`px-2.5 py-1 bg-blue-600 text-white border-none rounded cursor-pointer text-xs font-medium ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
+                        className={`px-2.5 py-1 bg-blue-600 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                         disabled={isUpdating}
                       >
                         {isUpdating ? "Saving..." : "Save"}
                       </button>
                       <button
                         onClick={() => setExpandedNotesId(null)}
-                        className={`px-2.5 py-1 bg-gray-100 text-gray-700 border-none rounded cursor-pointer text-xs font-medium ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
+                        className={`px-2.5 py-1 bg-gray-100 text-gray-700 border-none rounded cursor-pointer text-xs font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                         disabled={isUpdating}
                       >
                         Close
@@ -669,7 +669,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           <div className="text-center py-3 border-t border-gray-100">
             <button
               onClick={() => navigate("/jewellery/verification")}
-              className="px-4 py-2 bg-transparent text-blue-600 border border-blue-600 rounded cursor-pointer text-sm"
+              className="px-4 py-2 bg-transparent text-blue-600 border border-blue-600 rounded cursor-pointer text-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               View {filteredItems.length - 15} more items
             </button>

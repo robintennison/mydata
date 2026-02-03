@@ -2,16 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { useAuth } from "../../../contexts/AuthContext";
-import { tw, cls } from "../../../utils/tailwindMapping";
 import OnlineListTab from "./OnlineListTab";
 import RenewalListTab from "./RenewalListTab";
 import CategoryListTab from "./CategoryListTab";
 import Header from "../../../components/Layout/Header";
 
+// Helper function for conditional classes
+const cls = (...classes: (string | boolean | undefined)[]) =>
+  classes.filter(Boolean).join(" ");
+
 // Tab components
 const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
   return (
-    <div className={tw.scrollableArea}>
+    <div className="flex-1 overflow-y-auto min-h-0 p-2 px-1">
       {(() => {
         switch (activeTab) {
           case "items":
@@ -162,18 +165,18 @@ const OnlineHomepage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={tw.container}>
+      <div className="w-full h-screen bg-gray-50 flex flex-col">
         <Header />
-        <div className={tw.loading}>
-          <div className={tw.spinner}></div>
-          <p>Loading online module...</p>
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600">Loading online module...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={tw.container}>
+    <div className="w-full h-screen bg-gray-50 flex flex-col">
       <Header
         showAddButton={true}
         onAddClick={handleAddClick}
@@ -181,13 +184,13 @@ const OnlineHomepage: React.FC = () => {
       />
 
       {/* Main Content Area */}
-      <div className={tw.contentWrapper}>
-        {/* Tab Navigation with Tailwind */}
+      <div className="flex-1 flex flex-col w-full overflow-hidden min-h-0">
+        {/* Tab Navigation */}
         <div className="flex bg-white border-b border-gray-200 px-1 shrink-0">
           <button
             onClick={() => setActiveTab("items")}
             className={cls(
-              "flex-1 py-3 bg-transparent border-none relative whitespace-nowrap transition-all duration-200",
+              "flex-1 py-3 bg-transparent relative whitespace-nowrap transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:z-10",
               activeTab === "items"
                 ? "border-b-2 border-blue-500 text-blue-500 font-semibold"
                 : "border-b-2 border-transparent text-gray-600 font-medium hover:bg-gray-50",
@@ -204,7 +207,7 @@ const OnlineHomepage: React.FC = () => {
           <button
             onClick={() => setActiveTab("renewals")}
             className={cls(
-              "flex-1 py-3 bg-transparent border-none relative whitespace-nowrap transition-all duration-200",
+              "flex-1 py-3 bg-transparent relative whitespace-nowrap transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:z-10",
               activeTab === "renewals"
                 ? "border-b-2 border-orange-500 text-orange-500 font-semibold"
                 : "border-b-2 border-transparent text-gray-600 font-medium hover:bg-gray-50",
@@ -231,9 +234,9 @@ const OnlineHomepage: React.FC = () => {
           <button
             onClick={() => setActiveTab("categories")}
             className={cls(
-              "flex-1 py-3 bg-transparent border-none relative whitespace-nowrap transition-all duration-200",
+              "flex-1 py-3 bg-transparent relative whitespace-nowrap transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:z-10",
               activeTab === "categories"
-                ? "border-b-2 border-blue-500 text-blue-500 font-semibold"
+                ? "border-b-2 border-purple-500 text-purple-500 font-semibold"
                 : "border-b-2 border-transparent text-gray-600 font-medium hover:bg-gray-50",
             )}
           >

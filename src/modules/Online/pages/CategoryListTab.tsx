@@ -73,15 +73,16 @@ const CategoryListTab: React.FC = () => {
   }
 
   return (
-    <div className="min-h-full">
-      <div className="p-2 bg-white border-b border-gray-200 shrink-0">
+    <div className="w-full h-full flex flex-col">
+      {/* Search Bar */}
+      <div className="p-2 bg-white border-b border-gray-200 flex-shrink-0">
         <div className="relative">
           <input
             type="text"
             placeholder="Search categories..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-2.5 pl-3 pr-10 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+            className="w-full p-2.5 pl-3 pr-10 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           />
           <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
             🔍
@@ -89,9 +90,10 @@ const CategoryListTab: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0">
+      {/* Content Area */}
+      <div className="flex-1 overflow-y-auto">
         {filteredCategories.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-5 text-center flex-1">
+          <div className="flex flex-col items-center justify-center py-20 px-5 text-center h-full">
             <div className="text-4xl mb-4 opacity-50">📁</div>
             <div className="text-lg font-medium text-gray-600 mb-2">
               {searchTerm
@@ -101,6 +103,14 @@ const CategoryListTab: React.FC = () => {
             <div className="text-sm text-gray-400">
               {!searchTerm && "Add your first category"}
             </div>
+            {!searchTerm && (
+              <button
+                onClick={() => navigate("/online/categories/add")}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white border-none rounded cursor-pointer text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Add Category
+              </button>
+            )}
           </div>
         ) : (
           <div className="p-2">
@@ -113,21 +123,28 @@ const CategoryListTab: React.FC = () => {
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm("")}
-                  className="text-xs text-blue-500 cursor-pointer px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors"
+                  className="text-xs text-blue-500 cursor-pointer px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   Clear search
                 </button>
               )}
             </div>
 
-            <div className="space-y-2">
+            {/* Category List */}
+            <div className="space-y-2 pb-4">
               {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white rounded-lg border border-gray-200 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm"
+                  className="bg-white rounded-lg border border-gray-200 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onClick={() =>
                     navigate(`/online/categories/edit/${category.id}`)
                   }
+                  tabIndex={0}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      navigate(`/online/categories/edit/${category.id}`);
+                    }
+                  }}
                 >
                   <div className="p-3 flex items-center min-h-12">
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
@@ -144,7 +161,7 @@ const CategoryListTab: React.FC = () => {
 
                     <div className="ml-2 flex gap-1">
                       <button
-                        className="px-2.5 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors"
+                        className="px-2.5 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/online/categories/edit/${category.id}`);
@@ -154,7 +171,7 @@ const CategoryListTab: React.FC = () => {
                         ✏️ Edit
                       </button>
                       <button
-                        className="px-2.5 py-1.5 bg-red-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-red-600 transition-colors"
+                        className="px-2.5 py-1.5 bg-red-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDelete(category.id, category.name);
@@ -171,6 +188,18 @@ const CategoryListTab: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Add Category Button (Fixed at bottom) */}
+      {filteredCategories.length > 0 && (
+        <div className="p-4 bg-white border-t border-gray-200 flex-shrink-0">
+          <button
+            onClick={() => navigate("/online/categories/add")}
+            className="w-full py-3 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          >
+            Add New Category
+          </button>
+        </div>
+      )}
     </div>
   );
 };

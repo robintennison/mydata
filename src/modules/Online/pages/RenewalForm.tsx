@@ -125,32 +125,52 @@ const RenewalForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading renewal...</p>
+      <div className="w-full h-screen bg-gray-50 flex flex-col">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center">
+            <button
+              onClick={() =>
+                navigate("/online", { state: { activeTab: "renewals" } })
+              }
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title="Back"
+            >
+              ←
+            </button>
+            <div className="ml-4">
+              <h1 className="text-lg font-semibold text-gray-900">
+                {isEditing ? "Edit Renewal" : "Add Renewal"}
+              </h1>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading renewal...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full h-screen bg-gray-50 flex flex-col">
       {/* Top Navigation */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-10">
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center">
             <button
               onClick={() =>
                 navigate("/online", { state: { activeTab: "renewals" } })
               }
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
               title="Back"
             >
               ←
             </button>
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">
+            <div className="ml-4">
+              <h1 className="text-lg font-semibold text-gray-900">
                 {isEditing ? "Edit Renewal" : "Add Renewal"}
               </h1>
               <p className="text-sm text-gray-500">
@@ -158,96 +178,98 @@ const RenewalForm: React.FC = () => {
               </p>
             </div>
           </div>
-          <div>
-            <button
-              type="submit"
-              form="renewal-form"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
-              disabled={saving}
-            >
-              {saving ? "Saving..." : isEditing ? "Update" : "Save"}
-            </button>
-          </div>
+          <button
+            type="submit"
+            form="renewal-form"
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
+            disabled={saving}
+          >
+            {saving ? "Saving..." : isEditing ? "Update" : "Save"}
+          </button>
         </div>
       </div>
 
-      {/* Form */}
-      <div className="max-w-2xl mx-auto p-4">
-        <form id="renewal-form" onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Name *
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-              placeholder="Enter renewal name"
-              required
-              disabled={saving}
-              autoFocus
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Form Content */}
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="max-w-2xl mx-auto">
+          <form id="renewal-form" onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Start Date *
+                Name *
               </label>
               <input
-                type="date"
-                value={new Date(formData.startDate).toISOString().split("T")[0]}
+                type="text"
+                value={formData.name}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    startDate: new Date(e.target.value).getTime(),
-                  })
+                  setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="Enter renewal name"
                 required
                 disabled={saving}
+                autoFocus
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start Date *
+                </label>
+                <input
+                  type="date"
+                  value={
+                    new Date(formData.startDate).toISOString().split("T")[0]
+                  }
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      startDate: new Date(e.target.value).getTime(),
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  required
+                  disabled={saving}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Date *
+                </label>
+                <input
+                  type="date"
+                  value={new Date(formData.endDate).toISOString().split("T")[0]}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      endDate: new Date(e.target.value).getTime(),
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  required
+                  disabled={saving}
+                />
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                End Date *
+                Comments
               </label>
-              <input
-                type="date"
-                value={new Date(formData.endDate).toISOString().split("T")[0]}
+              <textarea
+                value={formData.comments || ""}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    endDate: new Date(e.target.value).getTime(),
-                  })
+                  setFormData({ ...formData, comments: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-y min-h-[80px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="Enter any comments or notes"
+                rows={3}
                 disabled={saving}
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Comments
-            </label>
-            <textarea
-              value={formData.comments || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, comments: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-y min-h-[80px] disabled:bg-gray-100 disabled:cursor-not-allowed"
-              placeholder="Enter any comments or notes"
-              rows={3}
-              disabled={saving}
-            />
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

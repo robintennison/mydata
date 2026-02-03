@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
+import { tw } from "../../../utils/tailwindMapping"; // Import the tw object
 
 interface BatchEditPageProps {}
 
@@ -173,130 +174,41 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          backgroundColor: "#f9fafb",
-        }}
-      >
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "16px",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              border: "3px solid #e5e7eb",
-              borderTopColor: "#3b82f6",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          ></div>
-          <p>Loading jewellery items...</p>
-        </div>
+      <div className={tw.loading}>
+        <div className={tw.spinner}></div>
+        <p>Loading jewellery items...</p>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#f9fafb",
-        maxWidth: "600px",
-        margin: "0 auto",
-      }}
-    >
+    <div className={tw.container}>
       {/* Top Navigation */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "12px 16px",
-          backgroundColor: "white",
-          borderBottom: "1px solid #e5e7eb",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <button
-          onClick={handleCancel}
-          style={{
-            background: "none",
-            border: "none",
-            padding: "8px",
-            fontSize: "18px",
-            cursor: "pointer",
-            color: "#374151",
-            borderRadius: "8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: "40px",
-            minHeight: "40px",
-          }}
-          title="Cancel"
-        >
-          ←
-        </button>
-        <div
-          style={{
-            fontSize: "18px",
-            fontWeight: "600",
-            color: "#111827",
-            textAlign: "center",
-            flex: 1,
-          }}
-        >
-          Batch Edit Location
+      <div className={tw.header}>
+        <div className={tw.headerContent}>
+          <button
+            onClick={handleCancel}
+            className={tw.settingsButton}
+            title="Cancel"
+          >
+            ←
+          </button>
+          <div className={tw.title} style={{ margin: 0, textAlign: "center" }}>
+            Batch Edit Location
+          </div>
+          <div style={{ width: "44px" }}></div>
         </div>
-        <div style={{ width: "40px" }}></div>
       </div>
 
       {/* Filters Section */}
-      <div
-        style={{
-          padding: "15px",
-          backgroundColor: "white",
-          borderBottom: "1px solid #e5e7eb",
-        }}
-      >
+      <div className={tw.section}>
         {/* Current Location Filter */}
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Filter by Current Location
-          </label>
+        <div className="mb-4">
+          <label className={tw.label}>Filter by Current Location</label>
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              backgroundColor: "white",
-            }}
+            className={tw.select}
           >
             <option value="All">All Locations</option>
             {locationOptions
@@ -310,28 +222,12 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
         </div>
 
         {/* New Location Selection */}
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            New Location for Selected Items
-          </label>
+        <div className="mb-4">
+          <label className={tw.label}>New Location for Selected Items</label>
           <select
             value={newLocation}
             onChange={(e) => setNewLocation(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              backgroundColor: "white",
-            }}
+            className={tw.select}
           >
             <option value="">Select new location...</option>
             {locationOptions
@@ -345,34 +241,17 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
         </div>
 
         {/* Selection Info */}
-        <div
-          style={{
-            fontSize: "14px",
-            color: "#6b7280",
-            marginBottom: "10px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <div className="flex justify-between items-center mb-4 text-sm text-gray-600">
           <span>
             {selectedItems.size} of {filteredItems.length} selected
           </span>
           {filteredItems.length > 0 && (
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                cursor: "pointer",
-                fontSize: "13px",
-              }}
-            >
+            <label className="flex items-center gap-2 cursor-pointer text-sm">
               <input
                 type="checkbox"
                 checked={selectedItems.size === filteredItems.length}
                 onChange={(e) => handleSelectAll(e.target.checked)}
-                style={{ width: "16px", height: "16px" }}
+                className="w-4 h-4"
               />
               Select All
             </label>
@@ -383,19 +262,11 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
         <button
           onClick={handleUpdateLocation}
           disabled={updating || selectedItems.size === 0 || !newLocation}
-          style={{
-            width: "100%",
-            padding: "12px",
-            backgroundColor:
-              selectedItems.size > 0 && newLocation ? "#3b82f6" : "#d1d5db",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            cursor:
-              selectedItems.size > 0 && newLocation ? "pointer" : "not-allowed",
-            fontSize: "16px",
-            fontWeight: "500",
-          }}
+          className={`w-full py-3 rounded-lg font-medium text-base ${
+            selectedItems.size > 0 && newLocation
+              ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+              : "bg-gray-200 text-gray-500 cursor-not-allowed"
+          } transition-colors`}
         >
           {updating
             ? "Updating..."
@@ -407,17 +278,11 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
         {/* Update Message */}
         {updateMessage && (
           <div
-            style={{
-              marginTop: "10px",
-              padding: "10px",
-              borderRadius: "6px",
-              backgroundColor: updateMessage.includes("Error")
-                ? "#fee2e2"
-                : "#d1fae5",
-              color: updateMessage.includes("Error") ? "#991b1b" : "#065f46",
-              fontSize: "14px",
-              textAlign: "center",
-            }}
+            className={`mt-3 p-3 rounded-lg text-sm text-center ${
+              updateMessage.includes("Error")
+                ? "bg-red-100 text-red-800"
+                : "bg-green-100 text-green-800"
+            }`}
           >
             {updateMessage}
           </div>
@@ -425,108 +290,51 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
       </div>
 
       {/* Items List */}
-      <div style={{ flex: 1, padding: "0" }}>
+      <div className="flex-1">
         {filteredItems.length === 0 ? (
-          <div
-            style={{
-              padding: "40px 20px",
-              textAlign: "center",
-              color: "#9ca3af",
-            }}
-          >
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>📦</div>
-            <p style={{ marginBottom: "8px" }}>No items found</p>
-            <p style={{ fontSize: "14px", color: "#6b7280" }}>
+          <div className="text-center py-12 px-4 text-gray-500">
+            <div className="text-5xl mb-4 opacity-50">📦</div>
+            <p className="font-medium mb-2">No items found</p>
+            <p className="text-sm">
               {locationFilter !== "All"
                 ? "No items with this location"
                 : "No jewellery items in database"}
             </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <div className="flex flex-col">
             {filteredItems.map((item) => (
               <div
                 key={item.id}
-                style={{
-                  backgroundColor: "white",
-                  padding: "12px 15px",
-                  borderBottom: "1px solid #e5e7eb",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
+                className="bg-white p-4 border-b border-gray-100 flex items-center gap-3 hover:bg-gray-50"
               >
                 {/* Checkbox */}
                 <input
                   type="checkbox"
                   checked={selectedItems.has(item.id)}
                   onChange={(e) => handleSelectItem(item.id, e.target.checked)}
-                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                  className="w-5 h-5 cursor-pointer"
                 />
 
                 {/* Item Details */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: "600",
-                        fontSize: "15px",
-                        color: "#111827",
-                      }}
-                    >
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="font-semibold text-gray-900 text-base truncate">
                       {item.code}
                     </div>
                     {!item.active && (
-                      <div
-                        style={{
-                          fontSize: "10px",
-                          padding: "2px 6px",
-                          backgroundColor: "#9ca3af",
-                          color: "white",
-                          borderRadius: "10px",
-                        }}
-                      >
+                      <div className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full">
                         Inactive
                       </div>
                     )}
                   </div>
 
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      color: "#6b7280",
-                      marginBottom: "4px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                  <div className="text-sm text-gray-600 truncate mb-2">
                     {item.description || "No description"}
                   </div>
 
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#9ca3af",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
-                    >
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
                       <span>📍</span>
                       <span>{item.location || "No location"}</span>
                     </div>
@@ -537,16 +345,7 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
                 {/* Current location indicator (if different from filter) */}
                 {locationFilter !== "All" &&
                   item.location === locationFilter && (
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        padding: "2px 6px",
-                        backgroundColor: "#dbeafe",
-                        color: "#1e40af",
-                        borderRadius: "4px",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <div className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded whitespace-nowrap">
                       Current
                     </div>
                   )}
@@ -557,22 +356,8 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
       </div>
 
       {/* Bottom Navigation */}
-      <div
-        style={{
-          marginTop: "auto",
-          padding: "10px 15px",
-          backgroundColor: "white",
-          borderTop: "1px solid #e5e7eb",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "12px",
-            color: "#6b7280",
-            textAlign: "center",
-            marginBottom: "10px",
-          }}
-        >
+      <div className="mt-auto p-4 bg-white border-t border-gray-200">
+        <div className="text-sm text-gray-600 text-center space-y-1">
           <div>
             <strong>Total items:</strong> {filteredItems.length}
           </div>
@@ -581,16 +366,6 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
           </div>
         </div>
       </div>
-
-      <style>
-        {`
-          @keyframes spin {
-            to {
-              transform: rotate(360deg);
-            }
-          }
-        `}
-      </style>
     </div>
   );
 };

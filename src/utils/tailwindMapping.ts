@@ -226,6 +226,39 @@ export const tw = {
   // ===== ANIMATIONS =====
   hoverLift: "hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200",
   clickScale: "active:scale-95 transition-transform",
+
+  // Add these to your existing tw object in tailwindMapping.ts:
+
+// ===== CHECKBOXES & SELECTION =====
+checkbox: "w-5 h-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500",
+checkboxLabel: "flex items-center gap-3 cursor-pointer text-sm",
+
+// ===== LIST ITEMS =====
+listItem: "bg-white p-3 border-b border-gray-100 last:border-b-0",
+listItemContent: "flex-1 min-w-0",
+listItemHeader: "flex justify-between items-start mb-1",
+listItemTitle: "font-semibold text-gray-900 text-base",
+listItemDescription: "text-sm text-gray-600 truncate",
+listItemMeta: "flex items-center gap-3 text-xs text-gray-500",
+
+// ===== BADGES & INDICATORS =====
+statusBadge: "text-xs px-2 py-1 rounded-full font-medium",
+activeBadge: "bg-green-100 text-green-800",
+inactiveBadge: "bg-gray-100 text-gray-800",
+locationBadge: "bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded",
+
+// ===== MESSAGES & ALERTS =====
+message: "mt-3 p-3 rounded-lg text-sm text-center",
+successMessage: "bg-green-100 text-green-800",
+errorMessage: "bg-red-100 text-red-800",
+infoMessage: "bg-blue-100 text-blue-800",
+
+// ===== SPECIFIC FOR BATCH EDIT =====
+batchInfo: "text-sm text-gray-600 mb-3 flex justify-between items-center",
+batchCounter: "text-xs text-gray-500 text-center mb-2",
+emptyStateIcon: "text-5xl mb-4 opacity-50",
+
+
 } as const; // Added 'as const' for better TypeScript inference
 
 // Banking-specific color variants

@@ -5,25 +5,16 @@ import { SettingsProvider } from "./contexts/SettingsContext";
 import { ErrorProvider } from "./contexts/ErrorContext";
 import { AuthProvider } from "./contexts/AuthContext";
 
-// Import global styles
-import "./shared/styles/design-tokens.css";
-import "./shared/styles/base.css";
-import "./shared/styles/utilities.css";
-import "./App.css";
-
-// Import the CSS module
-import styles from "./App.module.css";
-
 function App() {
   return (
     <ErrorProvider>
       <SettingsProvider>
         <BrowserRouter>
           <AuthProvider>
-            {/* REMOVED DIAGNOSTIC BORDERS */}
-            <div className={styles.container}>
-              <div className={styles.app}>
-                <main className={styles.main}>
+            {/* Main container */}
+            <div className="min-h-screen bg-gray-50">
+              <div className="w-full">
+                <main className="w-full">
                   <AppRoutes />
                 </main>
               </div>

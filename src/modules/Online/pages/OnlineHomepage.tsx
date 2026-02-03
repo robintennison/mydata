@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { useAuth } from "../../../contexts/AuthContext";
 import { tw, cls } from "../../../utils/tailwindMapping";
 import OnlineListTab from "./OnlineListTab";
 import RenewalListTab from "./RenewalListTab";
 import CategoryListTab from "./CategoryListTab";
-import styles from "../../../App.module.css"; // Keep CSS module for header for now
+import Header from "../../../components/Layout/Header";
 
 // Tab components
 const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
@@ -31,7 +31,7 @@ const TabContent: React.FC<{ activeTab: string }> = ({ activeTab }) => {
 const OnlineHomepage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   // State for active tab - initialize from location state if available
   const [activeTab, setActiveTab] = useState<
@@ -143,18 +143,6 @@ const OnlineHomepage: React.FC = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
-  const handleHomeClick = () => {
-    navigate("/");
-  };
-
   const getAddButtonTitle = () => {
     switch (activeTab) {
       case "items":
@@ -168,27 +156,6 @@ const OnlineHomepage: React.FC = () => {
     }
   };
 
-  // Define all icons in one place
-  const NAV_ICONS = {
-    // Module icons
-    BANKING: "🏦",
-    JEWELLERY: "💎",
-    ONLINE: "🌐",
-
-    // Header action icons
-    BACK: "←",
-    SETTINGS: "⚙️",
-    LOGOUT: "↪️",
-    ADD: "➕",
-  };
-
-  // Module navigation items
-  const MODULE_ITEMS = [
-    { path: "/banking", label: "Banking", icon: NAV_ICONS.BANKING },
-    { path: "/jewellery", label: "Jewellery", icon: NAV_ICONS.JEWELLERY },
-    { path: "/online", label: "Online", icon: NAV_ICONS.ONLINE },
-  ];
-
   if (!isAuthenticated) {
     return null;
   }
@@ -196,67 +163,7 @@ const OnlineHomepage: React.FC = () => {
   if (loading) {
     return (
       <div className={tw.container}>
-        {/* Header during loading (without add button) */}
-        <header className={styles.header}>
-          <div className={styles.headerContent}>
-            {/* Left side: MyData clickable header */}
-            <div className={styles.headerLeft}>
-              <button
-                className={styles.homeButton}
-                onClick={handleHomeClick}
-                aria-label="Go to Home"
-                title="Go to Home"
-              >
-                MyData
-              </button>
-            </div>
-
-            {/* Center: Module Navigation */}
-            <div className={styles.headerCenter}>
-              <div className={styles.moduleNav}>
-                {MODULE_ITEMS.map((item) => {
-                  const isActive =
-                    location.pathname === item.path ||
-                    (item.path !== "/" &&
-                      location.pathname.startsWith(item.path));
-
-                  return (
-                    <button
-                      key={item.path}
-                      className={`${styles.moduleButton} ${isActive ? styles.activeModule : ""}`}
-                      onClick={() => navigate(item.path)}
-                      aria-label={item.label}
-                      title={item.label}
-                    >
-                      <span className={styles.moduleIcon}>{item.icon}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Right side: Actions */}
-            <div className={styles.headerActions}>
-              <button
-                className={styles.settingsButton}
-                onClick={() => navigate("/settings")}
-                aria-label="Settings"
-                title="Settings"
-              >
-                {NAV_ICONS.SETTINGS}
-              </button>
-              <button
-                className={styles.logoutButton}
-                onClick={handleLogout}
-                aria-label="Logout"
-                title="Logout"
-              >
-                <span className={styles.logoutIcon}>{NAV_ICONS.LOGOUT}</span>
-              </button>
-            </div>
-          </div>
-        </header>
-
+        <Header />
         <div className={tw.loading}>
           <div className={tw.spinner}></div>
           <p>Loading online module...</p>
@@ -267,76 +174,11 @@ const OnlineHomepage: React.FC = () => {
 
   return (
     <div className={tw.container}>
-      {/* Header with add button */}
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          {/* Left side: MyData clickable header */}
-          <div className={styles.headerLeft}>
-            <button
-              className={styles.homeButton}
-              onClick={handleHomeClick}
-              aria-label="Go to Home"
-              title="Go to Home"
-            >
-              MyData
-            </button>
-          </div>
-
-          {/* Center: Module Navigation */}
-          <div className={styles.headerCenter}>
-            <div className={styles.moduleNav}>
-              {MODULE_ITEMS.map((item) => {
-                const isActive =
-                  location.pathname === item.path ||
-                  (item.path !== "/" &&
-                    location.pathname.startsWith(item.path));
-
-                return (
-                  <button
-                    key={item.path}
-                    className={`${styles.moduleButton} ${isActive ? styles.activeModule : ""}`}
-                    onClick={() => navigate(item.path)}
-                    aria-label={item.label}
-                    title={item.label}
-                  >
-                    <span className={styles.moduleIcon}>{item.icon}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Right side: Actions */}
-          <div className={styles.headerActions}>
-            {/* Add button - displayed left to settings icon */}
-            <button
-              className={styles.addButton}
-              onClick={handleAddClick}
-              aria-label={getAddButtonTitle()}
-              title={getAddButtonTitle()}
-            >
-              {NAV_ICONS.ADD}
-            </button>
-
-            <button
-              className={styles.settingsButton}
-              onClick={() => navigate("/settings")}
-              aria-label="Settings"
-              title="Settings"
-            >
-              {NAV_ICONS.SETTINGS}
-            </button>
-            <button
-              className={styles.logoutButton}
-              onClick={handleLogout}
-              aria-label="Logout"
-              title="Logout"
-            >
-              <span className={styles.logoutIcon}>{NAV_ICONS.LOGOUT}</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header
+        showAddButton={true}
+        onAddClick={handleAddClick}
+        addButtonTitle={getAddButtonTitle()}
+      />
 
       {/* Main Content Area */}
       <div className={tw.contentWrapper}>

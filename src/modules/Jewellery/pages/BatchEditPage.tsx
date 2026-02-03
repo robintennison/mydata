@@ -9,7 +9,6 @@ import {
 } from "firebase/firestore";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
-import { tw } from "../../../utils/tailwindMapping"; // Import the tw object
 
 interface BatchEditPageProps {}
 
@@ -174,41 +173,46 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
 
   if (loading) {
     return (
-      <div className={tw.loading}>
-        <div className={tw.spinner}></div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-gray-50 text-gray-700 m-0 p-0">
+        <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
         <p>Loading jewellery items...</p>
       </div>
     );
   }
 
   return (
-    <div className={tw.container}>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
       {/* Top Navigation */}
-      <div className={tw.header}>
-        <div className={tw.headerContent}>
+      <div className="bg-white text-gray-900 p-4 border-b border-gray-200 mb-4 shadow-sm sticky top-0 z-50 h-14">
+        <div className="flex justify-between items-center max-w-2xl mx-auto w-full px-4 h-full gap-2">
           <button
             onClick={handleCancel}
-            className={tw.settingsButton}
+            className="bg-transparent border-none text-lg cursor-pointer p-2 rounded-lg transition-all duration-200 text-gray-700 flex items-center justify-center w-11 h-11 hover:bg-gray-100 hover:shadow"
             title="Cancel"
           >
             ←
           </button>
-          <div className={tw.title} style={{ margin: 0, textAlign: "center" }}>
+          <div
+            className="text-xl font-extrabold mb-1 text-gray-900 tracking-tight"
+            style={{ margin: 0, textAlign: "center" }}
+          >
             Batch Edit Location
           </div>
-          <div style={{ width: "44px" }}></div>
+          <div className="w-11"></div>
         </div>
       </div>
 
       {/* Filters Section */}
-      <div className={tw.section}>
+      <div className="bg-white rounded-xl my-2.5 p-3 shadow-sm border border-gray-200 shrink-0">
         {/* Current Location Filter */}
-        <div className="mb-4">
-          <label className={tw.label}>Filter by Current Location</label>
+        <div className="mb-5">
+          <label className="block mb-1.5 text-sm font-medium text-gray-700">
+            Filter by Current Location
+          </label>
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            className={tw.select}
+            className="w-full p-2.5 px-3 border border-gray-300 rounded text-sm bg-white box-border"
           >
             <option value="All">All Locations</option>
             {locationOptions
@@ -222,12 +226,14 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
         </div>
 
         {/* New Location Selection */}
-        <div className="mb-4">
-          <label className={tw.label}>New Location for Selected Items</label>
+        <div className="mb-5">
+          <label className="block mb-1.5 text-sm font-medium text-gray-700">
+            New Location for Selected Items
+          </label>
           <select
             value={newLocation}
             onChange={(e) => setNewLocation(e.target.value)}
-            className={tw.select}
+            className="w-full p-2.5 px-3 border border-gray-300 rounded text-sm bg-white box-border"
           >
             <option value="">Select new location...</option>
             {locationOptions
@@ -262,11 +268,11 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
         <button
           onClick={handleUpdateLocation}
           disabled={updating || selectedItems.size === 0 || !newLocation}
-          className={`w-full py-3 rounded-lg font-medium text-base ${
+          className={`w-full py-3 rounded-lg font-medium text-base transition-colors ${
             selectedItems.size > 0 && newLocation
               ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
-          } transition-colors`}
+          }`}
         >
           {updating
             ? "Updating..."

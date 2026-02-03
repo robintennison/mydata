@@ -317,6 +317,47 @@ legendDot: "w-2 h-2 rounded-full",
 legendDotLinked: "bg-blue-500",
 legendDotUnlinked: "bg-gray-400",
 
+// Add these to your existing tw object in tailwindMapping.ts:
+
+// ===== IMAGE DISPLAY =====
+imageContainer: "mb-5 text-center relative",
+jewelleryImage: "max-w-full max-h-[300px] rounded-lg",
+imageDownloadButton: "absolute bottom-3 right-3 bg-black/70 text-white border-none rounded-lg px-3 py-2 cursor-pointer text-sm flex items-center gap-1.5 hover:bg-black/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed",
+
+// ===== BILL SECTION =====
+billSection: "bg-gray-50 p-4 rounded-lg border border-gray-200 mt-3",
+billHeader: "flex justify-between items-center mb-3",
+//billTitle: "text-base font-semibold text-gray-900",
+billStatus: "text-xs px-2 py-1 rounded-full",
+billAvailable: "bg-green-100 text-green-800",
+billUnavailable: "bg-red-100 text-red-800",
+billLoading: "text-gray-600",
+billError: "text-red-600",
+//billInfo: "mb-3 space-y-1.5",
+billActions: "flex gap-3 mt-4",
+billViewButton: "flex-1 py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors",
+billDownloadButton: "flex-1 py-2.5 bg-green-500 text-white border-none rounded-lg cursor-pointer flex items-center justify-center gap-2 hover:bg-green-600 transition-colors",
+billWarning: "p-3 bg-yellow-100 rounded-lg text-yellow-800 text-sm",
+
+// ===== DETAIL ITEMS =====
+detailGrid: "flex flex-col gap-3",
+detailItem: "flex flex-col",
+detailLabel: "font-semibold text-gray-700 mb-0.5",
+detailValue: "text-gray-900",
+
+// ===== STATUS BADGES =====
+verificationBadge: "inline-block px-2 py-1 rounded-full text-xs font-medium text-white",
+verifiedBadge: "bg-green-500",
+missingBadge: "bg-red-500",
+notVerifiedBadge: "bg-gray-500",
+
+// ===== NOT FOUND STATE =====
+notFoundContainer: "p-5 text-center",
+notFoundButton: "px-5 py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm hover:bg-blue-600 transition-colors",
+
+// ===== FILE TYPE =====
+fileTypeIcon: "text-base",
+
 
 } as const; // Added 'as const' for better TypeScript inference
 

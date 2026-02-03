@@ -400,6 +400,101 @@ actionButton: "px-4 py-2.5 text-white border-none rounded-lg cursor-pointer text
 listButton: "bg-blue-500 hover:bg-blue-600",
 //addButton: "bg-green-500 hover:bg-green-600",
 
+// Add these to the existing tw object:
+
+// ===== FORM LAYOUT =====
+// formContainer: "max-w-lg mx-auto w-full pb-4",
+formSection: "mb-4",
+formSectionTitle: "text-sm font-medium text-gray-700 mb-2",
+
+// ===== IMAGE UPLOAD FORM =====
+imageSection: "mb-4",
+imagePreviewContainer: "mb-3 text-center relative",
+imagePreview: "max-w-[300px] max-h-[300px] rounded-lg border border-gray-200 shadow-sm mx-auto",
+deleteImageButton: "absolute top-2 right-2 bg-red-600/90 text-white border-none rounded-full w-8 h-8 cursor-pointer flex items-center justify-center text-sm hover:bg-red-700/90 disabled:opacity-70 transition-colors",
+imageUploadArea: "flex flex-col gap-2",
+imageUploadRow: "flex gap-2 items-start",
+fileInput: "w-full p-2 border border-gray-300 rounded text-sm bg-white file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200",
+uploadButton: "px-3 py-2 bg-green-500 text-white border-none rounded text-sm cursor-pointer flex items-center gap-1.5 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed",
+cancelUploadButton: "px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded text-sm cursor-pointer hover:bg-gray-200",
+// fileInfo: "p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600",
+imageError: "p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600",
+noImagePlaceholder: "p-5 border-2 border-dashed border-gray-300 rounded text-center text-gray-500",
+placeholderIcon: "text-2xl mb-2",
+placeholderText: "text-sm",
+placeholderSubtext: "text-xs mt-1",
+
+// ===== FORM ROWS =====
+// formRow: "flex gap-3 mb-3",
+formField: "flex-1",
+formLabel: "block text-xs text-gray-600 mb-1",
+formInput: "w-full p-2 border border-gray-300 rounded text-sm bg-white",
+formSelect: "w-full p-2 border border-gray-300 rounded text-sm bg-white",
+
+// ===== CALENDAR =====
+dateInputContainer: "relative",
+dateInput: "w-full p-2 pr-10 border border-gray-300 rounded text-sm bg-white cursor-pointer",
+calendarButton: "absolute right-2 top-1/2 transform -translate-y-1/2 bg-none border-none cursor-pointer text-gray-500 p-1",
+calendarPopup: "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 p-5 min-w-[300px] max-w-[400px] w-[90%] max-h-[80vh] overflow-hidden",
+yearSelectorPopup: "min-w-[350px] max-w-[400px]",
+calendarHeader: "flex justify-between items-center mb-3",
+calendarNavButtons: "flex gap-2",
+calendarNavButton: "bg-white border border-gray-200 rounded p-1.5 cursor-pointer text-sm text-gray-700 min-w-10 hover:bg-gray-50",
+calendarTitle: "text-base font-semibold text-gray-900 cursor-pointer px-2 py-1 rounded hover:bg-gray-100",
+daysGrid: "grid grid-cols-7 gap-1 mb-2",
+dayHeader: "text-center text-sm text-gray-600 font-medium py-1",
+calendarGrid: "grid grid-cols-7 gap-1",
+calendarDay: "p-2 bg-none border-none rounded cursor-pointer text-sm transition-colors hover:bg-gray-100",
+selectedDay: "bg-blue-500 text-white hover:bg-blue-600",
+todayDay: "border border-blue-500",
+calendarActions: "mt-3 text-center flex justify-center gap-2",
+todayButton: "px-3 py-1.5 bg-blue-500 text-white border-none rounded cursor-pointer text-sm",
+closeCalendarButton: "px-3 py-1.5 bg-gray-100 border-none rounded cursor-pointer text-sm",
+yearSelectorGrid: "max-h-[300px] overflow-y-auto p-2 grid grid-cols-4 gap-2",
+yearButton: "p-2 bg-none border-none rounded cursor-pointer text-sm",
+
+// ===== BILL FORM SECTION =====
+billFormSection: "mt-5 pt-4 border-t border-gray-200",
+billCard: "p-3 bg-gray-50 border border-gray-200 rounded",
+billFormHeader: "flex justify-between items-center mb-2",
+billFormInfo: "flex items-center gap-2",
+billFormIcon: "text-blue-500",
+billFormTitle: "font-medium text-gray-900 text-sm",
+billFormActions: "flex gap-2 mt-2",
+billFormViewButton: "px-2 py-1 bg-blue-500 text-white border-none rounded text-xs cursor-pointer flex items-center gap-1 hover:bg-blue-600",
+billFormDownloadButton: "px-2 py-1 bg-green-500 text-white border-none rounded text-xs cursor-pointer flex items-center gap-1 hover:bg-green-600",
+billFormWarning: "px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs flex items-center gap-1",
+changeBillButton: "ml-auto px-2 py-1 bg-gray-100 text-gray-700 border border-gray-300 rounded text-xs cursor-pointer hover:bg-gray-200",
+noBillCard: "p-3 bg-gray-50 border border-dashed border-gray-300 rounded text-gray-600 text-center",
+addBillButton: "px-3 py-2 bg-green-500 text-white border-none rounded text-sm cursor-pointer flex items-center gap-1.5 hover:bg-green-600",
+billSelectRow: "flex gap-2",
+billSelect: "flex-1 p-2 border border-gray-300 rounded text-sm bg-white",
+billCancelButton: "px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded text-sm cursor-pointer hover:bg-gray-200",
+
+// ===== FORM ACTIONS =====
+// formActions: "mt-6",
+actionButtonsRow: "flex gap-3 justify-center mb-3",
+formCancelButton: "px-6 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded cursor-pointer text-base font-medium flex items-center gap-1.5 hover:bg-gray-200",
+formDeleteButton: "px-6 py-2.5 bg-red-600 text-white border-none rounded cursor-pointer text-base font-medium flex items-center gap-1.5 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed",
+formSubmitButton: "px-6 py-2.5 bg-blue-500 text-white border-none rounded cursor-pointer text-base font-medium hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed",
+
+// ===== MODAL =====
+modalOverlay: "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4",
+modalContainer: "bg-white rounded-xl p-6 max-w-[400px] w-full shadow-2xl",
+modalTitle: "text-xl font-semibold text-gray-900 mb-3",
+modalContent: "text-gray-600 mb-6",
+modalActions: "flex gap-3 justify-end",
+modalCancelButton: "px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer",
+modalConfirmButton: "px-4 py-2 bg-red-600 text-white border-none rounded-lg cursor-pointer hover:bg-red-700",
+
+// ===== LOADING STATES =====
+loadingText: "p-3 border border-gray-300 rounded bg-gray-100 text-gray-600 text-center",
+
+// ===== UTILITIES =====
+flexCenter: "flex items-center",
+flexBetween: "flex justify-between items-center",
+
+
 } as const; // Added 'as const' for better TypeScript inference
 
 // Banking-specific color variants

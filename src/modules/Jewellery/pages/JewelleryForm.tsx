@@ -10,6 +10,7 @@ import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
 import { useNavigate } from "react-router-dom";
+import { tw } from "../../../utils/tailwindMapping";
 
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
@@ -327,7 +328,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
     // Empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} style={{ padding: "10px 0" }}></div>);
+      days.push(<div key={`empty-${i}`} className="py-2.5"></div>);
     }
 
     // Days of the month
@@ -340,28 +341,11 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         <button
           key={day}
           onClick={() => selectDate(date)}
-          style={{
-            padding: "10px 0",
-            background: "none",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "0.9rem",
-            color: "#333",
-            transition: "all 0.2s",
-            ...(isSelected
-              ? {
-                  backgroundColor: "#3b82f6",
-                  color: "#fff",
-                  fontWeight: 600,
-                }
-              : {}),
-            ...(isTodayDate
-              ? {
-                  border: "2px solid #3b82f6",
-                }
-              : {}),
-          }}
+          className={`
+            ${tw.calendarDay}
+            ${isSelected ? tw.selectedDay : ""}
+            ${isTodayDate ? tw.todayDay : ""}
+          `}
         >
           {day}
         </button>,
@@ -381,37 +365,17 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         <button
           key={year}
           onClick={() => selectYear(year)}
-          style={{
-            padding: "10px 0",
-            background: year === currentYear ? "#3b82f6" : "none",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "0.9rem",
-            color: year === currentYear ? "#fff" : "#333",
-            fontWeight: year === currentYear ? 600 : 400,
-            transition: "all 0.2s",
-          }}
+          className={`
+            ${tw.yearButton}
+            ${year === currentYear ? "bg-blue-500 text-white font-semibold" : "text-gray-700"}
+          `}
         >
           {year}
         </button>,
       );
     }
 
-    return (
-      <div
-        style={{
-          maxHeight: "300px",
-          overflowY: "auto",
-          padding: "10px",
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "8px",
-        }}
-      >
-        {years}
-      </div>
-    );
+    return <div className={tw.yearSelectorGrid}>{years}</div>;
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -616,12 +580,10 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     setShowBillDropdown(true);
   };
 
-  // FIXED: Now navigates to jewellery list instead of browser history
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
     } else {
-      // Navigate back to jewellery list instead of browser history
       navigate("/jewellery/list");
     }
   };
@@ -644,56 +606,19 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        maxWidth: "600px",
-        margin: "0 auto",
-        // Add extra bottom padding for mobile
-        paddingBottom: "10px",
-      }}
-      className="jewellery-form-container"
-    >
+    <form onSubmit={handleSubmit} className={tw.formContainer}>
       {/* Image Section */}
-      <div style={{ marginBottom: "10px" }}>
-        <label
-          style={{
-            display: "block",
-            marginBottom: "10px",
-            fontSize: "14px",
-            color: "#374151",
-            fontWeight: "500",
-          }}
-        >
-          Jewellery Image
-        </label>
+      <div className={tw.imageSection}>
+        <label className={tw.formSectionTitle}>Jewellery Image</label>
 
         {/* Image Preview */}
         {imagePreview && (
-          <div
-            style={{
-              marginBottom: "15px",
-              textAlign: "center",
-              position: "relative",
-            }}
-          >
-            <div
-              style={{
-                display: "inline-block",
-                maxWidth: "100%",
-                position: "relative",
-              }}
-            >
+          <div className={tw.imagePreviewContainer}>
+            <div className="inline-block max-w-full relative">
               <img
                 src={imagePreview}
                 alt="Jewellery preview"
-                style={{
-                  maxWidth: "300px",
-                  maxHeight: "300px",
-                  borderRadius: "8px",
-                  border: "1px solid #e5e7eb",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                }}
+                className={tw.imagePreview}
               />
 
               {/* Delete button overlay */}
@@ -701,37 +626,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={deletingImage}
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  backgroundColor: "rgba(220, 38, 38, 0.9)",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "32px",
-                  height: "32px",
-                  cursor: deletingImage ? "not-allowed" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "16px",
-                  opacity: deletingImage ? 0.7 : 1,
-                  transition: "all 0.2s",
-                }}
+                className={tw.deleteImageButton}
                 title="Delete Image"
-                onMouseEnter={(e) => {
-                  if (!deletingImage) {
-                    e.currentTarget.style.backgroundColor =
-                      "rgba(185, 28, 28, 0.9)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!deletingImage) {
-                    e.currentTarget.style.backgroundColor =
-                      "rgba(220, 38, 38, 0.9)";
-                  }
-                }}
               >
                 {deletingImage ? "⏳" : "🗑️"}
               </button>
@@ -740,52 +636,26 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         )}
 
         {/* File Upload Section */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <div
-            style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}
-          >
-            <div style={{ flex: 1 }}>
+        <div className={tw.imageUploadArea}>
+          <div className={tw.imageUploadRow}>
+            <div className="flex-1">
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
                 disabled={uploadingImage || deletingImage}
-                style={{
-                  width: "100%",
-                  padding: "8px 10px",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
-                  fontSize: "14px",
-                  backgroundColor: "white",
-                  boxSizing: "border-box",
-                  opacity: uploadingImage || deletingImage ? 0.7 : 1,
-                  cursor:
-                    uploadingImage || deletingImage ? "not-allowed" : "pointer",
-                }}
+                className={tw.fileInput}
               />
             </div>
 
             {selectedFile ? (
-              <div style={{ display: "flex", gap: "8px" }}>
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleUploadImage}
                   disabled={uploadingImage || deletingImage}
-                  style={{
-                    padding: "8px 15px",
-                    backgroundColor: uploadingImage ? "#94a3b8" : "#10b981",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: uploadingImage ? "not-allowed" : "pointer",
-                    fontSize: "14px",
-                    whiteSpace: "nowrap",
-                    opacity: uploadingImage || deletingImage ? 0.7 : 1,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
+                  className={tw.uploadButton}
                 >
                   {uploadingImage ? (
                     <>
@@ -804,33 +674,14 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                   type="button"
                   onClick={handleCancelImageUpload}
                   disabled={uploadingImage || deletingImage}
-                  style={{
-                    padding: "8px 15px",
-                    backgroundColor: "#f3f4f6",
-                    color: "#374151",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "6px",
-                    cursor:
-                      uploadingImage || deletingImage
-                        ? "not-allowed"
-                        : "pointer",
-                    fontSize: "14px",
-                    whiteSpace: "nowrap",
-                    opacity: uploadingImage || deletingImage ? 0.7 : 1,
-                  }}
+                  className={tw.cancelUploadButton}
                 >
                   Cancel
                 </button>
               </div>
             ) : (
               !imagePreview && (
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#6b7280",
-                    fontStyle: "italic",
-                  }}
-                >
+                <div className="text-xs text-gray-500 italic">
                   No image selected
                 </div>
               )
@@ -839,52 +690,19 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
           {/* File info and errors */}
           {selectedFile && (
-            <div
-              style={{
-                padding: "8px 12px",
-                backgroundColor: "#f8fafc",
-                border: "1px solid #e2e8f0",
-                borderRadius: "6px",
-                fontSize: "13px",
-                color: "#475569",
-              }}
-            >
+            <div className={tw.fileInfo}>
               Selected: {selectedFile.name} (
               {(selectedFile.size / 1024).toFixed(1)} KB)
             </div>
           )}
 
-          {imageError && (
-            <div
-              style={{
-                padding: "8px 12px",
-                backgroundColor: "#fef2f2",
-                border: "1px solid #fecaca",
-                borderRadius: "6px",
-                fontSize: "13px",
-                color: "#dc2626",
-              }}
-            >
-              ⚠️ {imageError}
-            </div>
-          )}
+          {imageError && <div className={tw.imageError}>⚠️ {imageError}</div>}
 
           {!imagePreview && !selectedFile && (
-            <div
-              style={{
-                padding: "20px",
-                border: "2px dashed #d1d5db",
-                borderRadius: "8px",
-                textAlign: "center",
-                color: "#6b7280",
-                fontSize: "14px",
-              }}
-            >
-              <div style={{ marginBottom: "8px" }}>
-                <span style={{ fontSize: "24px" }}>📷</span>
-              </div>
-              <div>No image uploaded</div>
-              <div style={{ fontSize: "12px", marginTop: "4px" }}>
+            <div className={tw.noImagePlaceholder}>
+              <div className={tw.placeholderIcon}>📷</div>
+              <div className={tw.placeholderText}>No image uploaded</div>
+              <div className={tw.placeholderSubtext}>
                 Click "Choose File" to add an image
               </div>
             </div>
@@ -892,48 +710,22 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         </div>
       </div>
 
-      {/* Rest of the form fields remain the same */}
       {/* Code and Weight in same row */}
-      <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Code *
-          </label>
+      <div className={tw.formRow}>
+        <div className={tw.formField}>
+          <label className={tw.formLabel}>Code *</label>
           <input
             type="text"
             name="code"
             value={formData.code || ""}
             onChange={handleChange}
             required
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
+            className={tw.formInput}
           />
         </div>
 
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Weight (g) *
-          </label>
+        <div className={tw.formField}>
+          <label className={tw.formLabel}>Weight (g) *</label>
           <input
             type="number"
             name="weight"
@@ -941,73 +733,33 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
             value={formData.weight || ""}
             onChange={handleChange}
             required
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
+            className={tw.formInput}
           />
         </div>
       </div>
 
       {/* Description */}
-      <div style={{ marginBottom: "15px" }}>
-        <label
-          style={{
-            display: "block",
-            marginBottom: "5px",
-            fontSize: "13px",
-            color: "#6b7280",
-          }}
-        >
-          Description
-        </label>
+      <div className="mb-3">
+        <label className={tw.formLabel}>Description</label>
         <input
           type="text"
           name="description"
           value={formData.description || ""}
           onChange={handleChange}
-          style={{
-            width: "100%",
-            padding: "8px 10px",
-            borderRadius: "6px",
-            border: "1px solid #d1d5db",
-            fontSize: "14px",
-            boxSizing: "border-box",
-          }}
+          className={tw.formInput}
           placeholder="Description"
         />
       </div>
 
-      {/* Location and Bought For in same row - NOW AS DROPDOWNS */}
-      <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Location
-          </label>
+      {/* Location and Bought For in same row */}
+      <div className={tw.formRow}>
+        <div className={tw.formField}>
+          <label className={tw.formLabel}>Location</label>
           <select
             name="location"
             value={formData.location || ""}
             onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              backgroundColor: "white",
-              boxSizing: "border-box",
-            }}
+            className={tw.formSelect}
           >
             <option value="">Select Location</option>
             {settingsLoading ? (
@@ -1024,30 +776,13 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           </select>
         </div>
 
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Bought For
-          </label>
+        <div className={tw.formField}>
+          <label className={tw.formLabel}>Bought For</label>
           <select
             name="boughtFor"
             value={formData.boughtFor || ""}
             onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              fontSize: "14px",
-              backgroundColor: "white",
-              boxSizing: "border-box",
-            }}
+            className={tw.formSelect}
           >
             <option value="">Select Purpose</option>
             {settingsLoading ? (
@@ -1066,52 +801,21 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       </div>
 
       {/* Purchase Date with Calendar and Active checkbox in same row */}
-      <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
-        <div style={{ flex: 1 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Purchase Date
-          </label>
-          <div style={{ position: "relative" }}>
+      <div className={tw.formRow}>
+        <div className={tw.formField}>
+          <label className={tw.formLabel}>Purchase Date</label>
+          <div className={tw.dateInputContainer}>
             <input
               type="text"
               value={formatDate(formData.purchaseDate || Date.now())}
               readOnly
               onClick={openCalendar}
-              className="date-input"
-              style={{
-                width: "100%",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                border: "1px solid #d1d5db",
-                fontSize: "14px",
-                boxSizing: "border-box",
-                cursor: "pointer",
-                paddingRight: "40px",
-                backgroundColor: "#fff",
-              }}
+              className={`${tw.dateInput} date-input`}
             />
             <button
               type="button"
               onClick={openCalendar}
-              style={{
-                position: "absolute",
-                right: "8px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#6c757d",
-                fontSize: "1.2rem",
-                padding: "4px",
-              }}
+              className={tw.calendarButton}
               title="Pick purchase date"
             >
               📅
@@ -1119,24 +823,14 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           </div>
         </div>
 
-        <div style={{ flex: 1, display: "flex", alignItems: "flex-end" }}>
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "14px",
-              color: "#374151",
-              height: "100%",
-              paddingBottom: "8px",
-            }}
-          >
+        <div className={`${tw.formField} flex items-end`}>
+          <label className={tw.checkboxLabel}>
             <input
               type="checkbox"
               name="active"
               checked={formData.active !== false}
               onChange={handleChange}
-              style={{ width: "16px", height: "16px" }}
+              className="w-4 h-4"
             />
             Active Item
           </label>
@@ -1147,45 +841,13 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       {showCalendar && (
         <div
           ref={calendarRef}
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "#fff",
-            border: "1px solid #e0e0e0",
-            borderRadius: "12px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-            zIndex: 10001,
-            padding: "20px",
-            minWidth: showYearSelector ? "350px" : "300px",
-            maxWidth: showYearSelector ? "400px" : "350px",
-            width: "90%",
-            maxHeight: "80vh",
-            overflow: "hidden",
-          }}
+          className={`${tw.calendarPopup} ${showYearSelector ? tw.yearSelectorPopup : ""}`}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "15px",
-            }}
-          >
-            <div style={{ display: "flex", gap: "8px" }}>
+          <div className={tw.calendarHeader}>
+            <div className={tw.calendarNavButtons}>
               <button
                 onClick={() => navigateYear("prev")}
-                style={{
-                  background: "none",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "6px",
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                  fontSize: "0.9rem",
-                  color: "#333",
-                  minWidth: "40px",
-                }}
+                className={tw.calendarNavButton}
                 title="Previous Year"
                 type="button"
               >
@@ -1193,16 +855,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               </button>
               <button
                 onClick={() => navigateMonth("prev")}
-                style={{
-                  background: "none",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "6px",
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                  fontSize: "0.9rem",
-                  color: "#333",
-                  minWidth: "40px",
-                }}
+                className={tw.calendarNavButton}
                 title="Previous Month"
                 type="button"
               >
@@ -1210,32 +863,10 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               </button>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowYearSelector(!showYearSelector)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "1.1rem",
-                  fontWeight: 600,
-                  color: "#333",
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  transition: "background-color 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f0f0f0";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
+                className={tw.calendarTitle}
                 title="Select Year"
                 type="button"
               >
@@ -1246,19 +877,10 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               </button>
             </div>
 
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className={tw.calendarNavButtons}>
               <button
                 onClick={() => navigateMonth("next")}
-                style={{
-                  background: "none",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "6px",
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                  fontSize: "0.9rem",
-                  color: "#333",
-                  minWidth: "40px",
-                }}
+                className={tw.calendarNavButton}
                 title="Next Month"
                 type="button"
               >
@@ -1266,16 +888,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               </button>
               <button
                 onClick={() => navigateYear("next")}
-                style={{
-                  background: "none",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "6px",
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                  fontSize: "0.9rem",
-                  color: "#333",
-                  minWidth: "40px",
-                }}
+                className={tw.calendarNavButton}
                 title="Next Year"
                 type="button"
               >
@@ -1288,65 +901,25 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
             renderYearSelector()
           ) : (
             <>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(7, 1fr)",
-                  marginBottom: "8px",
-                }}
-              >
+              <div className={tw.daysGrid}>
                 {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
-                  <div
-                    key={day}
-                    style={{
-                      textAlign: "center" as const,
-                      fontSize: "0.85rem",
-                      color: "#666",
-                      fontWeight: 500,
-                      padding: "4px 0",
-                    }}
-                  >
+                  <div key={day} className={tw.dayHeader}>
                     {day}
                   </div>
                 ))}
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(7, 1fr)",
-                  gap: "4px",
-                }}
-              >
-                {renderCalendar()}
-              </div>
+              <div className={tw.calendarGrid}>{renderCalendar()}</div>
             </>
           )}
 
-          <div
-            style={{
-              marginTop: "15px",
-              textAlign: "center",
-              display: "flex",
-              justifyContent: "center",
-              gap: "10px",
-            }}
-          >
+          <div className={tw.calendarActions}>
             <button
               onClick={() => {
-                // Set to today
                 const today = new Date();
                 selectDate(today);
               }}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#3b82f6",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "0.9rem",
-                color: "#fff",
-              }}
+              className={tw.todayButton}
               type="button"
             >
               Today
@@ -1356,14 +929,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                 setShowCalendar(false);
                 setShowYearSelector(false);
               }}
-              style={{
-                padding: "8px 20px",
-                backgroundColor: "#f0f0f0",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "0.9rem",
-              }}
+              className={tw.closeCalendarButton}
               type="button"
             >
               Close
@@ -1373,99 +939,36 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       )}
 
       {/* Bill Section */}
-      <div
-        style={{
-          marginBottom: "20px",
-          borderTop: "1px solid #e5e7eb",
-          paddingTop: "20px",
-        }}
-      >
-        <label
-          style={{
-            display: "block",
-            marginBottom: "10px",
-            fontSize: "14px",
-            color: "#374151",
-            fontWeight: "500",
-          }}
-        >
-          Bill Assignment
-        </label>
+      <div className={tw.billFormSection}>
+        <label className={tw.formSectionTitle}>Bill Assignment</label>
 
         {/* Show assigned bill details when available */}
         {!showBillDropdown && assignedBill && !loadingAssignedBill && (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
+          <div className="flex flex-col gap-2">
             {/* Bill details card */}
-            <div
-              style={{
-                padding: "12px",
-                backgroundColor: "#f8fafc",
-                border: "1px solid #e2e8f0",
-                borderRadius: "6px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "8px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <span style={{ fontSize: "16px", color: "#3b82f6" }}>📄</span>
-                  <span
-                    style={{
-                      fontWeight: "500",
-                      fontSize: "14px",
-                      color: "#1e293b",
-                    }}
-                  >
+            <div className={tw.billCard}>
+              <div className={tw.billFormHeader}>
+                <div className={tw.billFormInfo}>
+                  <span className={tw.billFormIcon}>📄</span>
+                  <span className={tw.billFormTitle}>
                     {assignedBill.notes ||
                       `Bill ${assignedBill.id.substring(0, 8)}...`}
                   </span>
                 </div>
 
                 {billError && (
-                  <span style={{ fontSize: "12px", color: "#ef4444" }}>
-                    {billError}
-                  </span>
+                  <span className="text-xs text-red-600">{billError}</span>
                 )}
               </div>
 
               {/* Bill Action Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  marginTop: "8px",
-                }}
-              >
+              <div className={tw.billFormActions}>
                 {assignedBill.downloadUrl ? (
                   <>
                     <button
                       type="button"
                       onClick={handleViewBill}
-                      style={{
-                        padding: "6px 12px",
-                        backgroundColor: "#3b82f6",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "13px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
+                      className={tw.billFormViewButton}
                       title="View Bill"
                     >
                       <span>👁️</span>
@@ -1475,18 +978,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                     <button
                       type="button"
                       onClick={handleDownloadBill}
-                      style={{
-                        padding: "6px 12px",
-                        backgroundColor: "#10b981",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "13px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
+                      className={tw.billFormDownloadButton}
                       title="Download Bill"
                     >
                       <span>📥</span>
@@ -1494,18 +986,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                     </button>
                   </>
                 ) : (
-                  <div
-                    style={{
-                      padding: "6px 10px",
-                      backgroundColor: "#fef3c7",
-                      borderRadius: "4px",
-                      color: "#92400e",
-                      fontSize: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
+                  <div className={tw.billFormWarning}>
                     <span>⚠️</span>
                     <span>No file available</span>
                   </div>
@@ -1514,16 +995,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                 <button
                   type="button"
                   onClick={handleChangeBillClick}
-                  style={{
-                    marginLeft: "auto",
-                    padding: "6px 12px",
-                    backgroundColor: "#f1f5f9",
-                    color: "#475569",
-                    border: "1px solid #cbd5e1",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                  }}
+                  className={tw.changeBillButton}
                 >
                   Change Bill
                 </button>
@@ -1534,19 +1006,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
         {/* Show loading state for assigned bill */}
         {!showBillDropdown && loadingAssignedBill && (
-          <div
-            style={{
-              padding: "12px",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              backgroundColor: "#f3f4f6",
-              color: "#6b7280",
-              fontSize: "14px",
-              textAlign: "center",
-            }}
-          >
-            Loading bill information...
-          </div>
+          <div className={tw.loadingText}>Loading bill information...</div>
         )}
 
         {/* Show "Add Bill" when no bill is assigned */}
@@ -1554,19 +1014,9 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           !assignedBill &&
           !loadingAssignedBill &&
           formData.billId === "" && (
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    padding: "12px",
-                    backgroundColor: "#f8fafc",
-                    border: "1px dashed #cbd5e1",
-                    borderRadius: "6px",
-                    fontSize: "14px",
-                    color: "#64748b",
-                    textAlign: "center",
-                  }}
-                >
+            <div className="flex gap-2 items-center">
+              <div className="flex-1">
+                <div className={tw.noBillCard}>
                   No bill assigned to this jewellery item
                 </div>
               </div>
@@ -1574,19 +1024,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               <button
                 type="button"
                 onClick={handleAddBillClick}
-                style={{
-                  padding: "8px 15px",
-                  backgroundColor: "#10b981",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  whiteSpace: "nowrap",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
+                className={tw.addBillButton}
               >
                 <span>+</span>
                 <span>Add Bill</span>
@@ -1598,34 +1036,14 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         {showBillDropdown && (
           <div>
             {loadingBills ? (
-              <div
-                style={{
-                  padding: "12px",
-                  border: "1px solid #d1d5db",
-                  borderRadius: "6px",
-                  backgroundColor: "#f3f4f6",
-                  color: "#6b7280",
-                  fontSize: "14px",
-                  textAlign: "center",
-                }}
-              >
-                Loading available bills...
-              </div>
+              <div className={tw.loadingText}>Loading available bills...</div>
             ) : (
-              <div style={{ display: "flex", gap: "10px" }}>
+              <div className={tw.billSelectRow}>
                 <select
                   name="billId"
                   value={formData.billId || ""}
                   onChange={handleChange}
-                  style={{
-                    flex: 1,
-                    padding: "8px 10px",
-                    borderRadius: "6px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "14px",
-                    backgroundColor: "white",
-                    boxSizing: "border-box",
-                  }}
+                  className={tw.billSelect}
                 >
                   <option value="">-- No bill --</option>
                   {bills.map((bill) => (
@@ -1638,16 +1056,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                 <button
                   type="button"
                   onClick={handleCancelChangeBill}
-                  style={{
-                    padding: "8px 15px",
-                    backgroundColor: "#f3f4f6",
-                    color: "#374151",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    whiteSpace: "nowrap",
-                  }}
+                  className={tw.billCancelButton}
                 >
                   Cancel
                 </button>
@@ -1655,14 +1064,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
             )}
 
             {assignedBill && (
-              <div
-                style={{
-                  marginTop: "8px",
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  fontStyle: "italic",
-                }}
-              >
+              <div className="mt-2 text-xs text-gray-500 italic">
                 Currently assigned:{" "}
                 {assignedBill.notes ||
                   `Bill ${assignedBill.id.substring(0, 12)}...`}
@@ -1672,33 +1074,13 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         )}
       </div>
 
-      {/* Submit and Cancel Buttons - ORIGINAL POSITION with bottom spacing */}
-      <div style={{ marginTop: "30px" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: "15px",
-            justifyContent: "center",
-            // Add extra margin at the bottom for mobile
-            marginBottom: "10px",
-          }}
-        >
+      {/* Submit and Cancel Buttons */}
+      <div className={tw.formActions}>
+        <div className={tw.actionButtonsRow}>
           <button
             type="button"
             onClick={handleCancel}
-            style={{
-              padding: "10px 30px",
-              backgroundColor: "#f3f4f6",
-              color: "#374151",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "16px",
-              fontWeight: "500",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
+            className={tw.formCancelButton}
           >
             <span>←</span>
             <span>Cancel</span>
@@ -1710,22 +1092,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               type="button"
               onClick={onDelete}
               disabled={uploadingImage || deletingImage}
-              style={{
-                padding: "10px 30px",
-                backgroundColor:
-                  uploadingImage || deletingImage ? "#9ca3af" : "#dc2626",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor:
-                  uploadingImage || deletingImage ? "not-allowed" : "pointer",
-                fontSize: "16px",
-                fontWeight: "500",
-                opacity: uploadingImage || deletingImage ? 0.7 : 1,
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
+              className={tw.formDeleteButton}
             >
               <span>🗑️</span>
               <span>Delete</span>
@@ -1735,19 +1102,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           <button
             type="submit"
             disabled={uploadingImage || deletingImage}
-            style={{
-              padding: "10px 30px",
-              backgroundColor:
-                uploadingImage || deletingImage ? "#94a3b8" : "#3b82f6",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              cursor:
-                uploadingImage || deletingImage ? "not-allowed" : "pointer",
-              fontSize: "16px",
-              fontWeight: "500",
-              opacity: uploadingImage || deletingImage ? 0.7 : 1,
-            }}
+            className={tw.formSubmitButton}
           >
             {isEditing ? "Update" : "Add Item"}
           </button>
@@ -1756,92 +1111,25 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
       {/* Delete Image Confirmation Dialog */}
       {showDeleteConfirm && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 10000,
-            padding: "20px",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "12px",
-              padding: "24px",
-              maxWidth: "400px",
-              width: "100%",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 12px 0",
-                fontSize: "1.25rem",
-                fontWeight: 600,
-                color: "#333",
-              }}
-            >
-              Delete Image
-            </h3>
-            <p
-              style={{
-                margin: "0 0 24px 0",
-                color: "#666",
-                lineHeight: "1.5",
-                fontSize: "0.95rem",
-              }}
-            >
+        <div className={tw.modalOverlay}>
+          <div className={tw.modalContainer}>
+            <h3 className={tw.modalTitle}>Delete Image</h3>
+            <p className={tw.modalContent}>
               Are you sure you want to delete this image? This action cannot be
               undone.
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "flex-end",
-              }}
-            >
+            <div className={tw.modalActions}>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deletingImage}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "transparent",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
-                  color: "#666",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  fontSize: "0.95rem",
-                  minWidth: "80px",
-                  opacity: deletingImage ? 0.7 : 1,
-                }}
+                className={tw.modalCancelButton}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteImage}
                 disabled={deletingImage}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: deletingImage ? "#9ca3af" : "#dc2626",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#fff",
-                  fontWeight: 500,
-                  cursor: deletingImage ? "not-allowed" : "pointer",
-                  fontSize: "0.95rem",
-                  minWidth: "80px",
-                  opacity: deletingImage ? 0.7 : 1,
-                }}
+                className={tw.modalConfirmButton}
               >
                 {deletingImage ? "Deleting..." : "Delete"}
               </button>

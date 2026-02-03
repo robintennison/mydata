@@ -129,7 +129,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
   if (loading) {
     return (
       <div className="text-center py-10 px-5 text-gray-400 flex flex-col items-center">
-        <div className="w-[30px] h-[30px] border-[3px] border-gray-100 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <div className="w-7.5 h-7.5 border-3 border-gray-100 border-t-blue-500 rounded-full animate-spin mb-4"></div>
         <p>Loading gallery...</p>
       </div>
     );
@@ -137,20 +137,20 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
 
   if (compact) {
     return (
-      <div className="bg-white rounded-lg p-[15px] shadow-sm mb-[15px]">
-        <div className="text-base font-semibold text-[#333] mb-[15px] flex justify-between items-center">
+      <div className="bg-white rounded-lg p-3.75 shadow-sm mb-3.75">
+        <div className="text-base font-semibold text-gray-800 mb-3.75 flex justify-between items-center">
           <span>Gallery Summary</span>
           <span className="text-xs text-gray-500 font-normal">
             {filteredItems.length} items
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-[10px] mb-[15px]">
-          <div className="bg-slate-50 rounded-lg p-3 text-center">
+        <div className="grid grid-cols-3 gap-2.5 mb-3.75">
+          <div className="bg-gray-50 rounded-lg p-3 text-center">
             <div className="text-lg font-semibold text-blue-500 mb-1">
               {jewelleryItems.filter((item) => item.active).length}
             </div>
-            <div className="text-[11px] text-gray-500">Active</div>
+            <div className="text-xs text-gray-500">Active</div>
           </div>
 
           <div className="bg-amber-50 rounded-lg p-3 text-center">
@@ -163,7 +163,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                 ).length
               }
             </div>
-            <div className="text-[11px] text-amber-600">To Verify</div>
+            <div className="text-xs text-amber-600">To Verify</div>
           </div>
 
           <div className="bg-red-50 rounded-lg p-3 text-center">
@@ -176,11 +176,11 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                 ).length
               }
             </div>
-            <div className="text-[11px] text-red-600">Missing</div>
+            <div className="text-xs text-red-600">Missing</div>
           </div>
         </div>
 
-        <div className="mb-[15px] flex gap-2">
+        <div className="mb-3.75 flex gap-2">
           <input
             type="text"
             placeholder="Search items..."
@@ -191,7 +191,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            className="p-2 border border-gray-200 rounded-md text-xs min-w-[60px]"
+            className="p-2 border border-gray-200 rounded-md text-xs min-w-15"
             title="Location"
           >
             {locationOptions.slice(0, 1).map((location) => (
@@ -204,7 +204,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
 
         <button
           onClick={() => navigate("/jewellery/gallery")}
-          className="w-full p-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2"
+          className="w-full py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2"
         >
           View Full Gallery
           <span>→</span>
@@ -216,11 +216,11 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 max-w-[600px] mx-auto p-0 w-full">
       {/* Compact Top Bar - All in one row */}
-      <div className="flex items-center gap-1 px-2 py-1.5 bg-white border-b border-gray-200 sticky top-0 z-10 flex-nowrap overflow-x-auto min-h-[44px] m-0 w-full scrollbar-none">
+      <div className="flex items-center gap-0.5 px-1 py-1 bg-white border-b border-gray-200 sticky top-0 z-10 flex-nowrap overflow-x-auto min-h-11 m-0 w-full">
         {/* Back Button */}
         <button
           onClick={() => navigate("/jewellery")}
-          className="bg-transparent border-none p-1.5 text-sm cursor-pointer text-gray-700 rounded flex items-center justify-center min-w-[28px] min-h-[28px] shrink-0 hover:bg-gray-100"
+          className="bg-transparent border-none p-1 text-sm cursor-pointer text-gray-700 rounded flex items-center justify-center min-w-7 min-h-7 shrink-0 hover:bg-gray-100"
           title="Back to Jewellery"
         >
           ←
@@ -232,7 +232,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
           placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 min-w-0 py-1 px-1.5 rounded border border-gray-300 text-[11px] bg-white text-gray-900 shrink max-w-[120px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 placeholder:text-[11px]"
+          className="flex-1 min-w-0 py-1 px-1.5 rounded border border-gray-300 text-xs bg-white text-gray-900 shrink max-w-30 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 placeholder:text-xs"
         />
 
         {/* Location Filter - Compact */}
@@ -240,7 +240,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            className="py-1 px-1.5 pr-5 rounded border border-gray-300 text-[11px] bg-white text-gray-700 cursor-pointer min-w-0 max-w-[80px] shrink whitespace-nowrap overflow-hidden text-ellipsis appearance-none focus:outline-none focus:border-blue-500 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236b7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_4px_center] bg-[length:12px]"
+            className="py-1 px-1.5 pr-5 rounded border border-gray-300 text-xs bg-white text-gray-700 cursor-pointer min-w-0 max-w-20 shrink whitespace-nowrap overflow-hidden text-ellipsis appearance-none focus:outline-none focus:border-blue-500 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236b7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_4px_center] bg-[length:12px]"
             title="Location"
           >
             {locationOptions.map((location) => (
@@ -260,7 +260,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
           <select
             value={boughtForFilter}
             onChange={(e) => setBoughtForFilter(e.target.value)}
-            className="py-1 px-1.5 pr-5 rounded border border-gray-300 text-[11px] bg-white text-gray-700 cursor-pointer min-w-0 max-w-[80px] shrink whitespace-nowrap overflow-hidden text-ellipsis appearance-none focus:outline-none focus:border-blue-500 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236b7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_4px_center] bg-[length:12px]"
+            className="py-1 px-1.5 pr-5 rounded border border-gray-300 text-xs bg-white text-gray-700 cursor-pointer min-w-0 max-w-20 shrink whitespace-nowrap overflow-hidden text-ellipsis appearance-none focus:outline-none focus:border-blue-500 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236b7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_4px_center] bg-[length:12px]"
             title="Bought For"
           >
             {boughtForOptions.map((boughtFor) => (
@@ -278,7 +278,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
         {/* Settings Icon */}
         <button
           onClick={() => navigate("/settings")}
-          className="bg-transparent border-none p-1.5 text-sm cursor-pointer text-gray-700 rounded flex items-center justify-center min-w-[28px] min-h-[28px] shrink-0 hover:bg-gray-100"
+          className="bg-transparent border-none p-1 text-sm cursor-pointer text-gray-700 rounded flex items-center justify-center min-w-7 min-h-7 shrink-0 hover:bg-gray-100"
           title="Settings"
         >
           ⚙️
@@ -286,7 +286,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
 
         {/* Show Inactive Toggle (very small) */}
         <label
-          className="flex items-center gap-0.5 text-[10px] text-gray-500 cursor-pointer whitespace-nowrap shrink-0 p-1 rounded bg-gray-100 min-w-[34px] hover:bg-gray-200"
+          className="flex items-center gap-0.5 text-xs text-gray-500 cursor-pointer whitespace-nowrap shrink-0 p-0.5 rounded bg-gray-100 min-w-8.5 hover:bg-gray-200"
           title="Show Inactive"
         >
           <input
@@ -332,10 +332,10 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                       {/* Overlay for Code and Weight */}
                       <div className="absolute bottom-0 left-0 right-0 bg-transparent p-1.5 px-1 text-white m-0">
                         <div className="flex flex-col items-start gap-px m-0">
-                          <div className="text-xs font-semibold text-white m-0 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+                          <div className="text-xs font-semibold text-white m-0 drop-shadow-lg">
                             {item.code}
                           </div>
-                          <div className="text-[10px] text-white m-0 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+                          <div className="text-[10px] text-white m-0 drop-shadow-lg">
                             {item.weight}g
                           </div>
 
@@ -343,7 +343,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                           {item.verificationStatus !==
                             VerificationStatus.VERIFIED && (
                             <div
-                              className={`text-[8px] px-1 py-px rounded-[3px] font-semibold tracking-wide uppercase mt-0.5 bg-white/90 text-gray-900 ${
+                              className={`text-[8px] px-1 py-0.5 rounded font-semibold tracking-wide uppercase mt-0.5 bg-white/90 text-gray-900 ${
                                 item.verificationStatus ===
                                 VerificationStatus.MISSING
                                   ? "bg-red-100 text-red-600"
@@ -361,7 +361,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                     </>
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-500 m-0 p-0">
-                      <div className="text-[32px] mb-1.5 opacity-50">💎</div>
+                      <div className="text-3xl mb-1.5 opacity-50">💎</div>
                       <div className="flex flex-col items-center gap-px text-center m-0 p-0">
                         <div className="text-xs font-semibold text-gray-700 m-0">
                           {item.code}
@@ -374,7 +374,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                         {item.verificationStatus !==
                           VerificationStatus.VERIFIED && (
                           <div
-                            className={`text-[8px] px-1 py-px rounded-[3px] font-semibold tracking-wide uppercase mt-1 bg-white/90 ${
+                            className={`text-[8px] px-1 py-0.5 rounded font-semibold tracking-wide uppercase mt-1 bg-white/90 ${
                               item.verificationStatus ===
                               VerificationStatus.MISSING
                                 ? "bg-red-100 text-red-600"
@@ -398,7 +398,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
       </div>
 
       {/* Simple counter at bottom */}
-      <div className="p-2 bg-white text-gray-500 text-[11px] text-center border-t border-gray-200 m-0">
+      <div className="p-2 bg-white text-gray-500 text-xs text-center border-t border-gray-200 m-0">
         {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
       </div>
     </div>
@@ -406,4 +406,3 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
 };
 
 export default GalleryTab;
-

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { jewelleryStyles } from "./styles/jewelleryStyles";
 import { useJewellerySettings } from "./hooks/useSettingsData";
 import {
   getFirestore,
@@ -14,7 +13,8 @@ import ListTab from "./pages/ListTab";
 import BillsTab from "./pages/BillsTab";
 import GalleryTab from "./pages/GalleryTab";
 import VerificationTab from "./pages/VerificationTab";
-import Header from "../../components/Layout/Header"; // Import Header
+import Header from "../../components/Layout/Header";
+import { cls } from "../../utils/tailwindMapping";
 
 type TabType = "dashboard" | "list" | "gallery" | "bills" | "verification";
 
@@ -42,7 +42,7 @@ const JewelleryHome: React.FC = () => {
     return location.state?.activeTab || "dashboard";
   });
 
-  // ADDED: Read activeTab from location state when component mounts or location changes
+  // Read activeTab from location state when component mounts or location changes
   useEffect(() => {
     if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
@@ -221,10 +221,10 @@ const JewelleryHome: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={jewelleryStyles.centeredContainer}>
-        <div style={jewelleryStyles.loading}>
-          <div style={jewelleryStyles.spinner}></div>
-          <p>Loading jewellery data...</p>
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-5">
+        <div className="flex flex-col items-center">
+          <div className="w-10 h-10 border-4 border-gray-100 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-500 text-sm">Loading jewellery data...</p>
         </div>
       </div>
     );
@@ -236,245 +236,82 @@ const JewelleryHome: React.FC = () => {
       case "dashboard":
         return (
           <>
-            {/* ADDED: Padding container for stat cards */}
-            <div style={{ padding: "8px 4px 0 4px" }}>
+            <div className="pt-2 px-1">
               {/* Three Small Cards for Weight and Values */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: "6px",
-                  marginBottom: "8px",
-                }}
-              >
+              <div className="grid grid-cols-3 gap-1.5 mb-2">
                 {/* Total Weight Card */}
-                <div
-                  style={{
-                    backgroundColor: "white",
-                    borderRadius: "10px",
-                    padding: "12px 4px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#6b7280",
-                      marginBottom: "4px",
-                    }}
-                  >
+                <div className="bg-white rounded-lg p-3 shadow-sm text-center">
+                  <div className="text-[11px] text-gray-500 mb-1">
                     Total Weight
                   </div>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      color: "#3b82f6",
-                    }}
-                  >
+                  <div className="text-base font-semibold text-blue-500">
                     {formatWeight(stats.totalWeight)}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "10px",
-                      color: "#9ca3af",
-                      marginTop: "4px",
-                    }}
-                  >
+                  <div className="text-[10px] text-gray-400 mt-1">
                     {stats.totalItems} items
                   </div>
                 </div>
 
                 {/* Buy Value Card */}
-                <div
-                  style={{
-                    backgroundColor: "white",
-                    borderRadius: "10px",
-                    padding: "12px 4px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#6b7280",
-                      marginBottom: "4px",
-                    }}
-                  >
+                <div className="bg-white rounded-lg p-3 shadow-sm text-center">
+                  <div className="text-[11px] text-gray-500 mb-1">
                     Buy Value
                   </div>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "#10b981",
-                    }}
-                  >
+                  <div className="text-sm font-semibold text-emerald-500">
                     {formatValueInLakhs(stats.buyValue)}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "10px",
-                      color: "#9ca3af",
-                      marginTop: "4px",
-                    }}
-                  >
+                  <div className="text-[10px] text-gray-400 mt-1">
                     ₹{goldRate}/g + {formatPercent(makingTaxPercent)}
                   </div>
                 </div>
 
                 {/* Sell Value Card */}
-                <div
-                  style={{
-                    backgroundColor: "white",
-                    borderRadius: "10px",
-                    padding: "12px 4px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#6b7280",
-                      marginBottom: "4px",
-                    }}
-                  >
+                <div className="bg-white rounded-lg p-3 shadow-sm text-center">
+                  <div className="text-[11px] text-gray-500 mb-1">
                     Sell Value
                   </div>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "#ef4444",
-                    }}
-                  >
+                  <div className="text-sm font-semibold text-red-500">
                     {formatValueInLakhs(stats.sellValue)}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "10px",
-                      color: "#9ca3af",
-                      marginTop: "4px",
-                    }}
-                  >
+                  <div className="text-[10px] text-gray-400 mt-1">
                     -{formatPercent(resaleDiscountPercent)} resale
                   </div>
                 </div>
               </div>
 
               {/* Weight Distribution Cards - SIDE BY SIDE */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: "8px",
-                  marginBottom: "8px",
-                }}
-              >
+              <div className="grid grid-cols-2 gap-2 mb-2">
                 {/* Weight by Person Card */}
-                <div
-                  style={{
-                    backgroundColor: "white",
-                    borderRadius: "10px",
-                    padding: "12px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: "600",
-                      color: "#333",
-                      marginBottom: "10px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
+                <div className="bg-white rounded-lg p-3 shadow-sm h-full flex flex-col">
+                  <div className="text-[13px] font-semibold text-gray-800 mb-2.5 flex justify-between items-center">
                     <span>By Person</span>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#6b7280",
-                        fontWeight: "normal",
-                      }}
-                    >
+                    <span className="text-[11px] text-gray-500 font-normal">
                       {personsWeight.length}
                     </span>
                   </div>
 
                   {personsWeight.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "15px",
-                        color: "#9ca3af",
-                        fontSize: "12px",
-                        flex: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
+                    <div className="text-center p-4 text-gray-400 text-xs flex-1 flex items-center justify-center">
                       No person data
                     </div>
                   ) : (
-                    <div
-                      style={{
-                        flex: 1,
-                        overflowY: "auto",
-                        maxHeight: "200px",
-                        paddingRight: "2px",
-                      }}
-                    >
+                    <div className="flex-1 overflow-y-auto max-h-[200px] pr-0.5">
                       {personsWeight.map((item, index) => (
                         <div
                           key={index}
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            padding: "8px 0",
-                            paddingRight: "4px",
-                            borderBottom:
-                              index < personsWeight.length - 1
-                                ? "1px solid #f3f4f6"
-                                : "none",
-                          }}
+                          className={`flex justify-between items-center py-2 pr-1 ${
+                            index < personsWeight.length - 1
+                              ? "border-b border-gray-100"
+                              : ""
+                          }`}
                         >
                           <div
-                            style={{
-                              fontSize: "12px",
-                              color: "#4b5563",
-                              flex: 1,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              marginRight: "8px",
-                              paddingRight: "4px",
-                            }}
+                            className="text-xs text-gray-600 flex-1 overflow-hidden text-ellipsis whitespace-nowrap mr-2"
                             title={item.person}
                           >
                             {item.person}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              fontWeight: "600",
-                              color: "#111827",
-                              whiteSpace: "nowrap",
-                              paddingLeft: "4px",
-                              paddingRight: "4px",
-                              minWidth: "50px",
-                              textAlign: "right",
-                            }}
-                          >
+                          <div className="text-xs font-semibold text-gray-900 whitespace-nowrap min-w-[50px] text-right">
                             {formatWeight(item.totalWeight)}
                           </div>
                         </div>
@@ -484,106 +321,36 @@ const JewelleryHome: React.FC = () => {
                 </div>
 
                 {/* Weight by Location Card */}
-                <div
-                  style={{
-                    backgroundColor: "white",
-                    borderRadius: "10px",
-                    padding: "12px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: "600",
-                      color: "#333",
-                      marginBottom: "10px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
+                <div className="bg-white rounded-lg p-3 shadow-sm h-full flex flex-col">
+                  <div className="text-[13px] font-semibold text-gray-800 mb-2.5 flex justify-between items-center">
                     <span>By Location</span>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#6b7280",
-                        fontWeight: "normal",
-                      }}
-                    >
+                    <span className="text-[11px] text-gray-500 font-normal">
                       {locationWeight.length}
                     </span>
                   </div>
 
                   {locationWeight.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "15px",
-                        color: "#9ca3af",
-                        fontSize: "12px",
-                        flex: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
+                    <div className="text-center p-4 text-gray-400 text-xs flex-1 flex items-center justify-center">
                       No location data
                     </div>
                   ) : (
-                    <div
-                      style={{
-                        flex: 1,
-                        overflowY: "auto",
-                        maxHeight: "200px",
-                        paddingRight: "2px",
-                      }}
-                    >
+                    <div className="flex-1 overflow-y-auto max-h-[200px] pr-0.5">
                       {locationWeight.map((item, index) => (
                         <div
                           key={index}
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            padding: "8px 0",
-                            paddingRight: "4px",
-                            borderBottom:
-                              index < locationWeight.length - 1
-                                ? "1px solid #f3f4f6"
-                                : "none",
-                          }}
+                          className={`flex justify-between items-center py-2 pr-1 ${
+                            index < locationWeight.length - 1
+                              ? "border-b border-gray-100"
+                              : ""
+                          }`}
                         >
                           <div
-                            style={{
-                              fontSize: "12px",
-                              color: "#4b5563",
-                              flex: 1,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              marginRight: "8px",
-                              paddingRight: "4px",
-                            }}
+                            className="text-xs text-gray-600 flex-1 overflow-hidden text-ellipsis whitespace-nowrap mr-2"
                             title={item.location}
                           >
                             {item.location}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              fontWeight: "600",
-                              color: "#111827",
-                              whiteSpace: "nowrap",
-                              paddingLeft: "4px",
-                              paddingRight: "4px",
-                              minWidth: "50px",
-                              textAlign: "right",
-                            }}
-                          >
+                          <div className="text-xs font-semibold text-gray-900 whitespace-nowrap min-w-[50px] text-right">
                             {formatWeight(item.totalWeight)}
                           </div>
                         </div>
@@ -608,8 +375,33 @@ const JewelleryHome: React.FC = () => {
     }
   };
 
+  // Tab Button Component
+  const TabButton = ({
+    id,
+    label,
+    icon,
+  }: {
+    id: TabType;
+    label: string;
+    icon: string;
+  }) => (
+    <button
+      onClick={() => setActiveTab(id)}
+      className={cls(
+        "flex-1 py-3.5 px-2 bg-transparent border-none text-xs flex items-center justify-center gap-1 min-w-0 transition-all cursor-pointer",
+        activeTab === id
+          ? "bg-gray-100 text-gray-900 font-semibold border-b-2 border-blue-500"
+          : "text-gray-500 font-normal hover:bg-gray-50",
+      )}
+      title={label}
+    >
+      <span>{icon}</span>
+      <span>{label}</span>
+    </button>
+  );
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div className="flex flex-col h-screen">
       {/* Header with Add button */}
       <Header
         showAddButton={shouldShowAddButton()}
@@ -618,163 +410,21 @@ const JewelleryHome: React.FC = () => {
       />
 
       {/* Main Content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Tab Navigation - Compact with smaller text */}
-        <div
-          style={{
-            display: "flex",
-            backgroundColor: "white",
-            borderBottom: "1px solid #e5e7eb",
-          }}
-        >
-          <button
-            onClick={() => setActiveTab("dashboard")}
-            style={{
-              padding: "14px 8px",
-              border: "none",
-              backgroundColor:
-                activeTab === "dashboard" ? "#f3f4f6" : "transparent",
-              color: activeTab === "dashboard" ? "#111827" : "#6b7280",
-              fontSize: "12px",
-              fontWeight: activeTab === "dashboard" ? "600" : "400",
-              borderBottom:
-                activeTab === "dashboard" ? "2px solid #3b82f6" : "none",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              flex: 1,
-              justifyContent: "center",
-              minWidth: 0,
-            }}
-            title="Dashboard"
-          >
-            <span>📊</span>
-            <span>Dash</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("list")}
-            style={{
-              padding: "14px 8px",
-              border: "none",
-              backgroundColor: activeTab === "list" ? "#f3f4f6" : "transparent",
-              color: activeTab === "list" ? "#111827" : "#6b7280",
-              fontSize: "12px",
-              fontWeight: activeTab === "list" ? "600" : "400",
-              borderBottom: activeTab === "list" ? "2px solid #3b82f6" : "none",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              flex: 1,
-              justifyContent: "center",
-              minWidth: 0,
-            }}
-            title="List"
-          >
-            <span>📋</span>
-            <span>List</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("gallery")}
-            style={{
-              padding: "14px 8px",
-              border: "none",
-              backgroundColor:
-                activeTab === "gallery" ? "#f3f4f6" : "transparent",
-              color: activeTab === "gallery" ? "#111827" : "#6b7280",
-              fontSize: "12px",
-              fontWeight: activeTab === "gallery" ? "600" : "400",
-              borderBottom:
-                activeTab === "gallery" ? "2px solid #3b82f6" : "none",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              flex: 1,
-              justifyContent: "center",
-              minWidth: 0,
-            }}
-            title="Gallery"
-          >
-            <span>🖼️</span>
-            <span>Gallery</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("bills")}
-            style={{
-              padding: "14px 8px",
-              border: "none",
-              backgroundColor:
-                activeTab === "bills" ? "#f3f4f6" : "transparent",
-              color: activeTab === "bills" ? "#111827" : "#6b7280",
-              fontSize: "12px",
-              fontWeight: activeTab === "bills" ? "600" : "400",
-              borderBottom:
-                activeTab === "bills" ? "2px solid #3b82f6" : "none",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              flex: 1,
-              justifyContent: "center",
-              minWidth: 0,
-            }}
-            title="Bills"
-          >
-            <span>📄</span>
-            <span>Bills</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("verification")}
-            style={{
-              padding: "14px 8px",
-              border: "none",
-              backgroundColor:
-                activeTab === "verification" ? "#f3f4f6" : "transparent",
-              color: activeTab === "verification" ? "#111827" : "#6b7280",
-              fontSize: "12px",
-              fontWeight: activeTab === "verification" ? "600" : "400",
-              borderBottom:
-                activeTab === "verification" ? "2px solid #3b82f6" : "none",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              flex: 1,
-              justifyContent: "center",
-              minWidth: 0,
-            }}
-            title="Verification"
-          >
-            <span>✓</span>
-            <span>Verify</span>
-          </button>
+        <div className="flex bg-white border-b border-gray-200 shrink-0">
+          <TabButton id="dashboard" label="Dash" icon="📊" />
+          <TabButton id="list" label="List" icon="📋" />
+          <TabButton id="gallery" label="Gallery" icon="🖼️" />
+          <TabButton id="bills" label="Bills" icon="📄" />
+          <TabButton id="verification" label="Verify" icon="✓" />
         </div>
 
         {/* Tab Content Area */}
-        <div
-          style={{
-            ...jewelleryStyles.contentWrapper,
-            padding: "8px 2px",
-            flex: 1,
-            overflowY: "auto",
-          }}
-        >
+        <div className="flex-1 overflow-y-auto px-0.5 py-2">
           {renderTabContent()}
         </div>
       </div>
-
-      {/* REMOVED: FAB buttons (now in Header) */}
     </div>
   );
 };

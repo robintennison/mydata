@@ -284,27 +284,14 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
 
   if (loading) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "40px 20px",
-          color: "#9ca3af",
-        }}
-      >
-        <div
-          style={{
-            width: "30px",
-            height: "30px",
-            border: "3px solid #f3f4f6",
-            borderTop: "3px solid #3b82f6",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-            margin: "0 auto 16px auto",
-          }}
-        ></div>
+      <div className="text-center p-10 text-gray-400">
+        <div className="w-8 h-8 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
         <p>Loading verification data...</p>
         <style>
           {`
+            .border-3 {
+              border-width: 3px;
+            }
             @keyframes spin {
               0% { transform: rotate(0deg); }
               100% { transform: rotate(360deg); }
@@ -317,149 +304,42 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
 
   if (compact) {
     return (
-      <div
-        style={{
-          backgroundColor: "white",
-          borderRadius: "10px",
-          padding: "15px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          marginBottom: "15px",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "16px",
-            fontWeight: "600",
-            color: "#333",
-            marginBottom: "15px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-3.75">
+        <div className="text-base font-semibold text-gray-800 mb-3.75 flex justify-between items-center">
           <span>Verification Summary</span>
-          <span
-            style={{
-              fontSize: "12px",
-              color: "#6b7280",
-              fontWeight: "normal",
-            }}
-          >
+          <span className="text-xs text-gray-500 font-normal">
             {stats.notVerified} to verify
           </span>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "10px",
-            marginBottom: "15px",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              borderRadius: "8px",
-              padding: "12px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#10b981",
-                marginBottom: "4px",
-              }}
-            >
+        <div className="grid grid-cols-3 gap-2.5 mb-3.75">
+          <div className="bg-gray-50 rounded-lg p-3 text-center">
+            <div className="text-lg font-semibold text-emerald-600 mb-1">
               {stats.verified}
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#10b981",
-              }}
-            >
-              Verified
-            </div>
+            <div className="text-xs text-emerald-600">Verified</div>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "#fef3c7",
-              borderRadius: "8px",
-              padding: "12px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#f59e0b",
-                marginBottom: "4px",
-              }}
-            >
+          <div className="bg-amber-50 rounded-lg p-3 text-center">
+            <div className="text-lg font-semibold text-amber-600 mb-1">
               {stats.notVerified}
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#f59e0b",
-              }}
-            >
-              To Verify
-            </div>
+            <div className="text-xs text-amber-600">To Verify</div>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "#fef2f2",
-              borderRadius: "8px",
-              padding: "12px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#ef4444",
-                marginBottom: "4px",
-              }}
-            >
+          <div className="bg-red-50 rounded-lg p-3 text-center">
+            <div className="text-lg font-semibold text-red-600 mb-1">
               {stats.missing}
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#ef4444",
-              }}
-            >
-              Missing
-            </div>
+            <div className="text-xs text-red-600">Missing</div>
           </div>
         </div>
 
-        <div
-          style={{
-            marginBottom: "15px",
-            display: "flex",
-            gap: "8px",
-          }}
-        >
+        <div className="mb-3.75 flex gap-2">
           <select
             value={selectedLocation}
             onChange={(e) => setSelectedLocation(e.target.value)}
-            style={{
-              flex: 1,
-              padding: "8px",
-              border: "1px solid #e5e7eb",
-              borderRadius: "6px",
-              fontSize: "12px",
-              backgroundColor: "white",
-            }}
+            className="flex-1 px-2 py-2 border border-gray-200 rounded text-sm bg-white"
           >
             <option value="">All Locations</option>
             {locations.map((location) => (
@@ -474,16 +354,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
               onClick={() =>
                 handleBulkUpdate(selectedLocation, VerificationStatus.VERIFIED)
               }
-              style={{
-                padding: "8px 12px",
-                backgroundColor: "#10b981",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "12px",
-                fontWeight: "500",
-              }}
+              className="px-3 py-2 bg-emerald-600 text-white border-none rounded cursor-pointer text-sm font-medium"
             >
               ✓ All
             </button>
@@ -492,21 +363,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
 
         <button
           onClick={() => navigate("/jewellery/verification")}
-          style={{
-            width: "100%",
-            padding: "10px",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "500",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          }}
+          className="w-full py-2.5 px-4 bg-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2"
         >
           Start Verification
           <span>→</span>
@@ -517,101 +374,34 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
 
   // Full mode - Exactly 2 lines per record (mobile optimized)
   return (
-    <div
-      style={{
-        backgroundColor: "white",
-        borderRadius: "10px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        overflow: "hidden",
-        marginBottom: "15px",
-      }}
-    >
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-3.75 overflow-hidden">
       {/* Header */}
-      <div
-        style={{
-          padding: "15px",
-          borderBottom: "1px solid #e5e7eb",
-          backgroundColor: "#f8fafc",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "16px",
-            fontWeight: "600",
-            color: "#333",
-            marginBottom: "10px",
-          }}
-        >
+      <div className="p-3.75 border-b border-gray-200 bg-gray-50">
+        <div className="text-base font-semibold text-gray-800 mb-2.5">
           Quick Verification
         </div>
 
         {/* Stats */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "8px",
-          }}
-        >
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "4px",
-              }}
-            >
-              Total
-            </div>
-            <div style={{ fontSize: "16px", fontWeight: "600" }}>
-              {stats.totalItems}
-            </div>
+        <div className="grid grid-cols-4 gap-2">
+          <div className="text-center">
+            <div className="text-xs text-gray-500 mb-1">Total</div>
+            <div className="text-base font-semibold">{stats.totalItems}</div>
           </div>
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#10b981",
-                marginBottom: "4px",
-              }}
-            >
-              Verified
-            </div>
-            <div
-              style={{ fontSize: "16px", fontWeight: "600", color: "#10b981" }}
-            >
+          <div className="text-center">
+            <div className="text-xs text-emerald-600 mb-1">Verified</div>
+            <div className="text-base font-semibold text-emerald-600">
               {stats.verified}
             </div>
           </div>
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#f59e0b",
-                marginBottom: "4px",
-              }}
-            >
-              To Verify
-            </div>
-            <div
-              style={{ fontSize: "16px", fontWeight: "600", color: "#f59e0b" }}
-            >
+          <div className="text-center">
+            <div className="text-xs text-amber-600 mb-1">To Verify</div>
+            <div className="text-base font-semibold text-amber-600">
               {stats.notVerified}
             </div>
           </div>
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#ef4444",
-                marginBottom: "4px",
-              }}
-            >
-              Missing
-            </div>
-            <div
-              style={{ fontSize: "16px", fontWeight: "600", color: "#ef4444" }}
-            >
+          <div className="text-center">
+            <div className="text-xs text-red-600 mb-1">Missing</div>
+            <div className="text-base font-semibold text-red-600">
               {stats.missing}
             </div>
           </div>
@@ -619,42 +409,19 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
       </div>
 
       {/* Filters */}
-      <div
-        style={{
-          padding: "12px 15px",
-          borderBottom: "1px solid #f3f4f6",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: "8px",
-            marginBottom: "10px",
-          }}
-        >
+      <div className="p-3 border-b border-gray-100">
+        <div className="flex gap-2 mb-2.5">
           <input
             type="text"
             placeholder="Search items..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              flex: 1,
-              padding: "8px 12px",
-              border: "1px solid #e5e7eb",
-              borderRadius: "6px",
-              fontSize: "14px",
-            }}
+            className="flex-1 px-3 py-2 border border-gray-200 rounded text-sm"
           />
           <select
             value={selectedLocation}
             onChange={(e) => setSelectedLocation(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              border: "1px solid #e5e7eb",
-              borderRadius: "6px",
-              fontSize: "14px",
-              minWidth: "120px",
-            }}
+            className="px-3 py-2 border border-gray-200 rounded text-sm min-w-30"
           >
             <option value="">All Locations</option>
             {locations.map((location) => (
@@ -666,28 +433,12 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
         </div>
 
         {selectedLocation && (
-          <div
-            style={{
-              display: "flex",
-              gap: "8px",
-              justifyContent: "center",
-            }}
-          >
+          <div className="flex gap-2 justify-center">
             <button
               onClick={() =>
                 handleBulkUpdate(selectedLocation, VerificationStatus.VERIFIED)
               }
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#10b981",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "12px",
-                fontWeight: "500",
-                flex: 1,
-              }}
+              className="flex-1 px-3 py-1.5 bg-emerald-600 text-white border-none rounded cursor-pointer text-xs font-medium"
             >
               ✓ Mark All Verified
             </button>
@@ -698,17 +449,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                   VerificationStatus.NOT_VERIFIED,
                 )
               }
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#f59e0b",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "12px",
-                fontWeight: "500",
-                flex: 1,
-              }}
+              className="flex-1 px-3 py-1.5 bg-amber-500 text-white border-none rounded cursor-pointer text-xs font-medium"
             >
               ⟲ Reset All
             </button>
@@ -717,35 +458,14 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
       </div>
 
       {/* Items List - Exactly 2 lines per record (mobile optimized) */}
-      <div
-        style={{
-          maxHeight: "500px",
-          overflowY: "auto",
-          padding: "0 15px",
-        }}
-      >
+      <div className="max-h-[500px] overflow-y-auto p-0 px-3.75">
         {filteredItems.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "30px 20px",
-              color: "#9ca3af",
-            }}
-          >
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>📦</div>
+          <div className="text-center p-7.5 text-gray-400">
+            <div className="text-5xl mb-4">📦</div>
             <p>No jewellery items found</p>
             <button
               onClick={() => navigate("/jewellery")}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-                marginTop: "12px",
-              }}
+              className="px-4 py-2 bg-blue-600 text-white border-none rounded cursor-pointer text-sm mt-3"
             >
               Add Jewellery Items
             </button>
@@ -762,120 +482,44 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
               item.verificationStatus === VerificationStatus.VERIFIED;
 
             return (
-              <div
-                key={item.id}
-                style={{
-                  padding: "8px 0",
-                  borderBottom: "1px solid #f3f4f6",
-                }}
-              >
+              <div key={item.id} className="py-2 border-b border-gray-100">
                 {/* LINE 1: Image + Code + Weight + Date + Buttons (ALL ON SAME LINE) */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    marginBottom: "4px",
-                  }}
-                >
+                <div className="flex items-center gap-1.5 mb-1">
                   {/* Jewellery Image */}
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      backgroundColor: "#f3f4f6",
-                      borderRadius: "6px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      overflow: "hidden",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center overflow-hidden flex-shrink-0">
                     {item.imageUrl ? (
                       <img
                         src={item.imageUrl}
                         alt={item.code}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
+                        className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span style={{ color: "#9ca3af", fontSize: "16px" }}>
-                        💎
-                      </span>
+                      <span className="text-gray-400 text-base">💎</span>
                     )}
                   </div>
 
                   {/* Status Indicator */}
                   <div
+                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                     style={{
-                      width: "6px",
-                      height: "6px",
-                      borderRadius: "50%",
                       backgroundColor: getStatusColor(item.verificationStatus),
-                      flexShrink: 0,
                     }}
                   />
 
                   {/* Item Code and Weight - Compact on same line */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "baseline",
-                      gap: "6px",
-                      flex: 1,
-                      minWidth: 0,
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: "600",
-                        fontSize: "13px",
-                        color: "#111827",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
+                  <div className="flex items-baseline gap-1.5 flex-1 min-w-0 overflow-hidden">
+                    <div className="font-semibold text-sm text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">
                       {item.code}
                     </div>
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        color: "#6b7280",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <div className="text-xs text-gray-500 whitespace-nowrap">
                       {item.weight}g
                     </div>
                   </div>
 
                   {/* Last Verified Date - Compact */}
-                  <div
-                    style={{
-                      minWidth: "40px",
-                      maxWidth: "50px",
-                      textAlign: "center",
-                      flexShrink: 0,
-                      marginRight: "4px",
-                    }}
-                  >
+                  <div className="min-w-10 max-w-12.5 text-center flex-shrink-0 mr-1">
                     <div
-                      style={{
-                        fontSize: "10px",
-                        color: isRecentlyVerified ? "#10b981" : "#6b7280",
-                        fontWeight: isRecentlyVerified ? "500" : "normal",
-                        backgroundColor: isRecentlyVerified
-                          ? "#f0fdf4"
-                          : "transparent",
-                        padding: "2px 4px",
-                        borderRadius: "3px",
-                        whiteSpace: "nowrap",
-                      }}
+                      className={`text-xs px-1 py-0.5 rounded whitespace-nowrap ${isRecentlyVerified ? "text-emerald-600 font-medium bg-emerald-50" : "text-gray-500"}`}
                       title={
                         item.lastVerified
                           ? new Date(item.lastVerified).toLocaleDateString()
@@ -887,14 +531,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                   </div>
 
                   {/* Action Buttons - Smaller on mobile */}
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "2px",
-                      alignItems: "center",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div className="flex gap-0.5 items-center flex-shrink-0">
                     <button
                       onClick={() =>
                         handleUpdateVerification(
@@ -904,29 +541,11 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       }
                       disabled={isUpdating}
                       title="Mark as Verified"
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor:
-                          item.verificationStatus ===
-                          VerificationStatus.VERIFIED
-                            ? "#10b981"
-                            : "#f0fdf4",
-                        color:
-                          item.verificationStatus ===
-                          VerificationStatus.VERIFIED
-                            ? "white"
-                            : "#10b981",
-                        border: `1px solid ${item.verificationStatus === VerificationStatus.VERIFIED ? "#10b981" : "#d1fae5"}`,
-                        borderRadius: "3px",
-                        cursor: isUpdating ? "not-allowed" : "pointer",
-                        fontSize: "10px",
-                        opacity: isUpdating ? 0.7 : 1,
-                        flexShrink: 0,
-                      }}
+                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer ${
+                        item.verificationStatus === VerificationStatus.VERIFIED
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-emerald-50 text-emerald-600 border-emerald-200"
+                      } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       ✓
                     </button>
@@ -940,29 +559,12 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       }
                       disabled={isUpdating}
                       title="Mark as Not Verified"
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor:
-                          item.verificationStatus ===
-                          VerificationStatus.NOT_VERIFIED
-                            ? "#f59e0b"
-                            : "#fffbeb",
-                        color:
-                          item.verificationStatus ===
-                          VerificationStatus.NOT_VERIFIED
-                            ? "white"
-                            : "#f59e0b",
-                        border: `1px solid ${item.verificationStatus === VerificationStatus.NOT_VERIFIED ? "#f59e0b" : "#fef3c7"}`,
-                        borderRadius: "3px",
-                        cursor: isUpdating ? "not-allowed" : "pointer",
-                        fontSize: "10px",
-                        opacity: isUpdating ? 0.7 : 1,
-                        flexShrink: 0,
-                      }}
+                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer ${
+                        item.verificationStatus ===
+                        VerificationStatus.NOT_VERIFIED
+                          ? "bg-amber-500 text-white border-amber-500"
+                          : "bg-amber-50 text-amber-600 border-amber-200"
+                      } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       !
                     </button>
@@ -976,27 +578,11 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                       }
                       disabled={isUpdating}
                       title="Mark as Missing"
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor:
-                          item.verificationStatus === VerificationStatus.MISSING
-                            ? "#ef4444"
-                            : "#fef2f2",
-                        color:
-                          item.verificationStatus === VerificationStatus.MISSING
-                            ? "white"
-                            : "#ef4444",
-                        border: `1px solid ${item.verificationStatus === VerificationStatus.MISSING ? "#ef4444" : "#fee2e2"}`,
-                        borderRadius: "3px",
-                        cursor: isUpdating ? "not-allowed" : "pointer",
-                        fontSize: "10px",
-                        opacity: isUpdating ? 0.7 : 1,
-                        flexShrink: 0,
-                      }}
+                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer ${
+                        item.verificationStatus === VerificationStatus.MISSING
+                          ? "bg-red-500 text-white border-red-500"
+                          : "bg-red-50 text-red-600 border-red-200"
+                      } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       ✗
                     </button>
@@ -1004,24 +590,11 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                     <button
                       onClick={() => toggleNotes(item)}
                       title={hasNotes ? "View notes" : "Add notes"}
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor: hasNotes ? "#dbeafe" : "transparent",
-                        color: hasNotes ? "#1d4ed8" : "#6b7280",
-                        border: `1px solid ${hasNotes ? "#93c5fd" : "#e5e7eb"}`,
-                        borderRadius: "3px",
-                        cursor: "pointer",
-                        fontSize: "10px",
-                        transform: isExpanded
-                          ? "rotate(180deg)"
-                          : "rotate(0deg)",
-                        transition: "transform 0.2s ease",
-                        flexShrink: 0,
-                      }}
+                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer border ${
+                        hasNotes
+                          ? "bg-blue-100 text-blue-700 border-blue-300"
+                          : "bg-transparent text-gray-500 border-gray-300"
+                      } transition-transform ${isExpanded ? "rotate-180" : ""}`}
                     >
                       ↓
                     </button>
@@ -1029,30 +602,11 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                 </div>
 
                 {/* LINE 2: Location + Bought For only */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    paddingLeft: "44px", // Align with image (32px) + status (6px) + gap (6px) = 44px
-                    overflow: "hidden",
-                  }}
-                >
+                <div className="flex items-center gap-1.5 pl-11 overflow-hidden">
                   {/* Location - Tiny badge */}
                   {item.location && (
                     <div
-                      style={{
-                        fontSize: "10px",
-                        color: "#4b5563",
-                        backgroundColor: "#f3f4f6",
-                        padding: "2px 4px",
-                        borderRadius: "3px",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        maxWidth: "80px",
-                        flexShrink: 0,
-                      }}
+                      className="text-xs text-gray-700 bg-gray-100 px-1 py-0.5 rounded whitespace-nowrap overflow-hidden text-ellipsis max-w-20 flex-shrink-0"
                       title={item.location}
                     >
                       {item.location}
@@ -1062,18 +616,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                   {/* Bought For - Tiny badge */}
                   {item.boughtFor && (
                     <div
-                      style={{
-                        fontSize: "10px",
-                        color: "#0369a1",
-                        backgroundColor: "#e0f2fe",
-                        padding: "2px 4px",
-                        borderRadius: "3px",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        maxWidth: "80px",
-                        flexShrink: 0,
-                      }}
+                      className="text-xs text-blue-800 bg-blue-100 px-1 py-0.5 rounded whitespace-nowrap overflow-hidden text-ellipsis max-w-20 flex-shrink-0"
                       title={item.boughtFor}
                     >
                       {item.boughtFor}
@@ -1083,24 +626,8 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
 
                 {/* Expanded Notes Section (only when toggled) */}
                 {isExpanded && (
-                  <div
-                    style={{
-                      marginTop: "8px",
-                      padding: "8px",
-                      backgroundColor: "#f9fafb",
-                      borderRadius: "4px",
-                      border: "1px solid #e5e7eb",
-                      marginLeft: "44px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: "500",
-                        color: "#4b5563",
-                        marginBottom: "6px",
-                      }}
-                    >
+                  <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200 ml-11">
+                    <div className="text-xs font-medium text-gray-700 mb-1.5">
                       Verification Notes:
                     </div>
                     <textarea
@@ -1112,56 +639,20 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                         }))
                       }
                       placeholder="Add verification notes..."
-                      style={{
-                        width: "100%",
-                        padding: "6px 8px",
-                        border: "1px solid #e5e7eb",
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                        fontFamily: "inherit",
-                        resize: "vertical",
-                        minHeight: "40px",
-                        marginBottom: "8px",
-                      }}
+                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm font-inherit resize-y min-h-10 mb-2"
                       disabled={isUpdating}
                     />
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "6px",
-                        justifyContent: "flex-end",
-                      }}
-                    >
+                    <div className="flex gap-1.5 justify-end">
                       <button
                         onClick={() => saveNotes(item.id)}
-                        style={{
-                          padding: "4px 10px",
-                          backgroundColor: "#3b82f6",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: isUpdating ? "not-allowed" : "pointer",
-                          fontSize: "11px",
-                          fontWeight: "500",
-                          opacity: isUpdating ? 0.7 : 1,
-                        }}
+                        className={`px-2.5 py-1 bg-blue-600 text-white border-none rounded cursor-pointer text-xs font-medium ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                         disabled={isUpdating}
                       >
                         {isUpdating ? "Saving..." : "Save"}
                       </button>
                       <button
                         onClick={() => setExpandedNotesId(null)}
-                        style={{
-                          padding: "4px 10px",
-                          backgroundColor: "#f3f4f6",
-                          color: "#4b5563",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: isUpdating ? "not-allowed" : "pointer",
-                          fontSize: "11px",
-                          fontWeight: "500",
-                          opacity: isUpdating ? 0.7 : 1,
-                        }}
+                        className={`px-2.5 py-1 bg-gray-100 text-gray-700 border-none rounded cursor-pointer text-xs font-medium ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
                         disabled={isUpdating}
                       >
                         Close
@@ -1175,24 +666,10 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
         )}
 
         {filteredItems.length > 15 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "12px 0",
-              borderTop: "1px solid #f3f4f6",
-            }}
-          >
+          <div className="text-center py-3 border-t border-gray-100">
             <button
               onClick={() => navigate("/jewellery/verification")}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "transparent",
-                color: "#3b82f6",
-                border: "1px solid #3b82f6",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
+              className="px-4 py-2 bg-transparent text-blue-600 border border-blue-600 rounded cursor-pointer text-sm"
             >
               View {filteredItems.length - 15} more items
             </button>

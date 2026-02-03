@@ -123,9 +123,6 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
     }
   };
 
-  // REMOVED: handleAddBill function
-  // The FAB will be handled in JewelleryHome when activeTab is "bills"
-
   const getTabStats = () => {
     const withJewellery = bills.filter((b) => b.hasLinkedJewellery).length;
     const withoutJewellery = bills.filter((b) => !b.hasLinkedJewellery).length;
@@ -141,27 +138,14 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "40px 20px",
-          color: "#9ca3af",
-        }}
-      >
-        <div
-          style={{
-            width: "30px",
-            height: "30px",
-            border: "3px solid #f3f4f6",
-            borderTop: "3px solid #3b82f6",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-            margin: "0 auto 16px auto",
-          }}
-        ></div>
+      <div className="text-center p-10 text-gray-400">
+        <div className="w-8 h-8 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
         <p>Loading bills...</p>
         <style>
           {`
+            .border-3 {
+              border-width: 3px;
+            }
             @keyframes spin {
               0% { transform: rotate(0deg); }
               100% { transform: rotate(360deg); }
@@ -174,148 +158,40 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
 
   if (compact) {
     return (
-      <div
-        style={{
-          backgroundColor: "white",
-          borderRadius: "10px",
-          padding: "15px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          marginBottom: "15px",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "16px",
-            fontWeight: "600",
-            color: "#333",
-            marginBottom: "15px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-3.75">
+        <div className="text-base font-semibold text-gray-800 mb-3.75 flex justify-between items-center">
           <span>Bills Summary</span>
-          <span
-            style={{
-              fontSize: "12px",
-              color: "#6b7280",
-              fontWeight: "normal",
-            }}
-          >
+          <span className="text-xs text-gray-500 font-normal">
             {stats.all} bills
           </span>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "10px",
-            marginBottom: "15px",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              borderRadius: "8px",
-              padding: "12px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#3b82f6",
-                marginBottom: "4px",
-              }}
-            >
+        <div className="grid grid-cols-3 gap-2.5 mb-3.75">
+          <div className="bg-gray-50 rounded-lg p-3 text-center">
+            <div className="text-lg font-semibold text-blue-600 mb-1">
               {stats.all}
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#6b7280",
-              }}
-            >
-              Total
-            </div>
+            <div className="text-xs text-gray-500">Total</div>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "#eff6ff",
-              borderRadius: "8px",
-              padding: "12px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#1e40af",
-                marginBottom: "4px",
-              }}
-            >
+          <div className="bg-blue-50 rounded-lg p-3 text-center">
+            <div className="text-lg font-semibold text-blue-800 mb-1">
               {stats.withJewellery}
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#1e40af",
-              }}
-            >
-              With Items
-            </div>
+            <div className="text-xs text-blue-800">With Items</div>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              borderRadius: "8px",
-              padding: "12px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#6b7280",
-                marginBottom: "4px",
-              }}
-            >
+          <div className="bg-gray-50 rounded-lg p-3 text-center">
+            <div className="text-lg font-semibold text-gray-500 mb-1">
               {stats.withoutJewellery}
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#6b7280",
-              }}
-            >
-              Without
-            </div>
+            <div className="text-xs text-gray-500">Without</div>
           </div>
         </div>
 
         <button
           onClick={() => navigate("/jewellery/bills")}
-          style={{
-            width: "100%",
-            padding: "10px",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "500",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          }}
+          className="w-full py-2.5 bg-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2"
         >
           View All Bills
           <span>→</span>
@@ -325,116 +201,62 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
   }
 
   return (
-    <div style={{ minHeight: "100vh" }}>
+    <div className="min-h-screen">
       {/* Tab Navigation */}
-      <div
-        style={{
-          display: "flex",
-          borderBottom: "1px solid #e5e7eb",
-          backgroundColor: "white",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
+      <div className="flex border-b border-gray-200 bg-white sticky top-0 z-10">
         <button
           onClick={() => setActiveTab("all")}
-          style={{
-            flex: 1,
-            padding: "12px 16px",
-            border: "none",
-            backgroundColor: activeTab === "all" ? "#f3f4f6" : "transparent",
-            color: activeTab === "all" ? "#111827" : "#6b7280",
-            fontSize: "14px",
-            fontWeight: activeTab === "all" ? "600" : "400",
-            borderBottom: activeTab === "all" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "6px",
-          }}
+          className={`flex-1 px-4 py-3 border-none text-sm cursor-pointer flex items-center justify-center gap-1.5 ${
+            activeTab === "all"
+              ? "bg-gray-100 text-gray-900 font-semibold border-b-2 border-blue-500"
+              : "bg-transparent text-gray-500 font-normal"
+          }`}
         >
           All Bills
           <span
-            style={{
-              fontSize: "12px",
-              backgroundColor: activeTab === "all" ? "#d1d5db" : "#f3f4f6",
-              color: activeTab === "all" ? "#374151" : "#9ca3af",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              minWidth: "24px",
-            }}
+            className={`text-xs px-2 py-0.5 rounded-full min-w-6 ${
+              activeTab === "all"
+                ? "bg-gray-300 text-gray-700"
+                : "bg-gray-100 text-gray-400"
+            }`}
           >
             {stats.all}
           </span>
         </button>
         <button
           onClick={() => setActiveTab("with-jewellery")}
-          style={{
-            flex: 1,
-            padding: "12px 16px",
-            border: "none",
-            backgroundColor:
-              activeTab === "with-jewellery" ? "#f3f4f6" : "transparent",
-            color: activeTab === "with-jewellery" ? "#111827" : "#6b7280",
-            fontSize: "14px",
-            fontWeight: activeTab === "with-jewellery" ? "600" : "400",
-            borderBottom:
-              activeTab === "with-jewellery" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "6px",
-          }}
+          className={`flex-1 px-4 py-3 border-none text-sm cursor-pointer flex items-center justify-center gap-1.5 ${
+            activeTab === "with-jewellery"
+              ? "bg-gray-100 text-gray-900 font-semibold border-b-2 border-blue-500"
+              : "bg-transparent text-gray-500 font-normal"
+          }`}
         >
           With Jewellery
           <span
-            style={{
-              fontSize: "12px",
-              backgroundColor:
-                activeTab === "with-jewellery" ? "#dbeafe" : "#f3f4f6",
-              color: activeTab === "with-jewellery" ? "#1e40af" : "#9ca3af",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              minWidth: "24px",
-            }}
+            className={`text-xs px-2 py-0.5 rounded-full min-w-6 ${
+              activeTab === "with-jewellery"
+                ? "bg-blue-100 text-blue-800"
+                : "bg-gray-100 text-gray-400"
+            }`}
           >
             {stats.withJewellery}
           </span>
         </button>
         <button
           onClick={() => setActiveTab("without-jewellery")}
-          style={{
-            flex: 1,
-            padding: "12px 16px",
-            border: "none",
-            backgroundColor:
-              activeTab === "without-jewellery" ? "#f3f4f6" : "transparent",
-            color: activeTab === "without-jewellery" ? "#111827" : "#6b7280",
-            fontSize: "14px",
-            fontWeight: activeTab === "without-jewellery" ? "600" : "400",
-            borderBottom:
-              activeTab === "without-jewellery" ? "2px solid #3b82f6" : "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "6px",
-          }}
+          className={`flex-1 px-4 py-3 border-none text-sm cursor-pointer flex items-center justify-center gap-1.5 ${
+            activeTab === "without-jewellery"
+              ? "bg-gray-100 text-gray-900 font-semibold border-b-2 border-blue-500"
+              : "bg-transparent text-gray-500 font-normal"
+          }`}
         >
           Without Jewellery
           <span
-            style={{
-              fontSize: "12px",
-              backgroundColor:
-                activeTab === "without-jewellery" ? "#f3f4f6" : "#f3f4f6",
-              color: activeTab === "without-jewellery" ? "#374151" : "#9ca3af",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              minWidth: "24px",
-            }}
+            className={`text-xs px-2 py-0.5 rounded-full min-w-6 ${
+              activeTab === "without-jewellery"
+                ? "bg-gray-100 text-gray-700"
+                : "bg-gray-100 text-gray-400"
+            }`}
           >
             {stats.withoutJewellery}
           </span>
@@ -442,41 +264,27 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
       </div>
 
       {/* Bills List */}
-      <div style={{ backgroundColor: "#f9fafb", minHeight: "400px" }}>
+      <div className="bg-gray-50 min-h-[400px]">
         {filteredBills.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 20px",
-              color: "#9ca3af",
-            }}
-          >
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>
+          <div className="text-center p-10 text-gray-400">
+            <div className="text-5xl mb-4">
               {activeTab === "all"
                 ? "📄"
                 : activeTab === "with-jewellery"
                   ? "🔗"
                   : "❌"}
             </div>
-            <p style={{ marginBottom: "16px" }}>
+            <p className="mb-4">
               {activeTab === "all"
                 ? "No bills found."
                 : activeTab === "with-jewellery"
                   ? "No bills with linked jewellery."
                   : "All bills have linked jewellery."}
             </p>
-            {/* REMOVED: Add bill button from empty state - will be handled by FAB */}
           </div>
         ) : (
           <>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#6b7280",
-                padding: "6px 12px 2px",
-                textAlign: "right",
-              }}
-            >
+            <div className="text-xs text-gray-500 px-3 pt-1.5 pb-0.5 text-right">
               Showing {filteredBills.length}{" "}
               {activeTab === "all"
                 ? "bills"
@@ -484,68 +292,36 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
                   ? "bills with jewellery"
                   : "bills without jewellery"}
             </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div className="flex flex-col">
               {filteredBills.map((bill) => (
                 <div
                   key={bill.id}
-                  style={{
-                    backgroundColor: "white",
-                    padding: "12px",
-                    borderBottom: "1px solid #e5e7eb",
-                    cursor: bill.hasLinkedJewellery ? "pointer" : "default",
-                    borderLeft: bill.hasLinkedJewellery
-                      ? "4px solid #3b82f6"
-                      : "4px solid transparent",
-                  }}
+                  className={`bg-white p-3 border-b border-gray-200 ${
+                    bill.hasLinkedJewellery
+                      ? "cursor-pointer"
+                      : "cursor-default"
+                  } ${bill.hasLinkedJewellery ? "border-l-4 border-blue-500" : "border-l-4 border-transparent"}`}
                   onClick={() =>
                     bill.hasLinkedJewellery &&
                     handleViewLinkedJewellery(bill.id)
                   }
                 >
                   {/* Single Row Layout */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
+                  <div className="flex items-center justify-between">
                     {/* Bill Info */}
-                    <div style={{ flex: 1, minWidth: 0, paddingRight: "10px" }}>
-                      <div
-                        style={{
-                          fontWeight: "500",
-                          fontSize: "14px",
-                          color: "#111827",
-                          marginBottom: "4px",
-                        }}
-                      >
+                    <div className="flex-1 min-w-0 pr-2.5">
+                      <div className="font-medium text-sm text-gray-900 mb-1">
                         {bill.notes || "No notes"}
                       </div>
 
                       {/* Link Status Indicator */}
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        }}
-                      >
+                      <div className="flex items-center gap-1.5">
                         <div
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "2px",
-                            fontSize: "11px",
-                            padding: "2px 6px",
-                            borderRadius: "12px",
-                            backgroundColor: bill.hasLinkedJewellery
-                              ? "#dbeafe"
-                              : "#f3f4f6",
-                            color: bill.hasLinkedJewellery
-                              ? "#1e40af"
-                              : "#6b7280",
-                          }}
+                          className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded-full ${
+                            bill.hasLinkedJewellery
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-500"
+                          }`}
                         >
                           {bill.hasLinkedJewellery ? (
                             <>
@@ -564,47 +340,26 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
                         </div>
 
                         {/* Bill ID (truncated) */}
-                        <div
-                          style={{
-                            fontSize: "10px",
-                            color: "#9ca3af",
-                            fontFamily: "monospace",
-                          }}
-                        >
+                        <div className="text-xs text-gray-400 font-mono">
                           {bill.id.substring(0, 8)}...
                         </div>
                       </div>
                     </div>
 
                     {/* Action Icons */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        flexShrink: 0,
-                      }}
-                    >
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       {/* View Linked Jewellery Button (only if has links) */}
                       {bill.hasLinkedJewellery && (
                         <button
-                          onClick={() => handleViewLinkedJewellery(bill.id)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            fontSize: "14px",
-                            color: "#3b82f6",
-                            cursor: "pointer",
-                            padding: "6px",
-                            borderRadius: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            flexDirection: "column",
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewLinkedJewellery(bill.id);
                           }}
+                          className="bg-transparent border-none text-sm text-blue-500 cursor-pointer p-1.5 rounded flex items-center flex-col"
                           title={`View ${bill.jewelleryCount} linked item${bill.jewelleryCount !== 1 ? "s" : ""}`}
                         >
                           <span>🔍</span>
-                          <span style={{ fontSize: "9px", marginTop: "2px" }}>
+                          <span className="text-[9px] mt-0.5">
                             {bill.jewelleryCount}
                           </span>
                         </button>
@@ -613,17 +368,7 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
                       {/* Edit Icon */}
                       <button
                         onClick={(e) => handleEditBill(e, bill.id)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          fontSize: "16px",
-                          color: "#3b82f6",
-                          cursor: "pointer",
-                          padding: "6px",
-                          borderRadius: "6px",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
+                        className="bg-transparent border-none text-base text-blue-500 cursor-pointer p-1.5 rounded flex items-center"
                         title="Edit Bill"
                       >
                         ✏️
@@ -632,6 +377,7 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
                       {/* Delete Icon - Show warning if bill has linked jewellery */}
                       <button
                         onClick={(e) => {
+                          e.stopPropagation();
                           if (bill.hasLinkedJewellery) {
                             if (
                               window.confirm(
@@ -645,19 +391,11 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
                             handleDeleteBill(e, bill.id);
                           }
                         }}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          fontSize: "16px",
-                          color: bill.hasLinkedJewellery
-                            ? "#f59e0b"
-                            : "#ef4444",
-                          cursor: "pointer",
-                          padding: "6px",
-                          borderRadius: "6px",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
+                        className={`bg-transparent border-none text-base cursor-pointer p-1.5 rounded flex items-center ${
+                          bill.hasLinkedJewellery
+                            ? "text-amber-500"
+                            : "text-red-500"
+                        }`}
                         title={
                           bill.hasLinkedJewellery
                             ? `Delete bill (linked to ${bill.jewelleryCount} item${bill.jewelleryCount !== 1 ? "s" : ""})`
@@ -673,48 +411,19 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
             </div>
 
             {/* Summary Section */}
-            <div
-              style={{
-                padding: "12px",
-                backgroundColor: "#f8fafc",
-                borderTop: "1px solid #e5e7eb",
-                fontSize: "12px",
-                color: "#64748b",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
+            <div className="p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600 flex justify-between items-center">
               <div>
-                <span style={{ fontWeight: "500" }}>Summary:</span>{" "}
+                <span className="font-medium">Summary:</span>{" "}
                 {stats.withJewellery} bills with jewellery,{" "}
                 {stats.withoutJewellery} without
               </div>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                >
-                  <div
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      backgroundColor: "#3b82f6",
-                      borderRadius: "50%",
-                    }}
-                  ></div>
+              <div className="flex gap-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>Has jewellery</span>
                 </div>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                >
-                  <div
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      backgroundColor: "#d1d5db",
-                      borderRadius: "50%",
-                    }}
-                  ></div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                   <span>No jewellery</span>
                 </div>
               </div>
@@ -722,9 +431,6 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
           </>
         )}
       </div>
-
-      {/* REMOVED: FAB from BillsTab component */}
-      {/* The FAB will be handled in JewelleryHome when activeTab is "bills" */}
     </div>
   );
 };

@@ -11,6 +11,7 @@ import {
 import JewelleryForm from "./JewelleryForm";
 import { Jewellery } from "../models/types";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { tw } from "../../../utils/tailwindMapping";
 
 interface JewelleryFormWrapperProps {
   isEditing?: boolean;
@@ -143,32 +144,32 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <div>Loading jewellery data...</div>
+      <div className={tw.loading}>
+        <div className={tw.spinner}></div>
+        <p>Loading jewellery data...</p>
       </div>
     );
   }
 
   if (error && isEditing && id) {
     return (
-      <div style={styles.errorContainer}>
-        <div style={styles.errorHeader}>
+      <div className={tw.errorContainer}>
+        <div className={tw.errorHeader}>
           <span>⚠️</span>
           <strong>Error</strong>
         </div>
-        <div style={styles.errorMessage}>{error}</div>
-        <div style={styles.errorButtons}>
+        <div className={tw.errorMessage}>{error}</div>
+        <div className={tw.errorButtons}>
           <button
             onClick={() => navigate("/jewellery/list")}
-            style={styles.errorButton}
+            className={tw.errorButton}
           >
             Back to List
           </button>
           {isEditing && (
             <button
               onClick={() => window.location.reload()}
-              style={{ ...styles.errorButton, backgroundColor: "#3b82f6" }}
+              className={`${tw.errorButton} bg-blue-500 text-white border-blue-500 hover:bg-blue-600`}
             >
               Try Again
             </button>
@@ -179,32 +180,32 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
   }
 
   return (
-    <div style={styles.container}>
+    <div className="w-full h-screen flex flex-col overflow-hidden">
       {/* Top Navigation Bar */}
-      <div style={styles.topNav}>
+      <div className={tw.topNav}>
         <button
           onClick={handleCancel}
-          style={styles.navButton}
+          className={tw.navButton}
           title="Back to List"
         >
           ←
         </button>
-        <div style={styles.navTitle}>
+        <div className="text-lg font-semibold text-gray-900 flex-1 text-center">
           {isEditing ? "Edit Jewellery" : "Add New Jewellery"}
         </div>
         <div style={{ width: "44px" }}></div>
       </div>
 
       {/* Form Content - This is the main scrollable area */}
-      <div style={styles.formContainer}>
+      <div className="flex-1 overflow-y-auto p-4 relative">
         {error && (
-          <div style={styles.errorAlert}>
-            <div style={styles.errorAlertIcon}>⚠️</div>
+          <div className={tw.errorAlert}>
+            <div className={tw.errorAlertIcon}>⚠️</div>
             <div>{error}</div>
           </div>
         )}
 
-        <div style={styles.formContentWrapper}>
+        <div className={tw.formContentWrapper}>
           <JewelleryForm
             initialData={initialData}
             onSubmit={handleSubmit}
@@ -219,165 +220,14 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
 
         {/* Loading overlay for delete */}
         {deleting && (
-          <div style={styles.loadingOverlay}>
-            <div style={styles.spinner}></div>
-            <div>Deleting jewellery item...</div>
+          <div className={tw.loadingOverlay}>
+            <div className={tw.spinner}></div>
+            <p className="mt-2">Deleting jewellery item...</p>
           </div>
         )}
       </div>
-
-      {/* REMOVED: Bottom spacing div - it was causing extra space */}
     </div>
   );
 };
-
-const styles = {
-  container: {
-    width: "100%",
-    height: "100vh",
-    display: "flex",
-    flexDirection: "column" as const,
-    overflow: "hidden",
-  },
-  topNav: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "12px 16px",
-    backgroundColor: "#fff",
-    borderBottom: "1px solid #e5e7eb",
-    position: "sticky" as const,
-    top: 0,
-    zIndex: 10,
-    flexShrink: 0,
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    fontSize: "20px",
-    cursor: "pointer",
-    color: "#374151",
-    padding: "6px",
-    borderRadius: "6px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "40px",
-    height: "40px",
-  },
-  navTitle: {
-    fontSize: "16px",
-    fontWeight: "600" as const,
-    color: "#111827",
-    textAlign: "center" as const,
-    flex: 1,
-  },
-  formContainer: {
-    flex: 1,
-    overflowY: "auto" as const,
-    padding: "16px",
-    position: "relative" as const,
-    // REMOVED: paddingBottom: "80px" - Let the form handle its own padding
-  },
-  formContentWrapper: {
-    maxWidth: "600px",
-    margin: "0 auto",
-    width: "100%",
-    // REMOVED: paddingBottom: "20px" - Let the form handle its own padding
-  },
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column" as const,
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100vh",
-    gap: "16px",
-  },
-  spinner: {
-    border: "4px solid #f3f4f6",
-    borderTop: "4px solid #3b82f6",
-    borderRadius: "50%",
-    width: "40px",
-    height: "40px",
-    animation: "spin 1s linear infinite",
-  },
-  loadingOverlay: {
-    position: "absolute" as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    display: "flex",
-    flexDirection: "column" as const,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 100,
-  },
-  errorContainer: {
-    padding: "20px",
-    maxWidth: "600px",
-    margin: "0 auto",
-  },
-  errorHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    marginBottom: "8px",
-    fontSize: "18px",
-    color: "#dc2626",
-  },
-  errorMessage: {
-    margin: "12px 0",
-    color: "#6b7280",
-  },
-  errorButtons: {
-    display: "flex",
-    gap: "12px",
-    marginTop: "16px",
-  },
-  errorButton: {
-    padding: "10px 20px",
-    backgroundColor: "#f3f4f6",
-    color: "#374151",
-    border: "1px solid #d1d5db",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  errorAlert: {
-    backgroundColor: "#fef2f2",
-    border: "1px solid #fecaca",
-    borderRadius: "8px",
-    padding: "12px 16px",
-    marginBottom: "20px",
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "8px",
-    fontSize: "14px",
-    color: "#dc2626",
-  },
-  errorAlertIcon: {
-    fontSize: "16px",
-    flexShrink: 0,
-  },
-};
-
-// Add CSS animation
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  /* Add this for mobile spacing */
-  @media (max-width: 768px) {
-    .jewellery-form-container {
-      padding-bottom: 20px !important;
-    }
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default JewelleryFormWrapper;

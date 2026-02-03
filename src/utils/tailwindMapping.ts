@@ -494,6 +494,22 @@ loadingText: "p-3 border border-gray-300 rounded bg-gray-100 text-gray-600 text-
 flexCenter: "flex items-center",
 flexBetween: "flex justify-between items-center",
 
+// Add these to your existing tw object in tailwindMapping.ts if not already present:
+
+// ===== LOADING OVERLAY =====
+loadingOverlay: "absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-100",
+
+// ===== ERROR CONTAINERS =====
+// errorContainer: "p-5 max-w-lg mx-auto",
+errorHeader: "flex items-center gap-2 mb-2 text-lg text-red-600",
+// errorMessage: "my-3 text-gray-600",
+errorButtons: "flex gap-3 mt-4",
+errorButton: "px-5 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded cursor-pointer text-sm hover:bg-gray-200",
+errorAlert: "bg-red-50 border border-red-200 rounded-lg p-3 mb-5 flex items-start gap-2 text-sm text-red-600",
+errorAlertIcon: "text-base flex-shrink-0",
+
+// ===== FORM WRAPPER =====
+formContentWrapper: "max-w-lg mx-auto w-full",
 
 } as const; // Added 'as const' for better TypeScript inference
 

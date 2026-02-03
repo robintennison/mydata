@@ -11,7 +11,7 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { Jewellery } from "../models/types";
-import { jewelleryStyles } from "../styles/jewelleryStyles";
+import { tw } from "../../../utils/tailwindMapping";
 import { useJewellerySettings } from "../hooks/useSettingsData";
 
 // Interface for Bill data
@@ -336,9 +336,9 @@ const JewelleryList: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={jewelleryStyles.container}>
-        <div style={jewelleryStyles.loading}>
-          <div style={jewelleryStyles.spinner}></div>
+      <div className={tw.container}>
+        <div className={tw.loading}>
+          <div className={tw.spinner}></div>
           <p>Loading jewellery items and bills...</p>
         </div>
       </div>
@@ -346,68 +346,31 @@ const JewelleryList: React.FC = () => {
   }
 
   return (
-    <div style={jewelleryStyles.container}>
+    <div className={tw.container}>
       {/* Top Navigation with Search */}
-      <div
-        style={{
-          ...jewelleryStyles.topNav,
-          display: "flex",
-          alignItems: "center",
-          padding: "8px 10px",
-          gap: "8px",
-        }}
-      >
+      <div className={`${tw.topNav} flex items-center p-2 gap-2`}>
         {/* Back Button */}
         <button
           onClick={() => navigate("/jewellery")}
-          style={{
-            ...jewelleryStyles.navButton,
-            padding: "6px",
-            fontSize: "16px",
-            width: "36px",
-            height: "36px",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className={`${tw.navButton} p-1.5 text-base w-9 h-9 flex-shrink-0 flex items-center justify-center`}
           title="Back to Jewellery"
         >
           ←
         </button>
 
         {/* Search Box */}
-        <div
-          style={{
-            flex: 1,
-            minWidth: 0,
-          }}
-        >
+        <div className="flex-1 min-w-0">
           <input
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "6px 10px",
-              borderRadius: "20px",
-              border: "1px solid #e5e7eb",
-              fontSize: "13px",
-              backgroundColor: "white",
-              color: "#374151",
-            }}
+            className="w-full px-2.5 py-1.5 rounded-full border border-gray-200 text-sm bg-white text-gray-700"
           />
         </div>
 
         {/* Button Group */}
-        <div
-          style={{
-            display: "flex",
-            gap: "4px",
-            flexShrink: 0,
-          }}
-        >
+        <div className="flex gap-1 flex-shrink-0">
           {/* Location Filter */}
           <button
             ref={locationButtonRef}
@@ -415,17 +378,7 @@ const JewelleryList: React.FC = () => {
               setShowBoughtForFilter(false);
               setShowLocationFilter(!showLocationFilter);
             }}
-            style={{
-              ...jewelleryStyles.navButton,
-              padding: "5px",
-              fontSize: "14px",
-              width: "32px",
-              height: "32px",
-              backgroundColor: selectedLocation ? "#e0f2fe" : "transparent",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center ${selectedLocation ? "bg-blue-50" : ""}`}
             title={`Filter by location${selectedLocation ? `: ${selectedLocation}` : ""}`}
           >
             📍
@@ -438,17 +391,7 @@ const JewelleryList: React.FC = () => {
               setShowLocationFilter(false);
               setShowBoughtForFilter(!showBoughtForFilter);
             }}
-            style={{
-              ...jewelleryStyles.navButton,
-              padding: "5px",
-              fontSize: "14px",
-              width: "32px",
-              height: "32px",
-              backgroundColor: selectedBoughtFor ? "#e0f2fe" : "transparent",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center ${selectedBoughtFor ? "bg-blue-50" : ""}`}
             title={`Filter by purpose${selectedBoughtFor ? `: ${selectedBoughtFor}` : ""}`}
           >
             🎁
@@ -457,17 +400,7 @@ const JewelleryList: React.FC = () => {
           {/* Batch Edit Button */}
           <button
             onClick={() => navigate("/jewellery/batch-edit")}
-            style={{
-              ...jewelleryStyles.navButton,
-              padding: "5px",
-              fontSize: "14px",
-              width: "32px",
-              height: "32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#f0f9ff",
-            }}
+            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center bg-blue-50`}
             title="Batch Edit Locations"
           >
             🔄
@@ -476,16 +409,7 @@ const JewelleryList: React.FC = () => {
           {/* Add Button */}
           <button
             onClick={() => navigate("/jewellery/add")}
-            style={{
-              ...jewelleryStyles.navButton,
-              padding: "5px",
-              fontSize: "14px",
-              width: "32px",
-              height: "32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center`}
             title="Add New"
           >
             ➕
@@ -494,16 +418,7 @@ const JewelleryList: React.FC = () => {
           {/* Settings Button */}
           <button
             onClick={() => navigate("/settings")}
-            style={{
-              ...jewelleryStyles.navButton,
-              padding: "5px",
-              fontSize: "14px",
-              width: "32px",
-              height: "32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className={`${tw.navButton} p-1.25 text-sm w-8 h-8 flex items-center justify-center`}
             title="Settings"
           >
             ⚙️
@@ -513,27 +428,17 @@ const JewelleryList: React.FC = () => {
 
       {/* Inactive Items Toggle */}
       {showInactiveSetting && (
-        <div
-          style={{
-            padding: "8px 12px",
-            backgroundColor: "#f8fafc",
-            borderBottom: "1px solid #e5e7eb",
-            fontSize: "12px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          <label style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <div className="px-3 py-2 bg-slate-50 border-b border-gray-200 text-xs flex items-center gap-2">
+          <label className="flex items-center gap-1.5">
             <input
               type="checkbox"
               checked={showInactive}
               onChange={(e) => setShowInactive(e.target.checked)}
-              style={{ width: "16px", height: "16px" }}
+              className="w-4 h-4"
             />
             <span>Show inactive items</span>
           </label>
-          <span style={{ fontSize: "11px", color: "#6b7280" }}>
+          <span className="text-[11px] text-gray-500">
             ({showInactive ? "Showing all" : "Active only"})
           </span>
         </div>
@@ -542,30 +447,15 @@ const JewelleryList: React.FC = () => {
       {/* Dropdowns */}
       {showLocationFilter && (
         <div
-          className="location-dropdown"
+          className="location-dropdown bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[180px] max-h-[300px] overflow-y-auto"
           style={{
             position: "fixed",
             top: getDropdownPosition(locationButtonRef).top + "px",
             right: getDropdownPosition(locationButtonRef).right + "px",
-            backgroundColor: "white",
-            border: "1px solid #e5e7eb",
-            borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            padding: "8px",
             zIndex: 1000,
-            minWidth: "180px",
-            maxHeight: "300px",
-            overflowY: "auto",
           }}
         >
-          <div
-            style={{
-              fontSize: "13px",
-              fontWeight: "600",
-              marginBottom: "8px",
-              color: "#374151",
-            }}
-          >
+          <div className="text-sm font-semibold mb-2 text-gray-700">
             Filter by Location
           </div>
           <button
@@ -573,21 +463,7 @@ const JewelleryList: React.FC = () => {
               setSelectedLocation("");
               setShowLocationFilter(false);
             }}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              fontSize: "13px",
-              textAlign: "left",
-              backgroundColor: !selectedLocation ? "#f3f4f6" : "transparent",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              marginBottom: "4px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "#374151",
-            }}
+            className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-1 flex items-center gap-2 text-gray-700 ${!selectedLocation ? "bg-gray-100" : ""}`}
           >
             <span>📍</span>
             <span>All Locations</span>
@@ -599,22 +475,7 @@ const JewelleryList: React.FC = () => {
                 setSelectedLocation(location);
                 setShowLocationFilter(false);
               }}
-              style={{
-                width: "100%",
-                padding: "8px 10px",
-                fontSize: "13px",
-                textAlign: "left",
-                backgroundColor:
-                  selectedLocation === location ? "#e0f2fe" : "transparent",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                marginBottom: "2px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                color: "#374151",
-              }}
+              className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-0.5 flex items-center gap-2 text-gray-700 ${selectedLocation === location ? "bg-blue-50" : ""}`}
             >
               <span>📍</span>
               <span>{location}</span>
@@ -625,30 +486,15 @@ const JewelleryList: React.FC = () => {
 
       {showBoughtForFilter && (
         <div
-          className="boughtfor-dropdown"
+          className="boughtfor-dropdown bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[180px] max-h-[300px] overflow-y-auto"
           style={{
             position: "fixed",
             top: getDropdownPosition(boughtForButtonRef).top + "px",
             right: getDropdownPosition(boughtForButtonRef).right + "px",
-            backgroundColor: "white",
-            border: "1px solid #e5e7eb",
-            borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            padding: "8px",
             zIndex: 1000,
-            minWidth: "180px",
-            maxHeight: "300px",
-            overflowY: "auto",
           }}
         >
-          <div
-            style={{
-              fontSize: "13px",
-              fontWeight: "600",
-              marginBottom: "8px",
-              color: "#374151",
-            }}
-          >
+          <div className="text-sm font-semibold mb-2 text-gray-700">
             Filter by Purpose
           </div>
           <button
@@ -656,21 +502,7 @@ const JewelleryList: React.FC = () => {
               setSelectedBoughtFor("");
               setShowBoughtForFilter(false);
             }}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              fontSize: "13px",
-              textAlign: "left",
-              backgroundColor: !selectedBoughtFor ? "#f3f4f6" : "transparent",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              marginBottom: "4px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "#374151",
-            }}
+            className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-1 flex items-center gap-2 text-gray-700 ${!selectedBoughtFor ? "bg-gray-100" : ""}`}
           >
             <span>🎁</span>
             <span>All Purposes</span>
@@ -682,22 +514,7 @@ const JewelleryList: React.FC = () => {
                 setSelectedBoughtFor(boughtFor);
                 setShowBoughtForFilter(false);
               }}
-              style={{
-                width: "100%",
-                padding: "8px 10px",
-                fontSize: "13px",
-                textAlign: "left",
-                backgroundColor:
-                  selectedBoughtFor === boughtFor ? "#e0f2fe" : "transparent",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                marginBottom: "2px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                color: "#374151",
-              }}
+              className={`w-full px-2.5 py-2 text-sm text-left rounded-md mb-0.5 flex items-center gap-2 text-gray-700 ${selectedBoughtFor === boughtFor ? "bg-blue-50" : ""}`}
             >
               <span>🎁</span>
               <span>{boughtFor}</span>
@@ -708,35 +525,15 @@ const JewelleryList: React.FC = () => {
 
       {/* Filter Indicators */}
       {(searchTerm || selectedLocation || selectedBoughtFor) && (
-        <div
-          style={{
-            padding: "6px 12px",
-            backgroundColor: "#f8fafc",
-            borderBottom: "1px solid #e5e7eb",
-            fontSize: "11px",
-            color: "#6b7280",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <div style={{ flex: 1 }}>
+        <div className="px-3 py-1.5 bg-slate-50 border-b border-gray-200 text-[11px] text-gray-500 flex items-center gap-2.5">
+          <div className="flex-1">
             {searchTerm && <span>Search: "{searchTerm}"</span>}
             {selectedLocation && <span> • Location: {selectedLocation}</span>}
             {selectedBoughtFor && <span> • Purpose: {selectedBoughtFor}</span>}
           </div>
           <button
             onClick={clearFilters}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#ef4444",
-              cursor: "pointer",
-              fontSize: "11px",
-              padding: "2px 6px",
-              borderRadius: "4px",
-              backgroundColor: "#fee2e2",
-            }}
+            className="bg-red-50 text-red-500 cursor-pointer text-[11px] px-1.5 py-0.5 rounded"
           >
             Clear Filters
           </button>
@@ -744,56 +541,30 @@ const JewelleryList: React.FC = () => {
       )}
 
       {/* ALL CONTENT INSIDE SCROLLABLE WRAPPER */}
-      <div style={jewelleryStyles.contentWrapper}>
+      <div className={tw.contentWrapper}>
         {/* Error Display */}
         {error && (
-          <div
-            style={{
-              margin: "10px 0",
-              padding: "10px",
-              backgroundColor: "#fef3c7",
-              border: "1px solid #f59e0b",
-              borderRadius: "6px",
-              color: "#92400e",
-              fontSize: "12px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div className="my-2.5 p-2.5 bg-amber-50 border border-amber-500 rounded text-amber-800 text-xs">
+            <div className="flex items-center gap-1.5">
               <span>⚠️</span>
               <strong>Index Required</strong>
             </div>
-            <div style={{ margin: "6px 0" }}>
+            <div className="my-1.5">
               Create Firestore index for: jewellery, active, code
             </div>
-            <div style={{ display: "flex", gap: "6px" }}>
+            <div className="flex gap-1.5">
               <button
                 onClick={() => {
                   setShowInactive(true);
                   setError("Showing all items without sorting.");
                 }}
-                style={{
-                  padding: "4px 8px",
-                  backgroundColor: "#f59e0b",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "11px",
-                }}
+                className="px-2 py-1 bg-amber-500 text-white rounded cursor-pointer text-[11px]"
               >
                 Show All
               </button>
               <button
                 onClick={handleRefresh}
-                style={{
-                  padding: "4px 8px",
-                  backgroundColor: "#3b82f6",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "11px",
-                }}
+                className="px-2 py-1 bg-blue-600 text-white rounded cursor-pointer text-[11px]"
               >
                 Try Again
               </button>
@@ -803,14 +574,7 @@ const JewelleryList: React.FC = () => {
 
         {/* Items Count */}
         {!error && filteredItems.length > 0 && (
-          <div
-            style={{
-              fontSize: "11px",
-              color: "#6b7280",
-              padding: "6px 12px 2px",
-              textAlign: "right",
-            }}
-          >
+          <div className="text-[11px] text-gray-500 px-3 pt-1.5 pb-0.5 text-right">
             {filteredItems.length} items
             {filteredItems.length !== jewelleryItems.length &&
               ` (of ${jewelleryItems.length})`}
@@ -820,18 +584,10 @@ const JewelleryList: React.FC = () => {
         )}
 
         {/* Items List */}
-        <div style={{ padding: "0 0 5px 0" }}>
+        <div className="pb-1.25">
           {filteredItems.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "20px",
-                color: "#9ca3af",
-                fontSize: "13px",
-                margin: "10px",
-              }}
-            >
-              <div style={{ fontSize: "24px", marginBottom: "8px" }}>📦</div>
+            <div className="text-center p-5 text-gray-400 text-sm m-2.5">
+              <div className="text-2xl mb-2">📦</div>
               <p>
                 {jewelleryItems.length === 0
                   ? "No jewellery items found."
@@ -840,23 +596,14 @@ const JewelleryList: React.FC = () => {
               {(searchTerm || selectedLocation || selectedBoughtFor) && (
                 <button
                   onClick={clearFilters}
-                  style={{
-                    padding: "6px 12px",
-                    backgroundColor: "#3b82f6",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                    marginTop: "8px",
-                  }}
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded cursor-pointer text-sm mt-2"
                 >
                   Clear Filters
                 </button>
               )}
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div className="flex flex-col">
               {filteredItems.map((item, index) => {
                 // Get bill details for this item
                 const billDetails = getBillDetails(item.billId);
@@ -867,144 +614,52 @@ const JewelleryList: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    style={{
-                      backgroundColor: "white",
-                      padding: "6px 10px",
-                      minHeight: "50px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      borderBottom:
-                        index < filteredItems.length - 1
-                          ? "1px solid #e5e7eb"
-                          : "none",
-                      opacity: item.active ? 1 : 0.7,
-                      position: "relative",
-                    }}
                     onClick={() => navigate(`/jewellery/detail/${item.id}`)}
+                    className={`bg-white px-2.5 py-1.5 min-h-[50px] cursor-pointer flex items-center gap-2 relative ${index < filteredItems.length - 1 ? "border-b border-gray-200" : ""} ${item.active ? "" : "opacity-70"}`}
                   >
                     {/* Item Image */}
                     <div
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        flexShrink: 0,
-                        backgroundColor: "#f3f4f6",
-                        borderRadius: "4px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                        border: !item.active ? "1px dashed #9ca3af" : "none",
-                      }}
+                      className={`w-10 h-10 flex-shrink-0 bg-gray-100 rounded flex items-center justify-center overflow-hidden ${!item.active ? "border border-dashed border-gray-400" : ""}`}
                     >
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
                           alt={item.code}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div style={{ fontSize: "16px", color: "#9ca3af" }}>
-                          💎
-                        </div>
+                        <div className="text-base text-gray-400">💎</div>
                       )}
                     </div>
 
                     {/* Item Details */}
                     <div
-                      style={{
-                        flex: 1,
-                        minWidth: 0,
-                        paddingRight: showDeleteSetting ? "36px" : "0",
-                      }}
+                      className={`flex-1 min-w-0 ${showDeleteSetting ? "pr-9" : ""}`}
                     >
                       {/* ROW 1: Code + Description + Weight */}
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "baseline",
-                          justifyContent: "space-between",
-                          marginBottom: "2px",
-                          gap: "6px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "baseline",
-                            gap: "4px",
-                            minWidth: 0,
-                            flex: 1,
-                          }}
-                        >
+                      <div className="flex items-baseline justify-between mb-0.5 gap-1.5">
+                        <div className="flex items-baseline gap-1 min-w-0 flex-1">
                           <div
-                            style={{
-                              fontWeight: "600",
-                              fontSize: "13px",
-                              color: item.active ? "#111827" : "#6b7280",
-                              whiteSpace: "nowrap",
-                            }}
+                            className={`font-semibold text-sm whitespace-nowrap ${item.active ? "text-gray-900" : "text-gray-500"}`}
                           >
                             {item.code}
                           </div>
                           {!item.active && (
-                            <span
-                              style={{
-                                fontSize: "9px",
-                                backgroundColor: "#9ca3af",
-                                color: "white",
-                                padding: "1px 4px",
-                                borderRadius: "8px",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
+                            <span className="text-[9px] bg-gray-400 text-white px-1 py-0.25 rounded-full whitespace-nowrap">
                               Inactive
                             </span>
                           )}
-                          <div
-                            style={{
-                              fontSize: "11px",
-                              color: "#6b7280",
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              flex: 1,
-                              minWidth: 0,
-                            }}
-                          >
+                          <div className="text-[11px] text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0">
                             {item.description}
                           </div>
                         </div>
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            color: "#374151",
-                            fontWeight: "500",
-                            whiteSpace: "nowrap",
-                            flexShrink: 0,
-                          }}
-                        >
+                        <div className="text-xs text-gray-700 font-medium whitespace-nowrap flex-shrink-0">
                           {item.weight}g
                         </div>
                       </div>
 
                       {/* ROW 2: Location • Bought For • Purchase Date */}
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          fontSize: "10px",
-                          color: "#9ca3af",
-                          gap: "4px",
-                          flexWrap: "wrap",
-                        }}
-                      >
+                      <div className="flex items-center text-[10px] text-gray-400 gap-1 flex-wrap">
                         {item.location && (
                           <>
                             <span>{item.location}</span>
@@ -1027,28 +682,20 @@ const JewelleryList: React.FC = () => {
                         {!item.location &&
                           !item.boughtFor &&
                           !formattedDate && (
-                            <span style={{ fontStyle: "italic" }}>
-                              No details
-                            </span>
+                            <span className="italic">No details</span>
                           )}
                       </div>
                     </div>
 
                     {/* Status Indicator */}
                     <div
-                      style={{
-                        width: "8px",
-                        height: "8px",
-                        borderRadius: "50%",
-                        backgroundColor:
-                          item.verificationStatus === "Verified"
-                            ? "#10b981"
-                            : item.verificationStatus === "Missing"
-                              ? "#ef4444"
-                              : "#d1d5db",
-                        flexShrink: 0,
-                        marginRight: showDeleteSetting ? "36px" : "0",
-                      }}
+                      className={`w-2 h-2 rounded-full flex-shrink-0 ${showDeleteSetting ? "mr-9" : ""} ${
+                        item.verificationStatus === "Verified"
+                          ? "bg-emerald-500"
+                          : item.verificationStatus === "Missing"
+                            ? "bg-red-500"
+                            : "bg-gray-300"
+                      }`}
                       title={item.verificationStatus}
                     />
 
@@ -1056,32 +703,8 @@ const JewelleryList: React.FC = () => {
                     {showDeleteSetting && (
                       <button
                         onClick={(e) => handleEditClick(e, item.id)}
-                        style={{
-                          position: "absolute",
-                          right: "8px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          backgroundColor: "transparent",
-                          border: "none",
-                          fontSize: "14px",
-                          color: "#3b82f6",
-                          cursor: "pointer",
-                          padding: "4px",
-                          borderRadius: "4px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "28px",
-                          height: "28px",
-                          zIndex: 2,
-                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent text-blue-600 cursor-pointer p-1 rounded flex items-center justify-center w-7 h-7 z-10 hover:bg-blue-50"
                         title="Edit"
-                        onMouseOver={(e) => {
-                          e.currentTarget.style.backgroundColor = "#e0f2fe";
-                        }}
-                        onMouseOut={(e) => {
-                          e.currentTarget.style.backgroundColor = "transparent";
-                        }}
                       >
                         ✏️
                       </button>
@@ -1093,9 +716,8 @@ const JewelleryList: React.FC = () => {
           )}
         </div>
 
-
         {/* Minimal bottom spacing */}
-        <div style={{ height: "5px" }}></div>
+        <div className="h-1.25"></div>
       </div>
     </div>
   );

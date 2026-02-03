@@ -14,7 +14,6 @@ import BillsTab from "./pages/BillsTab";
 import GalleryTab from "./pages/GalleryTab";
 import VerificationTab from "./pages/VerificationTab";
 import Header from "../../components/Layout/Header";
-import { cls } from "../../utils/tailwindMapping";
 
 type TabType = "dashboard" | "list" | "gallery" | "bills" | "verification";
 
@@ -387,12 +386,11 @@ const JewelleryHome: React.FC = () => {
   }) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={cls(
-        "flex-1 py-3.5 px-2 bg-transparent border-none text-xs flex items-center justify-center gap-1 min-w-0 transition-all cursor-pointer",
+      className={`flex-1 py-3.5 px-2 bg-transparent border-none text-xs flex items-center justify-center gap-1 min-w-0 transition-all cursor-pointer ${
         activeTab === id
           ? "bg-gray-100 text-gray-900 font-semibold border-b-2 border-blue-500"
-          : "text-gray-500 font-normal hover:bg-gray-50",
-      )}
+          : "text-gray-500 font-normal hover:bg-gray-50"
+      }`}
       title={label}
     >
       <span>{icon}</span>

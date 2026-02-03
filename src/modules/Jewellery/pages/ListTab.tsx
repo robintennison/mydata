@@ -345,7 +345,7 @@ const ListTab: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[300px]">
-        <div className="border-4 border-gray-100 border-t-amber-500 rounded-full w-10 h-10 animate-spin mb-4"></div>
+        <div className="w-10 h-10 border-4 border-gray-100 border-t-amber-500 rounded-full animate-spin mb-4"></div>
         <p className="text-sm text-gray-500">
           Loading jewellery items and bills...
         </p>
@@ -363,15 +363,15 @@ const ListTab: React.FC = () => {
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full py-2.5 pl-4 pr-10 rounded-lg border border-gray-200 text-sm bg-white text-gray-700 box-border"
+            className="w-full py-2.5 pl-4 pr-10 rounded-lg border border-gray-200 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
             🔍
           </div>
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-9 top-1/2 -translate-y-1/2 bg-transparent border-none text-gray-400 cursor-pointer text-lg p-0"
+              className="absolute right-9 top-1/2 -translate-y-1/2 bg-transparent text-gray-400 cursor-pointer text-lg p-0 hover:text-gray-600 focus:outline-none"
             >
               ×
             </button>
@@ -389,8 +389,8 @@ const ListTab: React.FC = () => {
               setShowBoughtForFilter(false);
               setShowLocationFilter(!showLocationFilter);
             }}
-            className={`px-3 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 text-gray-700 ${
-              selectedLocation ? "bg-sky-100" : "bg-slate-50"
+            className={`px-3 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              selectedLocation ? "bg-sky-100 border-sky-200" : "bg-slate-50"
             }`}
             title={`Filter by location${selectedLocation ? `: ${selectedLocation}` : ""}`}
           >
@@ -404,8 +404,8 @@ const ListTab: React.FC = () => {
               setShowLocationFilter(false);
               setShowBoughtForFilter(!showBoughtForFilter);
             }}
-            className={`px-3 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 text-gray-700 ${
-              selectedBoughtFor ? "bg-sky-100" : "bg-slate-50"
+            className={`px-3 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              selectedBoughtFor ? "bg-sky-100 border-sky-200" : "bg-slate-50"
             }`}
             title={`Filter by purpose${selectedBoughtFor ? `: ${selectedBoughtFor}` : ""}`}
           >
@@ -415,7 +415,7 @@ const ListTab: React.FC = () => {
           {/* Batch Edit Button */}
           <button
             onClick={() => navigate("/jewellery/batch-edit")}
-            className="px-3 py-2 text-xs bg-slate-50 border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 text-gray-700 hover:bg-gray-100"
+            className="px-3 py-2 text-xs bg-slate-50 border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             title="Batch Edit Locations"
           >
             🔄 Batch Edit
@@ -425,13 +425,13 @@ const ListTab: React.FC = () => {
 
       {/* Inactive Items Toggle */}
       {showInactiveSetting && (
-        <div className="px-3 py-2 bg-slate-50 border-b border-gray-200 text-xs flex items-center gap-2 mb-3 rounded-md">
+        <div className="px-3 py-2 bg-slate-50 border border-gray-200 text-xs flex items-center gap-2 mb-3 rounded-md">
           <label className="flex items-center gap-1.5 cursor-pointer">
             <input
               type="checkbox"
               checked={showInactive}
               onChange={(e) => setShowInactive(e.target.checked)}
-              className="w-4 h-4 cursor-pointer"
+              className="w-4 h-4 cursor-pointer text-blue-600 focus:ring-blue-500"
             />
             <span>Show inactive items</span>
           </label>
@@ -458,7 +458,7 @@ const ListTab: React.FC = () => {
               setSelectedLocation("");
               setShowLocationFilter(false);
             }}
-            className={`w-full p-2.5 text-[13px] text-left border-none rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 ${
+            className={`w-full p-2.5 text-[13px] text-left rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
               !selectedLocation ? "bg-gray-100" : "bg-transparent"
             }`}
           >
@@ -472,7 +472,7 @@ const ListTab: React.FC = () => {
                 setSelectedLocation(location);
                 setShowLocationFilter(false);
               }}
-              className={`w-full p-2.5 text-[13px] text-left border-none rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 ${
+              className={`w-full p-2.5 text-[13px] text-left rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
                 selectedLocation === location ? "bg-sky-100" : "bg-transparent"
               }`}
             >
@@ -499,7 +499,7 @@ const ListTab: React.FC = () => {
               setSelectedBoughtFor("");
               setShowBoughtForFilter(false);
             }}
-            className={`w-full p-2.5 text-[13px] text-left border-none rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 ${
+            className={`w-full p-2.5 text-[13px] text-left rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
               !selectedBoughtFor ? "bg-gray-100" : "bg-transparent"
             }`}
           >
@@ -513,8 +513,10 @@ const ListTab: React.FC = () => {
                 setSelectedBoughtFor(boughtFor);
                 setShowBoughtForFilter(false);
               }}
-              className={`w-full p-2.5 text-[13px] text-left border-none rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 ${
-                selectedBoughtFor === boughtFor ? "bg-sky-100" : "bg-transparent"
+              className={`w-full p-2.5 text-[13px] text-left rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                selectedBoughtFor === boughtFor
+                  ? "bg-sky-100"
+                  : "bg-transparent"
               }`}
             >
               <span>🎁</span>
@@ -526,7 +528,7 @@ const ListTab: React.FC = () => {
 
       {/* Filter Indicators */}
       {(searchTerm || selectedLocation || selectedBoughtFor) && (
-        <div className="px-3 py-1.5 bg-slate-50 border-b border-gray-200 text-[11px] text-gray-500 flex items-center gap-2.5 mb-3 rounded-md">
+        <div className="px-3 py-1.5 bg-slate-50 border border-gray-200 text-[11px] text-gray-500 flex items-center gap-2.5 mb-3 rounded-md">
           <div className="flex-1">
             {searchTerm && <span>Search: "{searchTerm}"</span>}
             {selectedLocation && <span> • Location: {selectedLocation}</span>}
@@ -534,7 +536,7 @@ const ListTab: React.FC = () => {
           </div>
           <button
             onClick={clearFilters}
-            className="bg-red-100 border-none text-red-500 cursor-pointer text-[11px] px-1.5 py-0.5 rounded"
+            className="bg-red-100 text-red-500 cursor-pointer text-[11px] px-1.5 py-0.5 rounded hover:bg-red-200 focus:outline-none focus:ring-1 focus:ring-red-500"
           >
             Clear Filters
           </button>
@@ -557,13 +559,13 @@ const ListTab: React.FC = () => {
                 setShowInactive(true);
                 setError("Showing all items without sorting.");
               }}
-              className="px-2 py-1 bg-amber-500 text-white border-none rounded cursor-pointer text-[11px]"
+              className="px-2 py-1 bg-amber-500 text-white rounded cursor-pointer text-[11px] hover:bg-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-300"
             >
               Show All
             </button>
             <button
               onClick={handleRefresh}
-              className="px-2 py-1 bg-blue-500 text-white border-none rounded cursor-pointer text-[11px]"
+              className="px-2 py-1 bg-blue-500 text-white rounded cursor-pointer text-[11px] hover:bg-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-300"
             >
               Try Again
             </button>
@@ -594,7 +596,7 @@ const ListTab: React.FC = () => {
             {(searchTerm || selectedLocation || selectedBoughtFor) && (
               <button
                 onClick={clearFilters}
-                className="px-3 py-1.5 bg-blue-500 text-white border-none rounded cursor-pointer text-xs mt-2"
+                className="px-3 py-1.5 bg-blue-500 text-white rounded cursor-pointer text-xs mt-2 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 Clear Filters
               </button>
@@ -613,8 +615,8 @@ const ListTab: React.FC = () => {
               return (
                 <div
                   key={item.id}
-                  className={`bg-white p-2.5 min-h-[50px] cursor-pointer flex items-center gap-2 relative rounded-md mb-1 shadow-[0_1px_3px_rgba(0,0,0,0.05)] ${
-                    isLast ? "border-none" : "border-b border-gray-200"
+                  className={`bg-white p-2.5 min-h-[50px] cursor-pointer flex items-center gap-2 relative rounded-md mb-1 shadow-sm hover:shadow-md hover:bg-gray-50 transition-shadow duration-200 ${
+                    isLast ? "" : "border-b border-gray-100"
                   } ${item.active ? "opacity-100" : "opacity-70"}`}
                   onClick={() => handleViewDetail(item.id)}
                 >
@@ -704,7 +706,7 @@ const ListTab: React.FC = () => {
                   {showDeleteSetting && (
                     <button
                       onClick={(e) => handleEditClick(e, item.id)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-sm text-blue-500 cursor-pointer p-1 rounded flex items-center justify-center w-7 h-7 z-[2] hover:bg-sky-100"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent text-blue-500 cursor-pointer p-1 rounded flex items-center justify-center w-7 h-7 z-[2] hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       title="Edit"
                     >
                       ✏️

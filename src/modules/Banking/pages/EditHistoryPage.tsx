@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { bankingStyles } from "../styles";
+import { tw } from "../../../utils/tailwindMapping";
 import { useBankingData } from "../hooks/useBankingData";
-//import { useBankingOperations } from "../hooks/useBankingOperations";
 
 const EditHistoryPage: React.FC = () => {
   const navigate = useNavigate();
-  //const location = useLocation();
   const { month } = useParams();
-  const { loading, history } = useBankingData(); // You'll need to create or modify your hook
+  const { loading, history } = useBankingData();
 
   const [formMonth, setFormMonth] = useState("");
   const [formTotalDeposits, setFormTotalDeposits] = useState("");
@@ -57,9 +55,9 @@ const EditHistoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={bankingStyles.container}>
-        <div style={bankingStyles.loading}>
-          <div style={bankingStyles.spinner}></div>
+      <div className={tw.bankingContainer}>
+        <div className={tw.bankingLoading}>
+          <div className={tw.bankingSpinner}></div>
           <p>Loading...</p>
         </div>
       </div>
@@ -67,30 +65,31 @@ const EditHistoryPage: React.FC = () => {
   }
 
   return (
-    <div style={styles.container}>
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen">
       {/* Header */}
-      <div style={bankingStyles.header}>
-        <div style={bankingStyles.headerTopRow}>
-          <div style={bankingStyles.headerLeft}>
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-5 shadow-lg">
+        <div className="flex justify-between items-center max-w-2xl mx-auto">
+          <div className="flex items-center flex-1">
             <button
               onClick={handleCancel}
-              style={styles.backButton}
+              className="bg-transparent border-none text-white text-2xl cursor-pointer mr-3 p-1 hover:bg-white/20 rounded-lg transition-colors"
               title="Go Back"
             >
               ←
             </button>
-            <h1 style={bankingStyles.headerTitle}>
+            <h1 className="text-xl font-bold">
               {month ? "Banking / Edit History" : "Banking / Add History"}
             </h1>
           </div>
-          <div style={styles.headerActions}>
+          <div className="flex items-center gap-3">
             <button
               onClick={handleSave}
               disabled={!canSave}
-              style={{
-                ...styles.saveButton,
-                opacity: canSave ? 1 : 0.5,
-              }}
+              className={`w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all ${
+                canSave
+                  ? "bg-white/20 text-white hover:bg-white/30 cursor-pointer"
+                  : "bg-white/10 text-white/50 cursor-not-allowed"
+              }`}
               title="Save"
             >
               ✓
@@ -100,109 +99,55 @@ const EditHistoryPage: React.FC = () => {
       </div>
 
       {/* Form */}
-      <div style={styles.formContainer}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Month (e.g. 2025-09)</label>
-          <input
-            type="text"
-            value={formMonth}
-            onChange={(e) => setFormMonth(e.target.value)}
-            style={styles.input}
-            disabled={!!month} // Lock month when editing
-            placeholder="YYYY-MM"
-          />
-        </div>
+      <div className="p-4">
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 mb-4">
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Month (e.g. 2025-09)
+              </label>
+              <input
+                type="text"
+                value={formMonth}
+                onChange={(e) => setFormMonth(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100"
+                disabled={!!month}
+                placeholder="YYYY-MM"
+              />
+            </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Total Deposits</label>
-          <input
-            type="number"
-            value={formTotalDeposits}
-            onChange={(e) => setFormTotalDeposits(e.target.value)}
-            style={styles.input}
-            placeholder="0"
-          />
-        </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Total Deposits
+              </label>
+              <input
+                type="number"
+                value={formTotalDeposits}
+                onChange={(e) => setFormTotalDeposits(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                placeholder="0"
+              />
+            </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Savings</label>
-          <input
-            type="number"
-            value={formSavings}
-            onChange={(e) => setFormSavings(e.target.value)}
-            style={styles.input}
-            placeholder="0"
-          />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Savings
+              </label>
+              <input
+                type="number"
+                value={formSavings}
+                onChange={(e) => setFormSavings(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                placeholder="0"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div style={{ height: "20px" }}></div>
+      <div className="h-5"></div>
     </div>
   );
-};
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    width: "100%",
-    maxWidth: "500px",
-    margin: "0 auto",
-    backgroundColor: "#f5f7fa",
-    minHeight: "100vh",
-  },
-  backButton: {
-    background: "none",
-    border: "none",
-    fontSize: "1.5rem",
-    color: "white",
-    cursor: "pointer",
-    marginRight: "10px",
-    padding: "5px",
-  },
-  headerActions: {
-    display: "flex",
-    gap: "10px",
-  },
-  saveButton: {
-    background: "rgba(255, 255, 255, 0.2)",
-    border: "none",
-    borderRadius: "50%",
-    width: "40px",
-    height: "40px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "1.2rem",
-    color: "white",
-    cursor: "pointer",
-    transition: "all 0.2s",
-  },
-  formContainer: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    margin: "15px 0",
-    padding: "20px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    border: "1px solid #e9ecef",
-  },
-  formGroup: {
-    display: "flex",
-    flexDirection: "column" as "column",
-    gap: "8px",
-    marginBottom: "20px",
-  },
-  label: {
-    fontSize: "0.9rem",
-    fontWeight: 500,
-    color: "#666",
-  },
-  input: {
-    padding: "12px",
-    border: "1px solid #ddd",
-    borderRadius: "8px",
-    fontSize: "1rem",
-    width: "100%",
-    boxSizing: "border-box" as "border-box",
-  },
 };
 
 export default EditHistoryPage;

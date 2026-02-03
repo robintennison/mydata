@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
-import { bankingStyles } from "../styles/BankingStyles";
+import { tw } from "../../../utils/tailwindMapping";
 import type { BankAccount } from "../../../types/banking.types";
 
 const EditAccountPage: React.FC = () => {
@@ -19,7 +19,7 @@ const EditAccountPage: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [account, setAccount] = useState<BankAccount | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [textareaHeight, setTextareaHeight] = useState<number>(150); // Default height
+  const [textareaHeight, setTextareaHeight] = useState<number>(150);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -38,7 +38,7 @@ const EditAccountPage: React.FC = () => {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;")
-      .replace(/\*/g, "&#42;"); // Specifically escape asterisks
+      .replace(/\*/g, "&#42;");
   };
 
   // Function to unescape when saving
@@ -65,16 +65,6 @@ const EditAccountPage: React.FC = () => {
         setError("Account not found");
         return;
       }
-
-      console.log("DEBUG - Account '01 AXIS' details:", {
-        raw: foundAccount.acctDetails,
-        length: foundAccount.acctDetails?.length,
-        hasAsterisk: foundAccount.acctDetails?.includes("*"),
-        asteriskPositions: foundAccount.acctDetails
-          ?.split("")
-          .map((char, i) => (char === "*" ? i : -1))
-          .filter((i) => i !== -1),
-      });
 
       setAccount(foundAccount);
 
@@ -162,12 +152,6 @@ const EditAccountPage: React.FC = () => {
         mpin: formData.mpin,
       };
 
-      console.log("Saving account data:", {
-        escaped: formData.acctDetails,
-        unescaped: unescapedDetails,
-        hasAsterisk: unescapedDetails.includes("*"),
-      });
-
       await handleSaveAccount(accountData);
 
       navigate("/banking", {
@@ -233,8 +217,8 @@ const EditAccountPage: React.FC = () => {
 
   if (dataLoading) {
     return (
-      <div style={bankingStyles.loadingContainer}>
-        <div style={bankingStyles.spinner}></div>
+      <div className={tw.loadingContainer}>
+        <div className={tw.spinner}></div>
         <p>Loading account details...</p>
       </div>
     );
@@ -242,17 +226,19 @@ const EditAccountPage: React.FC = () => {
 
   if (!account && !dataLoading) {
     return (
-      <div style={bankingStyles.container}>
-        <div style={bankingStyles.header}>
-          <h1 style={bankingStyles.headerTitle}>Account Not Found</h1>
+      <div className={tw.bankingContainer}>
+        <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200 mb-4">
+          <h1 className="text-xl font-bold text-gray-900">Account Not Found</h1>
         </div>
-        <div style={{ padding: "15px 4px", position: "relative" }}>
-          <p>The account you're looking for doesn't exist.</p>
+        <div className="p-4">
+          <p className="mb-4 text-gray-700">
+            The account you're looking for doesn't exist.
+          </p>
           <button
             onClick={() =>
               navigate("/banking", { state: { activeTab: "accounts" } })
             }
-            style={bankingStyles.primaryButton}
+            className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:shadow-lg transition-all"
           >
             Back to Accounts
           </button>
@@ -261,134 +247,62 @@ const EditAccountPage: React.FC = () => {
     );
   }
 
-  // Create a clean style for textarea - CHANGED FONT ONLY
-  const textareaStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "8px",
-    border: "1px solid #d1d5db",
-    backgroundColor: submitting ? "#f3f4f6" : "white",
-    color: "#111827", // Default text color
-    fontSize: "14px", // Normal font size
-    lineHeight: "1.5",
-    fontFamily: "inherit", // Use default font instead of monospace
-    height: `${textareaHeight}px`, // Use dynamic height
-    resize: "vertical" as const,
-    boxSizing: "border-box" as const,
-    outline: "none",
-    cursor: submitting ? "not-allowed" : "text",
-    whiteSpace: "pre-wrap" as const,
-    wordBreak: "break-word" as const,
-    overflowY: "auto", // Allow vertical scrolling if content exceeds viewport height
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "8px",
-    border: "1px solid #d1d5db",
-    backgroundColor: submitting ? "#f3f4f6" : "white",
-    color: "#111827",
-    fontSize: "14px",
-    fontFamily: "inherit",
-    boxSizing: "border-box" as const,
-    outline: "none",
-    cursor: submitting ? "not-allowed" : "text",
-  };
-
   return (
-    <div style={bankingStyles.container}>
+    <div className={tw.bankingContainer}>
       {/* Top Navigation */}
-      <div style={bankingStyles.topNav}>
+      <div className={tw.bankingTopNav}>
         <button
           onClick={handleCancel}
-          style={bankingStyles.navButton}
+          className={tw.bankingNavButton}
           title="Back to Accounts"
           disabled={submitting}
         >
           ←
         </button>
-        <div style={bankingStyles.navTitle}>Banking / {getPageTitle()}</div>
-        <div style={{ width: "40px" }}></div>
+        <div className={tw.bankingNavTitle}>Banking / {getPageTitle()}</div>
+        <div className="w-10"></div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div
-          style={{
-            margin: "15px",
-            padding: "12px",
-            backgroundColor: "#fef2f2",
-            border: "1px solid #fecaca",
-            borderRadius: "8px",
-            color: "#dc2626",
-            fontSize: "14px",
-          }}
-        >
-          ⚠️ {error}
+        <div className="m-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
+          <span>⚠️</span>
+          <span>{error}</span>
         </div>
       )}
 
-      {/* Debug info - REMOVED TO CLEAN UP UI */}
-      {/* <div
-        style={{
-          padding: "10px 15px",
-          backgroundColor: "#f0f9ff",
-          fontSize: "12px",
-          color: "#0369a1",
-          borderBottom: "1px solid #bae6fd",
-        }}
-      >
-        Editing: {account?.acctCode} | Contains special characters:{" "}
-        {formData.acctDetails.includes("*") ? "Yes (asterisks escaped)" : "No"}
-      </div> */}
-
       {/* Form */}
-      <div style={{ padding: "15px 0" }}>
+      <div className="p-4">
         {isViewMode ? (
           // View mode - just display data
           <div>
             {/* Account Code */}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={bankingStyles.label}>Account Code *</label>
-              <div
-                style={{
-                  ...inputStyle,
-                  backgroundColor: "#f9fafb",
-                  cursor: "default",
-                }}
-              >
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Account Code *
+              </label>
+              <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900">
                 {formData.acctCode || "Not specified"}
               </div>
             </div>
 
             {/* Account Details - Show unescaped in view mode */}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={bankingStyles.label}>Account Details *</label>
-              <div
-                style={{
-                  ...textareaStyle,
-                  backgroundColor: "#f9fafb",
-                  cursor: "default",
-                  fontFamily: "inherit", // Use default font
-                  minHeight: "150px", // Keep minHeight for view mode
-                }}
-              >
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Account Details *
+              </label>
+              <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 min-h-[150px] whitespace-pre-wrap">
                 {unescapeTextareaValue(formData.acctDetails) ||
                   "No details provided"}
               </div>
             </div>
 
-            {/* Savings Amount - REMOVED ₹ SYMBOL */}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={bankingStyles.label}>Savings Amount *</label>
-              <div
-                style={{
-                  ...inputStyle,
-                  backgroundColor: "#f9fafb",
-                  cursor: "default",
-                }}
-              >
+            {/* Savings Amount */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Savings Amount *
+              </label>
+              <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900">
                 {parseFloat(formData.savingsAmount || "0").toLocaleString(
                   "en-IN",
                 )}
@@ -396,42 +310,21 @@ const EditAccountPage: React.FC = () => {
             </div>
 
             {/* MPIN - Show as plain text in view mode */}
-            <div style={{ marginBottom: "30px" }}>
-              <label style={bankingStyles.label}>MPIN</label>
-              <div
-                style={{
-                  ...inputStyle,
-                  backgroundColor: "#f9fafb",
-                  cursor: "default",
-                  fontFamily: "monospace",
-                  fontSize: "16px",
-                }}
-              >
+            <div className="mb-8">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                MPIN
+              </label>
+              <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-mono">
                 {formData.mpin || "Not set"}
               </div>
             </div>
 
             {/* Back Button only in view mode */}
-            <div
-              style={{
-                paddingTop: "10px",
-                borderTop: "1px solid #e9ecef",
-              }}
-            >
+            <div className="pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={handleCancel}
-                style={{
-                  width: "100%",
-                  padding: "14px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  borderRadius: "8px",
-                  color: "#495057",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                }}
+                className="w-full px-4 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer font-medium hover:bg-gray-200 transition-colors"
               >
                 Back to Accounts
               </button>
@@ -441,14 +334,16 @@ const EditAccountPage: React.FC = () => {
           // Edit mode - form for editing
           <form onSubmit={handleSubmit}>
             {/* Account Code */}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={bankingStyles.label}>Account Code *</label>
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Account Code *
+              </label>
               <input
                 type="text"
                 placeholder="e.g., SBI1234"
                 value={formData.acctCode}
                 onChange={(e) => handleChange("acctCode", e.target.value)}
-                style={bankingStyles.input} // Use original bankingStyles
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100"
                 required
                 disabled={submitting}
                 maxLength={50}
@@ -456,34 +351,37 @@ const EditAccountPage: React.FC = () => {
             </div>
 
             {/* Account Details - Using escaped value */}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={bankingStyles.label}>Account Details *</label>
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Account Details *
+              </label>
               <textarea
                 ref={textareaRef}
                 placeholder="Bank name, branch, account type, etc."
                 value={formData.acctDetails}
                 onChange={(e) => handleChange("acctDetails", e.target.value)}
-                style={textareaStyle}
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 resize-vertical"
+                style={{ height: `${textareaHeight}px` }}
                 required
                 disabled={submitting}
-                maxLength={1000} // Increased max length
+                maxLength={1000}
               />
-              <div
-                style={{ fontSize: "12px", color: "#666", marginTop: "5px" }}
-              >
+              <div className="text-xs text-gray-500 mt-1">
                 Characters: {formData.acctDetails.length}/1000
               </div>
             </div>
 
-            {/* Savings Amount - REMOVED ₹ SYMBOL AND WRAPPER DIV */}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={bankingStyles.label}>Savings Amount *</label>
+            {/* Savings Amount */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Savings Amount *
+              </label>
               <input
                 type="number"
                 placeholder="0.00"
                 value={formData.savingsAmount}
                 onChange={(e) => handleChange("savingsAmount", e.target.value)}
-                style={bankingStyles.input} // Use original bankingStyles
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100"
                 required
                 min="0"
                 step="0.01"
@@ -492,42 +390,26 @@ const EditAccountPage: React.FC = () => {
             </div>
 
             {/* MPIN */}
-            <div style={{ marginBottom: "30px" }}>
-              <label style={bankingStyles.label}>MPIN</label>
+            <div className="mb-8">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                MPIN
+              </label>
               <input
                 type="text"
                 placeholder="Enter MPIN or any access code"
                 value={formData.mpin}
                 onChange={(e) => handleChange("mpin", e.target.value)}
-                style={bankingStyles.input} // Use original bankingStyles
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100"
                 disabled={submitting}
               />
             </div>
 
             {/* Buttons - Edit mode only */}
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                paddingTop: "10px",
-                borderTop: "1px solid #e9ecef",
-              }}
-            >
+            <div className="flex gap-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={handleCancel}
-                style={{
-                  flex: 1,
-                  padding: "14px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  borderRadius: "8px",
-                  color: "#495057",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  opacity: submitting ? 0.6 : 1,
-                }}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
                 disabled={submitting}
               >
                 Cancel
@@ -536,18 +418,7 @@ const EditAccountPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowDeleteDialog(true)}
-                style={{
-                  flex: 1,
-                  padding: "14px",
-                  backgroundColor: "#fef2f2",
-                  border: "1px solid #fecaca",
-                  borderRadius: "8px",
-                  color: "#dc2626",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  opacity: submitting ? 0.6 : 1,
-                }}
+                className="flex-1 px-4 py-3 bg-red-50 text-red-700 border border-red-200 rounded-lg font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
                 disabled={submitting}
               >
                 Delete Account
@@ -555,18 +426,9 @@ const EditAccountPage: React.FC = () => {
 
               <button
                 type="submit"
-                style={{
-                  flex: 1,
-                  padding: "14px",
-                  backgroundColor: submitting ? "#94a3b8" : "#2563eb",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#ffffff",
-                  fontWeight: "600",
-                  cursor: submitting ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                  opacity: submitting ? 0.7 : 1,
-                }}
+                className={`flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-lg font-medium hover:shadow-lg transition-all ${
+                  submitting ? "opacity-70 cursor-not-allowed" : ""
+                }`}
                 disabled={submitting}
               >
                 {submitting ? "Saving..." : "Save Changes"}
@@ -578,69 +440,25 @@ const EditAccountPage: React.FC = () => {
 
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              maxWidth: "400px",
-              width: "90%",
-              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-            }}
-          >
-            <h3 style={{ margin: "0 0 16px 0", color: "#1f2937" }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Delete Account?
             </h3>
-            <p style={{ margin: "0 0 24px 0", color: "#6b7280" }}>
+            <p className="text-gray-600 mb-6">
               Are you sure you want to delete account "{account?.acctCode}"?
               This action cannot be undone.
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "flex-end",
-              }}
-            >
+            <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteDialog(false)}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#f3f4f6",
-                  border: "1px solid #d1d5db",
-                  borderRadius: "6px",
-                  color: "#374151",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
+                className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg font-medium hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#dc2626",
-                  border: "none",
-                  borderRadius: "6px",
-                  color: "white",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
+                className="px-4 py-2 bg-red-600 text-white border-none rounded-lg font-medium hover:bg-red-700 transition-colors"
               >
                 Delete
               </button>
@@ -660,9 +478,8 @@ const EditAccountPage: React.FC = () => {
             pointer-events: auto !important;
           }
           
-          @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
+          .resize-vertical {
+            resize: vertical;
           }
         `}
       </style>

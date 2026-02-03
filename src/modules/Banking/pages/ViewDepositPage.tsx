@@ -2,16 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
-import { useSettings } from "../../../contexts/SettingsContext"; // Import settings context
+import { useSettings } from "../../../contexts/SettingsContext";
 import { Deposit } from "../../../types/banking.types";
 import { formatDate } from "../../../utils/formatters";
-import { bankingStyles } from "../styles";
+import { tw, banking } from "../../../utils/tailwindMapping";
 
 const ViewDepositPage: React.FC = () => {
   const { depositId } = useParams();
   const navigate = useNavigate();
   const { accounts, deposits, loading: dataLoading } = useBankingData();
-  const { settings } = useSettings(); // Get settings
+  const { settings } = useSettings();
 
   const [deposit, setDeposit] = useState<Deposit | null>(null);
   const [accountCode, setAccountCode] = useState("");
@@ -50,9 +50,9 @@ const ViewDepositPage: React.FC = () => {
 
   if (dataLoading || !deposit) {
     return (
-      <div style={bankingStyles.container}>
-        <div style={bankingStyles.loading}>
-          <div style={bankingStyles.spinner}></div>
+      <div className={tw.bankingContainer}>
+        <div className={tw.bankingLoading}>
+          <div className={tw.bankingSpinner}></div>
           <p>Loading deposit details...</p>
         </div>
       </div>
@@ -60,28 +60,23 @@ const ViewDepositPage: React.FC = () => {
   }
 
   return (
-    <div style={bankingStyles.container}>
+    <div className={tw.bankingContainer}>
       {/* Top Navigation */}
-      <div style={bankingStyles.topNav}>
+      <div className={tw.bankingTopNav}>
         <button
           onClick={handleBack}
-          style={bankingStyles.navButton}
+          className={tw.bankingNavButton}
           title="Back"
         >
           ←
         </button>
-        <div style={bankingStyles.navTitle}>Banking / View Deposit</div>
+        <div className={tw.bankingNavTitle}>Banking / View Deposit</div>
 
         {/* EDIT button in top nav - only show if showDelete setting is true */}
         {settings?.showDelete && (
           <button
             onClick={handleEdit}
-            style={{
-              ...bankingStyles.navButton,
-              backgroundColor: "#3b82f6",
-              color: "#fff",
-              border: "none",
-            }}
+            className="px-3 py-2 bg-blue-500 text-white border-none rounded-lg text-sm font-medium cursor-pointer min-w-10 flex items-center justify-center hover:bg-blue-600 transition-colors"
             title="Edit"
           >
             ✏️ Edit
@@ -90,101 +85,36 @@ const ViewDepositPage: React.FC = () => {
       </div>
 
       {/* Deposit Details Card */}
-      <div style={{ padding: "20px 0" }}>
-        <div
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: "12px",
-            padding: "24px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            marginBottom: "20px",
-          }}
-        >
+      <div className="py-5">
+        <div className={tw.bankingCard}>
           {/* Account */}
-          <div style={{ marginBottom: "20px" }}>
-            <div
-              style={{
-                fontSize: "0.9rem",
-                color: "#6b7280",
-                marginBottom: "4px",
-                fontWeight: 500,
-              }}
-            >
+          <div className="mb-5">
+            <div className="text-sm text-gray-600 mb-1 font-medium">
               Account
             </div>
-            <div
-              style={{
-                fontSize: "1.25rem",
-                color: "#111827",
-                fontWeight: 600,
-              }}
-            >
+            <div className="text-xl text-gray-900 font-semibold">
               {accountCode}
             </div>
           </div>
 
           {/* Amount */}
-          <div style={{ marginBottom: "20px" }}>
-            <div
-              style={{
-                fontSize: "0.9rem",
-                color: "#6b7280",
-                marginBottom: "4px",
-                fontWeight: 500,
-              }}
-            >
-              Amount
-            </div>
-            <div
-              style={{
-                fontSize: "1.5rem",
-                color: "#1976d2",
-                fontWeight: 700,
-                display: "flex",
-                alignItems: "baseline",
-              }}
-            >
+          <div className="mb-5">
+            <div className="text-sm text-gray-600 mb-1 font-medium">Amount</div>
+            <div className="text-2xl text-blue-600 font-bold flex items-baseline">
               <span>₹{formatInLakhs(deposit.amount)}</span>
-              <span
-                style={{
-                  fontSize: "0.9rem",
-                  color: "#6b7280",
-                  marginLeft: "8px",
-                  fontWeight: 400,
-                }}
-              >
+              <span className="text-sm text-gray-600 ml-2 font-normal">
                 ({deposit.amount.toLocaleString("en-IN")})
               </span>
             </div>
           </div>
 
           {/* Dates */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "20px",
-              marginBottom: "20px",
-            }}
-          >
+          <div className="grid grid-cols-2 gap-5 mb-5">
             <div>
-              <div
-                style={{
-                  fontSize: "0.9rem",
-                  color: "#6b7280",
-                  marginBottom: "4px",
-                  fontWeight: 500,
-                }}
-              >
+              <div className="text-sm text-gray-600 mb-1 font-medium">
                 Start Date
               </div>
-              <div
-                style={{
-                  fontSize: "1rem",
-                  color: "#111827",
-                  fontWeight: 500,
-                }}
-              >
+              <div className="text-base text-gray-900 font-medium">
                 {formatDate(deposit.startDate, "en-IN", {
                   day: "2-digit",
                   month: "short",
@@ -194,23 +124,10 @@ const ViewDepositPage: React.FC = () => {
             </div>
 
             <div>
-              <div
-                style={{
-                  fontSize: "0.9rem",
-                  color: "#6b7280",
-                  marginBottom: "4px",
-                  fontWeight: 500,
-                }}
-              >
+              <div className="text-sm text-gray-600 mb-1 font-medium">
                 End Date
               </div>
-              <div
-                style={{
-                  fontSize: "1rem",
-                  color: "#111827",
-                  fontWeight: 500,
-                }}
-              >
+              <div className="text-base text-gray-900 font-medium">
                 {formatDate(deposit.endDate, "en-IN", {
                   day: "2-digit",
                   month: "short",
@@ -221,24 +138,11 @@ const ViewDepositPage: React.FC = () => {
           </div>
 
           {/* Duration */}
-          <div style={{ marginBottom: "20px" }}>
-            <div
-              style={{
-                fontSize: "0.9rem",
-                color: "#6b7280",
-                marginBottom: "4px",
-                fontWeight: 500,
-              }}
-            >
+          <div className="mb-5">
+            <div className="text-sm text-gray-600 mb-1 font-medium">
               Duration
             </div>
-            <div
-              style={{
-                fontSize: "1rem",
-                color: "#111827",
-                fontWeight: 500,
-              }}
-            >
+            <div className="text-base text-gray-900 font-medium">
               {Math.round(
                 (deposit.endDate - deposit.startDate) / (1000 * 60 * 60 * 24),
               )}{" "}
@@ -247,28 +151,12 @@ const ViewDepositPage: React.FC = () => {
           </div>
 
           {/* Status */}
-          <div style={{ marginBottom: "20px" }}>
+          <div className="mb-5">
+            <div className="text-sm text-gray-600 mb-1 font-medium">Status</div>
             <div
-              style={{
-                fontSize: "0.9rem",
-                color: "#6b7280",
-                marginBottom: "4px",
-                fontWeight: 500,
-              }}
-            >
-              Status
-            </div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "4px 12px",
-                borderRadius: "20px",
-                backgroundColor: deposit.active ? "#d1fae5" : "#fee2e2",
-                color: deposit.active ? "#065f46" : "#991b1b",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-              }}
+              className={banking.statusBadge(
+                deposit.active ? "active" : "inactive",
+              )}
             >
               {deposit.active ? "● Active" : "● Inactive"}
             </div>
@@ -276,35 +164,11 @@ const ViewDepositPage: React.FC = () => {
 
           {/* Comments (if any) */}
           {deposit.comments && (
-            <div
-              style={{
-                marginTop: "24px",
-                paddingTop: "24px",
-                borderTop: "1px solid #e5e7eb",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "0.9rem",
-                  color: "#6b7280",
-                  marginBottom: "8px",
-                  fontWeight: 500,
-                }}
-              >
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="text-sm text-gray-600 mb-2 font-medium">
                 Comments
               </div>
-              <div
-                style={{
-                  fontSize: "1rem",
-                  color: "#374151",
-                  lineHeight: "1.5",
-                  whiteSpace: "pre-wrap",
-                  backgroundColor: "#f9fafb",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  border: "1px solid #e5e7eb",
-                }}
-              >
+              <div className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 p-3 rounded-lg border border-gray-200">
                 {deposit.comments || "No comments"}
               </div>
             </div>
@@ -312,16 +176,12 @@ const ViewDepositPage: React.FC = () => {
         </div>
 
         {/* Action Buttons - EDIT button only shows if showDelete setting is true */}
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div className="flex gap-3">
           <button
             onClick={handleBack}
-            style={{
-              ...bankingStyles.actionButton,
-              backgroundColor: "#f3f4f6",
-              color: "#374151",
-              border: "1px solid #d1d5db",
-              flex: settings?.showDelete ? 1 : "100%", // Take full width if no edit button
-            }}
+            className={`px-4 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors ${
+              settings?.showDelete ? "flex-1" : "w-full"
+            }`}
           >
             ← Back to Deposits
           </button>
@@ -330,13 +190,7 @@ const ViewDepositPage: React.FC = () => {
           {settings?.showDelete && (
             <button
               onClick={handleEdit}
-              style={{
-                ...bankingStyles.actionButton,
-                backgroundColor: "#3b82f6",
-                color: "#fff",
-                border: "none",
-                flex: 1,
-              }}
+              className="flex-1 px-4 py-3 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors"
             >
               ✏️ Edit Deposit
             </button>

@@ -1,8 +1,7 @@
-// components/Layout/Header.tsx - Ensure it has the updated CSS classes
+// components/Layout/Header.tsx
 import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import styles from "../../App.module.css";
 
 interface HeaderProps {
   showAddButton?: boolean;
@@ -63,12 +62,12 @@ const Header: React.FC<HeaderProps> = ({
   }
 
   return (
-    <header className={styles.header}>
-      <div className={styles.headerContent}>
-        {/* Left side: MyData clickable header */}
-        <div className={styles.headerLeft}>
+    <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-slate-800 to-slate-900 text-white py-3 shadow-lg shadow-slate-900/30">
+      <div className="flex items-center justify-between px-3 sm:px-4 w-full">
+        {/* Left side: MyData clickable header - hidden on mobile when actions are shown */}
+        <div className="flex-1 min-w-0">
           <button
-            className={styles.homeButton}
+            className="text-lg sm:text-xl font-semibold hover:text-slate-300 transition-colors p-1 sm:p-2 -ml-1 sm:-ml-2 rounded-md hover:bg-slate-700/30 whitespace-nowrap overflow-hidden text-ellipsis"
             onClick={handleHomeClick}
             aria-label="Go to Home"
             title="Go to Home"
@@ -77,9 +76,9 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* Center: Module Navigation */}
-        <div className={styles.headerCenter}>
-          <div className={styles.moduleNav}>
+        {/* Center: Module Navigation - smaller on mobile */}
+        <div className="flex justify-center mx-2">
+          <div className="flex items-center gap-1 sm:gap-2 bg-slate-700/40 p-1 sm:p-2 rounded-full backdrop-blur-sm">
             {MODULE_ITEMS.map((item) => {
               const isActive =
                 location.pathname === item.path ||
@@ -88,47 +87,51 @@ const Header: React.FC<HeaderProps> = ({
               return (
                 <button
                   key={item.path}
-                  className={`${styles.moduleButton} ${isActive ? styles.activeModule : ""}`}
+                  className={`p-1.5 sm:p-2.5 rounded-full transition-all duration-200 ${
+                    isActive
+                      ? "bg-white text-slate-800 shadow-md sm:shadow-lg transform scale-105 sm:scale-110"
+                      : "hover:bg-slate-600/50 hover:scale-105"
+                  }`}
                   onClick={() => navigate(item.path)}
                   aria-label={item.label}
                   title={item.label}
                 >
-                  <span className={styles.moduleIcon}>{item.icon}</span>
+                  <span className="text-base sm:text-xl">{item.icon}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Right side: Actions */}
-        <div className={styles.headerActions}>
+        {/* Right side: Actions - compact on mobile */}
+        <div className="flex-1 flex justify-end items-center gap-1 sm:gap-2 min-w-0">
           {/* Add button - displayed left to settings icon */}
           {showAddButton && (
             <button
-              className={styles.addButton}
+              className="p-1.5 sm:p-3 rounded-full hover:bg-slate-600/50 transition-all hover:scale-105 flex-shrink-0"
               onClick={handleAddClick}
               aria-label={addButtonTitle}
               title={addButtonTitle}
             >
-              {NAV_ICONS.ADD}
+              <span className="text-base sm:text-xl">{NAV_ICONS.ADD}</span>
             </button>
           )}
 
           <button
-            className={styles.settingsButton}
+            className="p-1.5 sm:p-3 rounded-full hover:bg-slate-600/50 transition-all hover:scale-105 flex-shrink-0"
             onClick={() => navigate("/settings")}
             aria-label="Settings"
             title="Settings"
           >
-            {NAV_ICONS.SETTINGS}
+            <span className="text-base sm:text-xl">{NAV_ICONS.SETTINGS}</span>
           </button>
           <button
-            className={styles.logoutButton}
+            className="p-1.5 sm:p-3 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-all hover:scale-105 flex items-center justify-center flex-shrink-0"
             onClick={handleLogout}
             aria-label="Logout"
             title="Logout"
           >
-            <span className={styles.logoutIcon}>{NAV_ICONS.LOGOUT}</span>
+            <span className="text-base sm:text-xl">{NAV_ICONS.LOGOUT}</span>
           </button>
         </div>
       </div>

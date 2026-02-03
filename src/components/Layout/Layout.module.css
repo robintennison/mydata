@@ -1,269 +1,38 @@
-/* src/App.module.css */
+// components/LoadingState.tsx
+import React from "react";
 
-.container {
-  min-height: 100vh;
-  background-color: var(--color-gray-50);
+interface LoadingStateProps {
+  error?: {
+    message: string;
+    onRetry?: () => void;
+  };
 }
 
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Updated loading styles */
-.loadingContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
-  color: var(--color-white);
-  text-align: center;
-  padding: var(--spacing-xl);
-}
-
-.spinner {
-  width: 60px;
-  height: 60px;
-  border: 5px solid rgba(255, 255, 255, 0.2);
-  border-top: 5px solid var(--color-white);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: var(--spacing-lg);
-}
-
-.loadingContainer p {
-  font-size: 1.1rem;
-  opacity: 0.9;
-  margin-top: var(--spacing-md);
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Optional: Error loading state */
-.errorContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(135deg, var(--color-error-500) 0%, var(--color-error-700) 100%);
-  color: var(--color-white);
-  text-align: center;
-  padding: var(--spacing-xl);
-}
-
-.errorIcon {
-  font-size: 3rem;
-  margin-bottom: var(--spacing-lg);
-}
-
-.errorContainer h2 {
-  font-size: 1.5rem;
-  margin-bottom: var(--spacing-sm);
-}
-
-.errorContainer p {
-  font-size: 1rem;
-  opacity: 0.9;
-  margin-bottom: var(--spacing-lg);
-  max-width: 400px;
-  line-height: 1.5;
-}
-
-.retryButton {
-  background-color: var(--color-white);
-  color: var(--color-error-600);
-  border: none;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--border-radius-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.95rem;
-}
-
-.retryButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.retryButton:active {
-  transform: translateY(0);
-}
-
-/* Header with max-width constraint */
-.header {
-  background-color: var(--color-primary-600);
-  color: var(--color-white);
-  padding: var(--spacing-md) 0;
-  box-shadow: 0 2px 10px rgba(66, 133, 244, 0.3);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  width: 100%;
-}
-
-.headerContent {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 600px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 0 var(--spacing-md);
-}
-
-.logoContainer {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.logo {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.logoIcon {
-  font-size: 1.8rem;
-}
-
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.logoutButton {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-white);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.logoutButton:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-}
-
-.logoutButton:active {
-  transform: translateY(0);
-}
-
-.logoutIcon {
-  font-size: 1rem;
-}
-
-.main {
-  flex: 1;
-  max-width: 600px;
-  width: 100%;
-  margin: 0 auto;
-  padding: var(--spacing-lg) var(--spacing-md);
-}
-
-.footer {
-  background-color: var(--color-gray-900);
-  color: var(--color-white);
-  text-align: center;
-  padding: var(--spacing-md);
-  font-size: 0.8rem;
-  margin-top: auto;
-  width: 100%;
-}
-
-.footerContent {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .headerContent,
-  .main,
-  .footerContent {
-    padding: 0 var(--spacing-md);
+export const LoadingState: React.FC<LoadingStateProps> = ({ error }) => {
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-red-500 to-red-700 text-white text-center p-8">
+        <div className="text-5xl mb-6">⚠️</div>
+        <h2 className="text-2xl mb-3 font-semibold">Error Loading App</h2>
+        <p className="text-lg opacity-90 mb-6 max-w-md leading-relaxed">
+          {error.message}
+        </p>
+        {error.onRetry && (
+          <button
+            onClick={error.onRetry}
+            className="bg-white text-red-600 border-none px-6 py-3 rounded-lg font-semibold cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg active:translate-y-0 text-base"
+          >
+            Retry
+          </button>
+        )}
+      </div>
+    );
   }
-  
-  .logo {
-    font-size: 1.3rem;
-  }
-  
-  .logoutButton span:not(.logoutIcon) {
-    display: none;
-  }
-  
-  .logoutButton {
-    padding: var(--spacing-xs);
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .main {
-    padding: var(--spacing-md);
-  }
-}
 
-@media (max-width: 480px) {
-  .loadingContainer {
-    padding: var(--spacing-lg);
-  }
-  
-  .spinner {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .loadingContainer p {
-    font-size: 1rem;
-  }
-  
-  .headerContent,
-  .main {
-    padding: 0 var(--spacing-sm);
-  }
-}
-
-/* Ensure app width matches the max-width constraint */
-@media (min-width: 601px) {
-  .app {
-    margin: 0 auto;
-    width: 100%;
-    max-width: 600px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    background-color: var(--color-white);
-  }
-  
-  .container {
-    background-color: var(--color-gray-200);
-    padding: 0;
-  }
-  
-  .header {
-    border-radius: 0;
-  }
-  
-  .footer {
-    border-radius: 0;
-  }
-}
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-600 to-blue-800 text-white text-center p-8">
+      <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-6"></div>
+      <p className="text-lg opacity-90 mt-4">Loading application...</p>
+    </div>
+  );
+};

@@ -11,9 +11,10 @@ function App() {
       <SettingsProvider>
         <BrowserRouter>
           <AuthProvider>
-            {/* Main container */}
-            <div className="min-h-screen bg-gray-50">
-              <div className="w-full">
+            {/* Main container with responsive max-width constraint */}
+            <div className="min-h-screen bg-gray-50 md:bg-gradient-to-br md:from-gray-100 md:to-gray-200">
+              {/* Desktop: Centered container with shadow */}
+              <div className="w-full md:max-w-2xl md:mx-auto md:min-h-screen md:bg-white md:shadow-xl">
                 <main className="w-full">
                   <AppRoutes />
                 </main>

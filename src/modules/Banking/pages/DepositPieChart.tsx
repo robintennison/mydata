@@ -9,7 +9,6 @@ import {
 } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { bankingHomeStyles as styles } from "../styles/BankingHomePage.styles";
 
 // Register Chart.js components for Pie chart
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
@@ -172,9 +171,9 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
   if (!chartData) return null;
 
   return (
-    <div style={{ ...styles.sectionPadding, paddingTop: 0 }}>
-      <div style={styles.card}>
-        <div style={styles.cardTitle}>
+    <div className="pb-2">
+      <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+        <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
           <span>📊</span>
           <span>Deposit Distribution</span>
         </div>

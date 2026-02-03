@@ -12,7 +12,6 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import ChartDataLabels, { Context } from "chartjs-plugin-datalabels";
-import styles from "../../../MyDataHomepage.module.css";
 
 // Register Chart.js components for Bar chart
 ChartJS.register(
@@ -274,14 +273,14 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
 
   if (!chartData) {
     return (
-      <div className={styles.section}>
-        <div className={styles.sectionHeader} style={{ marginBottom: "15px" }}>
-          <div className={styles.sectionTitle}>
+      <div className="bg-white rounded-lg my-3 p-3 shadow-sm border border-gray-200 mb-3">
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-sm font-semibold text-gray-800">
             <span>📊</span> Asset Distribution
           </div>
         </div>
         <div
-          className={styles.emptyState}
+          className="text-center p-3 text-gray-500"
           style={{
             height: "360px",
             display: "flex",
@@ -290,8 +289,8 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
           }}
         >
           <div>
-            <div className={styles.emptyText}>No asset data available</div>
-            <div className={styles.emptySubtext}>
+            <div className="text-sm font-medium mb-0.5">No asset data available</div>
+            <div className="text-xs">
               Add accounts and deposits to see the distribution
             </div>
           </div>
@@ -301,9 +300,9 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
   }
 
   return (
-    <div className={styles.section}>
-      <div className={styles.sectionHeader} style={{ marginBottom: "15px" }}>
-        <div className={styles.sectionTitle}>
+    <div className="bg-white rounded-lg my-3 p-3 shadow-sm border border-gray-200 mb-3">
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-sm font-semibold text-gray-800">
           <span>📊</span> Asset Distribution
         </div>
         <div

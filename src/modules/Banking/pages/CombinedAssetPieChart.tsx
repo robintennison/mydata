@@ -9,7 +9,6 @@ import {
 } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import styles from "../../../MyDataHomepage.module.css";
 
 // Register Chart.js components for Pie chart
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
@@ -106,8 +105,8 @@ const CombinedAssetPieChart: React.FC<CombinedAssetPieChartProps> = ({
             "#ff9800",
             "#795548",
             "#607d8b",
-          ],
-          borderWidth: 1,
+            ],
+            borderWidth: 1,
         },
       ],
     };
@@ -175,9 +174,9 @@ const CombinedAssetPieChart: React.FC<CombinedAssetPieChartProps> = ({
   if (!chartData) return null;
 
   return (
-    <div className={styles.section}>
-      <div className={styles.sectionHeader} style={{ marginBottom: "15px" }}>
-        <div className={styles.sectionTitle}>
+    <div className="bg-white rounded-lg my-3 p-3 shadow-sm border border-gray-200 mb-3">
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-sm font-semibold text-gray-800">
            <span>📊</span> Asset Distribution
         </div>
       </div>

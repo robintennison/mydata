@@ -465,72 +465,72 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         addButtonTitle={getAddButtonTitle()}
       />
 
-      {/* Tabs Navigation - Mobile First */}
+      {/* Tabs Navigation - Mobile First with Larger Icons */}
       <div className="w-full bg-white border-b border-gray-200 sticky top-14 z-10">
         <div className="flex overflow-x-auto px-1 py-0 gap-0.5">
           <button
             onClick={() => setActiveTab("dashboard")}
-            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "dashboard"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="Dashboard"
           >
-            <span className="text-xs">📊</span>
-            <span className="hidden xs:inline">Dash</span>
+            <span className="text-base">📊</span>
+            <span className="hidden xs:block text-[10px] mt-0.5">Dash</span>
           </button>
 
           <button
             onClick={() => setActiveTab("accounts")}
-            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "accounts"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="Accounts"
           >
-            <span className="text-xs">👥</span>
-            <span className="hidden xs:inline">Acct</span>
+            <span className="text-base">👥</span>
+            <span className="hidden xs:block text-[10px] mt-0.5">Acct</span>
           </button>
 
           <button
             onClick={() => setActiveTab("deposits")}
-            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "deposits"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="Deposits"
           >
-            <span className="text-xs">💰</span>
-            <span className="hidden xs:inline">Depo</span>
+            <span className="text-base">💰</span>
+            <span className="hidden xs:block text-[10px] mt-0.5">Depo</span>
           </button>
 
           <button
             onClick={() => setActiveTab("history")}
-            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "history"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="History"
           >
-            <span className="text-xs">📅</span>
-            <span className="hidden xs:inline">Hist</span>
+            <span className="text-base">📅</span>
+            <span className="hidden xs:block text-[10px] mt-0.5">Hist</span>
           </button>
 
           <button
             onClick={() => setActiveTab("summary")}
-            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "summary"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="Summary"
           >
-            <span className="text-xs">📈</span>
-            <span className="hidden xs:inline">Summ</span>
+            <span className="text-base">📈</span>
+            <span className="hidden xs:block text-[10px] mt-0.5">Summ</span>
           </button>
         </div>
       </div>

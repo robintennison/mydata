@@ -163,7 +163,7 @@ const JewelleryHome: React.FC = () => {
   };
 
   const formatWeight = (weight: number): string => {
-    return `${weight.toFixed(1)}g`;
+    return `${weight.toFixed(1)}`;
   };
 
   const formatPercent = (percent: number): string => {
@@ -294,7 +294,7 @@ const JewelleryHome: React.FC = () => {
                       No person data
                     </div>
                   ) : (
-                    <div className="flex-1 overflow-y-auto max-h-[200px] pr-0.5">
+                    <div className="flex-1 overflow-y-auto max-h-[200px] pr-1">
                       {personsWeight.map((item, index) => (
                         <div
                           key={index}
@@ -333,7 +333,7 @@ const JewelleryHome: React.FC = () => {
                       No location data
                     </div>
                   ) : (
-                    <div className="flex-1 overflow-y-auto max-h-[200px] pr-0.5">
+                    <div className="flex-1 overflow-y-auto max-h-[200px] pr-1">
                       {locationWeight.map((item, index) => (
                         <div
                           key={index}

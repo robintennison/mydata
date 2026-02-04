@@ -121,13 +121,13 @@ const AccountsTab: React.FC = () => {
         ) : (
           <div>
             {/* Table Header - COMPACT */}
-            <div className="flex items-center py-2.5 px-3 bg-gray-50 border-b border-gray-300 font-semibold text-xs text-gray-700">
+            <div className="flex items-center py-1.5 px-2 bg-gray-50 border-b border-gray-300 font-semibold text-xs text-gray-700">
               {/* Account Column */}
-              <div className="w-[38%] px-1 text-left">Account</div>
+              <div className="w-[38%] px-0.5 text-left">Account</div>
               {/* Savings Column */}
-              <div className="w-[27%] px-1 text-left">Savings</div>
+              <div className="w-[27%] px-0.5 text-left">Savings</div>
               {/* MPIN Column - More space */}
-              <div className="w-[28%] px-1 text-left">MPIN</div>
+              <div className="w-[28%] px-0.5 text-left">MPIN</div>
               {/* Edit Button Column - Minimal space */}
               {settings?.showDelete && (
                 <div className="w-[7%] flex justify-end pr-0.5"></div>
@@ -147,9 +147,9 @@ const AccountsTab: React.FC = () => {
                     className="bg-white border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => handleRowClick(account.id)}
                   >
-                    <div className="flex items-center py-2.5 px-3 min-h-11">
+                    <div className="flex items-center py-1.5 px-2 min-h-9">
                       {/* Account Column */}
-                      <div className="w-[38%] min-w-0 text-left px-1">
+                      <div className="w-[38%] min-w-0 text-left px-0.5">
                         <div
                           className={`text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap ${
                             isActive ? "text-gray-800" : "text-gray-500"
@@ -168,7 +168,7 @@ const AccountsTab: React.FC = () => {
                       </div>
 
                       {/* Savings Column */}
-                      <div className="w-[27%] text-left px-1">
+                      <div className="w-[27%] text-left px-0.5">
                         <div
                           className={`text-xs font-semibold whitespace-nowrap ${
                             isActive ? "text-blue-600" : "text-gray-500"
@@ -179,7 +179,7 @@ const AccountsTab: React.FC = () => {
                       </div>
 
                       {/* MPIN Column - More space now */}
-                      <div className="w-[28%] text-left px-1">
+                      <div className="w-[28%] text-left px-0.5">
                         <div className="font-mono text-xs text-black overflow-hidden text-ellipsis whitespace-nowrap font-medium">
                           {account.mpin || "••••"}
                         </div>
@@ -203,8 +203,8 @@ const AccountsTab: React.FC = () => {
               })}
             </div>
 
-            {/* Total Savings Footer */}
-            <div className="bg-gray-50 border-t border-gray-300 px-3 py-2.5 flex justify-between items-center">
+            {/* Total Savings Footer - COMPACT */}
+            <div className="bg-gray-50 border-t border-gray-300 px-2 py-1.5 flex justify-between items-center">
               <div className="flex flex-col justify-center">
                 <div className="text-[10px] text-gray-600">
                   {settings?.showInactive
@@ -220,7 +220,7 @@ const AccountsTab: React.FC = () => {
                 <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
                   Total Savings
                 </div>
-                <div className="text-sm font-bold text-blue-600">
+                <div className="text-xs font-bold text-blue-600">
                   {formatCurrency(totalSavings)}
                 </div>
               </div>

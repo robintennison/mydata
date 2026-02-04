@@ -25,28 +25,12 @@ const AddAccountPage: React.FC = () => {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Function to unescape when saving
-  const unescapeTextareaValue = (text: string): string => {
-    return text
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'")
-      .replace(/&#42;/g, "*");
-  };
-
   // Calculate textarea height based on content
   useEffect(() => {
     if (textareaRef.current) {
-      // Reset height to auto to get the scrollHeight
       textareaRef.current.style.height = "auto";
-
-      // Calculate the new height based on scrollHeight
       const newHeight = Math.max(150, textareaRef.current.scrollHeight);
       setTextareaHeight(newHeight);
-
-      // Set the height on the textarea
       textareaRef.current.style.height = `${newHeight}px`;
     }
   }, [formData.acctDetails]);
@@ -60,7 +44,6 @@ const AddAccountPage: React.FC = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
     if (error) setError(null);
   };
 
@@ -100,14 +83,6 @@ const AddAccountPage: React.FC = () => {
       return false;
     }
 
-    if (
-      formData.mpin &&
-      (formData.mpin.length < 4 || formData.mpin.length > 6)
-    ) {
-      setError("MPIN must be 4-6 digits if provided");
-      return false;
-    }
-
     return true;
   };
 
@@ -123,14 +98,11 @@ const AddAccountPage: React.FC = () => {
     setError(null);
 
     try {
-      // Unescape the text before saving
-      const unescapedDetails = unescapeTextareaValue(formData.acctDetails);
-
       const accountData = {
         acctCode: formData.acctCode.trim(),
         bankName: formData.bankName.trim(),
         accountNumber: formData.accountNumber.trim(),
-        acctDetails: unescapedDetails.trim(),
+        acctDetails: formData.acctDetails.trim(),
         savingsAmount: parseFloat(formData.savingsAmount) || 0,
         mpin: formData.mpin || "",
         isActive: formData.isActive,
@@ -142,7 +114,7 @@ const AddAccountPage: React.FC = () => {
       const accountsRef = collection(firestore, "accounts");
       await addDoc(accountsRef, accountData);
 
-      // Success - ALWAYS navigate back to banking with accounts tab active
+      // Success - navigate back to banking with accounts tab active
       navigate("/banking", {
         state: { activeTab: "accounts" },
         replace: true,
@@ -164,38 +136,38 @@ const AddAccountPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200 mb-4">
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-4 px-2 box-border overflow-x-hidden">
+      {/* Header - Reduced padding */}
+      <div className="flex items-center justify-between p-3 bg-white border-b border-gray-200 mb-3">
         <button
           onClick={handleCancel}
-          className="w-10 h-10 bg-white border border-gray-300 rounded-lg text-xl cursor-pointer flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-9 h-9 bg-white border border-gray-300 rounded-lg text-lg cursor-pointer flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Go Back"
           disabled={isSubmitting}
         >
           ←
         </button>
-        <h1 className="text-xl font-bold text-gray-900">Add New Account</h1>
-        <div className="w-10"></div> {/* Spacer for alignment */}
+        <h1 className="text-lg font-bold text-gray-900">Add New Account</h1>
+        <div className="w-9"></div> {/* Spacer for alignment */}
       </div>
 
-      {/* Error Message */}
+      {/* Error Message - Reduced padding */}
       {error && (
-        <div className="mb-4 mx-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-          <div className="text-red-500 text-xl flex-shrink-0">⚠️</div>
+        <div className="mb-3 mx-2 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+          <div className="text-red-500 text-lg flex-shrink-0">⚠️</div>
           <div className="flex-1 text-red-700 text-sm">{error}</div>
           <button
             onClick={() => setError(null)}
-            className="text-red-500 hover:text-red-700 text-lg cursor-pointer flex-shrink-0"
+            className="text-red-500 hover:text-red-700 text-base cursor-pointer flex-shrink-0"
           >
             ✕
           </button>
         </div>
       )}
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="px-4 pb-4">
-        <div className="space-y-6">
+      {/* Form - Reduced padding */}
+      <form onSubmit={handleSubmit} className="px-2 pb-3">
+        <div className="space-y-4">
           {/* Account Code */}
           <div>
             <label
@@ -210,12 +182,12 @@ const AddAccountPage: React.FC = () => {
               name="acctCode"
               value={formData.acctCode}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="e.g., HDFC, SBI, ICICI"
               disabled={isSubmitting}
               required
             />
-            <div className="mt-1 text-xs text-gray-500">
+            <div className="mt-0.5 text-xs text-gray-500">
               Short code to identify the account
             </div>
           </div>
@@ -234,12 +206,12 @@ const AddAccountPage: React.FC = () => {
               name="bankName"
               value={formData.bankName}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="e.g., HDFC Bank, State Bank of India"
               disabled={isSubmitting}
               required
             />
-            <div className="mt-1 text-xs text-gray-500">
+            <div className="mt-0.5 text-xs text-gray-500">
               Full name of the bank
             </div>
           </div>
@@ -258,12 +230,12 @@ const AddAccountPage: React.FC = () => {
               name="accountNumber"
               value={formData.accountNumber}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="e.g., 1234567890"
               disabled={isSubmitting}
               required
             />
-            <div className="mt-1 text-xs text-gray-500">
+            <div className="mt-0.5 text-xs text-gray-500">
               Bank account number
             </div>
           </div>
@@ -282,19 +254,19 @@ const AddAccountPage: React.FC = () => {
               name="acctDetails"
               value={formData.acctDetails}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed resize-y"
+              className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed resize-y"
               style={{ height: `${textareaHeight}px` }}
               placeholder="Bank name, branch, account type, IFSC code, account holder name, contact info, etc."
               disabled={isSubmitting}
               required
               maxLength={1000}
             />
-            <div className="mt-1 text-xs text-gray-500">
+            <div className="mt-0.5 text-xs text-gray-500">
               Characters: {formData.acctDetails.length}/1000
             </div>
           </div>
 
-          {/* Savings Amount */}
+          {/* Savings Amount - No rupee symbol */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -302,27 +274,25 @@ const AddAccountPage: React.FC = () => {
             >
               Initial Savings Amount *
             </label>
-            <div className="relative">
-              <input
-                type="number"
-                id="savingsAmount"
-                name="savingsAmount"
-                value={formData.savingsAmount}
-                onChange={handleChange}
-                className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
-                placeholder="0"
-                step="0.01"
-                min="0"
-                disabled={isSubmitting}
-                required
-              />
-            </div>
-            <div className="mt-1 text-xs text-gray-500">
+            <input
+              type="number"
+              id="savingsAmount"
+              name="savingsAmount"
+              value={formData.savingsAmount}
+              onChange={handleChange}
+              className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+              placeholder="0"
+              step="0.01"
+              min="0"
+              disabled={isSubmitting}
+              required
+            />
+            <div className="mt-0.5 text-xs text-gray-500">
               Enter amount in rupees. Use 0 for new account.
             </div>
           </div>
 
-          {/* MPIN (Optional) */}
+          {/* MPIN (Optional) - No length limit */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -336,13 +306,12 @@ const AddAccountPage: React.FC = () => {
               name="mpin"
               value={formData.mpin}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="••••"
-              maxLength={6}
               disabled={isSubmitting}
             />
-            <div className="mt-1 text-xs text-gray-500">
-              4-6 digit PIN for account access (optional)
+            <div className="mt-0.5 text-xs text-gray-500">
+              PIN for account access (optional)
             </div>
           </div>
 
@@ -365,24 +334,24 @@ const AddAccountPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Form Buttons */}
-          <div className="flex gap-3 pt-4">
+          {/* Form Buttons - Reduced padding */}
+          <div className="flex gap-2 pt-3">
             <button
               type="button"
               onClick={handleCancel}
-              className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-3 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2 hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
+              className={`flex-1 px-3 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2 hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Adding...</span>
                 </>
               ) : (
@@ -391,12 +360,12 @@ const AddAccountPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Settings Info */}
+          {/* Settings Info - Reduced padding */}
           {!settings?.showDelete && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-              <div className="text-blue-500 text-lg flex-shrink-0">ℹ️</div>
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2">
+              <div className="text-blue-500 text-base flex-shrink-0">ℹ️</div>
               <div className="flex-1">
-                <div className="text-sm font-medium text-blue-800 mb-1">
+                <div className="text-sm font-medium text-blue-800 mb-0.5">
                   Edit/Delete Disabled
                 </div>
                 <div className="text-xs text-blue-700">

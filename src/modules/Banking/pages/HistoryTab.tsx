@@ -93,16 +93,16 @@ const HistoryTab: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Chart */}
-      <div className="bg-white mb-4 border-b border-gray-300">
+    <div className="flex flex-col h-full px-2 py-2">
+      {/* Chart with margin */}
+      <div className="bg-white mb-3 border border-gray-200 rounded-lg p-2">
         <HistoryChart history={history} compact={true} />
       </div>
 
-      {/* Table */}
+      {/* Table with proper margins */}
       <div className="flex-1 overflow-y-auto">
         {/* Header */}
-        <div className="flex justify-between items-center py-1 bg-gray-50 border-b border-gray-300 px-1">
+        <div className="flex justify-between items-center py-2 bg-white rounded-t-lg px-2 mb-1">
           <div className="flex items-center gap-1">
             <span>📊</span>
             <span className="text-xs font-semibold text-gray-800">History</span>
@@ -123,14 +123,14 @@ const HistoryTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {/* Table Header */}
-            <div className="flex items-center py-1 bg-gray-50 border-b border-gray-300 font-semibold text-[10px] text-gray-700 px-1">
-              <div className="w-1/4 px-0.5">Month</div>
-              <div className="w-1/4 px-0.5 text-right">Savings</div>
-              <div className="w-1/4 px-0.5 text-right">Deposits</div>
-              <div className="w-1/4 px-0.5 text-right">Total</div>
-              {settings?.showDelete && <div className="w-14 px-0.5"></div>}
+            <div className="flex items-center py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2">
+              <div className="w-1/4 px-1">Month</div>
+              <div className="w-1/4 px-1 text-right">Savings</div>
+              <div className="w-1/4 px-1 text-right">Deposits</div>
+              <div className="w-1/4 px-1 text-right">Total</div>
+              {settings?.showDelete && <div className="w-14 px-1"></div>}
             </div>
 
             {/* Table Rows */}
@@ -143,21 +143,21 @@ const HistoryTab: React.FC = () => {
               return (
                 <div
                   key={record.month}
-                  className="flex items-center py-1 border-b border-gray-100 min-h-8 px-1"
+                  className="flex items-center py-2 border-b border-gray-100 min-h-8 px-2 hover:bg-gray-50 last:border-b-0"
                 >
                   {/* Month */}
-                  <div className="w-1/4 px-0.5 text-xs text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
+                  <div className="w-1/4 px-1 text-xs text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
                     {record.month}
                   </div>
 
                   {/* Savings */}
-                  <div className="w-1/4 px-0.5">
+                  <div className="w-1/4 px-1">
                     {isEditing ? (
                       <input
                         type="number"
                         value={editedSavings}
                         onChange={(e) => setEditedSavings(e.target.value)}
-                        className="w-16 p-1 border border-gray-300 rounded text-xs"
+                        className="w-full max-w-20 p-1 border border-gray-300 rounded text-xs"
                         step="0.01"
                         min="0"
                         placeholder="0.00"
@@ -171,13 +171,13 @@ const HistoryTab: React.FC = () => {
                   </div>
 
                   {/* Deposits */}
-                  <div className="w-1/4 px-0.5">
+                  <div className="w-1/4 px-1">
                     {isEditing ? (
                       <input
                         type="number"
                         value={editedDeposits}
                         onChange={(e) => setEditedDeposits(e.target.value)}
-                        className="w-16 p-1 border border-gray-300 rounded text-xs"
+                        className="w-full max-w-20 p-1 border border-gray-300 rounded text-xs"
                         step="0.01"
                         min="0"
                         placeholder="0.00"
@@ -191,7 +191,7 @@ const HistoryTab: React.FC = () => {
                   </div>
 
                   {/* Total */}
-                  <div className="w-1/4 px-0.5">
+                  <div className="w-1/4 px-1">
                     <div className="text-xs font-semibold text-blue-600 text-right">
                       {formatLakhs(totalValue)}
                     </div>
@@ -199,12 +199,12 @@ const HistoryTab: React.FC = () => {
 
                   {/* Actions */}
                   {settings?.showDelete && (
-                    <div className="w-14 flex gap-0.5 px-0.5">
+                    <div className="w-14 flex gap-1 px-1">
                       {isEditing ? (
                         <>
                           <button
                             onClick={() => saveEdits(record.month)}
-                            className="w-6 h-6 p-0 bg-green-500 text-white text-xs rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50"
+                            className="w-7 h-7 p-0 bg-green-500 text-white text-xs rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 transition-colors"
                             disabled={isSaving}
                             title="Save"
                           >
@@ -212,7 +212,7 @@ const HistoryTab: React.FC = () => {
                           </button>
                           <button
                             onClick={cancelEditing}
-                            className="w-6 h-6 p-0 bg-gray-400 text-white text-xs rounded flex items-center justify-center hover:bg-gray-500"
+                            className="w-7 h-7 p-0 bg-gray-400 text-white text-xs rounded flex items-center justify-center hover:bg-gray-500 transition-colors"
                             title="Cancel"
                           >
                             ✕
@@ -228,7 +228,7 @@ const HistoryTab: React.FC = () => {
                                 record.totalDeposits,
                               )
                             }
-                            className="w-6 h-6 p-0 bg-blue-500 text-white text-xs rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50"
+                            className="w-7 h-7 p-0 bg-blue-500 text-white text-xs rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 transition-colors"
                             disabled={editingMonth !== null}
                             title="Edit"
                           >
@@ -236,7 +236,7 @@ const HistoryTab: React.FC = () => {
                           </button>
                           <button
                             onClick={() => setDeleteConfirmMonth(record.month)}
-                            className="w-6 h-6 p-0 bg-red-500 text-white text-xs rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50"
+                            className="w-7 h-7 p-0 bg-red-500 text-white text-xs rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50 transition-colors"
                             disabled={editingMonth !== null}
                             title="Delete"
                           >
@@ -256,7 +256,7 @@ const HistoryTab: React.FC = () => {
       {/* Delete Confirmation */}
       {deleteConfirmMonth && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-50">
-          <div className="bg-white rounded-xl p-5 max-w-md w-full shadow-2xl">
+          <div className="bg-white rounded-xl p-5 max-w-md w-full shadow-2xl mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
               Confirm Delete
             </h3>

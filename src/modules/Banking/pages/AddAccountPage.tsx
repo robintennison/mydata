@@ -1,5 +1,5 @@
 // src/modules/banking/AddAccountPage.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
@@ -13,6 +13,7 @@ const AddAccountPage: React.FC = () => {
     acctCode: "",
     bankName: "",
     accountNumber: "",
+    acctDetails: "",
     savingsAmount: "",
     mpin: "",
     isActive: true,
@@ -20,9 +21,40 @@ const AddAccountPage: React.FC = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [textareaHeight, setTextareaHeight] = useState<number>(150);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Function to unescape when saving
+  const unescapeTextareaValue = (text: string): string => {
+    return text
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&#42;/g, "*");
+  };
+
+  // Calculate textarea height based on content
+  useEffect(() => {
+    if (textareaRef.current) {
+      // Reset height to auto to get the scrollHeight
+      textareaRef.current.style.height = "auto";
+
+      // Calculate the new height based on scrollHeight
+      const newHeight = Math.max(150, textareaRef.current.scrollHeight);
+      setTextareaHeight(newHeight);
+
+      // Set the height on the textarea
+      textareaRef.current.style.height = `${newHeight}px`;
+    }
+  }, [formData.acctDetails]);
 
   // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -57,6 +89,11 @@ const AddAccountPage: React.FC = () => {
       return false;
     }
 
+    if (!formData.acctDetails.trim()) {
+      setError("Account details are required");
+      return false;
+    }
+
     const savingsAmount = parseFloat(formData.savingsAmount);
     if (isNaN(savingsAmount) || savingsAmount < 0) {
       setError("Please enter a valid savings amount (0 or more)");
@@ -86,10 +123,14 @@ const AddAccountPage: React.FC = () => {
     setError(null);
 
     try {
+      // Unescape the text before saving
+      const unescapedDetails = unescapeTextareaValue(formData.acctDetails);
+
       const accountData = {
         acctCode: formData.acctCode.trim(),
         bankName: formData.bankName.trim(),
         accountNumber: formData.accountNumber.trim(),
+        acctDetails: unescapedDetails.trim(),
         savingsAmount: parseFloat(formData.savingsAmount) || 0,
         mpin: formData.mpin || "",
         isActive: formData.isActive,
@@ -227,6 +268,32 @@ const AddAccountPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Account Details Textarea */}
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-700 mb-1"
+              htmlFor="acctDetails"
+            >
+              Account Details *
+            </label>
+            <textarea
+              ref={textareaRef}
+              id="acctDetails"
+              name="acctDetails"
+              value={formData.acctDetails}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed resize-y"
+              style={{ height: `${textareaHeight}px` }}
+              placeholder="Bank name, branch, account type, IFSC code, account holder name, contact info, etc."
+              disabled={isSubmitting}
+              required
+              maxLength={1000}
+            />
+            <div className="mt-1 text-xs text-gray-500">
+              Characters: {formData.acctDetails.length}/1000
+            </div>
+          </div>
+
           {/* Savings Amount */}
           <div>
             <label
@@ -236,9 +303,6 @@ const AddAccountPage: React.FC = () => {
               Initial Savings Amount *
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                ₹
-              </div>
               <input
                 type="number"
                 id="savingsAmount"

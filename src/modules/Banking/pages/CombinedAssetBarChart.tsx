@@ -9,6 +9,7 @@ import {
   Legend,
   ChartOptions,
   ChartData,
+  Scale,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import ChartDataLabels, { Context } from "chartjs-plugin-datalabels";
@@ -147,128 +148,260 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
     return { chartData: data, fullLabels };
   }, [accounts, deposits, adjustments, showInactive]);
 
-  const chartOptions: ChartOptions<"bar"> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    indexAxis: "y" as const, // Horizontal bar chart
-    scales: {
-      x: {
-        beginAtZero: true,
-        grid: {
-          display: false, // Remove grid lines for cleaner look
+  // Type-safe callback function for y-axis ticks
+  const getYTickCallback = (isMobile: boolean) => {
+    return function (this: any, value: string | number, index: number): string {
+      if (typeof value === "number" && this.chart?.scales?.y?.getLabels) {
+        const labels = this.chart.scales.y.getLabels();
+        if (index >= 0 && index < labels.length) {
+          const label = labels[index];
+          if (label === "Others") return "Others";
+
+          if (isMobile) {
+            // On mobile, show only last 3-4 characters
+            if (label && label.length > 5) {
+              return label.substring(Math.max(0, label.length - 4));
+            }
+          } else {
+            // On desktop, truncate first 3 characters for account codes
+            if (label && label.length > 3) {
+              return label.substring(3);
+            }
+          }
+          return label || "";
+        }
+      }
+      return value.toString();
+    };
+  };
+
+  // Mobile-first chart options
+  const getChartOptions = (): ChartOptions<"bar"> => {
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
+    const baseOptions: ChartOptions<"bar"> = {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: "y" as const,
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: {
+            display: false,
+          },
+          ticks: {
+            display: false,
+          },
+          title: {
+            display: false,
+          },
+          stacked: true,
         },
-        ticks: {
-          display: false, // Hide x-axis ticks completely
+        y: {
+          grid: {
+            display: false,
+          },
+          stacked: true,
         },
-        title: {
-          display: false,
-        },
-        stacked: true,
       },
-      y: {
-        grid: {
-          display: false,
+      plugins: {
+        legend: {
+          position: "top" as const,
+          labels: {
+            usePointStyle: true,
+          },
         },
-        ticks: {
+        tooltip: {
+          enabled: false,
+        },
+        datalabels: {
+          anchor: "end" as const,
+          align: "end" as const,
+          color: "#1a202c",
+        },
+      },
+      layout: {
+        padding: {},
+      },
+    };
+
+    // Mobile-specific overrides
+    if (isMobile) {
+      return {
+        ...baseOptions,
+        scales: {
+          ...baseOptions.scales,
+          y: {
+            ...baseOptions.scales?.y,
+            ticks: {
+              font: {
+                size: 10,
+                weight: 500,
+              } as any,
+              callback: getYTickCallback(true),
+            },
+            afterFit: function (scale: Scale) {
+              scale.width = 40;
+            },
+          },
+        },
+        plugins: {
+          ...baseOptions.plugins,
+          legend: {
+            ...baseOptions.plugins?.legend,
+            labels: {
+              boxWidth: 10,
+              padding: 10,
+              font: {
+                size: 10,
+              },
+              usePointStyle: true,
+            },
+          },
+          datalabels: {
+            ...baseOptions.plugins?.datalabels,
+            font: {
+              weight: 600,
+              size: 8,
+            } as any,
+            formatter: (_value: number, context: Context) => {
+              if (context.datasetIndex === 1) {
+                const savings = context.chart.data.datasets[0].data[
+                  context.dataIndex
+                ] as number;
+                const deposits = context.chart.data.datasets[1].data[
+                  context.dataIndex
+                ] as number;
+                const total = savings + deposits;
+
+                if (total >= 0.1) {
+                  const savingsFormatted = savings.toFixed(
+                    savings >= 10 ? 0 : 1,
+                  );
+                  const depositsFormatted = deposits.toFixed(
+                    deposits >= 10 ? 0 : 1,
+                  );
+                  return `S:${savingsFormatted} D:${depositsFormatted}`;
+                }
+              }
+              return "";
+            },
+            display: (context: Context) => {
+              if (context.datasetIndex === 1) {
+                const savings = context.chart.data.datasets[0].data[
+                  context.dataIndex
+                ] as number;
+                const deposits = context.chart.data.datasets[1].data[
+                  context.dataIndex
+                ] as number;
+                const total = savings + deposits;
+                return total >= 0.1;
+              }
+              return false;
+            },
+            padding: {
+              right: 2,
+            },
+            offset: 4,
+          },
+        },
+        layout: {
+          padding: {
+            left: 5,
+            right: 60,
+            top: 30,
+            bottom: 10,
+          },
+        },
+      };
+    }
+
+    // Desktop-specific overrides
+    return {
+      ...baseOptions,
+      scales: {
+        ...baseOptions.scales,
+        y: {
+          ...baseOptions.scales?.y,
+          ticks: {
+            font: {
+              size: 11,
+              weight: 500,
+            } as any,
+            callback: getYTickCallback(false),
+          },
+          afterFit: function (scale: Scale) {
+            scale.width = 60;
+          },
+        },
+      },
+      plugins: {
+        ...baseOptions.plugins,
+        legend: {
+          ...baseOptions.plugins?.legend,
+          labels: {
+            boxWidth: 12,
+            padding: 15,
+            font: {
+              size: 11,
+            },
+            usePointStyle: true,
+          },
+        },
+        datalabels: {
+          ...baseOptions.plugins?.datalabels,
           font: {
-            size: 11,
-            weight: 500,
+            weight: 600,
+            size: 9,
           } as any,
-          callback: function (value: string | number, index: number) {
-            if (
-              typeof value === "number" &&
-              this.chart?.scales?.y?.getLabels?.()
-            ) {
-              const labels = this.chart.scales.y.getLabels();
-              if (index >= 0 && index < labels.length) {
-                const label = labels[index];
-                // Truncate first 3 characters for account codes
-                return label && label.length > 3 && label !== "Others"
-                  ? label.substring(3)
-                  : label;
+          formatter: (_value: number, context: Context) => {
+            if (context.datasetIndex === 1) {
+              const savings = context.chart.data.datasets[0].data[
+                context.dataIndex
+              ] as number;
+              const deposits = context.chart.data.datasets[1].data[
+                context.dataIndex
+              ] as number;
+              const total = savings + deposits;
+
+              if (total >= 0.1) {
+                const savingsFormatted = savings.toFixed(savings >= 10 ? 0 : 1);
+                const depositsFormatted = deposits.toFixed(
+                  deposits >= 10 ? 0 : 1,
+                );
+                return `S:${savingsFormatted}\nD:${depositsFormatted}`;
               }
             }
-            return value;
+            return "";
           },
-        },
-        stacked: true,
-      },
-    },
-    plugins: {
-      legend: {
-        position: "top" as const,
-        labels: {
-          boxWidth: 12,
-          padding: 15,
-          font: {
-            size: 11,
-          },
-          usePointStyle: true,
-        },
-      },
-      tooltip: {
-        enabled: false, // Disable tooltips since we're showing values on chart
-      },
-      datalabels: {
-        anchor: "end" as const,
-        align: "end" as const,
-        color: "#1a202c",
-        font: {
-          weight: 600,
-          size: 9,
-        } as any,
-        formatter: (_value: number, context: Context) => {
-          // Show both savings and deposits values
-          if (context.datasetIndex === 1) {
-            // Deposits dataset (top of stack)
-            const savings = context.chart.data.datasets[0].data[
-              context.dataIndex
-            ] as number;
-            const deposits = context.chart.data.datasets[1].data[
-              context.dataIndex
-            ] as number;
-            const total = savings + deposits;
-
-            if (total >= 0.1) {
-              // Show for all values
-              // Create a multi-line label showing both values
-              const savingsFormatted = savings.toFixed(savings >= 10 ? 0 : 1);
-              const depositsFormatted = deposits.toFixed(
-                deposits >= 10 ? 0 : 1,
-              );
-              return `S:${savingsFormatted}\nD:${depositsFormatted}`;
+          display: (context: Context) => {
+            if (context.datasetIndex === 1) {
+              const savings = context.chart.data.datasets[0].data[
+                context.dataIndex
+              ] as number;
+              const deposits = context.chart.data.datasets[1].data[
+                context.dataIndex
+              ] as number;
+              const total = savings + deposits;
+              return total >= 0.1;
             }
-          }
-          return "";
+            return false;
+          },
+          padding: {
+            right: 4,
+          },
+          offset: 8,
         },
-        display: (context: Context) => {
-          // Only show on deposits dataset (top of stack)
-          if (context.datasetIndex === 1) {
-            const savings = context.chart.data.datasets[0].data[
-              context.dataIndex
-            ] as number;
-            const deposits = context.chart.data.datasets[1].data[
-              context.dataIndex
-            ] as number;
-            const total = savings + deposits;
-            return total >= 0.1; // Show for all values
-          }
-          return false;
-        },
+      },
+      layout: {
         padding: {
-          right: 4, // Add padding to prevent overlap with chart edge
+          left: 10,
+          right: 80,
+          top: 40,
+          bottom: 20,
         },
-        offset: 8, // Move labels further away from bars
       },
-    },
-    layout: {
-      padding: {
-        left: 10,
-        right: 80, // Increased right padding for labels
-        top: 40,
-        bottom: 20,
-      },
-    },
+    };
   };
 
   if (!chartData) {
@@ -282,7 +415,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
         <div
           className="text-center p-3 text-gray-500 flex items-center justify-center"
           style={{
-            height: "360px",
+            height: "300px",
           }}
         >
           <div>
@@ -300,16 +433,20 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({
 
   return (
     <div className="bg-white rounded-lg my-3 p-3 shadow-sm border border-gray-200 mb-3">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-3">
         <div className="text-sm font-semibold text-gray-800">
           <span>📊</span> Asset Distribution
         </div>
-        <div className="text-xs text-gray-600 font-normal">
+        <div className="text-xs text-gray-600 font-normal hidden sm:block">
           S=Savings | D=Deposits
         </div>
+        <div className="text-xs text-gray-600 font-normal sm:hidden">
+          S=Sav D=Dep
+        </div>
       </div>
-      <div className="h-[450px] relative">
-        <Bar data={chartData.chartData} options={chartOptions} />
+      {/* Responsive height - taller on mobile to utilize space */}
+      <div className="h-[380px] sm:h-[450px] relative">
+        <Bar data={chartData.chartData} options={getChartOptions()} />
       </div>
     </div>
   );

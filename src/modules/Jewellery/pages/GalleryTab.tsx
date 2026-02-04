@@ -215,8 +215,8 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 max-w-[600px] mx-auto p-0 w-full">
-      {/* Compact Top Bar - All in one row */}
-      <div className="flex items-center gap-0.5 px-1 py-1 bg-white border-b border-gray-200 sticky top-0 z-10 flex-nowrap overflow-x-auto min-h-11 m-0 w-full">
+      {/* Compact Search Bar - DIRECTLY below tabs with no gap */}
+      <div className="flex items-center gap-0.5 px-1 py-1 bg-white border-b border-gray-200 flex-nowrap overflow-x-auto min-h-10 m-0 w-full">
         {/* Back Button */}
         <button
           onClick={() => navigate("/jewellery")}
@@ -275,15 +275,6 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
           </select>
         </div>
 
-        {/* Settings Icon */}
-        <button
-          onClick={() => navigate("/settings")}
-          className="bg-transparent border-none p-1 text-sm cursor-pointer text-gray-700 rounded flex items-center justify-center min-w-7 min-h-7 shrink-0 hover:bg-gray-100"
-          title="Settings"
-        >
-          ⚙️
-        </button>
-
         {/* Show Inactive Toggle (very small) */}
         <label
           className="flex items-center gap-0.5 text-xs text-gray-500 cursor-pointer whitespace-nowrap shrink-0 p-0.5 rounded bg-gray-100 min-w-8.5 hover:bg-gray-200"
@@ -299,8 +290,8 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
         </label>
       </div>
 
-      {/* Gallery Grid - Starts immediately below top bar */}
-      <div className="flex-1 p-0 bg-slate-50 m-0 w-full">
+      {/* Gallery Grid */}
+      <div className="flex-1 bg-slate-50 m-0 w-full p-0">
         {filteredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] p-5 text-gray-500 m-0">
             <div className="text-5xl mb-3 opacity-50">🖼️</div>

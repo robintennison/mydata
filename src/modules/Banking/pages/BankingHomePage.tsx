@@ -267,67 +267,62 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
   // Dashboard content component with HistoryTab-style table and Pie Charts
   const DashboardContent = () => (
     <>
-      {/* Top 3 Cards in Single Row */}
-      <div className="px-4 py-3">
-        <div className="grid grid-cols-3 gap-2.5 mb-4">
+      {/* Top 3 Cards in Single Row - Compact */}
+      <div className="px-2 py-2">
+        <div className="grid grid-cols-3 gap-1.5 mb-3">
           {/* Total Savings Card */}
-          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
-            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-              Savings
-            </div>
-            <div className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs text-gray-500 mb-0.5">Savings</div>
+            <div className="text-base font-bold text-gray-900 leading-tight">
               {formatLakhs(totalSavings)}
             </div>
           </div>
 
           {/* Total Deposits Card */}
-          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
-            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-              Deposits
-            </div>
-            <div className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs text-gray-500 mb-0.5">Deposits</div>
+            <div className="text-base font-bold text-gray-900 leading-tight">
               {formatLakhs(totalDeposits)}
             </div>
           </div>
 
           {/* Total Bank Balance Card */}
-          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
-            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-              Total
-            </div>
-            <div className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs text-gray-500 mb-0.5">Total</div>
+            <div className="text-base font-bold text-gray-900 leading-tight">
               {formatLakhs(totalBankBalance)}
             </div>
           </div>
         </div>
       </div>
 
-      {/* EMW Section - Single Row */}
-      <div className="px-4 py-3">
-        <div className="grid grid-cols-3 gap-2.5 mb-4">
+      {/* EMW Section - Single Row - Compact */}
+      <div className="px-2 py-2">
+        <div className="grid grid-cols-3 gap-1.5 mb-3">
           {/* EMW Card */}
-          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
-            <div className="text-xs font-semibold text-blue-800 mb-1.5 flex items-center justify-center gap-1">
-              <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-xs">
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs font-semibold text-blue-800 mb-1 flex items-center justify-center gap-1">
+              <span className="bg-blue-500 text-white px-1 py-0.5 rounded text-xs">
                 EMW
               </span>
-              <span>Monthly</span>
+              <span className="hidden sm:inline">Monthly</span>
+              <span className="sm:hidden">Mon</span>
             </div>
-            <div className="text-lg font-bold text-blue-800">
+            <div className="text-base font-bold text-blue-800 leading-tight">
               {formatLakhs(emwAmount)}
             </div>
-            <div className="text-xs text-gray-500 mt-1">
-              {emwSettings.interestRate}% interest
+            <div className="text-xs text-gray-500 mt-0.5">
+              {emwSettings.interestRate}%
             </div>
           </div>
 
           {/* Actual Rate Card */}
-          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
-            <div className="text-xs font-semibold text-gray-700 mb-1.5">
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs font-semibold text-gray-700 mb-1">
               Actual (6m)
             </div>
             <div
-              className={`text-lg font-bold ${
+              className={`text-base font-bold leading-tight ${
                 actualWithdrawalData.monthlyRate >= emwAmount
                   ? "text-red-600"
                   : "text-green-600"
@@ -335,52 +330,54 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
             >
               {formatLakhs(actualWithdrawalData.monthlyRate)}
             </div>
-            <div className="text-xs text-gray-500 mt-1">avg/month</div>
+            <div className="text-xs text-gray-500 mt-0.5">avg/month</div>
           </div>
 
           {/* Last Month Card */}
-          <div className="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
-            <div className="text-xs font-semibold text-gray-700 mb-1.5">
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs font-semibold text-gray-700 mb-1">
               Last Month
             </div>
             <div
-              className={`text-lg font-bold ${
+              className={`text-base font-bold leading-tight ${
                 lastMonthWithdrawal >= 0 ? "text-red-600" : "text-green-600"
               }`}
             >
               {lastMonthWithdrawal >= 0 ? "-" : "+"}
               {formatLakhs(Math.abs(lastMonthWithdrawal))}
             </div>
-            <div className="text-xs text-gray-500 mt-1">
-              {lastMonthWithdrawal >= 0 ? "withdrawal" : "deposit"}
+            <div className="text-xs text-gray-500 mt-0.5">
+              {lastMonthWithdrawal >= 0 ? "withdraw" : "deposit"}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent History */}
-      <div className="px-4 pb-3">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <div className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+      {/* Recent History - Compact */}
+      <div className="px-2 pb-2">
+        <div className="bg-white rounded-lg p-2 shadow-sm border border-gray-100">
+          <div className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-1">
             <span>📅</span>
-            <span>Recent History (Last 6 Months)</span>
+            <span>Recent History (6 Months)</span>
           </div>
 
           {last6Months.length === 0 ? (
-            <div className="text-center py-3 text-gray-500 text-sm">
+            <div className="text-center py-2 text-gray-500 text-xs">
               No history data available
             </div>
           ) : (
             <div>
-              {/* Table Header - Same as HistoryTab */}
-              <div className="flex items-center py-2 px-1 bg-gray-50 border-b border-gray-200 font-semibold text-xs text-gray-700">
-                <div className="flex-2 px-1">Month</div>
-                <div className="flex-2 px-1 text-right">Savings</div>
-                <div className="flex-2 px-1 text-right">Deposits</div>
-                <div className="flex-2 px-1 text-right">Total</div>
+              {/* Table Header - Compact */}
+              <div className="flex items-center py-1 px-0 bg-gray-50 border-b border-gray-200 font-semibold text-xs text-gray-700">
+                <div className="flex-1 px-0.5 min-w-[45px]">Month</div>
+                <div className="flex-1 px-0.5 text-right min-w-[40px]">Sav</div>
+                <div className="flex-1 px-0.5 text-right min-w-[40px]">Dep</div>
+                <div className="flex-1 px-0.5 text-right min-w-[40px]">
+                  Total
+                </div>
               </div>
 
-              {/* Table Rows - Limited to 6 records */}
+              {/* Table Rows - Compact */}
               {last6Months.map((record) => {
                 // Use formatLakhs function to convert rupees to lakhs with 2 decimals
                 const savingsDisplay = formatLakhs(record.savings);
@@ -400,43 +397,42 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
                 return (
                   <div
                     key={record.month}
-                    className="flex items-center py-2 px-1 border-b border-gray-100 min-h-8"
+                    className="flex items-center py-1 px-0 border-b border-gray-100 min-h-6 last:border-b-0"
                   >
                     {/* Month */}
-                    <div className="flex-2 px-1 text-sm text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap">
+                    <div className="flex-1 px-0.5 text-xs text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap min-w-[45px]">
                       {monthName}
                     </div>
 
                     {/* Savings */}
-                    <div className="flex-2 px-1 text-sm font-semibold text-green-600 text-right">
+                    <div className="flex-1 px-0.5 text-xs font-semibold text-green-600 text-right min-w-[40px]">
                       {savingsDisplay}
                     </div>
 
                     {/* Deposits */}
-                    <div className="flex-2 px-1 text-sm font-semibold text-orange-500 text-right">
+                    <div className="flex-1 px-0.5 text-xs font-semibold text-orange-500 text-right min-w-[40px]">
                       {depositsDisplay}
                     </div>
 
                     {/* Total */}
-                    <div className="flex-2 px-1 text-sm font-semibold text-blue-600 text-right">
+                    <div className="flex-1 px-0.5 text-xs font-semibold text-blue-600 text-right min-w-[40px]">
                       {totalDisplay}
                     </div>
                   </div>
                 );
               })}
 
-              {/* Show count of records */}
-              <div className="text-xs text-gray-400 text-center py-2 border-t border-gray-100 bg-gray-50">
-                Showing {Math.min(last6Months.length, 6)} of {history.length}{" "}
-                records
+              {/* Show count of records - Compact */}
+              <div className="text-xs text-gray-400 text-center py-1 border-t border-gray-100 bg-gray-50">
+                {Math.min(last6Months.length, 6)} of {history.length} records
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Pie Charts Section - Below Recent History Table (One below the other) */}
-      <div className="flex flex-col gap-4 px-4 pb-4">
+      {/* Pie Charts Section - Below Recent History Table */}
+      <div className="flex flex-col gap-2 px-2 pb-2">
         {/* Top: Savings Pie Chart */}
         <SavingsPieChart accounts={accounts} />
 
@@ -454,8 +450,8 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <div className="w-10 h-10 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-        <p className="mt-4 text-gray-500">Loading banking data...</p>
+        <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+        <p className="mt-3 text-sm text-gray-500">Loading banking data...</p>
       </div>
     );
   }
@@ -469,79 +465,84 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         addButtonTitle={getAddButtonTitle()}
       />
 
-      {/* Tabs Navigation */}
+      {/* Tabs Navigation - Mobile First */}
       <div className="w-full bg-white border-b border-gray-200 sticky top-14 z-10">
-        <div className="flex overflow-x-auto px-1 gap-0.5">
+        <div className="flex overflow-x-auto px-1 py-0 gap-0.5">
           <button
             onClick={() => setActiveTab("dashboard")}
-            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "dashboard"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="Dashboard"
           >
-            📊 Dash
+            <span className="text-xs">📊</span>
+            <span className="hidden xs:inline">Dash</span>
           </button>
 
           <button
             onClick={() => setActiveTab("accounts")}
-            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "accounts"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="Accounts"
           >
-            👥 Acct
+            <span className="text-xs">👥</span>
+            <span className="hidden xs:inline">Acct</span>
           </button>
 
           <button
             onClick={() => setActiveTab("deposits")}
-            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "deposits"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="Deposits"
           >
-            💰 Depo
+            <span className="text-xs">💰</span>
+            <span className="hidden xs:inline">Depo</span>
           </button>
 
           <button
             onClick={() => setActiveTab("history")}
-            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "history"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="History"
           >
-            📅 Hist
+            <span className="text-xs">📅</span>
+            <span className="hidden xs:inline">Hist</span>
           </button>
 
           <button
             onClick={() => setActiveTab("summary")}
-            className={`flex-1 min-w-0 px-1 py-2.5 border-none text-xs font-semibold cursor-pointer whitespace-nowrap flex items-center justify-center gap-1 transition-all duration-200 ${
+            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "summary"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
             title="Summary"
           >
-            📈 Summ
+            <span className="text-xs">📈</span>
+            <span className="hidden xs:inline">Summ</span>
           </button>
         </div>
       </div>
 
-      {/* Tab Content */}
+      {/* Tab Content - Mobile First */}
       <div
-        className={`flex-1 w-full max-w-2xl mx-auto overflow-y-auto ${
+        className={`flex-1 w-full mx-auto overflow-y-auto ${
+          activeTab === "dashboard" ||
           activeTab === "history" ||
-          activeTab === "summary" ||
-          activeTab === "dashboard"
-            ? "px-1 py-2" // Reduced horizontal padding
-            : "p-4"
+          activeTab === "summary"
+            ? "px-0" // No horizontal padding
+            : "p-2" // Small padding for other tabs
         }`}
       >
         {activeTab === "dashboard" && <DashboardContent />}

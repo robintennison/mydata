@@ -170,31 +170,32 @@ const BillsList: React.FC = () => {
                     handleViewLinkedJewellery(bill.id)
                   }
                 >
-                  {/* Single Row Layout */}
-                  <div className="flex items-center justify-between min-w-0">
+                  {/* Single Row Layout - Compact for mobile */}
+                  <div className="flex items-center justify-between min-w-0 gap-2">
                     {/* Left side: Notes and item count */}
-                    <div className="flex-1 min-w-0 pr-3">
-                      <div className="flex items-center gap-3">
-                        {/* Notes */}
-                        <div className="font-medium text-gray-900 text-sm truncate">
-                          {bill.notes || "No notes"}
-                        </div>
-
-                        {/* Item count badge (only if has items) */}
-                        {bill.hasLinkedJewellery && (
-                          <div className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 flex-shrink-0">
-                            <span>🔗</span>
-                            <span>
-                              {bill.jewelleryCount} item
-                              {bill.jewelleryCount !== 1 ? "s" : ""}
-                            </span>
-                          </div>
-                        )}
+                    <div className="flex-1 min-w-0 flex items-center gap-2 overflow-hidden">
+                      {/* Notes - will truncate on small screens */}
+                      <div className="font-medium text-gray-900 text-sm truncate">
+                        {bill.notes || "No notes"}
                       </div>
+
+                      {/* Item count badge (only if has items) - smaller on mobile */}
+                      {bill.hasLinkedJewellery && (
+                        <div className="flex-shrink-0 inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 whitespace-nowrap">
+                          <span className="text-[10px]">🔗</span>
+                          <span className="hidden xs:inline">
+                            {bill.jewelleryCount} item
+                            {bill.jewelleryCount !== 1 ? "s" : ""}
+                          </span>
+                          <span className="xs:hidden">
+                            {bill.jewelleryCount}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Right side: Action buttons */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Right side: Action buttons - always visible */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       {/* Edit Icon */}
                       <button
                         onClick={(e) => handleEditBill(e, bill.id)}

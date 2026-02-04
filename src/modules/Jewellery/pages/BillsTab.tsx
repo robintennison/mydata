@@ -306,65 +306,31 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
                     handleViewLinkedJewellery(bill.id)
                   }
                 >
-                  {/* Single Row Layout */}
+                  {/* Single Row Layout - SIMPLIFIED */}
                   <div className="flex items-center justify-between">
-                    {/* Bill Info */}
+                    {/* Left side: Notes and item count */}
                     <div className="flex-1 min-w-0 pr-2.5">
-                      <div className="font-medium text-sm text-gray-900 mb-1">
-                        {bill.notes || "No notes"}
-                      </div>
-
-                      {/* Link Status Indicator */}
-                      <div className="flex items-center gap-1.5">
-                        <div
-                          className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded-full ${
-                            bill.hasLinkedJewellery
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-gray-100 text-gray-500"
-                          }`}
-                        >
-                          {bill.hasLinkedJewellery ? (
-                            <>
-                              <span>🔗</span>
-                              <span>
-                                {bill.jewelleryCount} item
-                                {bill.jewelleryCount !== 1 ? "s" : ""}
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <span>❌</span>
-                              <span>No jewellery</span>
-                            </>
-                          )}
+                      <div className="flex items-center gap-2">
+                        {/* Notes */}
+                        <div className="font-medium text-sm text-gray-900 truncate">
+                          {bill.notes || "No notes"}
                         </div>
 
-                        {/* Bill ID (truncated) */}
-                        <div className="text-xs text-gray-400 font-mono">
-                          {bill.id.substring(0, 8)}...
-                        </div>
+                        {/* Item count badge (only if has items) */}
+                        {bill.hasLinkedJewellery && (
+                          <div className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 flex-shrink-0">
+                            <span>🔗</span>
+                            <span>
+                              {bill.jewelleryCount} item
+                              {bill.jewelleryCount !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    {/* Action Icons */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {/* View Linked Jewellery Button (only if has links) */}
-                      {bill.hasLinkedJewellery && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewLinkedJewellery(bill.id);
-                          }}
-                          className="bg-transparent border-none text-sm text-blue-500 cursor-pointer p-1.5 rounded flex items-center flex-col"
-                          title={`View ${bill.jewelleryCount} linked item${bill.jewelleryCount !== 1 ? "s" : ""}`}
-                        >
-                          <span>🔍</span>
-                          <span className="text-[9px] mt-0.5">
-                            {bill.jewelleryCount}
-                          </span>
-                        </button>
-                      )}
-
+                    {/* Right side: Action buttons */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       {/* Edit Icon */}
                       <button
                         onClick={(e) => handleEditBill(e, bill.id)}
@@ -374,7 +340,7 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
                         ✏️
                       </button>
 
-                      {/* Delete Icon - Show warning if bill has linked jewellery */}
+                      {/* Delete Icon */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

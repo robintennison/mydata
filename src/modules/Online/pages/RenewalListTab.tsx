@@ -94,6 +94,42 @@ const RenewalListTab: React.FC = () => {
     }
   };
 
+  const getDaysUntilExpiry = (endDate: number) => {
+    const now = Date.now();
+    return Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+  };
+
+  const getStatusInfo = (endDate: number) => {
+    const daysUntilExpiry = getDaysUntilExpiry(endDate);
+    const now = Date.now();
+
+    if (endDate < now) {
+      return {
+        classes: "bg-red-100 text-red-700",
+        text: "Expired",
+        icon: "🔴",
+      };
+    } else if (daysUntilExpiry <= 7) {
+      return {
+        classes: "bg-yellow-100 text-yellow-800",
+        text: `${daysUntilExpiry}d`,
+        icon: "🟡",
+      };
+    } else if (daysUntilExpiry <= 30) {
+      return {
+        classes: "bg-blue-100 text-blue-700",
+        text: `${daysUntilExpiry}d`,
+        icon: "🔵",
+      };
+    } else {
+      return {
+        classes: "bg-green-100 text-green-700",
+        text: "Active",
+        icon: "🟢",
+      };
+    }
+  };
+
   const filteredRenewals = renewals.filter(
     (renewal) =>
       renewal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -166,32 +202,10 @@ const RenewalListTab: React.FC = () => {
               )}
             </div>
 
-            {/* Renewals List */}
-            <div className="space-y-2 pb-4">
+            {/* Renewals List - Single Row Layout */}
+            <div className="space-y-1.5 pb-4">
               {filteredRenewals.map((renewal) => {
-                const now = Date.now();
-                const endDate = renewal.endDate;
-                const daysUntilExpiry = Math.ceil(
-                  (endDate - now) / (1000 * 60 * 60 * 24),
-                );
-
-                // Determine status
-                let statusClasses = "";
-                let statusText = "";
-
-                if (endDate < now) {
-                  statusClasses = "bg-red-100 text-red-700";
-                  statusText = "Expired";
-                } else if (daysUntilExpiry <= 7) {
-                  statusClasses = "bg-yellow-100 text-yellow-800";
-                  statusText = `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? "s" : ""} left`;
-                } else if (daysUntilExpiry <= 30) {
-                  statusClasses = "bg-blue-100 text-blue-700";
-                  statusText = `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? "s" : ""} left`;
-                } else {
-                  statusClasses = "bg-green-100 text-green-700";
-                  statusText = "Active";
-                }
+                const statusInfo = getStatusInfo(renewal.endDate);
 
                 return (
                   <div
@@ -208,54 +222,59 @@ const RenewalListTab: React.FC = () => {
                     }}
                   >
                     <div className="p-3">
-                      <div className="flex items-start">
+                      <div className="flex items-center justify-between gap-2">
+                        {/* Left: Name */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-gray-900 truncate">
                               {renewal.name}
                             </span>
-                            <span
-                              className={cls(
-                                "text-xs font-semibold px-2 py-0.5 rounded",
-                                statusClasses,
-                              )}
-                            >
-                              {statusText}
-                            </span>
-                          </div>
-
-                          {renewal.comments && (
-                            <div className="text-xs text-gray-600 truncate leading-relaxed mb-2">
-                              {renewal.comments}
-                            </div>
-                          )}
-
-                          <div className="text-xs text-gray-500">
-                            Expires: {formatDate(renewal.endDate)}
                           </div>
                         </div>
 
-                        <div className="ml-2 flex gap-1">
-                          <button
-                            className="px-2.5 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/online/renewals/edit/${renewal.id}`);
-                            }}
-                            title="Edit"
+                        {/* Middle: End Date */}
+                        <div className="flex items-center gap-1 min-w-[100px] justify-end">
+                          <span className="text-xs text-gray-500">
+                            {formatDate(renewal.endDate)}
+                          </span>
+                        </div>
+
+                        {/* Right: Status and Actions */}
+                        <div className="flex items-center gap-2 ml-2">
+                          {/* Status Indicator */}
+                          <div
+                            className={cls(
+                              "text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1",
+                              statusInfo.classes,
+                            )}
                           >
-                            ✏️ Edit
-                          </button>
-                          <button
-                            className="px-2.5 py-1.5 bg-red-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(renewal.id, renewal.name);
-                            }}
-                            title="Delete"
-                          >
-                            🗑️
-                          </button>
+                            <span>{statusInfo.icon}</span>
+                            <span>{statusInfo.text}</span>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-1">
+                            <button
+                              className="px-2 py-1.5 bg-blue-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/online/renewals/edit/${renewal.id}`);
+                              }}
+                              title="Edit"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              className="px-2 py-1.5 bg-red-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(renewal.id, renewal.name);
+                              }}
+                              title="Delete"
+                            >
+                              🗑️
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

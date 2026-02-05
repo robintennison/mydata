@@ -392,11 +392,6 @@ const MyDataHomepage: React.FC = () => {
                           </span>
                         </div>
                         <div className="flex items-center overflow-hidden text-center flex-1 min-w-0">
-                          <span className="text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis text-xs sm:text-sm text-center">
-                            {getShortComments(renewal.comments || "")}
-                          </span>
-                        </div>
-                        <div className="flex items-center overflow-hidden text-center flex-1 min-w-0">
                           <span className="text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis text-xs sm:text-sm text-right min-w-[60px] sm:min-w-[70px]">
                             {formatDateShort(renewal.endDate)}
                             {isImmediate && (

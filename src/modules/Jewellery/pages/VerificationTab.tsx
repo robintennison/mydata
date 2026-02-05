@@ -38,6 +38,9 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
   const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
   const [notesText, setNotesText] = useState<Record<string, string>>({});
 
+  // Add state for showing all items
+  const [showAllItems, setShowAllItems] = useState(false);
+
   // Sort state
   const [sortField, setSortField] = useState<SortField>("code");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
@@ -479,7 +482,9 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
         </div>
 
         <button
-          onClick={() => navigate("/jewellery/verification")}
+          onClick={() =>
+            navigate("/jewellery", { state: { activeTab: "verification" } })
+          }
           className="w-full py-2.5 px-4 bg-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           Start Verification
@@ -698,207 +703,226 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
             </button>
           </div>
         ) : (
-          sortedItems.slice(0, 15).map((item) => {
-            const isUpdating = activeUpdate === item.id;
-            const isExpanded = expandedNotesId === item.id;
-            const hasNotes =
-              item.verificationNotes &&
-              item.verificationNotes.trim().length > 0;
-            const lastVerifiedText = formatLastVerified(item.lastVerified);
-            const isRecentlyVerified =
-              item.verificationStatus === VerificationStatus.VERIFIED;
+          // FIXED: Use showAllItems state to determine how many items to show
+          sortedItems
+            .slice(0, showAllItems ? sortedItems.length : 15)
+            .map((item) => {
+              const isUpdating = activeUpdate === item.id;
+              const isExpanded = expandedNotesId === item.id;
+              const hasNotes =
+                item.verificationNotes &&
+                item.verificationNotes.trim().length > 0;
+              const lastVerifiedText = formatLastVerified(item.lastVerified);
+              const isRecentlyVerified =
+                item.verificationStatus === VerificationStatus.VERIFIED;
 
-            return (
-              <div key={item.id} className="py-2 border-b border-gray-100">
-                {/* LINE 1: Image + Code + Weight + Date + Buttons (ALL ON SAME LINE) */}
-                <div className="flex items-center gap-1.5 mb-1">
-                  {/* Jewellery Image */}
-                  <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {item.imageUrl ? (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.code}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-base">💎</span>
+              return (
+                <div key={item.id} className="py-2 border-b border-gray-100">
+                  {/* LINE 1: Image + Code + Weight + Date + Buttons (ALL ON SAME LINE) */}
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {/* Jewellery Image */}
+                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.code}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-base">💎</span>
+                      )}
+                    </div>
+
+                    {/* Status Indicator */}
+                    <div
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{
+                        backgroundColor: getStatusColor(
+                          item.verificationStatus,
+                        ),
+                      }}
+                    />
+
+                    {/* Item Code and Weight - Compact on same line */}
+                    <div className="flex items-baseline gap-1.5 flex-1 min-w-0 overflow-hidden">
+                      <div className="font-semibold text-sm text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">
+                        {item.code}
+                      </div>
+                      <div className="text-xs text-gray-500 whitespace-nowrap">
+                        {item.weight}g
+                      </div>
+                    </div>
+
+                    {/* Last Verified Date - Compact */}
+                    <div className="min-w-10 max-w-12.5 text-center flex-shrink-0 mr-1">
+                      <div
+                        className={`text-xs px-1 py-0.5 rounded whitespace-nowrap ${isRecentlyVerified ? "text-emerald-600 font-medium bg-emerald-50" : "text-gray-500"}`}
+                        title={
+                          item.lastVerified
+                            ? new Date(item.lastVerified).toLocaleDateString()
+                            : "Never verified"
+                        }
+                      >
+                        {lastVerifiedText}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons - Smaller on mobile */}
+                    <div className="flex gap-0.5 items-center flex-shrink-0">
+                      <button
+                        onClick={() =>
+                          handleUpdateVerification(
+                            item.id,
+                            VerificationStatus.VERIFIED,
+                          )
+                        }
+                        disabled={isUpdating}
+                        title="Mark as Verified"
+                        className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                          item.verificationStatus ===
+                          VerificationStatus.VERIFIED
+                            ? "bg-emerald-600 text-white border-emerald-600 focus:ring-emerald-500"
+                            : "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 focus:ring-emerald-300"
+                        } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
+                      >
+                        ✓
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleUpdateVerification(
+                            item.id,
+                            VerificationStatus.NOT_VERIFIED,
+                          )
+                        }
+                        disabled={isUpdating}
+                        title="Mark as Not Verified"
+                        className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                          item.verificationStatus ===
+                          VerificationStatus.NOT_VERIFIED
+                            ? "bg-amber-500 text-white border-amber-500 focus:ring-amber-500"
+                            : "bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100 focus:ring-amber-300"
+                        } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
+                      >
+                        !
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleUpdateVerification(
+                            item.id,
+                            VerificationStatus.MISSING,
+                          )
+                        }
+                        disabled={isUpdating}
+                        title="Mark as Missing"
+                        className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                          item.verificationStatus === VerificationStatus.MISSING
+                            ? "bg-red-500 text-white border-red-500 focus:ring-red-500"
+                            : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 focus:ring-red-300"
+                        } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
+                      >
+                        ✗
+                      </button>
+
+                      <button
+                        onClick={() => toggleNotes(item)}
+                        title={hasNotes ? "View notes" : "Add notes"}
+                        className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer border focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-transform duration-200 ${
+                          hasNotes
+                            ? "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200"
+                            : "bg-transparent text-gray-500 border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                        } ${isExpanded ? "rotate-180" : ""}`}
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* LINE 2: Location + Bought For only */}
+                  <div className="flex items-center gap-1.5 pl-11 overflow-hidden">
+                    {/* Location - Tiny badge */}
+                    {item.location && (
+                      <div
+                        className="text-xs text-gray-700 bg-gray-100 px-1 py-0.5 rounded whitespace-nowrap overflow-hidden text-ellipsis max-w-20 flex-shrink-0"
+                        title={item.location}
+                      >
+                        {item.location}
+                      </div>
+                    )}
+
+                    {/* Bought For - Tiny badge */}
+                    {item.boughtFor && (
+                      <div
+                        className="text-xs text-blue-800 bg-blue-100 px-1 py-0.5 rounded whitespace-nowrap overflow-hidden text-ellipsis max-w-20 flex-shrink-0"
+                        title={item.boughtFor}
+                      >
+                        {item.boughtFor}
+                      </div>
                     )}
                   </div>
 
-                  {/* Status Indicator */}
-                  <div
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{
-                      backgroundColor: getStatusColor(item.verificationStatus),
-                    }}
-                  />
-
-                  {/* Item Code and Weight - Compact on same line */}
-                  <div className="flex items-baseline gap-1.5 flex-1 min-w-0 overflow-hidden">
-                    <div className="font-semibold text-sm text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">
-                      {item.code}
-                    </div>
-                    <div className="text-xs text-gray-500 whitespace-nowrap">
-                      {item.weight}g
-                    </div>
-                  </div>
-
-                  {/* Last Verified Date - Compact */}
-                  <div className="min-w-10 max-w-12.5 text-center flex-shrink-0 mr-1">
-                    <div
-                      className={`text-xs px-1 py-0.5 rounded whitespace-nowrap ${isRecentlyVerified ? "text-emerald-600 font-medium bg-emerald-50" : "text-gray-500"}`}
-                      title={
-                        item.lastVerified
-                          ? new Date(item.lastVerified).toLocaleDateString()
-                          : "Never verified"
-                      }
-                    >
-                      {lastVerifiedText}
-                    </div>
-                  </div>
-
-                  {/* Action Buttons - Smaller on mobile */}
-                  <div className="flex gap-0.5 items-center flex-shrink-0">
-                    <button
-                      onClick={() =>
-                        handleUpdateVerification(
-                          item.id,
-                          VerificationStatus.VERIFIED,
-                        )
-                      }
-                      disabled={isUpdating}
-                      title="Mark as Verified"
-                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                        item.verificationStatus === VerificationStatus.VERIFIED
-                          ? "bg-emerald-600 text-white border-emerald-600 focus:ring-emerald-500"
-                          : "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 focus:ring-emerald-300"
-                      } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
-                    >
-                      ✓
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        handleUpdateVerification(
-                          item.id,
-                          VerificationStatus.NOT_VERIFIED,
-                        )
-                      }
-                      disabled={isUpdating}
-                      title="Mark as Not Verified"
-                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                        item.verificationStatus ===
-                        VerificationStatus.NOT_VERIFIED
-                          ? "bg-amber-500 text-white border-amber-500 focus:ring-amber-500"
-                          : "bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100 focus:ring-amber-300"
-                      } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
-                    >
-                      !
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        handleUpdateVerification(
-                          item.id,
-                          VerificationStatus.MISSING,
-                        )
-                      }
-                      disabled={isUpdating}
-                      title="Mark as Missing"
-                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                        item.verificationStatus === VerificationStatus.MISSING
-                          ? "bg-red-500 text-white border-red-500 focus:ring-red-500"
-                          : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 focus:ring-red-300"
-                      } border ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
-                    >
-                      ✗
-                    </button>
-
-                    <button
-                      onClick={() => toggleNotes(item)}
-                      title={hasNotes ? "View notes" : "Add notes"}
-                      className={`w-6 h-6 flex items-center justify-center rounded text-xs flex-shrink-0 cursor-pointer border focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-transform duration-200 ${
-                        hasNotes
-                          ? "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200"
-                          : "bg-transparent text-gray-500 border-gray-300 hover:bg-gray-100 hover:text-gray-700"
-                      } ${isExpanded ? "rotate-180" : ""}`}
-                    >
-                      ↓
-                    </button>
-                  </div>
-                </div>
-
-                {/* LINE 2: Location + Bought For only */}
-                <div className="flex items-center gap-1.5 pl-11 overflow-hidden">
-                  {/* Location - Tiny badge */}
-                  {item.location && (
-                    <div
-                      className="text-xs text-gray-700 bg-gray-100 px-1 py-0.5 rounded whitespace-nowrap overflow-hidden text-ellipsis max-w-20 flex-shrink-0"
-                      title={item.location}
-                    >
-                      {item.location}
-                    </div>
-                  )}
-
-                  {/* Bought For - Tiny badge */}
-                  {item.boughtFor && (
-                    <div
-                      className="text-xs text-blue-800 bg-blue-100 px-1 py-0.5 rounded whitespace-nowrap overflow-hidden text-ellipsis max-w-20 flex-shrink-0"
-                      title={item.boughtFor}
-                    >
-                      {item.boughtFor}
+                  {/* Expanded Notes Section (only when toggled) */}
+                  {isExpanded && (
+                    <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200 ml-11">
+                      <div className="text-xs font-medium text-gray-700 mb-1.5">
+                        Verification Notes:
+                      </div>
+                      <textarea
+                        value={notesText[item.id] || ""}
+                        onChange={(e) =>
+                          setNotesText((prev) => ({
+                            ...prev,
+                            [item.id]: e.target.value,
+                          }))
+                        }
+                        placeholder="Add verification notes..."
+                        className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm font-inherit resize-y min-h-10 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isUpdating}
+                      />
+                      <div className="flex gap-1.5 justify-end">
+                        <button
+                          onClick={() => saveNotes(item.id)}
+                          className={`px-2.5 py-1 bg-blue-600 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
+                          disabled={isUpdating}
+                        >
+                          {isUpdating ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          onClick={() => setExpandedNotesId(null)}
+                          className={`px-2.5 py-1 bg-gray-100 text-gray-700 border-none rounded cursor-pointer text-xs font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
+                          disabled={isUpdating}
+                        >
+                          Close
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
-
-                {/* Expanded Notes Section (only when toggled) */}
-                {isExpanded && (
-                  <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200 ml-11">
-                    <div className="text-xs font-medium text-gray-700 mb-1.5">
-                      Verification Notes:
-                    </div>
-                    <textarea
-                      value={notesText[item.id] || ""}
-                      onChange={(e) =>
-                        setNotesText((prev) => ({
-                          ...prev,
-                          [item.id]: e.target.value,
-                        }))
-                      }
-                      placeholder="Add verification notes..."
-                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm font-inherit resize-y min-h-10 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      disabled={isUpdating}
-                    />
-                    <div className="flex gap-1.5 justify-end">
-                      <button
-                        onClick={() => saveNotes(item.id)}
-                        className={`px-2.5 py-1 bg-blue-600 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
-                        disabled={isUpdating}
-                      >
-                        {isUpdating ? "Saving..." : "Save"}
-                      </button>
-                      <button
-                        onClick={() => setExpandedNotesId(null)}
-                        className={`px-2.5 py-1 bg-gray-100 text-gray-700 border-none rounded cursor-pointer text-xs font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 ${isUpdating ? "opacity-70 cursor-not-allowed" : ""}`}
-                        disabled={isUpdating}
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })
+              );
+            })
         )}
 
-        {sortedItems.length > 15 && (
+        {/* FIXED: Show "View more" button only when not showing all items */}
+        {!showAllItems && sortedItems.length > 15 && (
           <div className="text-center py-3 border-t border-gray-100">
             <button
-              onClick={() => navigate("/jewellery/verification")}
+              onClick={() => setShowAllItems(true)}
               className="px-4 py-2 bg-transparent text-blue-600 border border-blue-600 rounded cursor-pointer text-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               View {sortedItems.length - 15} more items
+            </button>
+          </div>
+        )}
+
+        {/* FIXED: Show "Show less" button when showing all items */}
+        {showAllItems && sortedItems.length > 15 && (
+          <div className="text-center py-3 border-t border-gray-100">
+            <button
+              onClick={() => setShowAllItems(false)}
+              className="px-4 py-2 bg-transparent text-blue-600 border border-blue-600 rounded cursor-pointer text-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Show less
             </button>
           </div>
         )}

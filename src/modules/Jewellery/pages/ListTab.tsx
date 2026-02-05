@@ -355,70 +355,73 @@ const ListTab: React.FC = () => {
 
   return (
     <div className="w-full p-0 m-0">
-      {/* Search Bar */}
-      <div className="mb-2">
-        <div className="relative w-full">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full py-2.5 pl-4 pr-10 rounded-lg border border-gray-200 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-            🔍
+      {/* Search and Filter Buttons in One Row */}
+      <div className="mb-3">
+        <div className="flex items-center gap-1.5">
+          {/* Search Box - Takes remaining space */}
+          <div className="flex-1 min-w-0">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full py-2 pl-3 pr-8 rounded-lg border border-gray-200 text-xs bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                🔍
+              </div>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-7 top-1/2 -translate-y-1/2 bg-transparent text-gray-400 cursor-pointer text-sm p-0 hover:text-gray-600 focus:outline-none"
+                >
+                  ×
+                </button>
+              )}
+            </div>
           </div>
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute right-9 top-1/2 -translate-y-1/2 bg-transparent text-gray-400 cursor-pointer text-lg p-0 hover:text-gray-600 focus:outline-none"
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </div>
 
-      {/* Filter Buttons Row */}
-      <div className="mb-2">
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {/* Location Filter */}
+          {/* Location Filter Button */}
           <button
             ref={locationButtonRef}
             onClick={() => {
               setShowBoughtForFilter(false);
               setShowLocationFilter(!showLocationFilter);
             }}
-            className={`px-3 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`px-2.5 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-0.5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
               selectedLocation ? "bg-sky-100 border-sky-200" : "bg-slate-50"
             }`}
             title={`Filter by location${selectedLocation ? `: ${selectedLocation}` : ""}`}
           >
-            📍 Location
+            <span className="text-xs">📍</span>
+            <span className="hidden xs:inline">Loc</span>
           </button>
 
-          {/* Bought For Filter */}
+          {/* Bought For Filter Button */}
           <button
             ref={boughtForButtonRef}
             onClick={() => {
               setShowLocationFilter(false);
               setShowBoughtForFilter(!showBoughtForFilter);
             }}
-            className={`px-3 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`px-2.5 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-0.5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
               selectedBoughtFor ? "bg-sky-100 border-sky-200" : "bg-slate-50"
             }`}
             title={`Filter by purpose${selectedBoughtFor ? `: ${selectedBoughtFor}` : ""}`}
           >
-            🎁 Purpose
+            <span className="text-xs">🎁</span>
+            <span className="hidden xs:inline">Purp</span>
           </button>
 
           {/* Batch Edit Button */}
           <button
             onClick={() => navigate("/jewellery/batch-edit")}
-            className="px-3 py-2 text-xs bg-slate-50 border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2.5 py-2 text-xs bg-slate-50 border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-0.5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
             title="Batch Edit Locations"
           >
-            🔄 Batch Edit
+            <span className="text-xs">🔄</span>
+            <span className="hidden xs:inline">Batch</span>
           </button>
         </div>
       </div>
@@ -444,7 +447,7 @@ const ListTab: React.FC = () => {
       {/* Dropdowns */}
       {showLocationFilter && (
         <div
-          className="location-dropdown fixed bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-[1000] min-w-[180px] max-h-[300px] overflow-y-auto"
+          className="location-dropdown fixed bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-[1000] min-w-[160px] max-h-[300px] overflow-y-auto"
           style={{
             top: `${getDropdownPosition(locationButtonRef).top}px`,
             right: `${getDropdownPosition(locationButtonRef).right}px`,
@@ -485,7 +488,7 @@ const ListTab: React.FC = () => {
 
       {showBoughtForFilter && (
         <div
-          className="boughtfor-dropdown fixed bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-[1000] min-w-[180px] max-h-[300px] overflow-y-auto"
+          className="boughtfor-dropdown fixed bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-[1000] min-w-[160px] max-h-[300px] overflow-y-auto"
           style={{
             top: `${getDropdownPosition(boughtForButtonRef).top}px`,
             right: `${getDropdownPosition(boughtForButtonRef).right}px`,
@@ -529,16 +532,16 @@ const ListTab: React.FC = () => {
       {/* Filter Indicators */}
       {(searchTerm || selectedLocation || selectedBoughtFor) && (
         <div className="px-3 py-1.5 bg-slate-50 border border-gray-200 text-[11px] text-gray-500 flex items-center gap-2.5 mb-3 rounded-md">
-          <div className="flex-1">
+          <div className="flex-1 truncate">
             {searchTerm && <span>Search: "{searchTerm}"</span>}
-            {selectedLocation && <span> • Location: {selectedLocation}</span>}
-            {selectedBoughtFor && <span> • Purpose: {selectedBoughtFor}</span>}
+            {selectedLocation && <span> • Loc: {selectedLocation}</span>}
+            {selectedBoughtFor && <span> • Purp: {selectedBoughtFor}</span>}
           </div>
           <button
             onClick={clearFilters}
             className="bg-red-100 text-red-500 cursor-pointer text-[11px] px-1.5 py-0.5 rounded hover:bg-red-200 focus:outline-none focus:ring-1 focus:ring-red-500"
           >
-            Clear Filters
+            Clear
           </button>
         </div>
       )}

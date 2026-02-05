@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getFirestore,
@@ -18,6 +18,10 @@ const VerificationStatus = {
   NOT_VERIFIED: "Not Verified",
 } as const;
 
+// Sort options
+type SortField = "code" | "lastVerified";
+type SortOrder = "asc" | "desc";
+
 interface VerificationTabProps {
   compact?: boolean;
 }
@@ -33,6 +37,16 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
   const [activeUpdate, setActiveUpdate] = useState<string | null>(null);
   const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
   const [notesText, setNotesText] = useState<Record<string, string>>({});
+
+  // Sort state
+  const [sortField, setSortField] = useState<SortField>("code");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+
+  // Refs for dropdown positioning
+  const locationButtonRef = useRef<HTMLButtonElement>(null);
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
 
   // Fetch jewellery items
   useEffect(() => {
@@ -65,7 +79,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           items.push(item);
         });
 
-        // Sort items by code
+        // Initially sort items by code ascending
         const sortedItems = items.sort((a, b) => {
           return (a.code || "").localeCompare(b.code || "");
         });
@@ -99,6 +113,29 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           item.description.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : locationItems;
+
+  // Sort items
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    let comparison = 0;
+
+    if (sortField === "code") {
+      comparison = (a.code || "").localeCompare(b.code || "");
+    } else if (sortField === "lastVerified") {
+      // Sort by lastVerified date (0 means never verified, should go last in desc order)
+      const dateA = a.lastVerified || 0;
+      const dateB = b.lastVerified || 0;
+
+      if (dateA === 0 && dateB === 0) comparison = 0;
+      else if (dateA === 0)
+        comparison = 1; // Never verified goes last
+      else if (dateB === 0)
+        comparison = -1; // Never verified goes last
+      else comparison = dateA - dateB;
+    }
+
+    // Apply sort order
+    return sortOrder === "asc" ? comparison : -comparison;
+  });
 
   // Statistics - Now based on all filtered items
   const stats = {
@@ -282,6 +319,86 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
     }
   };
 
+  // Handle sort change
+  const handleSortChange = (field: SortField) => {
+    if (sortField === field) {
+      // Toggle order if same field
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // Change field, default to asc
+      setSortField(field);
+      setSortOrder("asc");
+    }
+    setShowSortDropdown(false);
+  };
+
+  // Handle location change
+  const handleLocationChange = (location: string) => {
+    setSelectedLocation(location);
+    setShowLocationDropdown(false);
+  };
+
+  // Get sort button label
+  const getSortLabel = () => {
+    if (sortField === "code") {
+      return sortOrder === "asc" ? "Code ↑" : "Code ↓";
+    } else {
+      return sortOrder === "asc" ? "Date ↑" : "Date ↓";
+    }
+  };
+
+  // Get location button label
+  const getLocationLabel = () => {
+    if (!selectedLocation) return "All";
+    return selectedLocation.length > 8
+      ? `${selectedLocation.substring(0, 8)}...`
+      : selectedLocation;
+  };
+
+  // Get dropdown position
+  const getDropdownPosition = (
+    buttonRef: React.RefObject<HTMLButtonElement | null>,
+  ) => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      return {
+        top: rect.bottom + window.scrollY + 5,
+        right: window.innerWidth - rect.right,
+      };
+    }
+    return { top: 60, right: 20 };
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      if (
+        showLocationDropdown &&
+        locationButtonRef.current &&
+        !locationButtonRef.current.contains(target) &&
+        !target.closest(".location-dropdown")
+      ) {
+        setShowLocationDropdown(false);
+      }
+
+      if (
+        showSortDropdown &&
+        sortButtonRef.current &&
+        !sortButtonRef.current.contains(target) &&
+        !target.closest(".sort-dropdown")
+      ) {
+        setShowSortDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showLocationDropdown, showSortDropdown]);
+
   if (loading) {
     return (
       <div className="text-center p-10 text-gray-400">
@@ -408,37 +525,72 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Search, Filter, Sort in One Row */}
       <div className="p-3 border-b border-gray-100">
-        <div className="flex gap-2 mb-2.5">
-          <input
-            type="text"
-            placeholder="Search items..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-          <select
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-            className="px-3 py-2 border border-gray-200 rounded text-sm min-w-30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        <div className="flex items-center gap-1.5 mb-2.5">
+          {/* Search Box - Takes remaining space */}
+          <div className="flex-1 min-w-0">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full py-2 pl-3 pr-8 rounded-lg border border-gray-200 text-xs bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                🔍
+              </div>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-7 top-1/2 -translate-y-1/2 bg-transparent text-gray-400 cursor-pointer text-sm p-0 hover:text-gray-600 focus:outline-none"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Location Filter Button */}
+          <button
+            ref={locationButtonRef}
+            onClick={() => {
+              setShowSortDropdown(false);
+              setShowLocationDropdown(!showLocationDropdown);
+            }}
+            className={`px-2.5 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-0.5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+              selectedLocation ? "bg-sky-100 border-sky-200" : "bg-slate-50"
+            }`}
+            title={`Filter by location${selectedLocation ? `: ${selectedLocation}` : ""}`}
           >
-            <option value="">All Locations</option>
-            {locations.map((location) => (
-              <option key={location} value={location}>
-                {location}
-              </option>
-            ))}
-          </select>
+            <span className="text-xs">📍</span>
+            <span className="hidden xs:inline">{getLocationLabel()}</span>
+          </button>
+
+          {/* Sort Button */}
+          <button
+            ref={sortButtonRef}
+            onClick={() => {
+              setShowLocationDropdown(false);
+              setShowSortDropdown(!showSortDropdown);
+            }}
+            className="px-2.5 py-2 text-xs bg-slate-50 border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-0.5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            title="Sort items"
+          >
+            <span className="text-xs">↕️</span>
+            <span className="hidden xs:inline">{getSortLabel()}</span>
+          </button>
         </div>
 
+        {/* Bulk Action Buttons (when location selected) */}
         {selectedLocation && (
-          <div className="flex gap-2 justify-center">
+          <div className="flex gap-2">
             <button
               onClick={() =>
                 handleBulkUpdate(selectedLocation, VerificationStatus.VERIFIED)
               }
-              className="flex-1 px-3 py-1.5 bg-emerald-600 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              className="flex-1 px-3 py-1.5 bg-emerald-600 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
             >
               ✓ Mark All Verified
             </button>
@@ -449,9 +601,84 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
                   VerificationStatus.NOT_VERIFIED,
                 )
               }
-              className="flex-1 px-3 py-1.5 bg-amber-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+              className="flex-1 px-3 py-1.5 bg-amber-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1"
             >
               ⟲ Reset All
+            </button>
+          </div>
+        )}
+
+        {/* Location Dropdown */}
+        {showLocationDropdown && (
+          <div
+            className="location-dropdown fixed bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-[1000] min-w-[160px] max-h-[300px] overflow-y-auto"
+            style={{
+              top: `${getDropdownPosition(locationButtonRef).top}px`,
+              right: `${getDropdownPosition(locationButtonRef).right}px`,
+            }}
+          >
+            <div className="text-[13px] font-semibold mb-2 text-gray-700">
+              Filter by Location
+            </div>
+            <button
+              onClick={() => handleLocationChange("")}
+              className={`w-full p-2.5 text-[13px] text-left rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                !selectedLocation ? "bg-gray-100" : "bg-transparent"
+              }`}
+            >
+              <span>📍</span>
+              <span>All Locations</span>
+            </button>
+            {locations.map((location) => (
+              <button
+                key={location}
+                onClick={() => handleLocationChange(location)}
+                className={`w-full p-2.5 text-[13px] text-left rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                  selectedLocation === location
+                    ? "bg-sky-100"
+                    : "bg-transparent"
+                }`}
+              >
+                <span>📍</span>
+                <span>{location}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Sort Dropdown */}
+        {showSortDropdown && (
+          <div
+            className="sort-dropdown fixed bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-[1000] min-w-[140px] max-h-[200px] overflow-y-auto"
+            style={{
+              top: `${getDropdownPosition(sortButtonRef).top}px`,
+              right: `${getDropdownPosition(sortButtonRef).right}px`,
+            }}
+          >
+            <div className="text-[13px] font-semibold mb-2 text-gray-700">
+              Sort By
+            </div>
+            <button
+              onClick={() => handleSortChange("code")}
+              className="w-full p-2.5 text-[13px] text-left rounded-md cursor-pointer mb-0.5 flex items-center justify-between text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <span>Code</span>
+              <span>
+                {sortField === "code" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+              </span>
+            </button>
+            <button
+              onClick={() => handleSortChange("lastVerified")}
+              className="w-full p-2.5 text-[13px] text-left rounded-md cursor-pointer flex items-center justify-between text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <span>Last Verified</span>
+              <span>
+                {sortField === "lastVerified"
+                  ? sortOrder === "asc"
+                    ? "↑"
+                    : "↓"
+                  : ""}
+              </span>
             </button>
           </div>
         )}
@@ -459,7 +686,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
 
       {/* Items List - Exactly 2 lines per record (mobile optimized) */}
       <div className="max-h-[500px] overflow-y-auto p-0 px-3.75">
-        {filteredItems.length === 0 ? (
+        {sortedItems.length === 0 ? (
           <div className="text-center p-7.5 text-gray-400">
             <div className="text-5xl mb-4">📦</div>
             <p>No jewellery items found</p>
@@ -471,7 +698,7 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
             </button>
           </div>
         ) : (
-          filteredItems.slice(0, 15).map((item) => {
+          sortedItems.slice(0, 15).map((item) => {
             const isUpdating = activeUpdate === item.id;
             const isExpanded = expandedNotesId === item.id;
             const hasNotes =
@@ -665,13 +892,13 @@ const VerificationTab: React.FC<VerificationTabProps> = ({
           })
         )}
 
-        {filteredItems.length > 15 && (
+        {sortedItems.length > 15 && (
           <div className="text-center py-3 border-t border-gray-100">
             <button
               onClick={() => navigate("/jewellery/verification")}
               className="px-4 py-2 bg-transparent text-blue-600 border border-blue-600 rounded cursor-pointer text-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              View {filteredItems.length - 15} more items
+              View {sortedItems.length - 15} more items
             </button>
           </div>
         )}

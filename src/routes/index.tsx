@@ -26,6 +26,7 @@ import JewelleryDetail from "../modules/Jewellery/pages/JewelleryDetail";
 import JewelleryFormWrapper from "../modules/Jewellery/pages/JewelleryFormWrapper";
 import JewelleryForBill from "../modules/Jewellery/pages/JewelleryForBill";
 import BatchEditPage from "../modules/Jewellery/pages/BatchEditPage";
+import VerificationTab from "../modules/Jewellery/pages/VerificationTab";
 
 // Import Online pages
 import CategoryForm from "../modules/Online/pages/CategoryForm";
@@ -229,6 +230,16 @@ const allRoutes: RouteConfig[] = [
     title: "Batch Edit",
     icon: "🔄",
     requiresAuth: true,
+  },
+
+  // Add this route to your allRoutes array in routes/index.tsx
+  {
+    path: "/jewellery/verification",
+    element: <VerificationTab compact={false} />, // Or create a separate VerificationPage component
+    title: "Verification",
+    icon: "✅",
+    requiresAuth: true,
+    noLayoutPadding: true,
   },
 
   {

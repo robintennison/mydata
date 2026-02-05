@@ -129,7 +129,7 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
       console.log("Jewellery item deleted successfully");
       alert("Jewellery item deleted successfully!");
 
-      navigate("/jewellery/list");
+      navigate("/jewellery");
     } catch (error: any) {
       console.error("Error deleting jewellery item:", error);
       setError(`Failed to delete jewellery item: ${error.message}`);
@@ -138,7 +138,7 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
   };
 
   const handleCancel = () => {
-    navigate("/jewellery/list");
+    navigate("/jewellery");
   };
 
   if (loading) {
@@ -163,7 +163,7 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
           <div className="text-gray-700 mb-6">{error}</div>
           <div className="flex space-x-3">
             <button
-              onClick={() => navigate("/jewellery/list")}
+              onClick={() => navigate("/jewellery")}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
               Back to List

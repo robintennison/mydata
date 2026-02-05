@@ -271,7 +271,7 @@ const JewelleryForBill: React.FC = () => {
               {/* Action Buttons */}
               <div className="flex gap-3 justify-center flex-wrap mt-5">
                 <button
-                  onClick={() => navigate("/jewellery/list")}
+                  onClick={() => navigate("/jewellery")}
                   className="px-4 py-2.5 text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-colors bg-blue-500 hover:bg-blue-600"
                 >
                   📋 Go to Jewellery List

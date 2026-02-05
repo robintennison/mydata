@@ -19,7 +19,7 @@ import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage";
 
 // Import Jewellery pages
 import JewelleryHome from "../modules/Jewellery/index";
-import JewelleryList from "../modules/Jewellery/pages/JewelleryList";
+import JewelleryList from "../modules/Jewellery/pages/ListTab";
 import BillsList from "../modules/Jewellery/pages/BillsTab";
 import BillForm from "../modules/Jewellery/pages/BillForm";
 import JewelleryDetail from "../modules/Jewellery/pages/JewelleryDetail";

@@ -334,7 +334,7 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
       <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
         <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
           <button
-            onClick={() => navigate("/jewellery/list")}
+            onClick={() => navigate("/jewellery")}
             className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
             title="Back to Jewellery"
           >
@@ -348,7 +348,7 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
         <div className="p-5 text-center">
           <p className="mb-4">The requested jewellery item was not found.</p>
           <button
-            onClick={() => navigate("/jewellery/list")}
+            onClick={() => navigate("/jewellery")}
             className="px-5 py-2.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm hover:bg-blue-600 transition-colors"
           >
             Back to Jewellery List
@@ -363,7 +363,7 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
       {/* Top Navigation */}
       <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
         <button
-          onClick={() => navigate("/jewellery/list")}
+          onClick={() => navigate("/jewellery")}
           className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
           title="Back to Jewellery"
         >

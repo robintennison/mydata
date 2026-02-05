@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { Jewellery, VerificationStatus } from "../models/types";
+import { useSettings } from "../../../contexts/SettingsContext";
 
 interface Bill {
   id: string;
@@ -23,6 +24,7 @@ const JewelleryDetail: React.FC = () => {
   const [billError, setBillError] = useState<string | null>(null);
   const [downloadingImage, setDownloadingImage] = useState(false);
   const [storage] = useState(getStorage()); // Initialize Firebase Storage
+  const { settings } = useSettings();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -373,13 +375,15 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
           Jewellery Details
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={() => navigate(`/jewellery/edit/${item.id}`)}
-            className="px-3 py-1.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors"
-            title="Edit"
-          >
-            Edit
-          </button>
+          {settings?.showDelete && (
+            <button
+              onClick={() => navigate(`/jewellery/edit/${item.id}`)}
+              className="px-3 py-1.5 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-blue-600 transition-colors"
+              title="Edit"
+            >
+              Edit
+            </button>
+          )}
         </div>
       </div>
 

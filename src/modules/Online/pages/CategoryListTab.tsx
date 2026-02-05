@@ -188,18 +188,6 @@ const CategoryListTab: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Add Category Button (Fixed at bottom) */}
-      {filteredCategories.length > 0 && (
-        <div className="p-4 bg-white border-t border-gray-200 flex-shrink-0">
-          <button
-            onClick={() => navigate("/online/categories/add")}
-            className="w-full py-3 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-          >
-            Add New Category
-          </button>
-        </div>
-      )}
     </div>
   );
 };

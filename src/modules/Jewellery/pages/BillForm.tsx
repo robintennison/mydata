@@ -73,7 +73,7 @@ const BillForm: React.FC = () => {
       // Show success message and navigate back
       setTimeout(() => {
         setLoading(false);
-        navigate("/jewellery/bills");
+        navigate("/jewellery"); // Fixed: Changed from "/jewellery/bills" to "/jewellery"
       }, 1000);
     } catch (error) {
       console.error("Error saving bill:", error);
@@ -98,7 +98,7 @@ const BillForm: React.FC = () => {
       {/* Top Navigation */}
       <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
         <button
-          onClick={() => navigate("/jewellery/bills")}
+          onClick={() => navigate("/jewellery")} // Fixed: Changed from "/jewellery/bills" to "/jewellery"
           className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
           title="Back to Bills"
         >
@@ -211,7 +211,7 @@ const BillForm: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => navigate("/jewellery/bills")}
+            onClick={() => navigate("/jewellery")} // Already fixed
             className="px-8 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors"
             disabled={loading}
           >

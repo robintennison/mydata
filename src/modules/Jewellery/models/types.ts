@@ -4,10 +4,11 @@ export interface Bill {
   id?: string;
   downloadUrl: string;
   mimeType: string;
-  createdAt: number;
-  notes?: string;
-  updatedAt?: number;
+  notes?: string | null;
+  createdAt: number;      // Both fields exist
+  uploadedAt: number;     // Both fields exist
 }
+
 
 // new
 

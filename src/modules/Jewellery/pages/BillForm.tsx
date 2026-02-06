@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Bill } from "../models/types";
+import { doc, setDoc, addDoc, collection, getDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { firestore, storage } from "../../../lib/firebase";
 
 const BillForm: React.FC = () => {
   const navigate = useNavigate();
@@ -14,28 +17,59 @@ const BillForm: React.FC = () => {
   const [formData, setFormData] = useState<Bill>({
     downloadUrl: "",
     mimeType: "",
+    notes: null,
     createdAt: Date.now(),
-    notes: "",
+    uploadedAt: Date.now(),
   });
 
+  // Load bill data for edit mode
   useEffect(() => {
-    if (isEditMode) {
-      // TODO: Load bill data from Firebase
-      setLoading(true);
-      setTimeout(() => {
-        const mockData: Bill = {
-          id,
-          downloadUrl: "https://example.com/bill.pdf",
-          mimeType: "application/pdf",
-          createdAt: Date.now() - 30 * 24 * 60 * 60 * 1000,
-          notes: "Gold chain purchase bill",
-        };
-        setFormData(mockData);
-        setFileName("existing-bill.pdf");
-        setLoading(false);
-      }, 500);
+    if (isEditMode && id) {
+      loadBillData();
     }
   }, [id, isEditMode]);
+
+  const loadBillData = async () => {
+    if (!id) return; // Add this check
+
+    setLoading(true);
+    try {
+      const billRef = doc(firestore, "bills", id); // Now id is guaranteed to be string
+      const billDoc = await getDoc(billRef);
+
+      if (billDoc.exists()) {
+        const data = billDoc.data();
+        setFormData({
+          id: billDoc.id,
+          downloadUrl: data.downloadUrl || "",
+          mimeType: data.mimeType || "",
+          notes: data.notes || null,
+          createdAt: data.createdAt || Date.now(),
+          uploadedAt: data.uploadedAt || Date.now(),
+        });
+
+        // Extract filename from URL if possible
+        if (data.downloadUrl) {
+          try {
+            const url = new URL(data.downloadUrl);
+            const pathname = url.pathname;
+            const extractedName = pathname.split("/").pop() || "existing-file";
+            setFileName(extractedName);
+          } catch {
+            setFileName("existing-file");
+          }
+        }
+      } else {
+        alert("Bill not found");
+        navigate("/jewellery");
+      }
+    } catch (error) {
+      console.error("Error loading bill:", error);
+      alert("Failed to load bill");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -51,37 +85,89 @@ const BillForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isEditMode && !file) {
+      alert("Please select a file to upload");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // TODO: Upload file to Firebase and get download URL
       let downloadUrl = formData.downloadUrl;
+      let mimeType = formData.mimeType;
+      let uploadedAt = formData.uploadedAt;
+
+      // Upload file if a new file is selected
       if (file) {
-        // TODO: Call Firebase upload function
-        // downloadUrl = await uploadBillFile(file);
+        const timestamp = Date.now();
+        const fileExtension =
+          file.name.split(".").pop() ||
+          (file.type === "application/pdf"
+            ? "pdf"
+            : file.type.startsWith("image/")
+              ? "jpg"
+              : "dat");
+
+        const fileName = `${timestamp}.${fileExtension}`;
+
+        // Use imported storage
+        const storageRef = ref(storage, `bills/${fileName}`);
+
+        await uploadBytes(storageRef, file);
+        downloadUrl = await getDownloadURL(storageRef);
+        mimeType = file.type;
+        uploadedAt = Date.now();
       }
 
       const billData = {
-        ...formData,
         downloadUrl,
-        updatedAt: Date.now(),
+        mimeType,
+        notes: formData.notes || null,
+        createdAt: isEditMode ? formData.createdAt : Date.now(),
+        uploadedAt,
       };
 
-      // TODO: Save to Firebase
-      console.log("Saving bill:", billData);
+      if (isEditMode && id) {
+        // id is guaranteed here because isEditMode is true
+        // Use imported firestore
+        const billRef = doc(firestore, "bills", id);
+        await setDoc(billRef, billData, { merge: true });
+        alert("Bill updated successfully!");
+      } else {
+        // Use imported firestore
+        await addDoc(collection(firestore, "bills"), billData);
+        alert("Bill added successfully!");
+      }
 
-      // Show success message and navigate back
-      setTimeout(() => {
-        setLoading(false);
-        navigate("/jewellery"); // Fixed: Changed from "/jewellery/bills" to "/jewellery"
-      }, 1000);
-    } catch (error) {
+      navigate("/jewellery");
+    } catch (error: any) {
       console.error("Error saving bill:", error);
+
+      let errorMessage = "Error saving bill. Please try again.";
+
+      if (error.code === "storage/unauthorized") {
+        errorMessage =
+          "Upload failed: You don't have permission to upload files.";
+      } else if (error.code === "storage/canceled") {
+        errorMessage = "Upload was cancelled.";
+      } else if (error.code === "storage/unknown") {
+        errorMessage = "An unknown error occurred during upload.";
+      } else if (error.message?.includes("quota")) {
+        errorMessage = "Storage quota exceeded.";
+      } else if (error.code === "permission-denied") {
+        errorMessage = "Permission denied. Please check Firebase rules.";
+      } else if (error.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+
+      alert(errorMessage);
+    } finally {
       setLoading(false);
-      alert("Error saving bill. Please try again.");
     }
   };
 
+  // Loading state
   if (loading && isEditMode) {
     return (
       <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
@@ -98,9 +184,9 @@ const BillForm: React.FC = () => {
       {/* Top Navigation */}
       <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
         <button
-          onClick={() => navigate("/jewellery")} // Fixed: Changed from "/jewellery/bills" to "/jewellery"
+          onClick={() => navigate("/jewellery")}
           className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
-          title="Back to Bills"
+          title="Back to Jewellery"
         >
           ←
         </button>
@@ -123,7 +209,7 @@ const BillForm: React.FC = () => {
             <input
               id="fileInput"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
+              accept=".pdf,.jpg,.jpeg,.png,image/*,application/pdf"
               onChange={handleFileSelect}
               className="hidden"
             />
@@ -138,6 +224,19 @@ const BillForm: React.FC = () => {
                 </div>
                 <div className="text-xs text-blue-500">
                   Click to select different file
+                </div>
+              </>
+            ) : isEditMode && formData.downloadUrl ? (
+              <>
+                <div className="text-5xl mb-3">📄</div>
+                <div className="text-sm font-medium text-gray-900 mb-1">
+                  Existing file uploaded
+                </div>
+                <div className="text-xs text-gray-500 mb-2">
+                  {formData.mimeType || "Unknown type"}
+                </div>
+                <div className="text-xs text-blue-500">
+                  Click to replace file (optional)
                 </div>
               </>
             ) : (
@@ -162,12 +261,12 @@ const BillForm: React.FC = () => {
         {/* Notes */}
         <div className="mb-6">
           <label className="block mb-1.5 text-sm font-medium text-gray-700">
-            Notes
+            Notes (optional)
           </label>
           <textarea
             value={formData.notes || ""}
             onChange={(e) =>
-              setFormData({ ...formData, notes: e.target.value })
+              setFormData({ ...formData, notes: e.target.value || null })
             }
             className="w-full p-3 border border-gray-300 rounded text-sm font-sans leading-normal text-gray-900 bg-white resize-y min-h-[150px] max-h-[400px] overflow-y-auto box-border"
             placeholder="Add notes about this bill (optional)"
@@ -175,23 +274,17 @@ const BillForm: React.FC = () => {
           />
         </div>
 
-        {/* Creation Date */}
+        {/* Display timestamps in edit mode */}
         {isEditMode && (
-          <div className="mb-6">
-            <label className="block mb-1.5 text-sm font-medium text-gray-700">
-              Created Date
-            </label>
-            <input
-              type="date"
-              value={new Date(formData.createdAt).toISOString().split("T")[0]}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  createdAt: new Date(e.target.value).getTime(),
-                })
-              }
-              className="w-full p-2.5 px-3 border border-gray-300 rounded text-sm bg-white box-border"
-            />
+          <div className="mb-6 space-y-2 text-sm text-gray-600">
+            <div>
+              <span className="font-medium">Created:</span>{" "}
+              {new Date(formData.createdAt).toLocaleString()}
+            </div>
+            <div>
+              <span className="font-medium">Uploaded:</span>{" "}
+              {new Date(formData.uploadedAt).toLocaleString()}
+            </div>
           </div>
         )}
 
@@ -211,7 +304,7 @@ const BillForm: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => navigate("/jewellery")} // Already fixed
+            onClick={() => navigate("/jewellery")}
             className="px-8 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors"
             disabled={loading}
           >

@@ -37,7 +37,7 @@ export const updateBillNotes = async (billId: string, notes?: string): Promise<v
   try {
     const updateData = {
       notes: notes || null,
-      updatedAt: Timestamp.now(),
+      // No updatedAt field in Bill model, only uploadedAt
     };
     
     await updateDoc(doc(firestore, "bills", billId), updateData);
@@ -55,11 +55,11 @@ export const getBill = async (billId: string): Promise<Bill | null> => {
       const data = snap.data();
       return {
         id: snap.id,
-        downloadUrl: data.downloadUrl,
-        mimeType: data.mimeType,
-        notes: data.notes || undefined, // Convert null to undefined
-        createdAt: data.createdAt?.toMillis() || data.createdAt || 0,
-        updatedAt: data.updatedAt?.toMillis() || data.updatedAt,
+        downloadUrl: data.downloadUrl || "",
+        mimeType: data.mimeType || "",
+        notes: data.notes || null, // Keep null like Kotlin
+        createdAt: data.createdAt?.toMillis() || data.createdAt || Date.now(),
+        uploadedAt: data.uploadedAt?.toMillis() || data.uploadedAt || Date.now(), // Use uploadedAt, not updatedAt
       };
     }
     return null;
@@ -93,6 +93,7 @@ export const uploadBillAndCreateDoc = async (
       downloadUrl: httpsUrl,
       mimeType: mime,
       createdAt: Timestamp.now(),
+      uploadedAt: Timestamp.now(), // Add uploadedAt
       notes: notes || null,
     };
 

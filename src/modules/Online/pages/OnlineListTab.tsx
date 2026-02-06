@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { OnlineItem } from "../types/online.types";
+import { useSettings } from "../../../contexts/SettingsContext";
 
 const OnlineListTab: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ const OnlineListTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [categories, setCategories] = useState<string[]>(["All"]);
+  const { settings } = useSettings();
+  const showDelete = settings?.showDelete || false; // Get the showDelete setting
 
   useEffect(() => {
     fetchData();
@@ -67,6 +70,23 @@ const OnlineListTab: React.FC = () => {
 
     return matchesSearch && matchesCategory;
   });
+
+  // Handle row click - go to edit mode if showDelete is true, otherwise view mode
+  const handleRowClick = (itemId: string) => {
+    if (showDelete) {
+      // If showDelete is enabled, go to edit mode
+      navigate(`/online/items/edit/${itemId}`);
+    } else {
+      // If showDelete is disabled, go to view mode
+      navigate(`/online/items/view/${itemId}`);
+    }
+  };
+
+  // Handle edit button click - always goes to edit mode
+  const handleEditClick = (e: React.MouseEvent, itemId: string) => {
+    e.stopPropagation();
+    navigate(`/online/items/edit/${itemId}`);
+  };
 
   if (loading) {
     return (
@@ -166,11 +186,11 @@ const OnlineListTab: React.FC = () => {
                 <div
                   key={item.id}
                   className="bg-white rounded-lg border border-gray-200 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onClick={() => navigate(`/online/items/view/${item.id}`)}
+                  onClick={() => handleRowClick(item.id)}
                   tabIndex={0}
                   onKeyPress={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
-                      navigate(`/online/items/view/${item.id}`);
+                      handleRowClick(item.id);
                     }
                   }}
                 >
@@ -204,19 +224,18 @@ const OnlineListTab: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Edit button only */}
-                    <div className="ml-2">
-                      <button
-                        className="px-3 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/online/items/edit/${item.id}`);
-                        }}
-                        title="Edit"
-                      >
-                        ✏️
-                      </button>
-                    </div>
+                    {/* Edit button only - conditionally shown based on settings */}
+                    {showDelete && (
+                      <div className="ml-2">
+                        <button
+                          className="px-3 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+                          onClick={(e) => handleEditClick(e, item.id)}
+                          title="Edit"
+                        >
+                          ✏️
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { Category } from "../types/online.types";
-import { useSettings } from "../../../contexts/SettingsContext"; // Import SettingsContext
+import { useSettings } from "../../../contexts/SettingsContext";
 
 const CategoryListTab: React.FC = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const { settings } = useSettings(); // Get settings from context
+  const { settings } = useSettings();
+  const showDelete = settings?.showDelete || false;
 
   useEffect(() => {
     fetchCategories();
@@ -40,6 +41,23 @@ const CategoryListTab: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle row click - go to edit mode if showDelete is true, otherwise view mode
+  const handleRowClick = (categoryId: string) => {
+    if (showDelete) {
+      // If showDelete is enabled, go to edit mode
+      navigate(`/online/categories/edit/${categoryId}`);
+    } else {
+      // If showDelete is disabled, go to view mode
+      navigate(`/online/categories/view/${categoryId}`);
+    }
+  };
+
+  // Handle edit button click - always goes to edit mode
+  const handleEditClick = (e: React.MouseEvent, categoryId: string) => {
+    e.stopPropagation();
+    navigate(`/online/categories/edit/${categoryId}`);
   };
 
   const filteredCategories = categories.filter((cat) =>
@@ -119,13 +137,11 @@ const CategoryListTab: React.FC = () => {
                 <div
                   key={category.id}
                   className="bg-white rounded-lg border border-gray-200 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onClick={() =>
-                    navigate(`/online/categories/edit/${category.id}`)
-                  }
+                  onClick={() => handleRowClick(category.id)}
                   tabIndex={0}
                   onKeyPress={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
-                      navigate(`/online/categories/edit/${category.id}`);
+                      handleRowClick(category.id);
                     }
                   }}
                 >
@@ -142,20 +158,16 @@ const CategoryListTab: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Only show edit button if showDelete is true in settings */}
-                    {settings?.showDelete && (
+                    {/* Only show edit button if showDelete is true */}
+                    {showDelete && (
                       <div className="ml-2">
                         <button
                           className="px-2.5 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/online/categories/edit/${category.id}`);
-                          }}
+                          onClick={(e) => handleEditClick(e, category.id)}
                           title="Edit"
                         >
                           ✏️
                         </button>
-                        {/* Removed delete button as per requirement */}
                       </div>
                     )}
                   </div>

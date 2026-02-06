@@ -35,7 +35,7 @@ const OnlineForm: React.FC = () => {
   const location = useLocation();
   const { id } = useParams<{ id?: string }>();
   const { settings } = useSettings();
-  const showDelete = settings?.showDelete || false;
+  const showDelete = settings?.showDelete || false; // Get showDelete setting
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const getModeFromPath = (): "add" | "edit" | "view" => {
@@ -302,7 +302,8 @@ const OnlineForm: React.FC = () => {
             </div>
           </div>
 
-          {isViewMode && (
+          {/* EDIT button in header - Only show in view mode AND when showDelete is true */}
+          {isViewMode && showDelete && (
             <button
               onClick={() =>
                 navigate(`/online/items/edit/${id}`, {

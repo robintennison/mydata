@@ -266,6 +266,14 @@ const allRoutes: RouteConfig[] = [
     icon: "✏️",
     requiresAuth: true,
   },
+
+  {
+    path: "/online/categories/view/:id",
+    element: <CategoryForm />,
+    title: "View Category",
+    requiresAuth: true,
+  },
+
   {
     path: "/online/items/add",
     element: <OnlineForm />,

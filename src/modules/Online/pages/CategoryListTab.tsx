@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { Category } from "../types/online.types";
+import { useSettings } from "../../../contexts/SettingsContext"; // Import SettingsContext
 
 const CategoryListTab: React.FC = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const { settings } = useSettings(); // Get settings from context
 
   useEffect(() => {
     fetchCategories();
@@ -43,19 +39,6 @@ const CategoryListTab: React.FC = () => {
       console.error("Error fetching categories:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete category "${name}"?`)) {
-      try {
-        const db = getFirestore();
-        await deleteDoc(doc(db, "online_categories", id));
-        setCategories(categories.filter((cat) => cat.id !== id));
-      } catch (error) {
-        console.error("Error deleting category:", error);
-        alert("Failed to delete category");
-      }
     }
   };
 
@@ -159,28 +142,22 @@ const CategoryListTab: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="ml-2 flex gap-1">
-                      <button
-                        className="px-2.5 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/online/categories/edit/${category.id}`);
-                        }}
-                        title="Edit"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        className="px-2.5 py-1.5 bg-red-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(category.id, category.name);
-                        }}
-                        title="Delete"
-                      >
-                        🗑️
-                      </button>
-                    </div>
+                    {/* Only show edit button if showDelete is true in settings */}
+                    {settings?.showDelete && (
+                      <div className="ml-2">
+                        <button
+                          className="px-2.5 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/online/categories/edit/${category.id}`);
+                          }}
+                          title="Edit"
+                        >
+                          ✏️
+                        </button>
+                        {/* Removed delete button as per requirement */}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

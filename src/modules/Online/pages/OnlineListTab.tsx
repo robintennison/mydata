@@ -214,7 +214,7 @@ const OnlineListTab: React.FC = () => {
                         }}
                         title="Edit"
                       >
-                        ✏️ Edit
+                        ✏️
                       </button>
                     </div>
                   </div>

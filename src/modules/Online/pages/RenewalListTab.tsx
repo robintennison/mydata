@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { Renewal } from "../types/online.types";
+import { useSettings } from "../../../contexts/SettingsContext"; // Import SettingsContext
 
 // Helper function for conditional classes
 const cls = (...classes: (string | boolean | undefined)[]) =>
@@ -18,6 +13,7 @@ const RenewalListTab: React.FC = () => {
   const [renewals, setRenewals] = useState<Renewal[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const { settings } = useSettings(); // Get settings from context
 
   useEffect(() => {
     fetchRenewals();
@@ -67,19 +63,6 @@ const RenewalListTab: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete renewal "${name}"?`)) {
-      try {
-        const db = getFirestore();
-        await deleteDoc(doc(db, "renewals", id));
-        setRenewals(renewals.filter((renewal) => renewal.id !== id));
-      } catch (error) {
-        console.error("Error deleting renewal:", error);
-        alert("Failed to delete renewal");
-      }
-    }
-  };
-
   const formatDate = (timestamp: number) => {
     try {
       const date = new Date(timestamp);
@@ -124,8 +107,8 @@ const RenewalListTab: React.FC = () => {
     } else {
       return {
         classes: "bg-green-100 text-green-700",
-        text: "Active",
-        icon: "🟢",
+        text: "",
+        icon: "",
       };
     }
   };
@@ -252,29 +235,24 @@ const RenewalListTab: React.FC = () => {
                             <span>{statusInfo.text}</span>
                           </div>
 
-                          {/* Action Buttons */}
-                          <div className="flex gap-1">
-                            <button
-                              className="px-2 py-1.5 bg-blue-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/online/renewals/edit/${renewal.id}`);
-                              }}
-                              title="Edit"
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              className="px-2 py-1.5 bg-red-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(renewal.id, renewal.name);
-                              }}
-                              title="Delete"
-                            >
-                              🗑️
-                            </button>
-                          </div>
+                          {/* Action Buttons - Only show edit if showDelete is true */}
+                          {settings?.showDelete && (
+                            <div className="flex gap-1">
+                              <button
+                                className="px-2 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(
+                                    `/online/renewals/edit/${renewal.id}`,
+                                  );
+                                }}
+                                title="Edit"
+                              >
+                                ✏️
+                              </button>
+                              {/* Removed delete button as per requirement */}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Bill } from "../models/types";
 import { doc, setDoc, addDoc, collection, getDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import { firestore, storage } from "../../../lib/firebase";
 import {
   optimizeFile,
@@ -24,6 +29,8 @@ const BillForm: React.FC = () => {
     savedPercentage: number;
   } | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingFile, setDeletingFile] = useState(false);
 
   const [formData, setFormData] = useState<Bill>({
     downloadUrl: "",
@@ -135,11 +142,77 @@ const BillForm: React.FC = () => {
     }
   };
 
+  const handleDeleteDocument = async () => {
+    if (!formData.downloadUrl) {
+      setShowDeleteConfirm(false);
+      return;
+    }
+
+    try {
+      setDeletingFile(true);
+
+      // Extract file path from Firebase Storage URL
+      // Firebase Storage URLs have format: https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{encodedPath}?alt=media
+      const url = new URL(formData.downloadUrl);
+      const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+
+      if (pathMatch) {
+        const filePath = decodeURIComponent(pathMatch[1]);
+        console.log("Deleting file from path:", filePath);
+
+        const storageRef = ref(storage, filePath);
+
+        // Check if file exists before deleting
+        try {
+          // This will throw if file doesn't exist
+          await getDownloadURL(storageRef);
+
+          // Delete file from storage
+          await deleteObject(storageRef);
+          console.log("File deleted successfully from storage");
+
+          // Update form data
+          setFormData((prev) => ({
+            ...prev,
+            downloadUrl: "",
+            mimeType: "",
+          }));
+          setFileName("");
+
+          alert("Document deleted successfully!");
+        } catch (error: any) {
+          if (error.code === "storage/object-not-found") {
+            console.log("File already deleted from storage");
+            // Still update the form data even if file doesn't exist
+            setFormData((prev) => ({
+              ...prev,
+              downloadUrl: "",
+              mimeType: "",
+            }));
+            setFileName("");
+            alert("Document removed from record (file was already deleted)");
+          } else {
+            throw error;
+          }
+        }
+      } else {
+        throw new Error("Could not extract file path from URL");
+      }
+    } catch (error: any) {
+      console.error("Error deleting document:", error);
+      alert(`Failed to delete document: ${error.message}`);
+    } finally {
+      setDeletingFile(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isEditMode && !file) {
-      alert("Please select a file to upload");
+    // Remove file requirement for new bills
+    if (!isEditMode && !file && !formData.notes?.trim()) {
+      alert("Please provide either a file or notes for the bill");
       return;
     }
 
@@ -151,17 +224,35 @@ const BillForm: React.FC = () => {
       let mimeType = formData.mimeType;
       let uploadedAt = formData.uploadedAt;
       let optimizedFileName = "";
+      let originalFileSize = null;
+      let optimizedFileSize = null;
+      let optimizationSavedPercentage = 0;
+      let originalFileName = null;
 
       // Upload file if a new file is selected
       if (file) {
         let fileToUpload = file;
 
-        // Optimize the file before upload
-        if (optimizationInfo && optimizationInfo.savedPercentage > 0) {
+        // Check file type and only optimize images
+        const isImage = file.type.startsWith("image/");
+        const isPDF =
+          file.type === "application/pdf" ||
+          file.name.toLowerCase().endsWith(".pdf");
+
+        console.log(
+          `File type: ${file.type}, Is Image: ${isImage}, Is PDF: ${isPDF}`,
+        );
+
+        // Only optimize images, not PDFs or other documents
+        if (
+          isImage &&
+          optimizationInfo &&
+          optimizationInfo.savedPercentage > 0
+        ) {
           try {
             fileToUpload = await optimizeFile(file);
             console.log(
-              `Uploading optimized bill: ${formatFileSize(fileToUpload.size)}`,
+              `Uploading optimized image: ${formatFileSize(fileToUpload.size)}`,
             );
           } catch (err) {
             console.error(
@@ -169,6 +260,10 @@ const BillForm: React.FC = () => {
               err,
             );
           }
+        } else if (isPDF) {
+          console.log("PDF file - no optimization applied, uploading as-is");
+        } else {
+          console.log("Other document type - no optimization applied");
         }
 
         const timestamp = Date.now();
@@ -178,32 +273,82 @@ const BillForm: React.FC = () => {
           (fileToUpload.type === "application/pdf"
             ? "pdf"
             : fileToUpload.type.startsWith("image/")
-              ? "jpg"
+              ? fileToUpload.type.includes("png")
+                ? "png"
+                : fileToUpload.type.includes("jpeg") ||
+                    fileToUpload.type.includes("jpg")
+                  ? "jpg"
+                  : fileToUpload.type.includes("gif")
+                    ? "gif"
+                    : "jpg"
               : "dat");
 
+        // CACHE BUSTING FIX: Add timestamp and random ID to filename to prevent caching
         optimizedFileName = `bill_${timestamp}_${randomId}.${fileExtension}`;
+        console.log(`Generated unique filename: ${optimizedFileName}`);
 
         // Use imported storage
         const storageRef = ref(storage, `bills/${optimizedFileName}`);
 
-        await uploadBytes(storageRef, fileToUpload);
-        downloadUrl = await getDownloadURL(storageRef);
+        // Upload with metadata to prevent caching
+        const metadata = {
+          contentType: fileToUpload.type,
+          cacheControl: "no-cache, max-age=0", // Prevent caching
+          customMetadata: {
+            originalName: file.name,
+            uploadedAt: timestamp.toString(),
+            optimized: (fileToUpload !== file).toString(),
+          },
+        };
+
+        await uploadBytes(storageRef, fileToUpload, metadata);
+
+        // Get download URL with cache-busting parameter
+        const baseUrl = await getDownloadURL(storageRef);
+        downloadUrl = `${baseUrl}?t=${timestamp}`; // Add timestamp query parameter
+
         mimeType = fileToUpload.type;
         uploadedAt = Date.now();
+        originalFileSize = file.size;
+        optimizedFileSize = fileToUpload.size;
+        optimizationSavedPercentage = isImage
+          ? optimizationInfo?.savedPercentage || 0
+          : 0;
+        originalFileName = file.name;
+
+        console.log(`Upload completed. URL: ${downloadUrl}`);
+        console.log(
+          `Original size: ${formatFileSize(originalFileSize)}, Optimized size: ${formatFileSize(optimizedFileSize)}`,
+        );
       }
 
-      const billData = {
-        downloadUrl,
-        mimeType,
-        notes: formData.notes || null,
+      // ... rest of your code remains the same
+      // Create bill data object with only necessary fields
+      const billData: any = {
+        notes: formData.notes?.trim() || null,
         createdAt: isEditMode ? formData.createdAt : Date.now(),
         uploadedAt,
-        originalFileName: file ? file.name : null,
-        optimizedFileName: optimizedFileName || null,
-        originalFileSize: file ? file.size : null,
-        optimizedFileSize: optimizationInfo?.optimizedSize || null,
-        optimizationSavedPercentage: optimizationInfo?.savedPercentage || 0,
       };
+
+      // Only add document-related fields if we have a download URL
+      if (downloadUrl) {
+        billData.downloadUrl = downloadUrl;
+        billData.mimeType = mimeType;
+        billData.originalFileName = originalFileName;
+        billData.optimizedFileName = optimizedFileName;
+        billData.originalFileSize = originalFileSize;
+        billData.optimizedFileSize = optimizedFileSize;
+        billData.optimizationSavedPercentage = optimizationSavedPercentage;
+      } else {
+        // For notes-only bills, ensure document fields are cleared
+        billData.downloadUrl = "";
+        billData.mimeType = "";
+        billData.originalFileName = null;
+        billData.optimizedFileName = null;
+        billData.originalFileSize = null;
+        billData.optimizedFileSize = null;
+        billData.optimizationSavedPercentage = 0;
+      }
 
       if (isEditMode && id) {
         const billRef = doc(firestore, "bills", id);
@@ -266,6 +411,10 @@ const BillForm: React.FC = () => {
     );
   }
 
+  const hasExistingDocument = isEditMode && formData.downloadUrl;
+  const hasNewFile = !!file;
+  const hasDocument = hasExistingDocument || hasNewFile;
+
   return (
     <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
       {/* Top Navigation */}
@@ -287,14 +436,14 @@ const BillForm: React.FC = () => {
         {/* File Upload */}
         <div className="mb-6">
           <label className="block mb-1.5 text-sm font-medium text-gray-700">
-            {isEditMode ? "Replace File" : "Upload File"}
+            {isEditMode ? "Document (Optional)" : "Upload Document (Optional)"}
             <span className="text-xs text-gray-500 ml-2">
               (Max 20MB, PDF, Images, Word, Text)
             </span>
           </label>
 
           <div
-            className={`border-2 ${file ? "border-solid border-blue-300" : "border-dashed border-gray-300"} rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300 mb-3`}
+            className={`border-2 ${hasDocument ? "border-solid border-blue-300" : "border-dashed border-gray-300"} rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300 mb-3`}
             onClick={() => document.getElementById("fileInput")?.click()}
           >
             <input
@@ -339,22 +488,22 @@ const BillForm: React.FC = () => {
               </>
             ) : isEditMode && formData.downloadUrl ? (
               <>
-                <div className="text-5xl mb-3 text-gray-500">📄</div>
+                <div className="text-5xl mb-3 text-blue-500">📄</div>
                 <div className="text-sm font-medium text-gray-900 mb-1">
-                  Existing file uploaded
+                  Current document attached
                 </div>
                 <div className="text-xs text-gray-500 mb-2">
                   {formData.mimeType || "Unknown type"}
                 </div>
                 <div className="text-xs text-blue-500">
-                  Click to replace file (optional)
+                  Click to replace document (optional)
                 </div>
               </>
             ) : (
               <>
                 <div className="text-5xl mb-3 text-gray-400">📁</div>
                 <div className="text-sm font-medium text-gray-700 mb-1">
-                  Tap to select file
+                  Tap to upload document (Optional)
                 </div>
                 <div className="text-xs text-gray-500">
                   PDF, JPG, PNG, DOC, TXT files accepted
@@ -368,7 +517,7 @@ const BillForm: React.FC = () => {
 
           {/* File info and actions */}
           {file && (
-            <div className="flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg mb-3">
               <div className="flex items-center gap-2">
                 <span className="text-gray-700 text-sm">{fileName}</span>
                 <span className="text-xs text-gray-500">
@@ -385,32 +534,86 @@ const BillForm: React.FC = () => {
             </div>
           )}
 
+          {/* Existing document actions */}
+          {isEditMode && formData.downloadUrl && !file && (
+            <div className="flex justify-between items-center p-3 bg-green-50 border border-green-200 rounded-lg mb-3">
+              <div className="flex items-center gap-2">
+                <div className="text-green-600">✓</div>
+                <div>
+                  <div className="text-sm text-green-800 font-medium">
+                    Document attached
+                  </div>
+                  <div className="text-xs text-green-700">
+                    {fileName || "Existing document"}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.open(formData.downloadUrl, "_blank")}
+                  className="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded text-xs font-medium hover:bg-blue-100"
+                >
+                  View
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-medium hover:bg-red-100"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
+
           {uploadError && (
             <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
               ⚠️ {uploadError}
             </div>
           )}
 
-          {!isEditMode && !file && (
-            <div className="text-xs text-red-600 mt-2">
-              * File is required for new bills
-            </div>
-          )}
+          {/* File requirement note */}
+          <div className="text-xs text-gray-500 mt-2">
+            {!isEditMode ? (
+              <div className="flex items-center gap-1">
+                <span>ℹ️</span>
+                <span>Document is optional. You can add notes only.</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1">
+                <span>ℹ️</span>
+                <span>You can update notes without changing the document.</span>
+              </div>
+            )}
+          </div>
 
           {/* Optimization info note */}
           <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
             <div className="flex items-start gap-2">
               <div className="text-blue-500 mt-0.5">ℹ️</div>
               <div className="text-xs text-blue-800">
-                <div className="font-medium mb-1">
-                  Automatic File Optimization
-                </div>
-                <div>
-                  Images are compressed, HEIC files converted to JPEG, PDFs
-                  optimized
+                <div className="font-medium mb-1">File Optimization Info</div>
+                <div className="space-y-1">
+                  <div>
+                    • <span className="font-medium">Images:</span> Automatically
+                    compressed
+                  </div>
+                  <div>
+                    • <span className="font-medium">PDFs:</span> Uploaded as-is
+                    (no compression)
+                  </div>
+                  <div>
+                    • <span className="font-medium">Other docs:</span> Uploaded
+                    as-is
+                  </div>
+                  <div>
+                    • <span className="font-medium">HEIC files:</span> Converted
+                    to JPEG
+                  </div>
                 </div>
                 <div className="mt-1 text-blue-600">
-                  Helps save storage space while maintaining quality
+                  Each upload gets a unique filename to prevent caching issues
                 </div>
               </div>
             </div>
@@ -420,7 +623,10 @@ const BillForm: React.FC = () => {
         {/* Notes */}
         <div className="mb-6">
           <label className="block mb-1.5 text-sm font-medium text-gray-700">
-            Notes (optional)
+            Notes *
+            <span className="text-xs text-gray-500 ml-2">
+              (Required if no document is attached)
+            </span>
           </label>
           <textarea
             value={formData.notes || ""}
@@ -428,11 +634,13 @@ const BillForm: React.FC = () => {
               setFormData({ ...formData, notes: e.target.value || null })
             }
             className="w-full p-3 border border-gray-300 rounded text-sm font-sans leading-normal text-gray-900 bg-white resize-y min-h-[150px] max-h-[400px] overflow-y-auto box-border"
-            placeholder="Add notes about this bill (optional)"
+            placeholder="Add notes about this bill (e.g., purchase details, vendor information, etc.)"
             rows={3}
+            required={!hasDocument && !file}
           />
           <div className="text-xs text-gray-500 mt-1">
-            e.g., "Gold necklace purchase invoice", "Repair bill", etc.
+            Provide details about the bill. Notes are required if no document is
+            attached.
           </div>
         </div>
 
@@ -444,20 +652,19 @@ const BillForm: React.FC = () => {
               {new Date(formData.createdAt).toLocaleString()}
             </div>
             <div>
-              <span className="font-medium">Uploaded:</span>{" "}
+              <span className="font-medium">Last Updated:</span>{" "}
               {new Date(formData.uploadedAt).toLocaleString()}
             </div>
-            {formData.downloadUrl && (
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => window.open(formData.downloadUrl, "_blank")}
-                  className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded text-xs font-medium hover:bg-blue-100"
-                >
-                  📄 View Current Bill
-                </button>
-              </div>
-            )}
+            <div>
+              <span className="font-medium">Status:</span>{" "}
+              <span
+                className={
+                  hasExistingDocument ? "text-green-600" : "text-blue-600"
+                }
+              >
+                {hasExistingDocument ? "Document attached" : "Notes only"}
+              </span>
+            </div>
           </div>
         )}
 
@@ -466,11 +673,11 @@ const BillForm: React.FC = () => {
           <button
             type="submit"
             className={`px-8 py-3 rounded-lg font-medium text-base transition-colors ${
-              loading || (!isEditMode && !file)
+              loading
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-gradient-to-br from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 cursor-pointer"
             }`}
-            disabled={loading || (!isEditMode && !file)}
+            disabled={loading}
           >
             {loading ? "Saving..." : isEditMode ? "Update Bill" : "Add Bill"}
           </button>
@@ -485,6 +692,37 @@ const BillForm: React.FC = () => {
           </button>
         </div>
       </form>
+
+      {/* Delete Document Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-[400px] w-full shadow-2xl">
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              Delete Document
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this document? This will remove
+              the file from storage and cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deletingFile}
+                className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteDocument}
+                disabled={deletingFile}
+                className="px-4 py-2 bg-red-600 text-white border-none rounded-lg cursor-pointer hover:bg-red-700"
+              >
+                {deletingFile ? "Deleting..." : "Delete Document"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import imageCompression from 'browser-image-compression';
+import { simplePDFCompress } from './pdfCompressor';
 
 // Interface for optimization options
 interface OptimizationOptions {
@@ -26,42 +27,16 @@ const defaultOptions: Record<string, OptimizationOptions> = {
 };
 
 /**
- * Optimizes an image file before upload
+ * Calculates file size in readable format
  */
-export const optimizeImage = async (
-  file: File,
-  customOptions?: Partial<OptimizationOptions>
-): Promise<File> => {
-  try {
-    const options = {
-      ...defaultOptions.image,
-      ...customOptions,
-      fileType: file.type,
-    };
-
-    // Convert HEIC/HEIF files to JPEG if needed
-    let processedFile = file;
-    if (file.type.includes('heic') || file.type.includes('heif')) {
-      processedFile = await convertHeicToJpeg(file);
-    }
-
-    // Compress the image
-    const compressedFile = await imageCompression(processedFile, options);
-
-    // Check if compression was effective
-    if (compressedFile.size < file.size) {
-      console.log(
-        `Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`
-      );
-      return compressedFile;
-    }
-
-    return file;
-  } catch (error) {
-    console.error('Error optimizing image:', error);
-    // Return original file if optimization fails
-    return file;
-  }
+export const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 /**
@@ -94,13 +69,66 @@ const convertHeicToJpeg = async (file: File): Promise<File> => {
 };
 
 /**
- * Optimizes a PDF file (basic implementation - reduces quality of embedded images)
+ * Optimizes an image file before upload
+ */
+export const optimizeImage = async (
+  file: File,
+  customOptions?: Partial<OptimizationOptions>
+): Promise<File> => {
+  try {
+    console.log(`Starting image optimization for: ${file.name} (${formatFileSize(file.size)})`);
+    
+    const options = {
+      ...defaultOptions.image,
+      ...customOptions,
+      fileType: file.type,
+    };
+
+    // Convert HEIC/HEIF files to JPEG if needed
+    let processedFile = file;
+    if (file.type.includes('heic') || file.type.includes('heif')) {
+      console.log('Converting HEIC/HEIF to JPEG...');
+      processedFile = await convertHeicToJpeg(file);
+    }
+
+    // Compress the image
+    console.log('Compressing image...');
+    const compressedFile = await imageCompression(processedFile, options);
+
+    // Check if compression was effective
+    if (compressedFile.size < file.size) {
+      console.log(
+        `Image compressed: ${formatFileSize(file.size)} → ${formatFileSize(compressedFile.size)} (${((file.size - compressedFile.size) / file.size * 100).toFixed(1)}% saved)`
+      );
+      return compressedFile;
+    }
+
+    console.log('Image compression had no effect, returning original file');
+    return file;
+  } catch (error) {
+    console.error('Error optimizing image:', error);
+    // Return original file if optimization fails
+    return file;
+  }
+};
+
+/**
+ * Optimizes a PDF file (basic implementation)
  */
 export const optimizePdf = async (file: File): Promise<File> => {
   try {
-    // For now, return original PDF
+    console.log(`Starting PDF optimization for: ${file.name} (${formatFileSize(file.size)})`);
+    
+    // For now, we can't optimize PDFs in the browser without a proper library
+    // You might want to add pdf-lib or similar for actual PDF optimization
+    console.log('PDF optimization not implemented yet. Returning original file.');
+    
     // TODO: Implement PDF optimization using pdf-lib
-    console.log('PDF optimization would be implemented here');
+    // This would require:
+    // 1. Extracting images from PDF
+    // 2. Compressing images
+    // 3. Rebuilding PDF with compressed images
+    
     return file;
   } catch (error) {
     console.error('Error optimizing PDF:', error);
@@ -113,8 +141,12 @@ export const optimizePdf = async (file: File): Promise<File> => {
  */
 export const optimizeDocument = async (file: File): Promise<File> => {
   try {
-    // For non-image documents, we can't do much optimization
+    console.log(`Processing document: ${file.name} (${formatFileSize(file.size)})`);
+    
+    // For non-image documents, we can't do much optimization in the browser
     // Could implement text compression or other techniques here
+    console.log('Document optimization not available. Returning original file.');
+    
     return file;
   } catch (error) {
     console.error('Error optimizing document:', error);
@@ -127,6 +159,9 @@ export const optimizeDocument = async (file: File): Promise<File> => {
  */
 export const optimizeFile = async (file: File): Promise<File> => {
   const fileType = file.type.toLowerCase();
+  const fileName = file.name.toLowerCase();
+  
+  console.log(`Processing file: ${file.name}, Type: ${fileType}, Size: ${formatFileSize(file.size)}`);
   
   // Check file size first - don't process files that are already small
   if (file.size < 100 * 1024) { // Less than 100KB
@@ -135,10 +170,30 @@ export const optimizeFile = async (file: File): Promise<File> => {
   }
 
   if (fileType.startsWith('image/')) {
+    console.log('Detected as image file, optimizing...');
     return optimizeImage(file);
-  } else if (fileType === 'application/pdf') {
-    return optimizePdf(file);
+  } else if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+    console.log('Detected as PDF file, attempting compression...');
+    
+    // Try simple PDF compression first
+    try {
+      const compressedPDF = await simplePDFCompress(file);
+      
+      // Only return compressed version if it's actually smaller
+      if (compressedPDF.size < file.size) {
+        const savings = ((file.size - compressedPDF.size) / file.size) * 100;
+        console.log(`PDF compressed: ${formatFileSize(file.size)} → ${formatFileSize(compressedPDF.size)} (${savings.toFixed(1)}% saved)`);
+        return compressedPDF;
+      } else {
+        console.log('PDF compression had no effect, returning original');
+        return file;
+      }
+    } catch (error) {
+      console.error('PDF compression failed, returning original:', error);
+      return file;
+    }
   } else {
+    console.log('Detected as other document type...');
     return optimizeDocument(file);
   }
 };
@@ -150,7 +205,7 @@ export const validateFile = (
   file: File,
   allowedTypes: string[],
   maxSizeMB: number = 10
-): { valid: boolean; error?: string } => {
+): { valid: boolean; error: string } => {
   // Check file type
   const isValidType = allowedTypes.some(type => {
     if (type.includes('*')) {
@@ -162,7 +217,7 @@ export const validateFile = (
   if (!isValidType) {
     return {
       valid: false,
-      error: `File type not allowed. Allowed types: ${allowedTypes.join(', ')}`,
+      error: `File type "${file.type}" not allowed. Allowed types: ${allowedTypes.join(', ')}`,
     };
   }
 
@@ -171,11 +226,11 @@ export const validateFile = (
   if (file.size > maxSizeBytes) {
     return {
       valid: false,
-      error: `File too large. Maximum size: ${maxSizeMB}MB`,
+      error: `File too large (${formatFileSize(file.size)}). Maximum size: ${maxSizeMB}MB`,
     };
   }
 
-  return { valid: true };
+  return { valid: true, error: "" };
 };
 
 /**
@@ -209,17 +264,4 @@ export const generateThumbnail = async (
       reader.readAsDataURL(file);
     });
   }
-};
-
-/**
- * Calculates file size in readable format
- */
-export const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes';
-  
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };

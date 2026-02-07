@@ -535,31 +535,32 @@ const BillForm: React.FC = () => {
           )}
 
           {/* Existing document actions */}
+
           {isEditMode && formData.downloadUrl && !file && (
-            <div className="flex justify-between items-center p-3 bg-green-50 border border-green-200 rounded-lg mb-3">
-              <div className="flex items-center gap-2">
-                <div className="text-green-600">✓</div>
-                <div>
-                  <div className="text-sm text-green-800 font-medium">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg mb-3">
+              <div className="flex items-start gap-2 sm:items-center">
+                <div className="text-green-600 mt-0.5 sm:mt-0">✓</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm text-green-800 font-medium truncate">
                     Document attached
                   </div>
-                  <div className="text-xs text-green-700">
+                  <div className="text-xs text-green-700 truncate">
                     {fileName || "Existing document"}
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 self-end sm:self-auto">
                 <button
                   type="button"
                   onClick={() => window.open(formData.downloadUrl, "_blank")}
-                  className="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded text-xs font-medium hover:bg-blue-100"
+                  className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded text-xs font-medium hover:bg-blue-100 whitespace-nowrap flex-1 sm:flex-none"
                 >
                   View
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-medium hover:bg-red-100"
+                  className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-medium hover:bg-red-100 whitespace-nowrap flex-1 sm:flex-none"
                 >
                   Delete
                 </button>

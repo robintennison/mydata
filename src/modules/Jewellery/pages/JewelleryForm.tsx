@@ -15,6 +15,7 @@ import {
   validateFile,
   formatFileSize,
 } from "../../../utils/fileOptimizer";
+import { useImageSize, ImageSizeBadge } from "../../../utils/imageSizeUtils";
 
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
@@ -70,9 +71,6 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   const [billError, setBillError] = useState<string | null>(null);
 
   // Image states
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    formData.imageUrl || null,
-  );
   const [uploadingImage, setUploadingImage] = useState(false);
   const [deletingImage, setDeletingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -83,6 +81,11 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     optimizedSize: number;
     savedPercentage: number;
   } | null>(null);
+
+  // Use the image size hook
+  const { size: currentImageSize, loading: loadingImageSize } = useImageSize(
+    formData.imageUrl || null,
+  );
 
   // Calendar states
   const [showCalendar, setShowCalendar] = useState(false);
@@ -98,11 +101,6 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     boughtForOptions,
     loading: settingsLoading,
   } = useJewellerySettings();
-
-  // Initialize image preview when formData changes
-  useEffect(() => {
-    setImagePreview(formData.imageUrl || null);
-  }, [formData.imageUrl]);
 
   // Fetch assigned bill details based on billId
   useEffect(() => {
@@ -416,8 +414,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
     // Create preview
     const reader = new FileReader();
-    reader.onload = (event) => {
-      setImagePreview(event.target?.result as string);
+    reader.onload = () => {
+      // Preview is handled by the file URL
     };
     reader.readAsDataURL(file);
 
@@ -533,9 +531,6 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           ...prev,
           imageUrl: "",
         }));
-
-        // Clear preview
-        setImagePreview(null);
       } else {
         throw new Error("Could not extract file path from URL");
       }
@@ -654,6 +649,16 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     });
   };
 
+  // Get image preview URL (either from selected file or existing URL)
+  const getImagePreview = () => {
+    if (selectedFile) {
+      return URL.createObjectURL(selectedFile);
+    }
+    return formData.imageUrl || null;
+  };
+
+  const imagePreview = getImagePreview();
+
   return (
     <form onSubmit={handleSubmit} className="p-4">
       {/* Image Section */}
@@ -672,6 +677,21 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                 className="max-w-[300px] max-h-[300px] rounded-lg border border-gray-200 shadow-sm mx-auto"
               />
 
+              {/* Size badge overlay */}
+              {selectedFile ? (
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  <span className="font-medium">
+                    {formatFileSize(selectedFile.size)}
+                  </span>
+                </div>
+              ) : (
+                <ImageSizeBadge
+                  size={currentImageSize}
+                  loading={loadingImageSize}
+                  position="overlay"
+                />
+              )}
+
               {/* Delete button overlay */}
               <button
                 type="button"
@@ -683,6 +703,17 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                 {deletingImage ? "⏳" : "🗑️"}
               </button>
             </div>
+
+            {/* Size badge below image */}
+            {formData.imageUrl && !selectedFile && (
+              <div className="mt-2 text-center">
+                <ImageSizeBadge
+                  size={currentImageSize}
+                  loading={loadingImageSize}
+                  position="below"
+                />
+              </div>
+            )}
           </div>
         )}
 

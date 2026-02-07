@@ -18,6 +18,7 @@ import {
   validateFile,
   formatFileSize,
 } from "../../../utils/fileOptimizer";
+import { useImageSize, ImageSizeBadge } from "../../../utils/imageSizeUtils";
 
 // Helper function to safely parse timestamps
 const parseTimestamp = (timestamp: any): number => {
@@ -89,12 +90,18 @@ const OnlineForm: React.FC = () => {
     useState<OptimizationInfo | null>(null);
   const [image2Optimization, setImage2Optimization] =
     useState<OptimizationInfo | null>(null);
-  const [image1Preview, setImage1Preview] = useState<string | null>(null);
-  const [image2Preview, setImage2Preview] = useState<string | null>(null);
   const [imageErrors, setImageErrors] = useState<{
     image1?: string;
     image2?: string;
   }>({});
+
+  // Use image size hooks for both images
+  const { size: image1Size, loading: loadingImage1Size } = useImageSize(
+    formData.image1 || null,
+  );
+  const { size: image2Size, loading: loadingImage2Size } = useImageSize(
+    formData.image2 || null,
+  );
 
   useEffect(() => {
     fetchCategories();
@@ -115,28 +122,11 @@ const OnlineForm: React.FC = () => {
     }
   }, [id, location.pathname]);
 
-  // Initialize previews when formData changes
-  useEffect(() => {
-    if (formData.image1) {
-      setImage1Preview(formData.image1);
-    } else {
-      setImage1Preview(null);
-    }
-
-    if (formData.image2) {
-      setImage2Preview(formData.image2);
-    } else {
-      setImage2Preview(null);
-    }
-  }, [formData.image1, formData.image2]);
-
   const resetImageStates = () => {
     setImage1File(null);
     setImage2File(null);
     setImage1Optimization(null);
     setImage2Optimization(null);
-    setImage1Preview(null);
-    setImage2Preview(null);
     setImageErrors({});
   };
 
@@ -238,17 +228,6 @@ const OnlineForm: React.FC = () => {
       setImage2File(file);
     }
 
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (imageNumber === 1) {
-        setImage1Preview(event.target?.result as string);
-      } else {
-        setImage2Preview(event.target?.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
-
     // Optimize the file in background
     try {
       const optimized = await optimizeFile(file);
@@ -287,7 +266,6 @@ const OnlineForm: React.FC = () => {
     if (imageNumber === 1) {
       setImage1File(null);
       setImage1Optimization(null);
-      setImage1Preview(formData.image1 || null);
       setImageErrors((prev) => ({ ...prev, image1: undefined }));
 
       // Reset file input
@@ -298,7 +276,6 @@ const OnlineForm: React.FC = () => {
     } else {
       setImage2File(null);
       setImage2Optimization(null);
-      setImage2Preview(formData.image2 || null);
       setImageErrors((prev) => ({ ...prev, image2: undefined }));
 
       // Reset file input
@@ -334,10 +311,8 @@ const OnlineForm: React.FC = () => {
         // Update form data
         if (imageNumber === 1) {
           setFormData((prev) => ({ ...prev, image1: "" }));
-          setImage1Preview(null);
         } else {
           setFormData((prev) => ({ ...prev, image2: "" }));
-          setImage2Preview(null);
         }
 
         alert(`Image ${imageNumber} deleted successfully!`);
@@ -537,47 +512,18 @@ const OnlineForm: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="w-full h-screen bg-gray-50 flex flex-col">
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
-          <div className="flex items-center">
-            <button
-              onClick={() =>
-                navigate("/online", { state: { activeTab: "items" } })
-              }
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-              title="Back"
-            >
-              ←
-            </button>
-            <div className="ml-4">
-              <h1 className="text-lg font-semibold text-gray-900">
-                {getPageTitle()}
-              </h1>
-            </div>
-          </div>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading item...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const renderImageSection = (imageNumber: 1 | 2) => {
     const isView = isViewMode;
     const file = imageNumber === 1 ? image1File : image2File;
     const optimization =
       imageNumber === 1 ? image1Optimization : image2Optimization;
-    const preview = imageNumber === 1 ? image1Preview : image2Preview;
     const error = imageNumber === 1 ? imageErrors.image1 : imageErrors.image2;
     const existingImage = imageNumber === 1 ? formData.image1 : formData.image2;
     const hasExistingImage = !!existingImage;
     const hasNewFile = !!file;
+    const imageSize = imageNumber === 1 ? image1Size : image2Size;
+    const loadingSize =
+      imageNumber === 1 ? loadingImage1Size : loadingImage2Size;
 
     return (
       <div>
@@ -587,17 +533,33 @@ const OnlineForm: React.FC = () => {
 
         {isView ? (
           <div className="text-center">
-            {preview ? (
+            {existingImage ? (
               <div className="relative">
                 <img
-                  src={preview}
+                  src={existingImage}
                   alt={`Image ${imageNumber}`}
                   className="max-w-full max-h-48 rounded-lg border border-gray-300 mx-auto"
+                />
+                <ImageSizeBadge
+                  size={imageSize}
+                  loading={loadingSize}
+                  position="overlay"
                 />
               </div>
             ) : (
               <div className="p-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-gray-500 text-sm">
                 No image
+              </div>
+            )}
+
+            {/* Size badge below image in view mode */}
+            {existingImage && (
+              <div className="mt-2 text-center">
+                <ImageSizeBadge
+                  size={imageSize}
+                  loading={loadingSize}
+                  position="below"
+                />
               </div>
             )}
           </div>
@@ -648,6 +610,11 @@ const OnlineForm: React.FC = () => {
                     alt={`Current Image ${imageNumber}`}
                     className="max-w-full max-h-36 rounded-lg border border-gray-300"
                   />
+                  <ImageSizeBadge
+                    size={imageSize}
+                    loading={loadingSize}
+                    position="overlay"
+                  />
                   <div className="mt-2 flex gap-2">
                     <button
                       type="button"
@@ -665,10 +632,16 @@ const OnlineForm: React.FC = () => {
               {hasNewFile && (
                 <div className="relative">
                   <img
-                    src={preview || ""}
+                    src={URL.createObjectURL(file)}
                     alt={`New Image ${imageNumber}`}
                     className="max-w-full max-h-36 rounded-lg border border-gray-300"
                   />
+                  {/* Size badge for new file */}
+                  <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    <span className="font-medium">
+                      {formatFileSize(file.size)}
+                    </span>
+                  </div>
                   <div className="mt-2 flex gap-2">
                     <button
                       type="button"
@@ -682,11 +655,53 @@ const OnlineForm: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Size badge below existing image */}
+            {hasExistingImage && !hasNewFile && (
+              <div className="mt-2 text-center">
+                <ImageSizeBadge
+                  size={imageSize}
+                  loading={loadingSize}
+                  position="below"
+                />
+              </div>
+            )}
           </>
         )}
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="w-full h-screen bg-gray-50 flex flex-col">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center">
+            <button
+              onClick={() =>
+                navigate("/online", { state: { activeTab: "items" } })
+              }
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title="Back"
+            >
+              ←
+            </button>
+            <div className="ml-4">
+              <h1 className="text-lg font-semibold text-gray-900">
+                {getPageTitle()}
+              </h1>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading item...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-screen bg-gray-50 flex flex-col">

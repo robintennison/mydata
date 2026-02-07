@@ -10,6 +10,11 @@ import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
 import { useNavigate } from "react-router-dom";
+import {
+  optimizeFile,
+  validateFile,
+  formatFileSize,
+} from "../../../utils/fileOptimizer";
 
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
@@ -73,6 +78,11 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   const [imageError, setImageError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [optimizationInfo, setOptimizationInfo] = useState<{
+    originalSize: number;
+    optimizedSize: number;
+    savedPercentage: number;
+  } | null>(null);
 
   // Calendar states
   const [showCalendar, setShowCalendar] = useState(false);
@@ -91,11 +101,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
   // Initialize image preview when formData changes
   useEffect(() => {
-    if (formData.imageUrl) {
-      setImagePreview(formData.imageUrl);
-    } else {
-      setImagePreview(null);
-    }
+    setImagePreview(formData.imageUrl || null);
   }, [formData.imageUrl]);
 
   // Fetch assigned bill details based on billId
@@ -381,32 +387,32 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     );
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
+    // Validate file
     const validTypes = [
       "image/jpeg",
       "image/png",
       "image/gif",
       "image/webp",
       "image/jpg",
+      "image/heic",
+      "image/heif",
     ];
-    if (!validTypes.includes(file.type)) {
-      setImageError("Please select a valid image file (JPEG, PNG, GIF, WebP)");
-      return;
-    }
 
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      setImageError("Image size should be less than 5MB");
+    const validation = validateFile(file, validTypes, 5); // 5MB max
+    if (!validation.valid) {
+      setImageError(validation.error || "Invalid file");
+      setSelectedFile(null);
+      setOptimizationInfo(null);
       return;
     }
 
     setSelectedFile(file);
     setImageError(null);
+    setOptimizationInfo(null);
 
     // Create preview
     const reader = new FileReader();
@@ -414,6 +420,28 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       setImagePreview(event.target?.result as string);
     };
     reader.readAsDataURL(file);
+
+    // Optimize the file in background
+    try {
+      const optimized = await optimizeFile(file);
+      const originalSize = file.size;
+      const optimizedSize = optimized.size;
+      const savedPercentage =
+        ((originalSize - optimizedSize) / originalSize) * 100;
+
+      setOptimizationInfo({
+        originalSize,
+        optimizedSize,
+        savedPercentage,
+      });
+
+      console.log(
+        `Image will be optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
+      );
+    } catch (err: any) {
+      console.error("Error optimizing image:", err);
+      setOptimizationInfo(null);
+    }
   };
 
   const handleUploadImage = async () => {
@@ -426,17 +454,33 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       setUploadingImage(true);
       setImageError(null);
 
+      // Optimize the image
+      let fileToUpload = selectedFile;
+      if (optimizationInfo && optimizationInfo.savedPercentage > 0) {
+        try {
+          fileToUpload = await optimizeFile(selectedFile);
+          console.log(
+            `Uploading optimized file: ${formatFileSize(fileToUpload.size)}`,
+          );
+        } catch (err) {
+          console.error(
+            "Error during final optimization, using original:",
+            err,
+          );
+        }
+      }
+
       // Generate a unique filename
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substring(2, 9);
-      const fileExtension = selectedFile.name.split(".").pop();
+      const fileExtension = fileToUpload.name.split(".").pop();
       const fileName = `jewellery_${timestamp}_${randomId}.${fileExtension}`;
 
       // Create storage reference
       const storageRef = ref(storage, `jewellery_images/${fileName}`);
 
-      // Upload file
-      const snapshot = await uploadBytes(storageRef, selectedFile);
+      // Upload optimized file
+      const snapshot = await uploadBytes(storageRef, fileToUpload);
 
       // Get download URL
       const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${snapshot.ref.bucket}/o/${encodeURIComponent(snapshot.ref.fullPath)}?alt=media`;
@@ -449,6 +493,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
       // Clear selected file
       setSelectedFile(null);
+      setOptimizationInfo(null);
 
       // Reset file input
       if (fileInputRef.current) {
@@ -594,6 +639,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   const handleCancelImageUpload = () => {
     setSelectedFile(null);
     setImageError(null);
+    setOptimizationInfo(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -693,11 +739,39 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
             )}
           </div>
 
-          {/* File info and errors */}
+          {/* File info and optimization details */}
           {selectedFile && (
             <div className="p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
-              Selected: {selectedFile.name} (
-              {(selectedFile.size / 1024).toFixed(1)} KB)
+              <div className="flex justify-between items-center mb-1">
+                <div className="font-medium">Selected: {selectedFile.name}</div>
+                <div>{formatFileSize(selectedFile.size)}</div>
+              </div>
+
+              {optimizationInfo && optimizationInfo.savedPercentage > 0 && (
+                <div className="mt-2 p-2 bg-green-50 border border-green-100 rounded">
+                  <div className="flex justify-between items-center text-green-800">
+                    <div className="font-medium flex items-center gap-1">
+                      <span>🎯</span>
+                      <span>
+                        {optimizationInfo.savedPercentage.toFixed(1)}% saved
+                      </span>
+                    </div>
+                    <div className="font-mono">
+                      {formatFileSize(optimizationInfo.originalSize)} →{" "}
+                      {formatFileSize(optimizationInfo.optimizedSize)}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {optimizationInfo && optimizationInfo.savedPercentage === 0 && (
+                <div className="mt-2 p-2 bg-blue-50 border border-blue-100 rounded text-blue-800">
+                  <div className="flex items-center gap-1">
+                    <span>ℹ️</span>
+                    <span>File is already optimized</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -712,7 +786,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               <div className="text-2xl mb-2">📷</div>
               <div className="text-sm">No image uploaded</div>
               <div className="text-xs mt-1">
-                Click "Choose File" to add an image
+                Click "Choose File" to add an image (max 5MB)
               </div>
             </div>
           )}

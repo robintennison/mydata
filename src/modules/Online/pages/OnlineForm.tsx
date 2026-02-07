@@ -10,8 +10,14 @@ import {
   getDocs,
   deleteDoc,
 } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
 import { OnlineItem, Category } from "../types/online.types";
 import { useSettings } from "../../../contexts/SettingsContext";
+import {
+  optimizeFile,
+  validateFile,
+  formatFileSize,
+} from "../../../utils/fileOptimizer";
 
 // Helper function to safely parse timestamps
 const parseTimestamp = (timestamp: any): number => {
@@ -30,13 +36,21 @@ const parseTimestamp = (timestamp: any): number => {
   return Date.now();
 };
 
+interface OptimizationInfo {
+  originalSize: number;
+  optimizedSize: number;
+  savedPercentage: number;
+  fileName: string;
+}
+
 const OnlineForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id?: string }>();
   const { settings } = useSettings();
-  const showDelete = settings?.showDelete || false; // Get showDelete setting
+  const showDelete = settings?.showDelete || false;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [storage] = useState(() => getStorage());
 
   const getModeFromPath = (): "add" | "edit" | "view" => {
     const path = location.pathname;
@@ -66,8 +80,21 @@ const OnlineForm: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+
+  // Image states
   const [image1File, setImage1File] = useState<File | null>(null);
   const [image2File, setImage2File] = useState<File | null>(null);
+  const [image1Optimization, setImage1Optimization] =
+    useState<OptimizationInfo | null>(null);
+  const [image2Optimization, setImage2Optimization] =
+    useState<OptimizationInfo | null>(null);
+  const [image1Preview, setImage1Preview] = useState<string | null>(null);
+  const [image2Preview, setImage2Preview] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<{
+    image1?: string;
+    image2?: string;
+  }>({});
 
   useEffect(() => {
     fetchCategories();
@@ -84,10 +111,34 @@ const OnlineForm: React.FC = () => {
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
-      setImage1File(null);
-      setImage2File(null);
+      resetImageStates();
     }
   }, [id, location.pathname]);
+
+  // Initialize previews when formData changes
+  useEffect(() => {
+    if (formData.image1) {
+      setImage1Preview(formData.image1);
+    } else {
+      setImage1Preview(null);
+    }
+
+    if (formData.image2) {
+      setImage2Preview(formData.image2);
+    } else {
+      setImage2Preview(null);
+    }
+  }, [formData.image1, formData.image2]);
+
+  const resetImageStates = () => {
+    setImage1File(null);
+    setImage2File(null);
+    setImage1Optimization(null);
+    setImage2Optimization(null);
+    setImage1Preview(null);
+    setImage2Preview(null);
+    setImageErrors({});
+  };
 
   const fetchCategories = async () => {
     try {
@@ -133,8 +184,7 @@ const OnlineForm: React.FC = () => {
           createdAt: parseTimestamp(data.createdAt),
           updatedAt: parseTimestamp(data.updatedAt),
         });
-        setImage1File(null);
-        setImage2File(null);
+        resetImageStates();
       } else {
         alert("Item not found");
         navigate("/online", { state: { activeTab: "items" } });
@@ -148,8 +198,200 @@ const OnlineForm: React.FC = () => {
     }
   };
 
-  const handleImageUpload = async (file: File): Promise<string> => {
-    return `https://via.placeholder.com/300x200?text=${encodeURIComponent(file.name)}`;
+  const handleImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    imageNumber: 1 | 2,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/jpg",
+      "image/heic",
+      "image/heif",
+    ];
+
+    const validation = validateFile(file, allowedTypes, 5); // 5MB max
+    if (!validation.valid) {
+      setImageErrors((prev) => ({
+        ...prev,
+        [`image${imageNumber}`]: validation.error,
+      }));
+      return;
+    }
+
+    // Clear any previous error
+    setImageErrors((prev) => ({
+      ...prev,
+      [`image${imageNumber}`]: undefined,
+    }));
+
+    // Set file
+    if (imageNumber === 1) {
+      setImage1File(file);
+    } else {
+      setImage2File(file);
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (imageNumber === 1) {
+        setImage1Preview(event.target?.result as string);
+      } else {
+        setImage2Preview(event.target?.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // Optimize the file in background
+    try {
+      const optimized = await optimizeFile(file);
+      const originalSize = file.size;
+      const optimizedSize = optimized.size;
+      const savedPercentage =
+        ((originalSize - optimizedSize) / originalSize) * 100;
+
+      const optimizationInfo = {
+        originalSize,
+        optimizedSize,
+        savedPercentage,
+        fileName: file.name,
+      };
+
+      if (imageNumber === 1) {
+        setImage1Optimization(optimizationInfo);
+      } else {
+        setImage2Optimization(optimizationInfo);
+      }
+
+      console.log(
+        `Image ${imageNumber} optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
+      );
+    } catch (err: any) {
+      console.error(`Error optimizing image ${imageNumber}:`, err);
+      if (imageNumber === 1) {
+        setImage1Optimization(null);
+      } else {
+        setImage2Optimization(null);
+      }
+    }
+  };
+
+  const handleRemoveImage = (imageNumber: 1 | 2) => {
+    if (imageNumber === 1) {
+      setImage1File(null);
+      setImage1Optimization(null);
+      setImage1Preview(formData.image1 || null);
+      setImageErrors((prev) => ({ ...prev, image1: undefined }));
+
+      // Reset file input
+      const input = document.getElementById(
+        `image${imageNumber}Input`,
+      ) as HTMLInputElement;
+      if (input) input.value = "";
+    } else {
+      setImage2File(null);
+      setImage2Optimization(null);
+      setImage2Preview(formData.image2 || null);
+      setImageErrors((prev) => ({ ...prev, image2: undefined }));
+
+      // Reset file input
+      const input = document.getElementById(
+        `image${imageNumber}Input`,
+      ) as HTMLInputElement;
+      if (input) input.value = "";
+    }
+  };
+
+  const handleDeleteExistingImage = async (imageNumber: 1 | 2) => {
+    const imageUrl = imageNumber === 1 ? formData.image1 : formData.image2;
+    if (!imageUrl) return;
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete Image ${imageNumber}? This action cannot be undone.`,
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      // Extract file path from URL
+      const url = new URL(imageUrl);
+      const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+
+      if (pathMatch) {
+        const filePath = decodeURIComponent(pathMatch[1]);
+        const storageRef = ref(storage, filePath);
+
+        // Delete file from storage
+        await deleteObject(storageRef);
+
+        // Update form data
+        if (imageNumber === 1) {
+          setFormData((prev) => ({ ...prev, image1: "" }));
+          setImage1Preview(null);
+        } else {
+          setFormData((prev) => ({ ...prev, image2: "" }));
+          setImage2Preview(null);
+        }
+
+        alert(`Image ${imageNumber} deleted successfully!`);
+      }
+    } catch (error: any) {
+      console.error(`Error deleting image ${imageNumber}:`, error);
+      alert(`Failed to delete image: ${error.message}`);
+    }
+  };
+
+  const uploadImage = async (
+    file: File,
+    imageNumber: 1 | 2,
+  ): Promise<string> => {
+    try {
+      let fileToUpload = file;
+
+      // Optimize the image before upload
+      const optimization =
+        imageNumber === 1 ? image1Optimization : image2Optimization;
+      if (optimization && optimization.savedPercentage > 0) {
+        try {
+          fileToUpload = await optimizeFile(file);
+          console.log(
+            `Uploading optimized image ${imageNumber}: ${formatFileSize(fileToUpload.size)}`,
+          );
+        } catch (err) {
+          console.error(
+            `Error during final optimization for image ${imageNumber}:`,
+            err,
+          );
+        }
+      }
+
+      // Generate a unique filename
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 9);
+      const fileExtension = fileToUpload.name.split(".").pop();
+      const fileName = `online_${imageNumber}_${timestamp}_${randomId}.${fileExtension}`;
+
+      // Create storage reference
+      const storageRef = ref(storage, `online_images/${fileName}`);
+
+      // Upload optimized file
+      const snapshot = await uploadBytes(storageRef, fileToUpload);
+
+      // Get download URL
+      const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${snapshot.ref.bucket}/o/${encodeURIComponent(snapshot.ref.fullPath)}?alt=media`;
+
+      return downloadURL;
+    } catch (error: any) {
+      console.error(`Error uploading image ${imageNumber}:`, error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,16 +404,18 @@ const OnlineForm: React.FC = () => {
 
     try {
       setSaving(true);
+      setUploadingImages(true);
       const db = getFirestore();
 
       let image1Url = formData.image1 || "";
       let image2Url = formData.image2 || "";
 
+      // Upload new images if selected
       if (image1File) {
-        image1Url = await handleImageUpload(image1File);
+        image1Url = await uploadImage(image1File, 1);
       }
       if (image2File) {
-        image2Url = await handleImageUpload(image2File);
+        image2Url = await uploadImage(image2File, 2);
       }
 
       const itemData = {
@@ -193,11 +437,24 @@ const OnlineForm: React.FC = () => {
       }
 
       navigate("/online", { state: { activeTab: "items" } });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving item:", error);
-      alert("Failed to save item");
+
+      let errorMessage = "Failed to save item";
+      if (error.message?.includes("quota")) {
+        errorMessage =
+          "Storage quota exceeded. Images are optimized to save space.";
+      } else if (error.code === "storage/unauthorized") {
+        errorMessage =
+          "Upload failed: You don't have permission to upload files.";
+      } else if (error.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+
+      alert(errorMessage);
     } finally {
       setSaving(false);
+      setUploadingImages(false);
     }
   };
 
@@ -212,8 +469,40 @@ const OnlineForm: React.FC = () => {
 
     try {
       setSaving(true);
+
+      // Delete images from storage if they exist
+      if (formData.image1) {
+        try {
+          const url = new URL(formData.image1);
+          const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+          if (pathMatch) {
+            const filePath = decodeURIComponent(pathMatch[1]);
+            const storageRef = ref(storage, filePath);
+            await deleteObject(storageRef);
+          }
+        } catch (error) {
+          console.error("Error deleting image 1:", error);
+        }
+      }
+
+      if (formData.image2) {
+        try {
+          const url = new URL(formData.image2);
+          const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+          if (pathMatch) {
+            const filePath = decodeURIComponent(pathMatch[1]);
+            const storageRef = ref(storage, filePath);
+            await deleteObject(storageRef);
+          }
+        } catch (error) {
+          console.error("Error deleting image 2:", error);
+        }
+      }
+
+      // Delete document from Firestore
       const db = getFirestore();
       await deleteDoc(doc(db, "online", id));
+
       alert("Item deleted successfully!");
       navigate("/online", { state: { activeTab: "items" } });
     } catch (error) {
@@ -279,6 +568,126 @@ const OnlineForm: React.FC = () => {
     );
   }
 
+  const renderImageSection = (imageNumber: 1 | 2) => {
+    const isView = isViewMode;
+    const file = imageNumber === 1 ? image1File : image2File;
+    const optimization =
+      imageNumber === 1 ? image1Optimization : image2Optimization;
+    const preview = imageNumber === 1 ? image1Preview : image2Preview;
+    const error = imageNumber === 1 ? imageErrors.image1 : imageErrors.image2;
+    const existingImage = imageNumber === 1 ? formData.image1 : formData.image2;
+    const hasExistingImage = !!existingImage;
+    const hasNewFile = !!file;
+
+    return (
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Image {imageNumber}
+        </label>
+
+        {isView ? (
+          <div className="text-center">
+            {preview ? (
+              <div className="relative">
+                <img
+                  src={preview}
+                  alt={`Image ${imageNumber}`}
+                  className="max-w-full max-h-48 rounded-lg border border-gray-300 mx-auto"
+                />
+              </div>
+            ) : (
+              <div className="p-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-gray-500 text-sm">
+                No image
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* File input */}
+            <input
+              id={`image${imageNumber}Input`}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageChange(e, imageNumber)}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+              disabled={saving || uploadingImages}
+            />
+
+            {/* Error message */}
+            {error && (
+              <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+                ⚠️ {error}
+              </div>
+            )}
+
+            {/* Optimization info */}
+            {optimization && optimization.savedPercentage > 0 && (
+              <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex flex-col text-green-800 text-xs">
+                  <div className="flex items-center gap-1 font-medium mb-1">
+                    <span>🎯</span>
+                    <span>
+                      {optimization.savedPercentage.toFixed(1)}% space saved
+                    </span>
+                  </div>
+                  <div className="font-mono text-xs">
+                    {formatFileSize(optimization.originalSize)} →{" "}
+                    {formatFileSize(optimization.optimizedSize)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Image preview and actions */}
+            <div className="space-y-3">
+              {/* Existing image preview */}
+              {hasExistingImage && !hasNewFile && (
+                <div className="relative">
+                  <img
+                    src={existingImage}
+                    alt={`Current Image ${imageNumber}`}
+                    className="max-w-full max-h-36 rounded-lg border border-gray-300"
+                  />
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteExistingImage(imageNumber)}
+                      disabled={saving || uploadingImages}
+                      className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-medium hover:bg-red-100 disabled:opacity-50"
+                    >
+                      Delete Image
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* New image preview */}
+              {hasNewFile && (
+                <div className="relative">
+                  <img
+                    src={preview || ""}
+                    alt={`New Image ${imageNumber}`}
+                    className="max-w-full max-h-36 rounded-lg border border-gray-300"
+                  />
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(imageNumber)}
+                      disabled={saving || uploadingImages}
+                      className="px-3 py-1 bg-gray-50 text-gray-700 border border-gray-300 rounded text-xs font-medium hover:bg-gray-100 disabled:opacity-50"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="w-full h-screen bg-gray-50 flex flex-col">
       {/* Top Navigation */}
@@ -339,7 +748,7 @@ const OnlineForm: React.FC = () => {
                 } disabled:bg-gray-100 disabled:cursor-not-allowed`}
                 placeholder="Enter item name"
                 required={!isViewMode}
-                disabled={isViewMode || saving}
+                disabled={isViewMode || saving || uploadingImages}
                 readOnly={isViewMode}
                 autoFocus={!isViewMode}
               />
@@ -360,7 +769,7 @@ const OnlineForm: React.FC = () => {
                     setFormData({ ...formData, category: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  disabled={saving}
+                  disabled={saving || uploadingImages}
                 >
                   <option value="">Select Category</option>
                   {categories.map((cat) => (
@@ -390,112 +799,36 @@ const OnlineForm: React.FC = () => {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-y min-h-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter item details"
-                  disabled={saving}
+                  disabled={saving || uploadingImages}
                 />
               )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image 1
-                </label>
-                {isViewMode ? (
-                  <div className="text-center">
-                    {formData.image1 ? (
-                      <>
-                        <img
-                          src={formData.image1}
-                          alt="Image 1"
-                          className="max-w-full max-h-48 rounded-lg border border-gray-300 mx-auto"
-                        />
-                        <div className="text-xs text-gray-500 mt-2">
-                          Image 1
-                        </div>
-                      </>
-                    ) : (
-                      <div className="p-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-gray-500 text-sm">
-                        No image
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        setImage1File(e.target.files?.[0] || null)
-                      }
-                      className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled={saving}
-                    />
-                    {formData.image1 && !image1File && (
-                      <div className="mt-4 text-center">
-                        <img
-                          src={formData.image1}
-                          alt="Preview 1"
-                          className="max-w-full max-h-36 rounded-lg border border-gray-300 mx-auto"
-                        />
-                        <div className="text-xs text-gray-500 mt-1">
-                          Current Image
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image 2
-                </label>
-                {isViewMode ? (
-                  <div className="text-center">
-                    {formData.image2 ? (
-                      <>
-                        <img
-                          src={formData.image2}
-                          alt="Image 2"
-                          className="max-w-full max-h-48 rounded-lg border border-gray-300 mx-auto"
-                        />
-                        <div className="text-xs text-gray-500 mt-2">
-                          Image 2
-                        </div>
-                      </>
-                    ) : (
-                      <div className="p-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-gray-500 text-sm">
-                        No image
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        setImage2File(e.target.files?.[0] || null)
-                      }
-                      className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled={saving}
-                    />
-                    {formData.image2 && !image2File && (
-                      <div className="mt-4 text-center">
-                        <img
-                          src={formData.image2}
-                          alt="Preview 2"
-                          className="max-w-full max-h-36 rounded-lg border border-gray-300 mx-auto"
-                        />
-                        <div className="text-xs text-gray-500 mt-1">
-                          Current Image
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+              {renderImageSection(1)}
+              {renderImageSection(2)}
             </div>
+
+            {/* Optimization note */}
+            {!isViewMode && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <div className="text-blue-500 mt-0.5">ℹ️</div>
+                  <div className="text-xs text-blue-800">
+                    <div className="font-medium mb-1">
+                      Automatic Image Optimization
+                    </div>
+                    <div>
+                      Images are automatically compressed to save storage space.
+                      HEIC files are converted to JPEG.
+                    </div>
+                    <div className="mt-1 text-blue-600">
+                      Max file size: 5MB | Recommended: Images under 1MB
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Timestamps - Show in View mode */}
             {isViewMode && (
@@ -529,7 +862,7 @@ const OnlineForm: React.FC = () => {
                       navigate("/online", { state: { activeTab: "items" } })
                     }
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
-                    disabled={saving}
+                    disabled={saving || uploadingImages}
                   >
                     Cancel
                   </button>
@@ -540,7 +873,7 @@ const OnlineForm: React.FC = () => {
                       type="button"
                       onClick={handleDelete}
                       className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:opacity-50"
-                      disabled={saving}
+                      disabled={saving || uploadingImages}
                     >
                       {saving ? "Deleting..." : "Delete"}
                     </button>
@@ -549,9 +882,9 @@ const OnlineForm: React.FC = () => {
                   <button
                     type="submit"
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
-                    disabled={saving}
+                    disabled={saving || uploadingImages}
                   >
-                    {saving
+                    {saving || uploadingImages
                       ? "Saving..."
                       : isAddMode
                         ? "Add Item"

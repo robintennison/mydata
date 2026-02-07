@@ -2,22 +2,82 @@ import { useState } from "react";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage, database } from "../lib/firebase";
 import { ref as dbRef, set, push } from "firebase/database";
+import {
+  optimizeFile,
+  validateFile,
+  formatFileSize,
+} from "../utils/fileOptimizer";
 
 interface FileUploadProps {
   userId: string;
+  allowedTypes?: string[];
+  maxSizeMB?: number;
+  pathPrefix?: string;
+  onUploadComplete?: (fileInfo: any) => void;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ userId }) => {
+const FileUpload: React.FC<FileUploadProps> = ({
+  userId,
+  allowedTypes = ["image/*", "application/pdf", "text/plain"],
+  maxSizeMB = 10,
+  pathPrefix = "users",
+  onUploadComplete,
+}) => {
   const [file, setFile] = useState<File | null>(null);
+  const [optimizedFile, setOptimizedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [optimizationInfo, setOptimizationInfo] = useState<{
+    originalSize: number;
+    optimizedSize: number;
+    savedPercentage: number;
+  } | null>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setError("");
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0]) return;
+
+    const selectedFile = e.target.files[0];
+
+    // Validate file
+    const validation = validateFile(selectedFile, allowedTypes, maxSizeMB);
+    if (!validation.valid) {
+      setError(validation.error || "Invalid file");
+      setFile(null);
+      setOptimizedFile(null);
+      setOptimizationInfo(null);
+      return;
+    }
+
+    setFile(selectedFile);
+    setError("");
+
+    try {
+      // Optimize the file
+      setOptimizationInfo(null);
+      const optimized = await optimizeFile(selectedFile);
+      setOptimizedFile(optimized);
+
+      // Calculate savings
+      const originalSize = selectedFile.size;
+      const optimizedSize = optimized.size;
+      const savedPercentage =
+        ((originalSize - optimizedSize) / originalSize) * 100;
+
+      setOptimizationInfo({
+        originalSize,
+        optimizedSize,
+        savedPercentage,
+      });
+
+      console.log(
+        `File optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
+      );
+    } catch (err: any) {
+      console.error("Error optimizing file:", err);
+      setOptimizedFile(selectedFile); // Fallback to original
+      setOptimizationInfo(null);
     }
   };
 
@@ -27,18 +87,22 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId }) => {
       return;
     }
 
+    const fileToUpload = optimizedFile || file;
+
     setUploading(true);
     setError("");
 
     try {
       // Create a storage reference
-      const storageRef = ref(
-        storage,
-        `users/${userId}/${Date.now()}_${file.name}`
-      );
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 9);
+      const fileExtension = fileToUpload.name.split(".").pop();
+      const fileName = `${timestamp}_${randomId}.${fileExtension}`;
+
+      const storageRef = ref(storage, `${pathPrefix}/${userId}/${fileName}`);
 
       // Create upload task
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
 
       // Monitor upload progress
       uploadTask.on(
@@ -57,27 +121,42 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId }) => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
           // Save file info to Realtime Database
-          const filesRef = dbRef(database, `users/${userId}/files`);
+          const filesRef = dbRef(database, `${pathPrefix}/${userId}/files`);
           const newFileRef = push(filesRef);
-          await set(newFileRef, {
+
+          const fileInfo = {
             name: file.name,
+            originalName: file.name,
+            optimizedName: fileName,
             url: downloadURL,
-            size: file.size,
+            originalSize: file.size,
+            optimizedSize: fileToUpload.size,
             type: file.type,
             uploadedAt: Date.now(),
-          });
+            savedBytes: file.size - fileToUpload.size,
+            savedPercentage: optimizationInfo?.savedPercentage || 0,
+          };
+
+          await set(newFileRef, fileInfo);
 
           setUploadedFiles((prev) => [...prev, file.name]);
           setFile(null);
+          setOptimizedFile(null);
+          setOptimizationInfo(null);
           setProgress(0);
           setUploading(false);
 
+          // Call callback if provided
+          if (onUploadComplete) {
+            onUploadComplete(fileInfo);
+          }
+
           // Reset file input
           const fileInput = document.getElementById(
-            "file-input"
+            "file-input",
           ) as HTMLInputElement;
           if (fileInput) fileInput.value = "";
-        }
+        },
       );
     } catch (err: any) {
       setError(`Upload error: ${err.message}`);
@@ -89,7 +168,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId }) => {
     <div style={styles.container}>
       <h3 style={styles.title}>📁 Upload Files to Firebase Storage</h3>
       <p style={styles.subtitle}>
-        Files will be stored in the same Storage as your Android app
+        Files will be automatically optimized to save space
       </p>
 
       <div style={styles.uploadArea}>
@@ -103,10 +182,26 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId }) => {
 
         {file && (
           <div style={styles.fileInfo}>
-            <span style={styles.fileName}>📄 {file.name}</span>
-            <span style={styles.fileSize}>
-              ({(file.size / 1024).toFixed(2)} KB)
-            </span>
+            <div style={styles.fileRow}>
+              <span style={styles.fileName}>📄 {file.name}</span>
+              <span style={styles.fileSize}>{formatFileSize(file.size)}</span>
+            </div>
+
+            {optimizationInfo && optimizationInfo.savedPercentage > 0 && (
+              <div style={styles.optimizationInfo}>
+                <div style={styles.savingsBadge}>
+                  🎯 {optimizationInfo.savedPercentage.toFixed(1)}% saved
+                </div>
+                <div style={styles.sizeComparison}>
+                  {formatFileSize(optimizationInfo.originalSize)} →{" "}
+                  {formatFileSize(optimizationInfo.optimizedSize)}
+                </div>
+              </div>
+            )}
+
+            {optimizationInfo && optimizationInfo.savedPercentage === 0 && (
+              <div style={styles.noSavings}>File is already optimized</div>
+            )}
           </div>
         )}
 
@@ -135,7 +230,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId }) => {
             cursor: !file || uploading ? "not-allowed" : "pointer",
           }}
         >
-          {uploading ? "Uploading..." : "Upload to Firebase Storage"}
+          {uploading ? "Uploading..." : "Upload Optimized File"}
         </button>
       </div>
 
@@ -154,13 +249,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId }) => {
 
       <div style={styles.infoBox}>
         <p>
-          <strong>Storage Path:</strong> users/{userId}/
+          <strong>Storage Path:</strong> {pathPrefix}/{userId}/
         </p>
         <p>
-          <strong>Connection:</strong> Same Firebase Storage as Android app
+          <strong>File Optimization:</strong> Automatic size reduction
         </p>
         <p style={styles.note}>
-          Uploaded files will be accessible from both web and Android app
+          Images are compressed, HEIC files are converted to JPEG
         </p>
       </div>
     </div>
@@ -198,20 +293,61 @@ const styles = {
     border: "1px solid #ddd",
     borderRadius: "6px",
     cursor: "pointer",
+    width: "100%",
+    maxWidth: "400px",
   },
   fileInfo: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "10px",
     marginBottom: "20px",
+    padding: "15px",
+    backgroundColor: "#fff",
+    borderRadius: "8px",
+    border: "1px solid #e0e0e0",
+  },
+  fileRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "10px",
   },
   fileName: {
     fontWeight: "bold" as const,
+    fontSize: "0.95rem",
   },
   fileSize: {
     color: "#666",
-    fontSize: "0.9rem",
+    fontSize: "0.85rem",
+    backgroundColor: "#f5f5f5",
+    padding: "2px 8px",
+    borderRadius: "4px",
+  },
+  optimizationInfo: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "8px",
+    marginTop: "10px",
+    paddingTop: "10px",
+    borderTop: "1px dashed #ddd",
+  },
+  savingsBadge: {
+    backgroundColor: "#4caf50",
+    color: "white",
+    padding: "4px 12px",
+    borderRadius: "12px",
+    fontSize: "0.8rem",
+    fontWeight: "bold" as const,
+    display: "inline-block",
+    width: "fit-content",
+  },
+  sizeComparison: {
+    fontSize: "0.85rem",
+    color: "#666",
+    fontFamily: "monospace",
+  },
+  noSavings: {
+    fontSize: "0.85rem",
+    color: "#757575",
+    fontStyle: "italic" as const,
+    marginTop: "5px",
   },
   progressContainer: {
     margin: "20px 0",

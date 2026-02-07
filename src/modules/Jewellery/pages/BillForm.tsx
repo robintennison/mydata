@@ -4,6 +4,11 @@ import { Bill } from "../models/types";
 import { doc, setDoc, addDoc, collection, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { firestore, storage } from "../../../lib/firebase";
+import {
+  optimizeFile,
+  validateFile,
+  formatFileSize,
+} from "../../../utils/fileOptimizer";
 
 const BillForm: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +18,12 @@ const BillForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState("");
+  const [optimizationInfo, setOptimizationInfo] = useState<{
+    originalSize: number;
+    optimizedSize: number;
+    savedPercentage: number;
+  } | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Bill>({
     downloadUrl: "",
@@ -22,6 +33,15 @@ const BillForm: React.FC = () => {
     uploadedAt: Date.now(),
   });
 
+  // Allowed file types for bills
+  const allowedFileTypes = [
+    "image/*",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+  ];
+
   // Load bill data for edit mode
   useEffect(() => {
     if (isEditMode && id) {
@@ -30,11 +50,11 @@ const BillForm: React.FC = () => {
   }, [id, isEditMode]);
 
   const loadBillData = async () => {
-    if (!id) return; // Add this check
+    if (!id) return;
 
     setLoading(true);
     try {
-      const billRef = doc(firestore, "bills", id); // Now id is guaranteed to be string
+      const billRef = doc(firestore, "bills", id);
       const billDoc = await getDoc(billRef);
 
       if (billDoc.exists()) {
@@ -71,15 +91,47 @@ const BillForm: React.FC = () => {
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setFileName(selectedFile.name);
-      setFormData({
-        ...formData,
-        mimeType: selectedFile.type,
+    if (!selectedFile) return;
+
+    // Validate file
+    const validation = validateFile(selectedFile, allowedFileTypes, 20); // 20MB max for bills
+    if (!validation.valid) {
+      setUploadError(validation.error || "Invalid file");
+      setFile(null);
+      setOptimizationInfo(null);
+      return;
+    }
+
+    setFile(selectedFile);
+    setFileName(selectedFile.name);
+    setUploadError(null);
+    setFormData({
+      ...formData,
+      mimeType: selectedFile.type,
+    });
+
+    // Optimize the file in background
+    try {
+      const optimized = await optimizeFile(selectedFile);
+      const originalSize = selectedFile.size;
+      const optimizedSize = optimized.size;
+      const savedPercentage =
+        ((originalSize - optimizedSize) / originalSize) * 100;
+
+      setOptimizationInfo({
+        originalSize,
+        optimizedSize,
+        savedPercentage,
       });
+
+      console.log(
+        `Bill file optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
+      );
+    } catch (err: any) {
+      console.error("Error optimizing bill file:", err);
+      setOptimizationInfo(null);
     }
   };
 
@@ -92,31 +144,51 @@ const BillForm: React.FC = () => {
     }
 
     setLoading(true);
+    setUploadError(null);
 
     try {
       let downloadUrl = formData.downloadUrl;
       let mimeType = formData.mimeType;
       let uploadedAt = formData.uploadedAt;
+      let optimizedFileName = "";
 
       // Upload file if a new file is selected
       if (file) {
+        let fileToUpload = file;
+
+        // Optimize the file before upload
+        if (optimizationInfo && optimizationInfo.savedPercentage > 0) {
+          try {
+            fileToUpload = await optimizeFile(file);
+            console.log(
+              `Uploading optimized bill: ${formatFileSize(fileToUpload.size)}`,
+            );
+          } catch (err) {
+            console.error(
+              "Error during final optimization, using original:",
+              err,
+            );
+          }
+        }
+
         const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(2, 9);
         const fileExtension =
-          file.name.split(".").pop() ||
-          (file.type === "application/pdf"
+          fileToUpload.name.split(".").pop() ||
+          (fileToUpload.type === "application/pdf"
             ? "pdf"
-            : file.type.startsWith("image/")
+            : fileToUpload.type.startsWith("image/")
               ? "jpg"
               : "dat");
 
-        const fileName = `${timestamp}.${fileExtension}`;
+        optimizedFileName = `bill_${timestamp}_${randomId}.${fileExtension}`;
 
         // Use imported storage
-        const storageRef = ref(storage, `bills/${fileName}`);
+        const storageRef = ref(storage, `bills/${optimizedFileName}`);
 
-        await uploadBytes(storageRef, file);
+        await uploadBytes(storageRef, fileToUpload);
         downloadUrl = await getDownloadURL(storageRef);
-        mimeType = file.type;
+        mimeType = fileToUpload.type;
         uploadedAt = Date.now();
       }
 
@@ -126,16 +198,18 @@ const BillForm: React.FC = () => {
         notes: formData.notes || null,
         createdAt: isEditMode ? formData.createdAt : Date.now(),
         uploadedAt,
+        originalFileName: file ? file.name : null,
+        optimizedFileName: optimizedFileName || null,
+        originalFileSize: file ? file.size : null,
+        optimizedFileSize: optimizationInfo?.optimizedSize || null,
+        optimizationSavedPercentage: optimizationInfo?.savedPercentage || 0,
       };
 
       if (isEditMode && id) {
-        // id is guaranteed here because isEditMode is true
-        // Use imported firestore
         const billRef = doc(firestore, "bills", id);
         await setDoc(billRef, billData, { merge: true });
         alert("Bill updated successfully!");
       } else {
-        // Use imported firestore
         await addDoc(collection(firestore, "bills"), billData);
         alert("Bill added successfully!");
       }
@@ -154,17 +228,30 @@ const BillForm: React.FC = () => {
       } else if (error.code === "storage/unknown") {
         errorMessage = "An unknown error occurred during upload.";
       } else if (error.message?.includes("quota")) {
-        errorMessage = "Storage quota exceeded.";
+        errorMessage =
+          "Storage quota exceeded. Files are now optimized to save space.";
       } else if (error.code === "permission-denied") {
         errorMessage = "Permission denied. Please check Firebase rules.";
       } else if (error.message) {
         errorMessage = `Error: ${error.message}`;
       }
 
+      setUploadError(errorMessage);
       alert(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRemoveFile = () => {
+    setFile(null);
+    setFileName("");
+    setOptimizationInfo(null);
+    setUploadError(null);
+
+    // Reset file input
+    const fileInput = document.getElementById("fileInput") as HTMLInputElement;
+    if (fileInput) fileInput.value = "";
   };
 
   // Loading state
@@ -201,34 +288,58 @@ const BillForm: React.FC = () => {
         <div className="mb-6">
           <label className="block mb-1.5 text-sm font-medium text-gray-700">
             {isEditMode ? "Replace File" : "Upload File"}
+            <span className="text-xs text-gray-500 ml-2">
+              (Max 20MB, PDF, Images, Word, Text)
+            </span>
           </label>
+
           <div
-            className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300"
+            className={`border-2 ${file ? "border-solid border-blue-300" : "border-dashed border-gray-300"} rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-300 mb-3`}
             onClick={() => document.getElementById("fileInput")?.click()}
           >
             <input
               id="fileInput"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png,image/*,application/pdf"
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
               onChange={handleFileSelect}
               className="hidden"
             />
+
             {fileName ? (
               <>
-                <div className="text-5xl mb-3">📄</div>
-                <div className="text-sm font-medium text-gray-900 mb-1 truncate">
+                <div className="text-5xl mb-3 text-blue-500">📄</div>
+                <div className="text-sm font-medium text-gray-900 mb-2 truncate">
                   {fileName}
                 </div>
-                <div className="text-xs text-gray-500 mb-2">
-                  {isEditMode ? "Tap to change file" : "File selected"}
+                <div className="text-xs text-gray-600 mb-1">
+                  Size: {formatFileSize(file?.size || 0)}
                 </div>
-                <div className="text-xs text-blue-500">
-                  Click to select different file
+
+                {optimizationInfo && optimizationInfo.savedPercentage > 0 && (
+                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex flex-col items-center text-green-800 text-xs">
+                      <div className="flex items-center gap-1 font-medium mb-1">
+                        <span>🎯</span>
+                        <span>
+                          {optimizationInfo.savedPercentage.toFixed(1)}% space
+                          saved
+                        </span>
+                      </div>
+                      <div className="font-mono text-xs">
+                        {formatFileSize(optimizationInfo.originalSize)} →{" "}
+                        {formatFileSize(optimizationInfo.optimizedSize)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-3 text-xs text-blue-500">
+                  Tap to select different file
                 </div>
               </>
             ) : isEditMode && formData.downloadUrl ? (
               <>
-                <div className="text-5xl mb-3">📄</div>
+                <div className="text-5xl mb-3 text-gray-500">📄</div>
                 <div className="text-sm font-medium text-gray-900 mb-1">
                   Existing file uploaded
                 </div>
@@ -246,16 +357,64 @@ const BillForm: React.FC = () => {
                   Tap to select file
                 </div>
                 <div className="text-xs text-gray-500">
-                  PDF, JPG, PNG files accepted
+                  PDF, JPG, PNG, DOC, TXT files accepted
+                </div>
+                <div className="text-xs text-gray-400 mt-1">
+                  Files are automatically optimized
                 </div>
               </>
             )}
           </div>
+
+          {/* File info and actions */}
+          {file && (
+            <div className="flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-700 text-sm">{fileName}</span>
+                <span className="text-xs text-gray-500">
+                  ({formatFileSize(file.size)})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleRemoveFile}
+                className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-medium hover:bg-red-100"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+
+          {uploadError && (
+            <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+              ⚠️ {uploadError}
+            </div>
+          )}
+
           {!isEditMode && !file && (
             <div className="text-xs text-red-600 mt-2">
               * File is required for new bills
             </div>
           )}
+
+          {/* Optimization info note */}
+          <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+            <div className="flex items-start gap-2">
+              <div className="text-blue-500 mt-0.5">ℹ️</div>
+              <div className="text-xs text-blue-800">
+                <div className="font-medium mb-1">
+                  Automatic File Optimization
+                </div>
+                <div>
+                  Images are compressed, HEIC files converted to JPEG, PDFs
+                  optimized
+                </div>
+                <div className="mt-1 text-blue-600">
+                  Helps save storage space while maintaining quality
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Notes */}
@@ -272,6 +431,9 @@ const BillForm: React.FC = () => {
             placeholder="Add notes about this bill (optional)"
             rows={3}
           />
+          <div className="text-xs text-gray-500 mt-1">
+            e.g., "Gold necklace purchase invoice", "Repair bill", etc.
+          </div>
         </div>
 
         {/* Display timestamps in edit mode */}
@@ -285,6 +447,17 @@ const BillForm: React.FC = () => {
               <span className="font-medium">Uploaded:</span>{" "}
               {new Date(formData.uploadedAt).toLocaleString()}
             </div>
+            {formData.downloadUrl && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => window.open(formData.downloadUrl, "_blank")}
+                  className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded text-xs font-medium hover:bg-blue-100"
+                >
+                  📄 View Current Bill
+                </button>
+              </div>
+            )}
           </div>
         )}
 

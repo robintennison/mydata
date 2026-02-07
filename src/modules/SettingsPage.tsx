@@ -467,7 +467,7 @@ const SettingsPage: React.FC = () => {
           )}
           {renderToggleField(
             "Show Delete Action",
-            "Display the delete control on Edit screen",
+            "Display the edit and delete control on Edit screen",
             "showDelete",
             settings?.showDelete || false,
           )}

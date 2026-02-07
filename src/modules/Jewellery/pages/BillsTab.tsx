@@ -7,6 +7,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { useJewellerySettings } from "../hooks/useSettingsData"; // IMPORT THE HOOK
 
 interface Bill {
   id: string;
@@ -18,11 +19,18 @@ interface Bill {
 type TabType = "all" | "with-jewellery" | "without-jewellery";
 
 interface BillsTabProps {
-  compact?: boolean; // Prop to control if it should show in compact mode
+  compact?: boolean;
+  // Removed showDelete prop since we'll get it from hook
 }
 
 const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
   const navigate = useNavigate();
+
+  // GET SETTINGS FROM HOOK - JUST LIKE LISTTAB DOES
+  const { showDelete: showDeleteSetting } = useJewellerySettings();
+
+  console.log("🚀 BillsTab - showDeleteSetting from hook:", showDeleteSetting);
+
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +39,7 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
   useEffect(() => {
     const fetchBillsAndCheckLinks = async () => {
       try {
+        console.log("📡 Fetching bills from Firestore...");
         const db = getFirestore();
 
         // Fetch all bills
@@ -46,6 +55,8 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
           });
         });
 
+        console.log(`📄 Found ${billsList.length} bills`);
+
         // Sort bills by notes (alphabetically)
         billsList.sort((a, b) => {
           const noteA = (a.notes || "").toLowerCase();
@@ -54,6 +65,7 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
         });
 
         // Check each bill for linked jewellery items
+        console.log("🔍 Checking for linked jewellery items...");
         const billsWithLinkStatus = await Promise.all(
           billsList.map(async (bill) => {
             try {
@@ -63,6 +75,12 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
               const jewellerySnapshot = await getDocs(q);
 
               const jewelleryCount = jewellerySnapshot.size;
+
+              if (jewelleryCount > 0) {
+                console.log(
+                  `   Bill "${bill.notes?.substring(0, 30)}..." has ${jewelleryCount} linked jewellery items`,
+                );
+              }
 
               return {
                 ...bill,
@@ -83,12 +101,23 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
           }),
         );
 
+        console.log(
+          `✅ Loaded ${billsWithLinkStatus.length} bills with link status`,
+        );
+        console.log(
+          `   - With jewellery: ${billsWithLinkStatus.filter((b) => b.hasLinkedJewellery).length}`,
+        );
+        console.log(
+          `   - Without jewellery: ${billsWithLinkStatus.filter((b) => !b.hasLinkedJewellery).length}`,
+        );
+
         setBills(billsWithLinkStatus);
         setFilteredBills(billsWithLinkStatus);
       } catch (error: any) {
-        console.error("Error fetching bills:", error);
+        console.error("❌ Error fetching bills:", error);
       } finally {
         setLoading(false);
+        console.log("✅ Loading complete");
       }
     };
 
@@ -97,35 +126,43 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
 
   // Filter bills based on active tab
   useEffect(() => {
+    console.log(`🔄 Filtering bills for tab: ${activeTab}`);
+    console.log(`   Total bills: ${bills.length}`);
+
     if (activeTab === "with-jewellery") {
-      setFilteredBills(bills.filter((bill) => bill.hasLinkedJewellery));
+      const withJewellery = bills.filter((bill) => bill.hasLinkedJewellery);
+      console.log(`   Showing ${withJewellery.length} bills with jewellery`);
+      setFilteredBills(withJewellery);
     } else if (activeTab === "without-jewellery") {
-      setFilteredBills(bills.filter((bill) => !bill.hasLinkedJewellery));
+      const withoutJewellery = bills.filter((bill) => !bill.hasLinkedJewellery);
+      console.log(
+        `   Showing ${withoutJewellery.length} bills without jewellery`,
+      );
+      setFilteredBills(withoutJewellery);
     } else {
+      console.log(`   Showing all ${bills.length} bills`);
       setFilteredBills(bills);
     }
   }, [activeTab, bills]);
 
   const handleViewLinkedJewellery = (billId: string) => {
+    console.log(`👁️ Viewing linked jewellery for bill: ${billId}`);
     navigate(`/jewellery/bills/${billId}/linked-jewellery`);
   };
 
   const handleEditBill = (e: React.MouseEvent, billId: string) => {
     e.stopPropagation();
+    console.log(`✏️ Editing bill: ${billId}`);
     navigate(`/jewellery/bills/edit/${billId}`);
-  };
-
-  const handleDeleteBill = (e: React.MouseEvent, billId: string) => {
-    e.stopPropagation();
-    if (window.confirm("Delete this bill?")) {
-      // TODO: Implement delete
-      console.log("Delete bill:", billId);
-    }
   };
 
   const getTabStats = () => {
     const withJewellery = bills.filter((b) => b.hasLinkedJewellery).length;
     const withoutJewellery = bills.filter((b) => !b.hasLinkedJewellery).length;
+
+    console.log(
+      `📊 Stats - All: ${bills.length}, With: ${withJewellery}, Without: ${withoutJewellery}`,
+    );
 
     return {
       all: bills.length,
@@ -137,6 +174,7 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
   const stats = getTabStats();
 
   if (loading) {
+    console.log("⏳ BillsTab is loading...");
     return (
       <div className="text-center p-10 text-gray-400">
         <div className="w-8 h-8 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
@@ -157,6 +195,7 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
   }
 
   if (compact) {
+    console.log("📱 Rendering compact BillsTab view");
     return (
       <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-3.75">
         <div className="text-base font-semibold text-gray-800 mb-3.75 flex justify-between items-center">
@@ -199,6 +238,12 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
       </div>
     );
   }
+
+  console.log(`🎨 Rendering full BillsTab view`);
+  console.log(
+    `   showDeleteSetting: ${showDeleteSetting} (${typeof showDeleteSetting})`,
+  );
+  console.log(`   filteredBills count: ${filteredBills.length}`);
 
   return (
     <div className="min-h-screen">
@@ -293,87 +338,64 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
                   : "bills without jewellery"}
             </div>
             <div className="flex flex-col">
-              {filteredBills.map((bill) => (
-                <div
-                  key={bill.id}
-                  className={`bg-white p-3 border-b border-gray-200 ${
-                    bill.hasLinkedJewellery
-                      ? "cursor-pointer"
-                      : "cursor-default"
-                  } ${bill.hasLinkedJewellery ? "border-l-4 border-blue-500" : "border-l-4 border-transparent"}`}
-                  onClick={() =>
-                    bill.hasLinkedJewellery &&
-                    handleViewLinkedJewellery(bill.id)
-                  }
-                >
-                  {/* Single Row Layout - SIMPLIFIED */}
-                  <div className="flex items-center justify-between">
-                    {/* Left side: Notes and item count */}
-                    <div className="flex-1 min-w-0 pr-2.5">
-                      <div className="flex items-center gap-2">
-                        {/* Notes */}
-                        <div className="font-medium text-sm text-gray-900 truncate">
-                          {bill.notes || "No notes"}
-                        </div>
+              {filteredBills.map((bill, index) => {
+                console.log(
+                  `   Rendering bill ${index + 1}: "${bill.notes?.substring(0, 30)}..." - showDeleteSetting: ${showDeleteSetting}`,
+                );
 
-                        {/* Item count badge (only if has items) */}
-                        {bill.hasLinkedJewellery && (
-                          <div className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 flex-shrink-0">
-                            <span>🔗</span>
-                            <span>
-                              {bill.jewelleryCount} item
-                              {bill.jewelleryCount !== 1 ? "s" : ""}
-                            </span>
+                return (
+                  <div
+                    key={bill.id}
+                    className={`bg-white p-3 border-b border-gray-200 ${
+                      bill.hasLinkedJewellery
+                        ? "cursor-pointer"
+                        : "cursor-default"
+                    } ${bill.hasLinkedJewellery ? "border-l-4 border-blue-500" : "border-l-4 border-transparent"}`}
+                    onClick={() =>
+                      bill.hasLinkedJewellery &&
+                      handleViewLinkedJewellery(bill.id)
+                    }
+                  >
+                    {/* Single Row Layout */}
+                    <div className="flex items-center justify-between">
+                      {/* Left side: Notes and item count */}
+                      <div className="flex-1 min-w-0 pr-2.5">
+                        <div className="flex items-center gap-2">
+                          {/* Notes */}
+                          <div className="font-medium text-sm text-gray-900 truncate">
+                            {bill.notes || "No notes"}
                           </div>
-                        )}
+
+                          {/* Item count badge (only if has items) */}
+                          {bill.hasLinkedJewellery && (
+                            <div className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 flex-shrink-0">
+                              <span>🔗</span>
+                              <span>
+                                {bill.jewelleryCount} item
+                                {bill.jewelleryCount !== 1 ? "s" : ""}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Right side: Action buttons */}
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {/* Edit Icon */}
-                      <button
-                        onClick={(e) => handleEditBill(e, bill.id)}
-                        className="bg-transparent border-none text-base text-blue-500 cursor-pointer p-1.5 rounded flex items-center"
-                        title="Edit Bill"
-                      >
-                        ✏️
-                      </button>
-
-                      {/* Delete Icon */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (bill.hasLinkedJewellery) {
-                            if (
-                              window.confirm(
-                                `This bill is linked to ${bill.jewelleryCount} jewellery item${bill.jewelleryCount !== 1 ? "s" : ""}. ` +
-                                  `Deleting it will remove the link from those items. Are you sure you want to delete?`,
-                              )
-                            ) {
-                              handleDeleteBill(e, bill.id);
-                            }
-                          } else {
-                            handleDeleteBill(e, bill.id);
-                          }
-                        }}
-                        className={`bg-transparent border-none text-base cursor-pointer p-1.5 rounded flex items-center ${
-                          bill.hasLinkedJewellery
-                            ? "text-amber-500"
-                            : "text-red-500"
-                        }`}
-                        title={
-                          bill.hasLinkedJewellery
-                            ? `Delete bill (linked to ${bill.jewelleryCount} item${bill.jewelleryCount !== 1 ? "s" : ""})`
-                            : "Delete bill"
-                        }
-                      >
-                        🗑️
-                      </button>
+                      {/* Right side: Action buttons - Show edit icon ONLY when showDeleteSetting is true */}
+                      {showDeleteSetting ? (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {/* Edit Icon */}
+                          <button
+                            onClick={(e) => handleEditBill(e, bill.id)}
+                            className="bg-transparent border-none text-base text-blue-500 cursor-pointer p-1.5 rounded flex items-center hover:bg-blue-50"
+                            title="Edit Bill"
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Summary Section */}

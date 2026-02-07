@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Bill } from "../models/types";
-import { doc, setDoc, addDoc, collection, getDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  addDoc,
+  collection,
+  getDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import {
   ref,
   uploadBytes,
@@ -31,6 +38,8 @@ const BillForm: React.FC = () => {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingFile, setDeletingFile] = useState(false);
+  const [deletingBill, setDeletingBill] = useState(false);
+  const [showDeleteBillConfirm, setShowDeleteBillConfirm] = useState(false);
 
   const [formData, setFormData] = useState<Bill>({
     downloadUrl: "",
@@ -152,7 +161,6 @@ const BillForm: React.FC = () => {
       setDeletingFile(true);
 
       // Extract file path from Firebase Storage URL
-      // Firebase Storage URLs have format: https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{encodedPath}?alt=media
       const url = new URL(formData.downloadUrl);
       const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
 
@@ -204,6 +212,48 @@ const BillForm: React.FC = () => {
     } finally {
       setDeletingFile(false);
       setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleDeleteBill = async () => {
+    if (!id) return;
+
+    try {
+      setDeletingBill(true);
+
+      // First, delete the associated file if it exists
+      if (formData.downloadUrl) {
+        try {
+          const url = new URL(formData.downloadUrl);
+          const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+          if (pathMatch) {
+            const filePath = decodeURIComponent(pathMatch[1]);
+            const storageRef = ref(storage, filePath);
+            await deleteObject(storageRef);
+            console.log("Associated file deleted from storage");
+          }
+        } catch (error: any) {
+          if (error.code !== "storage/object-not-found") {
+            console.warn(
+              "Error deleting associated file, continuing with bill deletion:",
+              error,
+            );
+          }
+        }
+      }
+
+      // Delete the bill document from Firestore
+      const billRef = doc(firestore, "bills", id);
+      await deleteDoc(billRef);
+
+      alert("Bill deleted successfully!");
+      navigate("/jewellery");
+    } catch (error: any) {
+      console.error("Error deleting bill:", error);
+      alert(`Failed to delete bill: ${error.message}`);
+    } finally {
+      setDeletingBill(false);
+      setShowDeleteBillConfirm(false);
     }
   };
 
@@ -322,7 +372,6 @@ const BillForm: React.FC = () => {
         );
       }
 
-      // ... rest of your code remains the same
       // Create bill data object with only necessary fields
       const billData: any = {
         notes: formData.notes?.trim() || null,
@@ -535,7 +584,6 @@ const BillForm: React.FC = () => {
           )}
 
           {/* Existing document actions */}
-
           {isEditMode && formData.downloadUrl && !file && (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg mb-3">
               <div className="flex items-start gap-2 sm:items-center">
@@ -669,7 +717,7 @@ const BillForm: React.FC = () => {
           </div>
         )}
 
-        {/* Submit Buttons */}
+        {/* Submit Buttons - UPDATED WITH CANCEL, DELETE, UPDATE */}
         <div className="flex flex-col gap-3 mt-8">
           <button
             type="submit"
@@ -683,14 +731,27 @@ const BillForm: React.FC = () => {
             {loading ? "Saving..." : isEditMode ? "Update Bill" : "Add Bill"}
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate("/jewellery")}
-            className="px-8 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors"
-            disabled={loading}
-          >
-            Cancel
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => navigate("/jewellery")}
+              className="flex-1 px-8 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors"
+              disabled={loading}
+            >
+              Cancel
+            </button>
+
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteBillConfirm(true)}
+                className="flex-1 px-8 py-3 bg-red-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-red-700 transition-colors"
+                disabled={loading}
+              >
+                Delete Bill
+              </button>
+            )}
+          </div>
         </div>
       </form>
 
@@ -719,6 +780,47 @@ const BillForm: React.FC = () => {
                 className="px-4 py-2 bg-red-600 text-white border-none rounded-lg cursor-pointer hover:bg-red-700"
               >
                 {deletingFile ? "Deleting..." : "Delete Document"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Bill Confirmation Dialog */}
+      {showDeleteBillConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-[400px] w-full shadow-2xl">
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              Delete Bill
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this entire bill? This action
+              will:
+            </p>
+            <ul className="text-gray-600 mb-6 text-sm space-y-2">
+              <li>• Permanently delete the bill record</li>
+              <li>• Delete any attached document file</li>
+              <li>
+                • Remove the bill reference from any linked jewellery items
+              </li>
+            </ul>
+            <p className="text-red-600 font-medium mb-6">
+              This action cannot be undone!
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteBillConfirm(false)}
+                disabled={deletingBill}
+                className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteBill}
+                disabled={deletingBill}
+                className="px-4 py-2 bg-red-600 text-white border-none rounded-lg cursor-pointer hover:bg-red-700"
+              >
+                {deletingBill ? "Deleting..." : "Delete Bill"}
               </button>
             </div>
           </div>

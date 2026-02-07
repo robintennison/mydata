@@ -627,7 +627,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     if (onCancel) {
       onCancel();
     } else {
-      navigate("/jewellery");
+      // Changed from "/jewellery" to "/jewellery/list"
+      navigate("/jewellery/list");
     }
   };
 

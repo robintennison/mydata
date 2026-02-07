@@ -97,7 +97,7 @@ const BillForm: React.FC = () => {
         }
       } else {
         alert("Bill not found");
-        navigate("/jewellery");
+        navigate("/jewellery/bills"); // Changed to bill list
       }
     } catch (error) {
       console.error("Error loading bill:", error);
@@ -247,7 +247,7 @@ const BillForm: React.FC = () => {
       await deleteDoc(billRef);
 
       alert("Bill deleted successfully!");
-      navigate("/jewellery");
+      navigate("/jewellery/bills"); // Changed to bill list
     } catch (error: any) {
       console.error("Error deleting bill:", error);
       alert(`Failed to delete bill: ${error.message}`);
@@ -408,7 +408,7 @@ const BillForm: React.FC = () => {
         alert("Bill added successfully!");
       }
 
-      navigate("/jewellery");
+      navigate("/jewellery/bills"); // Changed to bill list
     } catch (error: any) {
       console.error("Error saving bill:", error);
 
@@ -469,9 +469,9 @@ const BillForm: React.FC = () => {
       {/* Top Navigation */}
       <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
         <button
-          onClick={() => navigate("/jewellery")}
+          onClick={() => navigate("/jewellery/bills")} // Changed to bill list
           className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
-          title="Back to Jewellery"
+          title="Back to Bills"
         >
           ←
         </button>
@@ -734,7 +734,7 @@ const BillForm: React.FC = () => {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => navigate("/jewellery")}
+              onClick={() => navigate("/jewellery/bills")} // Changed to bill list
               className="flex-1 px-8 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors"
               disabled={loading}
             >

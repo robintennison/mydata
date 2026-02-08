@@ -9,7 +9,7 @@ import {
 import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // ADD useLocation
 import {
   optimizeFile,
   validateFile,
@@ -44,6 +44,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   showDelete = false,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation(); // ADD this
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [storage] = useState(getStorage());
 
@@ -623,12 +624,18 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     setShowBillDropdown(true);
   };
 
+  // FIX: Update handleCancel to read navigation state
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
     } else {
-      // Changed from "/jewellery" to "/jewellery/list"
-      navigate("/jewellery/list");
+      // Get return location and active tab from navigation state
+      const returnTo = location.state?.returnTo || "/jewellery";
+      const activeTab = location.state?.activeTab || "list";
+
+      navigate(returnTo, {
+        state: { activeTab: activeTab },
+      });
     }
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom"; // ADD useLocation
 import {
   getFirestore,
   collection,
@@ -20,6 +20,7 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
   isEditing = false,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation(); // ADD this
   const { id } = useParams<{ id: string }>();
   const [initialData, setInitialData] = useState<Partial<Jewellery>>({});
   const [loading, setLoading] = useState(isEditing);
@@ -101,8 +102,13 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
         alert("Jewellery added successfully!");
       }
 
-      // Changed from "/jewellery" to "/jewellery/list"
-      navigate("/jewellery/list");
+      // FIX: Get return location and active tab from navigation state
+      const returnTo = location.state?.returnTo || "/jewellery";
+      const activeTab = location.state?.activeTab || "list";
+
+      navigate(returnTo, {
+        state: { activeTab: activeTab },
+      });
     } catch (error) {
       console.error("Error saving jewellery:", error);
       setError("Failed to save jewellery. Please try again.");
@@ -130,8 +136,13 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
       console.log("Jewellery item deleted successfully");
       alert("Jewellery item deleted successfully!");
 
-      // Changed from "/jewellery" to "/jewellery/list"
-      navigate("/jewellery/list");
+      // FIX: Get return location and active tab from navigation state
+      const returnTo = location.state?.returnTo || "/jewellery";
+      const activeTab = location.state?.activeTab || "list";
+
+      navigate(returnTo, {
+        state: { activeTab: activeTab },
+      });
     } catch (error: any) {
       console.error("Error deleting jewellery item:", error);
       setError(`Failed to delete jewellery item: ${error.message}`);
@@ -140,8 +151,13 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
   };
 
   const handleCancel = () => {
-    // Changed from "/jewellery" to "/jewellery/list"
-    navigate("/jewellery/list");
+    // FIX: Get return location and active tab from navigation state
+    const returnTo = location.state?.returnTo || "/jewellery";
+    const activeTab = location.state?.activeTab || "list";
+
+    navigate(returnTo, {
+      state: { activeTab: activeTab },
+    });
   };
 
   if (loading) {
@@ -166,7 +182,7 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
           <div className="text-gray-700 mb-6">{error}</div>
           <div className="flex space-x-3">
             <button
-              onClick={() => navigate("/jewellery/list")} // Changed to list
+              onClick={handleCancel} // FIX: Use handleCancel instead of direct navigate
               className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
               Back to List

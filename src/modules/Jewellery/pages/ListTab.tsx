@@ -718,10 +718,7 @@ const ListTab: React.FC = () => {
             {searchTerm && <span>Search: "{searchTerm}"</span>}
             {selectedLocation && <span> • Loc: {selectedLocation}</span>}
             {selectedBoughtFor && <span> • Purp: {selectedBoughtFor}</span>}
-            {(currentSort.field !== "code" ||
-              currentSort.direction !== "desc") && (
-              <span> • Sort: {currentSort.label}</span>
-            )}
+            {currentSort.field !== "code" || currentSort.direction !== "desc"}
           </div>
           <button
             onClick={clearFilters}

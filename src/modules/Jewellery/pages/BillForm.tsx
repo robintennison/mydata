@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom"; // ADD useLocation
 import { Bill } from "../models/types";
 import {
   doc,
@@ -24,6 +24,7 @@ import {
 
 const BillForm: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // ADD this
   const { id } = useParams<{ id: string }>();
   const isEditMode = !!id;
 
@@ -97,7 +98,10 @@ const BillForm: React.FC = () => {
         }
       } else {
         alert("Bill not found");
-        navigate("/jewellery/bills"); // Changed to bill list
+        // FIX: Navigate back to bills tab with activeTab state
+        navigate("/jewellery", {
+          state: { activeTab: "bills" },
+        });
       }
     } catch (error) {
       console.error("Error loading bill:", error);
@@ -247,7 +251,10 @@ const BillForm: React.FC = () => {
       await deleteDoc(billRef);
 
       alert("Bill deleted successfully!");
-      navigate("/jewellery/bills"); // Changed to bill list
+      // FIX: Navigate back to bills tab with activeTab state
+      navigate("/jewellery", {
+        state: { activeTab: "bills" },
+      });
     } catch (error: any) {
       console.error("Error deleting bill:", error);
       alert(`Failed to delete bill: ${error.message}`);
@@ -408,7 +415,10 @@ const BillForm: React.FC = () => {
         alert("Bill added successfully!");
       }
 
-      navigate("/jewellery/bills"); // Changed to bill list
+      // FIX: Navigate back to bills tab with activeTab state
+      navigate("/jewellery", {
+        state: { activeTab: "bills" },
+      });
     } catch (error: any) {
       console.error("Error saving bill:", error);
 
@@ -448,6 +458,17 @@ const BillForm: React.FC = () => {
     if (fileInput) fileInput.value = "";
   };
 
+  // FIX: Add cancel handler that preserves tab state
+  const handleCancel = () => {
+    // Check if we came from jewellery home or somewhere else
+    const returnTo = location.state?.returnTo || "/jewellery";
+    const activeTab = location.state?.activeTab || "bills";
+
+    navigate(returnTo, {
+      state: { activeTab: activeTab },
+    });
+  };
+
   // Loading state
   if (loading && isEditMode) {
     return (
@@ -469,7 +490,7 @@ const BillForm: React.FC = () => {
       {/* Top Navigation */}
       <div className="flex items-center justify-between p-2.5 px-4 bg-white border-b border-gray-200 mb-2.5 shrink-0">
         <button
-          onClick={() => navigate("/jewellery/bills")} // Changed to bill list
+          onClick={handleCancel} // FIX: Use handleCancel instead of direct navigate
           className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-base cursor-pointer min-w-10 flex items-center justify-center text-gray-800"
           title="Back to Bills"
         >
@@ -717,7 +738,7 @@ const BillForm: React.FC = () => {
           </div>
         )}
 
-        {/* Submit Buttons - UPDATED WITH CANCEL, DELETE, UPDATE */}
+        {/* Submit Buttons */}
         <div className="flex flex-col gap-3 mt-8">
           <button
             type="submit"
@@ -734,7 +755,7 @@ const BillForm: React.FC = () => {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => navigate("/jewellery/bills")} // Changed to bill list
+              onClick={handleCancel} // FIX: Use handleCancel
               className="flex-1 px-8 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-200 transition-colors"
               disabled={loading}
             >

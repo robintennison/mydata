@@ -7,7 +7,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { useJewellerySettings } from "../hooks/useSettingsData"; // IMPORT THE HOOK
+import { useJewellerySettings } from "../hooks/useSettingsData";
 
 interface Bill {
   id: string;
@@ -20,13 +20,10 @@ type TabType = "all" | "with-jewellery" | "without-jewellery";
 
 interface BillsTabProps {
   compact?: boolean;
-  // Removed showDelete prop since we'll get it from hook
 }
 
 const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
   const navigate = useNavigate();
-
-  // GET SETTINGS FROM HOOK - JUST LIKE LISTTAB DOES
   const { showDelete: showDeleteSetting } = useJewellerySettings();
 
   console.log("🚀 BillsTab - showDeleteSetting from hook:", showDeleteSetting);
@@ -145,15 +142,34 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
     }
   }, [activeTab, bills]);
 
+  // FIX: Update navigation to pass activeTab state
   const handleViewLinkedJewellery = (billId: string) => {
     console.log(`👁️ Viewing linked jewellery for bill: ${billId}`);
-    navigate(`/jewellery/bills/${billId}/linked-jewellery`);
+    navigate(`/jewellery/bills/${billId}/linked-jewellery`, {
+      state: {
+        returnTo: "/jewellery",
+        activeTab: "bills",
+      },
+    });
   };
 
+  // FIX: Update navigation to pass activeTab state
   const handleEditBill = (e: React.MouseEvent, billId: string) => {
     e.stopPropagation();
     console.log(`✏️ Editing bill: ${billId}`);
-    navigate(`/jewellery/bills/edit/${billId}`);
+    navigate(`/jewellery/bills/edit/${billId}`, {
+      state: {
+        returnTo: "/jewellery",
+        activeTab: "bills",
+      },
+    });
+  };
+
+  // FIX: Navigation for "View All Bills" button
+  const handleViewAllBills = () => {
+    navigate("/jewellery", {
+      state: { activeTab: "bills" },
+    });
   };
 
   const getTabStats = () => {
@@ -229,7 +245,7 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
         </div>
 
         <button
-          onClick={() => navigate("/jewellery/bills")}
+          onClick={handleViewAllBills} // FIX: Use the new handler
           className="w-full py-2.5 bg-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium flex items-center justify-center gap-2"
         >
           View All Bills

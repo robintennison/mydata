@@ -22,6 +22,22 @@ interface Bill {
   // Add other bill fields as needed
 }
 
+// Sorting types
+type SortField =
+  | "code"
+  | "weight"
+  | "purchaseDate"
+  | "description"
+  | "location";
+type SortDirection = "asc" | "desc";
+
+// Sort option interface
+interface SortOption {
+  field: SortField;
+  direction: SortDirection;
+  label: string;
+}
+
 const ListTab: React.FC = () => {
   const navigate = useNavigate();
   const { showInactive: showInactiveSetting, showDelete: showDeleteSetting } =
@@ -39,9 +55,32 @@ const ListTab: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [selectedBoughtFor, setSelectedBoughtFor] = useState<string>("");
 
+  // New state for sorting
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [currentSort, setCurrentSort] = useState<SortOption>({
+    field: "code",
+    direction: "desc",
+    label: "Code (Z→A)",
+  });
+
   // Refs for dropdown positioning
   const locationButtonRef = useRef<HTMLButtonElement>(null);
   const boughtForButtonRef = useRef<HTMLButtonElement>(null);
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Available sort options
+  const sortOptions: SortOption[] = [
+    { field: "code", direction: "asc", label: "Code (A→Z)" },
+    { field: "code", direction: "desc", label: "Code (Z→A)" },
+    { field: "weight", direction: "asc", label: "Weight (Low→High)" },
+    { field: "weight", direction: "desc", label: "Weight (High→Low)" },
+    { field: "purchaseDate", direction: "desc", label: "Date (New→Old)" },
+    { field: "purchaseDate", direction: "asc", label: "Date (Old→New)" },
+    { field: "description", direction: "asc", label: "Description (A→Z)" },
+    { field: "description", direction: "desc", label: "Description (Z→A)" },
+    { field: "location", direction: "asc", label: "Location (A→Z)" },
+    { field: "location", direction: "desc", label: "Location (Z→A)" },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +90,7 @@ const ListTab: React.FC = () => {
 
         const db = getFirestore();
 
-        // Fetch jewellery items
+        // Fetch jewellery items - Default sorting by code desc
         let jewelleryQuery = query(collection(db, "jewellery"));
 
         if (!showInactive) {
@@ -112,7 +151,9 @@ const ListTab: React.FC = () => {
           `Parsed ${items.length} jewellery items and ${billItems.length} bills`,
         );
         setJewelleryItems(items);
-        setFilteredItems(items);
+        // Apply initial sort
+        const sortedItems = sortItems(items, currentSort);
+        setFilteredItems(sortedItems);
         setBills(billItems);
       } catch (error: any) {
         console.error("Error fetching data:", error);
@@ -137,7 +178,57 @@ const ListTab: React.FC = () => {
     fetchData();
   }, [showInactive]);
 
-  // Apply filters whenever search term or filters change
+  // Sort function - Fixed TypeScript error
+  const sortItems = (
+    items: Jewellery[],
+    sortOption: SortOption,
+  ): Jewellery[] => {
+    const { field, direction } = sortOption;
+
+    return [...items].sort((a, b) => {
+      // Handle different data types based on the field
+      if (field === "weight") {
+        const valueA = a.weight || 0;
+        const valueB = b.weight || 0;
+        return direction === "asc" ? valueA - valueB : valueB - valueA;
+      }
+
+      if (field === "purchaseDate") {
+        const dateA = a.purchaseDate || 0;
+        const dateB = b.purchaseDate || 0;
+        return direction === "asc" ? dateA - dateB : dateB - dateA;
+      }
+
+      if (field === "code") {
+        const strA = (a.code || "").toLowerCase();
+        const strB = (b.code || "").toLowerCase();
+        return direction === "asc"
+          ? strA.localeCompare(strB)
+          : strB.localeCompare(strA);
+      }
+
+      if (field === "description") {
+        const strA = (a.description || "").toLowerCase();
+        const strB = (b.description || "").toLowerCase();
+        return direction === "asc"
+          ? strA.localeCompare(strB)
+          : strB.localeCompare(strA);
+      }
+
+      if (field === "location") {
+        const strA = (a.location || "").toLowerCase();
+        const strB = (b.location || "").toLowerCase();
+        return direction === "asc"
+          ? strA.localeCompare(strB)
+          : strB.localeCompare(strA);
+      }
+
+      // Default fallback - should never reach here
+      return 0;
+    });
+  };
+
+  // Apply filters and sorting whenever dependencies change
   useEffect(() => {
     if (jewelleryItems.length === 0) return;
 
@@ -160,11 +251,26 @@ const ListTab: React.FC = () => {
       result = result.filter((item) => item.boughtFor === selectedBoughtFor);
     }
 
+    // Apply sorting
+    result = sortItems(result, currentSort);
+
     console.log(
       `Filtered ${result.length} items from ${jewelleryItems.length} total`,
     );
     setFilteredItems(result);
-  }, [jewelleryItems, searchTerm, selectedLocation, selectedBoughtFor]);
+  }, [
+    jewelleryItems,
+    searchTerm,
+    selectedLocation,
+    selectedBoughtFor,
+    currentSort,
+  ]);
+
+  // Handle sort selection
+  const handleSortSelect = (sortOption: SortOption) => {
+    setCurrentSort(sortOption);
+    setShowSortOptions(false);
+  };
 
   // Get bill details for a jewellery item
   const getBillDetails = (billId: string | undefined) => {
@@ -264,7 +370,9 @@ const ListTab: React.FC = () => {
       });
 
       setJewelleryItems(items);
-      setFilteredItems(items);
+      // Apply current sort to fetched items
+      const sortedItems = sortItems(items, currentSort);
+      setFilteredItems(sortedItems);
       setBills(billItems);
       setError(null);
     } catch (error: any) {
@@ -281,6 +389,13 @@ const ListTab: React.FC = () => {
     setSelectedBoughtFor("");
     setShowLocationFilter(false);
     setShowBoughtForFilter(false);
+    setShowSortOptions(false);
+    // Reset sort to default
+    setCurrentSort({
+      field: "code",
+      direction: "desc",
+      label: "Code (Z→A)",
+    });
   };
 
   // Handle edit button click
@@ -334,13 +449,22 @@ const ListTab: React.FC = () => {
       ) {
         setShowBoughtForFilter(false);
       }
+
+      if (
+        showSortOptions &&
+        sortButtonRef.current &&
+        !sortButtonRef.current.contains(target) &&
+        !target.closest(".sort-dropdown")
+      ) {
+        setShowSortOptions(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showLocationFilter, showBoughtForFilter]);
+  }, [showLocationFilter, showBoughtForFilter, showSortOptions]);
 
   if (loading) {
     return (
@@ -387,6 +511,7 @@ const ListTab: React.FC = () => {
             ref={locationButtonRef}
             onClick={() => {
               setShowBoughtForFilter(false);
+              setShowSortOptions(false);
               setShowLocationFilter(!showLocationFilter);
             }}
             className={`px-2.5 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-0.5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
@@ -403,6 +528,7 @@ const ListTab: React.FC = () => {
             ref={boughtForButtonRef}
             onClick={() => {
               setShowLocationFilter(false);
+              setShowSortOptions(false);
               setShowBoughtForFilter(!showBoughtForFilter);
             }}
             className={`px-2.5 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-0.5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
@@ -412,6 +538,27 @@ const ListTab: React.FC = () => {
           >
             <span className="text-xs">🎁</span>
             <span className="hidden xs:inline">Purp</span>
+          </button>
+
+          {/* Sort Button */}
+          <button
+            ref={sortButtonRef}
+            onClick={() => {
+              setShowLocationFilter(false);
+              setShowBoughtForFilter(false);
+              setShowSortOptions(!showSortOptions);
+            }}
+            className={`px-2.5 py-2 text-xs border border-gray-200 rounded-md cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-0.5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+              currentSort.field !== "code" || currentSort.direction !== "desc"
+                ? "bg-sky-100 border-sky-200"
+                : "bg-slate-50"
+            }`}
+            title={`Sort by: ${currentSort.label}`}
+          >
+            <span className="text-xs">
+              {currentSort.direction === "asc" ? "↑" : "↓"}
+            </span>
+            <span className="hidden xs:inline">Sort</span>
           </button>
 
           {/* Batch Edit Button */}
@@ -529,13 +676,52 @@ const ListTab: React.FC = () => {
         </div>
       )}
 
+      {showSortOptions && (
+        <div
+          className="sort-dropdown fixed bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-[1000] min-w-[180px] max-h-[300px] overflow-y-auto"
+          style={{
+            top: `${getDropdownPosition(sortButtonRef).top}px`,
+            right: `${getDropdownPosition(sortButtonRef).right}px`,
+          }}
+        >
+          <div className="text-[13px] font-semibold mb-2 text-gray-700">
+            Sort By
+          </div>
+          {sortOptions.map((option) => (
+            <button
+              key={`${option.field}-${option.direction}`}
+              onClick={() => handleSortSelect(option)}
+              className={`w-full p-2.5 text-[13px] text-left rounded-md cursor-pointer mb-0.5 flex items-center gap-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                currentSort.field === option.field &&
+                currentSort.direction === option.direction
+                  ? "bg-sky-100"
+                  : "bg-transparent"
+              }`}
+            >
+              <span className="text-xs">
+                {option.direction === "asc" ? "↑" : "↓"}
+              </span>
+              <span>{option.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Filter Indicators */}
-      {(searchTerm || selectedLocation || selectedBoughtFor) && (
+      {(searchTerm ||
+        selectedLocation ||
+        selectedBoughtFor ||
+        currentSort.field !== "code" ||
+        currentSort.direction !== "desc") && (
         <div className="px-3 py-1.5 bg-slate-50 border border-gray-200 text-[11px] text-gray-500 flex items-center gap-2.5 mb-3 rounded-md">
           <div className="flex-1 truncate">
             {searchTerm && <span>Search: "{searchTerm}"</span>}
             {selectedLocation && <span> • Loc: {selectedLocation}</span>}
             {selectedBoughtFor && <span> • Purp: {selectedBoughtFor}</span>}
+            {(currentSort.field !== "code" ||
+              currentSort.direction !== "desc") && (
+              <span> • Sort: {currentSort.label}</span>
+            )}
           </div>
           <button
             onClick={clearFilters}
@@ -583,6 +769,7 @@ const ListTab: React.FC = () => {
           {filteredItems.length !== jewelleryItems.length &&
             ` (of ${jewelleryItems.length})`}
           {showInactive && ` • Showing ${showInactive ? "all" : "active only"}`}
+          {currentSort && <span> • Sorted: {currentSort.label}</span>}
         </div>
       )}
 

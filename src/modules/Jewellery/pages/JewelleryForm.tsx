@@ -826,7 +826,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       </div>
 
       {/* Code and Weight in same row */}
-      <div className="flex gap-3 mb-3">
+      <div className="flex flex-col sm:flex-row gap-3 mb-3">
         <div className="flex-1">
           <label className="block text-xs text-gray-600 mb-1">Code *</label>
           <input
@@ -869,7 +869,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       </div>
 
       {/* Location and Bought For in same row */}
-      <div className="flex gap-3 mb-3">
+      <div className="flex flex-col sm:flex-row gap-3 mb-3">
         <div className="flex-1">
           <label className="block text-xs text-gray-600 mb-1">Location</label>
           <select
@@ -918,7 +918,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       </div>
 
       {/* Purchase Date with Calendar and Active checkbox in same row */}
-      <div className="flex gap-3 mb-3">
+      <div className="flex flex-col sm:flex-row gap-3 mb-3">
         <div className="flex-1">
           <label className="block text-xs text-gray-600 mb-1">
             Purchase Date
@@ -1140,7 +1140,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           !assignedBill &&
           !loadingAssignedBill &&
           formData.billId === "" && (
-            <div className="flex gap-2 items-center">
+            <div className="flex flex-col sm:flex-row gap-2 items-center">
               <div className="flex-1">
                 <div className="p-3 bg-gray-50 border border-dashed border-gray-300 rounded text-gray-600 text-center">
                   No bill assigned to this jewellery item
@@ -1150,7 +1150,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               <button
                 type="button"
                 onClick={handleAddBillClick}
-                className="px-3 py-2 bg-green-500 text-white border-none rounded text-sm cursor-pointer flex items-center gap-1.5 hover:bg-green-600"
+                className="px-3 py-2 bg-green-500 text-white border-none rounded text-sm cursor-pointer flex items-center justify-center gap-1.5 hover:bg-green-600"
               >
                 <span>+</span>
                 <span>Add Bill</span>
@@ -1166,7 +1166,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
                 Loading available bills...
               </div>
             ) : (
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <select
                   name="billId"
                   value={formData.billId || ""}
@@ -1202,13 +1202,13 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         )}
       </div>
 
-      {/* Submit and Cancel Buttons */}
+      {/* Submit and Cancel Buttons - FIXED FOR MOBILE */}
       <div className="mt-6">
-        <div className="flex gap-3 justify-center mb-3">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-3">
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-2.5 bg-gray-100 text-gray-700 border border-gray-300 rounded cursor-pointer text-base font-medium flex items-center gap-1.5 hover:bg-gray-200"
+            className="px-4 py-2.5 sm:px-6 bg-gray-100 text-gray-700 border border-gray-300 rounded cursor-pointer text-base font-medium flex items-center justify-center gap-1.5 hover:bg-gray-200"
           >
             <span>←</span>
             <span>Cancel</span>
@@ -1220,7 +1220,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               type="button"
               onClick={onDelete}
               disabled={uploadingImage || deletingImage}
-              className="px-6 py-2.5 bg-red-600 text-white border-none rounded cursor-pointer text-base font-medium flex items-center gap-1.5 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="px-4 py-2.5 sm:px-6 bg-red-600 text-white border-none rounded cursor-pointer text-base font-medium flex items-center justify-center gap-1.5 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <span>🗑️</span>
               <span>Delete</span>
@@ -1230,7 +1230,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
           <button
             type="submit"
             disabled={uploadingImage || deletingImage}
-            className="px-6 py-2.5 bg-blue-500 text-white border-none rounded cursor-pointer text-base font-medium hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="px-4 py-2.5 sm:px-6 bg-blue-500 text-white border-none rounded cursor-pointer text-base font-medium hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {isEditing ? "Update" : "Add Item"}
           </button>
@@ -1248,7 +1248,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               Are you sure you want to delete this image? This action cannot be
               undone.
             </p>
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col sm:flex-row gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deletingImage}

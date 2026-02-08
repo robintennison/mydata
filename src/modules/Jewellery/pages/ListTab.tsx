@@ -23,12 +23,7 @@ interface Bill {
 }
 
 // Sorting types
-type SortField =
-  | "code"
-  | "weight"
-  | "purchaseDate"
-  | "description"
-  | "location";
+type SortField = "code" | "weight";
 type SortDirection = "asc" | "desc";
 
 // Sort option interface
@@ -68,18 +63,12 @@ const ListTab: React.FC = () => {
   const boughtForButtonRef = useRef<HTMLButtonElement>(null);
   const sortButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Available sort options
+  // Available sort options - SIMPLIFIED to only code and weight
   const sortOptions: SortOption[] = [
     { field: "code", direction: "asc", label: "Code (A→Z)" },
     { field: "code", direction: "desc", label: "Code (Z→A)" },
     { field: "weight", direction: "asc", label: "Weight (Low→High)" },
     { field: "weight", direction: "desc", label: "Weight (High→Low)" },
-    { field: "purchaseDate", direction: "desc", label: "Date (New→Old)" },
-    { field: "purchaseDate", direction: "asc", label: "Date (Old→New)" },
-    { field: "description", direction: "asc", label: "Description (A→Z)" },
-    { field: "description", direction: "desc", label: "Description (Z→A)" },
-    { field: "location", direction: "asc", label: "Location (A→Z)" },
-    { field: "location", direction: "desc", label: "Location (Z→A)" },
   ];
 
   useEffect(() => {
@@ -193,31 +182,10 @@ const ListTab: React.FC = () => {
         return direction === "asc" ? valueA - valueB : valueB - valueA;
       }
 
-      if (field === "purchaseDate") {
-        const dateA = a.purchaseDate || 0;
-        const dateB = b.purchaseDate || 0;
-        return direction === "asc" ? dateA - dateB : dateB - dateA;
-      }
-
+      // For code sorting
       if (field === "code") {
         const strA = (a.code || "").toLowerCase();
         const strB = (b.code || "").toLowerCase();
-        return direction === "asc"
-          ? strA.localeCompare(strB)
-          : strB.localeCompare(strA);
-      }
-
-      if (field === "description") {
-        const strA = (a.description || "").toLowerCase();
-        const strB = (b.description || "").toLowerCase();
-        return direction === "asc"
-          ? strA.localeCompare(strB)
-          : strB.localeCompare(strA);
-      }
-
-      if (field === "location") {
-        const strA = (a.location || "").toLowerCase();
-        const strB = (b.location || "").toLowerCase();
         return direction === "asc"
           ? strA.localeCompare(strB)
           : strB.localeCompare(strA);
@@ -573,19 +541,19 @@ const ListTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Inactive Items Toggle */}
+      {/* Inactive Items Toggle - MOVED to Filter Indicators row to save space */}
       {showInactiveSetting && (
-        <div className="px-3 py-2 bg-slate-50 border border-gray-200 text-xs flex items-center gap-2 mb-3 rounded-md">
+        <div className="px-3 py-1.5 bg-slate-50 border border-gray-200 text-[11px] text-gray-500 flex items-center gap-2 mb-3 rounded-md">
           <label className="flex items-center gap-1.5 cursor-pointer">
             <input
               type="checkbox"
               checked={showInactive}
               onChange={(e) => setShowInactive(e.target.checked)}
-              className="w-4 h-4 cursor-pointer text-blue-600 focus:ring-blue-500"
+              className="w-3.5 h-3.5 cursor-pointer text-blue-600 focus:ring-blue-500"
             />
             <span>Show inactive items</span>
           </label>
-          <span className="text-[11px] text-gray-500">
+          <span className="text-[10px] text-gray-500 ml-auto">
             ({showInactive ? "Showing all" : "Active only"})
           </span>
         </div>
@@ -678,7 +646,7 @@ const ListTab: React.FC = () => {
 
       {showSortOptions && (
         <div
-          className="sort-dropdown fixed bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-[1000] min-w-[180px] max-h-[300px] overflow-y-auto"
+          className="sort-dropdown fixed bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-[1000] min-w-[160px] max-h-[300px] overflow-y-auto"
           style={{
             top: `${getDropdownPosition(sortButtonRef).top}px`,
             right: `${getDropdownPosition(sortButtonRef).right}px`,
@@ -707,22 +675,25 @@ const ListTab: React.FC = () => {
         </div>
       )}
 
-      {/* Filter Indicators */}
+      {/* Filter Indicators - OPTIMIZED: Combined with show inactive toggle */}
       {(searchTerm ||
         selectedLocation ||
         selectedBoughtFor ||
         currentSort.field !== "code" ||
         currentSort.direction !== "desc") && (
         <div className="px-3 py-1.5 bg-slate-50 border border-gray-200 text-[11px] text-gray-500 flex items-center gap-2.5 mb-3 rounded-md">
-          <div className="flex-1 truncate">
+          <div className="flex-1 truncate flex items-center gap-1.5">
             {searchTerm && <span>Search: "{searchTerm}"</span>}
-            {selectedLocation && <span> • Loc: {selectedLocation}</span>}
-            {selectedBoughtFor && <span> • Purp: {selectedBoughtFor}</span>}
-            {currentSort.field !== "code" || currentSort.direction !== "desc"}
+            {selectedLocation && <span>• Loc: {selectedLocation}</span>}
+            {selectedBoughtFor && <span>• Purp: {selectedBoughtFor}</span>}
+            {(currentSort.field !== "code" ||
+              currentSort.direction !== "desc") && (
+              <span>• Sort: {currentSort.label}</span>
+            )}
           </div>
           <button
             onClick={clearFilters}
-            className="bg-red-100 text-red-500 cursor-pointer text-[11px] px-1.5 py-0.5 rounded hover:bg-red-200 focus:outline-none focus:ring-1 focus:ring-red-500"
+            className="bg-red-100 text-red-500 cursor-pointer text-[11px] px-1.5 py-0.5 rounded hover:bg-red-200 focus:outline-none focus:ring-1 focus:ring-red-500 shrink-0"
           >
             Clear
           </button>

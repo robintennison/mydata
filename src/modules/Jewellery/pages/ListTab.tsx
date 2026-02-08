@@ -541,23 +541,38 @@ const ListTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Inactive Items Toggle - MOVED to Filter Indicators row to save space */}
-      {showInactiveSetting && (
-        <div className="px-3 py-1.5 bg-slate-50 border border-gray-200 text-[11px] text-gray-500 flex items-center gap-2 mb-3 rounded-md">
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
-              className="w-3.5 h-3.5 cursor-pointer text-blue-600 focus:ring-blue-500"
-            />
-            <span>Show inactive items</span>
-          </label>
-          <span className="text-[10px] text-gray-500 ml-auto">
-            ({showInactive ? "Showing all" : "Active only"})
-          </span>
+      {/* Combined Info Row - Show Inactive + Items Count + Sort Info */}
+      <div className="px-3 py-1.5 bg-slate-50 border border-gray-200 text-[11px] text-gray-500 flex items-center justify-between mb-3 rounded-md">
+        <div className="flex items-center gap-1.5">
+          {showInactiveSetting && (
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+                className="w-3.5 h-3.5 cursor-pointer text-blue-600 focus:ring-blue-500"
+              />
+              <span>Show inactive</span>
+            </label>
+          )}
         </div>
-      )}
+
+        {/* Items Count and Sort Info - Only show if we have items */}
+        {!error && filteredItems.length > 0 && (
+          <div className="text-right">
+            <span>{filteredItems.length} items</span>
+            {filteredItems.length !== jewelleryItems.length &&
+              ` (of ${jewelleryItems.length})`}
+            {showInactiveSetting && (
+              <span> • {showInactive ? "All" : "Active"}</span>
+            )}
+            {(currentSort.field !== "code" ||
+              currentSort.direction !== "desc") && (
+              <span> • {currentSort.label}</span>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Dropdowns */}
       {showLocationFilter && (
@@ -675,21 +690,13 @@ const ListTab: React.FC = () => {
         </div>
       )}
 
-      {/* Filter Indicators - OPTIMIZED: Combined with show inactive toggle */}
-      {(searchTerm ||
-        selectedLocation ||
-        selectedBoughtFor ||
-        currentSort.field !== "code" ||
-        currentSort.direction !== "desc") && (
+      {/* Filter Indicators */}
+      {(searchTerm || selectedLocation || selectedBoughtFor) && (
         <div className="px-3 py-1.5 bg-slate-50 border border-gray-200 text-[11px] text-gray-500 flex items-center gap-2.5 mb-3 rounded-md">
           <div className="flex-1 truncate flex items-center gap-1.5">
             {searchTerm && <span>Search: "{searchTerm}"</span>}
             {selectedLocation && <span>• Loc: {selectedLocation}</span>}
             {selectedBoughtFor && <span>• Purp: {selectedBoughtFor}</span>}
-            {(currentSort.field !== "code" ||
-              currentSort.direction !== "desc") && (
-              <span>• Sort: {currentSort.label}</span>
-            )}
           </div>
           <button
             onClick={clearFilters}
@@ -727,17 +734,6 @@ const ListTab: React.FC = () => {
               Try Again
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Items Count */}
-      {!error && filteredItems.length > 0 && (
-        <div className="text-[11px] text-gray-500 px-3 py-1.5 pb-0.5 text-right mb-2">
-          {filteredItems.length} items
-          {filteredItems.length !== jewelleryItems.length &&
-            ` (of ${jewelleryItems.length})`}
-          {showInactive && ` • Showing ${showInactive ? "all" : "active only"}`}
-          {currentSort && <span> • Sorted: {currentSort.label}</span>}
         </div>
       )}
 

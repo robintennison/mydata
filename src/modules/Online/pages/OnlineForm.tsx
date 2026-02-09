@@ -903,7 +903,7 @@ const OnlineForm: React.FC = () => {
                       ? "Saving..."
                       : isAddMode
                         ? "Add Item"
-                        : "Update Item"}
+                        : "Update"}
                   </button>
                 </div>
               </div>

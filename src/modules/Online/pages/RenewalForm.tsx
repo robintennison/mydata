@@ -445,7 +445,7 @@ const RenewalForm: React.FC = () => {
                       ? "Saving..."
                       : isAddMode
                         ? "Add Renewal"
-                        : "Update Renewal"}
+                        : "Update"}
                   </button>
                 </div>
               </div>

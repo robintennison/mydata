@@ -333,7 +333,7 @@ const CategoryForm: React.FC = () => {
                       ? "Saving..."
                       : isAddMode
                         ? "Add Category"
-                        : "Update Category"}
+                        : "Update"}
                   </button>
                 </div>
               </div>

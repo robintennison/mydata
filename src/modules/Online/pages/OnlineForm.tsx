@@ -715,8 +715,8 @@ const OnlineForm: React.FC = () => {
     try {
       const date = new Date(timestamp);
       if (isNaN(date.getTime())) return "Invalid date";
-      //  return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-      return date.toLocaleDateString();
+    //  return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    return date.toLocaleDateString();
     } catch (error) {
       return "Error formatting date";
     }
@@ -893,11 +893,10 @@ const OnlineForm: React.FC = () => {
                 <div className="relative">
                   {fileInfo.type === FILE_TYPES.IMAGE ? (
                     <img
-      src={existingFileUrl}
-      alt={`Current File ${fileNumber}`}
-      className="max-w-full max-h-36 w-auto h-auto rounded-lg border border-gray-300 object-contain bg-gray-50"
-      style={{ maxWidth: '100%', maxHeight: '144px' }}
-    />
+                      src={URL.createObjectURL(fileInfo.file)}
+                      alt={`New File ${fileNumber}`}
+                      className="max-w-full max-h-36 rounded-lg border border-gray-300"
+                    />
                   ) : (
                     <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg flex items-center gap-3">
                       <span className="text-2xl">📄</span>

@@ -9,6 +9,25 @@ import {
 } from "./modules/Banking/utils/bankingCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { DocumentData } from "firebase/firestore";
+
+// Add OnlineItem interface
+interface OnlineItem {
+  id: string;
+  name: string;
+  detail: string;
+  category: string;
+  startDate: number | null;
+  endDate: number | null;
+  file1: string;
+  file2: string;
+  file1Type: string;
+  file2Type: string;
+  file1Name: string;
+  file2Name: string;
+  createdAt: number;
+  updatedAt: number;
+}
 
 interface Renewal {
   id: string;
@@ -26,6 +45,8 @@ const MyDataHomepage: React.FC = () => {
   const { accounts, deposits, adjustments, loading } = useBankingData();
   const [renewals, setRenewals] = useState<Renewal[]>([]);
   const [renewalsLoading, setRenewalsLoading] = useState(true);
+  const [onlineItems, setOnlineItems] = useState<OnlineItem[]>([]);
+  const [onlineItemsLoading, setOnlineItemsLoading] = useState(true);
 
   // Fetch renewals data
   useEffect(() => {
@@ -75,6 +96,65 @@ const MyDataHomepage: React.FC = () => {
     };
 
     fetchRenewals();
+  }, []);
+
+  // Fetch online items
+  useEffect(() => {
+    const fetchOnlineItems = async () => {
+      try {
+        setOnlineItemsLoading(true);
+        const db = getFirestore();
+        const itemsRef = collection(db, "online");
+        const itemsSnapshot = await getDocs(itemsRef);
+
+        const itemsList: OnlineItem[] = [];
+        itemsSnapshot.forEach((doc) => {
+          const data: DocumentData = doc.data();
+
+          // Check if this is old data (has image fields) or new data (has file fields)
+          const hasOldImageFields =
+            data.image1 !== undefined || data.image2 !== undefined;
+
+          itemsList.push({
+            id: doc.id,
+            name: data.name || "",
+            detail: data.detail || "",
+            category: data.category || "",
+            // Handle nullable dates - if field doesn't exist or is null, set to null
+            startDate: data.startDate !== undefined ? data.startDate : null,
+            endDate: data.endDate !== undefined ? data.endDate : null,
+            // Handle both old and new field names
+            file1: data.file1 || data.image1 || "",
+            file2: data.file2 || data.image2 || "",
+            // Determine file types based on what's available
+            file1Type: data.file1Type || (data.image1 ? "image" : "none"),
+            file2Type: data.file2Type || (data.image2 ? "image" : "none"),
+            file1Name:
+              data.file1Name ||
+              (hasOldImageFields && data.image1 ? "Legacy Image" : ""),
+            file2Name:
+              data.file2Name ||
+              (hasOldImageFields && data.image2 ? "Legacy Image" : ""),
+            createdAt: data.createdAt || Date.now(),
+            updatedAt: data.updatedAt || Date.now(),
+          });
+        });
+
+        // Filter items with end dates and sort by end date ascending
+        const itemsWithEndDates = itemsList
+          .filter((item) => item.endDate != null)
+          .sort((a, b) => (a.endDate || 0) - (b.endDate || 0))
+          .slice(0, 5); // Get first 5 items
+
+        setOnlineItems(itemsWithEndDates);
+      } catch (error) {
+        console.error("Error fetching online items:", error);
+      } finally {
+        setOnlineItemsLoading(false);
+      }
+    };
+
+    fetchOnlineItems();
   }, []);
 
   // Memoize calculations for better performance
@@ -240,6 +320,7 @@ const MyDataHomepage: React.FC = () => {
   const hasExpiredRenewals = expiredRenewals.length > 0;
   const hasAnyMaturities = hasUpcomingMaturities || hasExpiredMaturities;
   const hasAnyRenewals = hasUpcomingRenewals || hasExpiredRenewals;
+  const hasOnlineItems = onlineItems.length > 0;
 
   // Helper function to calculate days ago for expired items
   const getDaysAgo = (endDate: number): string => {
@@ -247,6 +328,11 @@ const MyDataHomepage: React.FC = () => {
     if (daysAgo === 0) return "Today";
     if (daysAgo === 1) return "1 day ago";
     return `${daysAgo} days ago`;
+  };
+
+  // Helper function to calculate days until for upcoming items
+  const getDaysUntil = (endDate: number): number => {
+    return Math.ceil((endDate - Date.now()) / (1000 * 60 * 60 * 24));
   };
 
   return (
@@ -312,6 +398,113 @@ const MyDataHomepage: React.FC = () => {
             {activeDepositsCount} dep
           </div>
         </div>
+      </div>
+
+      {/* Online Items with End Dates Section - New section below EMW stats */}
+      <div
+        className="bg-white rounded-lg my-3 p-3 sm:p-4 shadow-sm border border-gray-200 shrink-0"
+        style={{
+          minHeight: hasOnlineItems ? "auto" : "60px",
+          marginTop: "8px",
+        }}
+      >
+        <div
+          className="flex justify-between items-center mb-2 sm:mb-3"
+          style={{ marginBottom: hasOnlineItems ? "12px" : "0" }}
+        >
+          <div className="text-sm font-semibold text-gray-800">
+            Online Items with End Dates
+            {hasOnlineItems && (
+              <span className="text-xs text-gray-600 ml-2 font-normal hidden sm:inline">
+                ({onlineItems.length} items)
+              </span>
+            )}
+          </div>
+          {hasOnlineItems && (
+            <button
+              className="bg-transparent text-blue-500 border border-blue-500 rounded-md sm:rounded-lg py-1 px-2 sm:py-2 sm:px-3 text-xs font-medium cursor-pointer hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onClick={() =>
+                navigate("/online", { state: { activeTab: "list" } })
+              }
+            >
+              View All
+            </button>
+          )}
+        </div>
+
+        {onlineItemsLoading ? (
+          <div className="text-center p-4 sm:p-8 text-gray-600">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 border-2 sm:border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-2 sm:mb-4"></div>
+            <div className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+              Loading online items...
+            </div>
+          </div>
+        ) : !hasOnlineItems ? (
+          <div className="text-center p-4 sm:p-8 text-gray-600">
+            <div className="text-2xl sm:text-4xl mb-2 sm:mb-4 opacity-50">
+              📋
+            </div>
+            <div className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+              No online items with end dates
+            </div>
+            <div className="text-[10px] sm:text-xs text-gray-500">
+              Add end dates to online items to track them
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1 sm:gap-2">
+            {onlineItems.map((item) => {
+              const daysUntil = getDaysUntil(item.endDate!);
+              const isImmediate = daysUntil <= 1;
+              const isExpired = item.endDate! < Date.now();
+
+              return (
+                <div
+                  key={item.id}
+                  className={`flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 bg-white text-xs sm:text-sm flex-nowrap overflow-hidden min-h-6 sm:min-h-8 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50 ${
+                    isExpired
+                      ? "opacity-70 text-gray-500"
+                      : isImmediate
+                        ? "bg-orange-50 border-l-2 border-orange-300"
+                        : ""
+                  }`}
+                  onClick={() => navigate(`/online/items/view/${item.id}`)}
+                >
+                  <div className="flex items-center overflow-hidden text-center flex-2 min-w-0">
+                    <span
+                      className={`whitespace-nowrap overflow-hidden text-ellipsis text-xs sm:text-sm text-center ${
+                        isExpired
+                          ? "text-gray-500 line-through"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {item.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center overflow-hidden text-center flex-1 min-w-0">
+                    <span
+                      className={`whitespace-nowrap overflow-hidden text-ellipsis text-xs sm:text-sm text-right min-w-[60px] sm:min-w-[70px] ${
+                        isExpired ? "text-red-600" : "text-gray-700"
+                      }`}
+                    >
+                      {formatDateShort(item.endDate!)}
+                      {isExpired && (
+                        <span className="ml-1 sm:ml-2 bg-red-100 text-red-700 text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 rounded whitespace-nowrap">
+                          {getDaysAgo(item.endDate!)}
+                        </span>
+                      )}
+                      {!isExpired && isImmediate && (
+                        <span className="bg-red-600 text-white text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 rounded ml-1 sm:ml-2 whitespace-nowrap">
+                          {daysUntil === 0 ? "Today" : "Tomorrow"}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Upcoming Renewals Section - Compact */}

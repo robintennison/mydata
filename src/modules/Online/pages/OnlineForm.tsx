@@ -21,7 +21,8 @@ import {
 import { useImageSize, ImageSizeBadge } from "../../../utils/imageSizeUtils";
 
 // Helper function to safely parse timestamps
-const parseTimestamp = (timestamp: any): number => {
+const parseTimestamp = (timestamp: any): number | null => {
+  if (timestamp === null || timestamp === undefined) return null;
   if (typeof timestamp === "number") {
     return timestamp;
   }
@@ -34,7 +35,19 @@ const parseTimestamp = (timestamp: any): number => {
       return parsed;
     }
   }
-  return Date.now();
+  return null;
+};
+
+// Helper to format date for input fields (YYYY-MM-DD)
+const formatDateInput = (timestamp?: number | null): string => {
+  if (!timestamp) return "";
+  try {
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return "";
+    return date.toISOString().split("T")[0];
+  } catch (error) {
+    return "";
+  }
 };
 
 interface OptimizationInfo {
@@ -68,11 +81,16 @@ const OnlineForm: React.FC = () => {
   const isEditMode = mode === "edit";
   const isViewMode = mode === "view";
 
+  // State for toggling renewable option
+  const [isRenewable, setIsRenewable] = useState(false);
+
   const [formData, setFormData] = useState<Partial<OnlineItem>>({
     id: "",
     name: "",
     detail: "",
     category: "",
+    startDate: null,
+    endDate: null,
     image1: "",
     image2: "",
     createdAt: Date.now(),
@@ -108,16 +126,20 @@ const OnlineForm: React.FC = () => {
     if (id) {
       fetchItem();
     } else {
+      // Add mode - initialize with null dates
       setFormData({
         id: "",
         name: "",
         detail: "",
         category: "",
+        startDate: null,
+        endDate: null,
         image1: "",
         image2: "",
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
+      setIsRenewable(false);
       resetImageStates();
     }
   }, [id, location.pathname]);
@@ -142,8 +164,8 @@ const OnlineForm: React.FC = () => {
         categoriesList.push({
           id: doc.id,
           name: data.name || "",
-          createdAt: parseTimestamp(data.createdAt),
-          updatedAt: parseTimestamp(data.updatedAt),
+          createdAt: parseTimestamp(data.createdAt) || undefined,
+          updatedAt: parseTimestamp(data.updatedAt) || undefined,
         });
       });
       categoriesList.sort((a, b) => a.name.localeCompare(b.name));
@@ -164,15 +186,24 @@ const OnlineForm: React.FC = () => {
 
       if (itemDoc.exists()) {
         const data = itemDoc.data();
+        const startDate = parseTimestamp(data.startDate);
+        const endDate = parseTimestamp(data.endDate);
+
+        // Set renewable state based on whether dates exist
+        // This ensures the checkbox is properly checked if dates exist
+        setIsRenewable(!!(startDate && endDate));
+
         setFormData({
           id: itemDoc.id,
           name: data.name || "",
           detail: data.detail || "",
           category: data.category || "",
+          startDate: startDate,
+          endDate: endDate,
           image1: data.image1 || "",
           image2: data.image2 || "",
-          createdAt: parseTimestamp(data.createdAt),
-          updatedAt: parseTimestamp(data.updatedAt),
+          createdAt: parseTimestamp(data.createdAt) || Date.now(),
+          updatedAt: parseTimestamp(data.updatedAt) || Date.now(),
         });
         resetImageStates();
       } else {
@@ -377,6 +408,18 @@ const OnlineForm: React.FC = () => {
       return;
     }
 
+    // Validate dates only if item is renewable
+    if (isRenewable) {
+      if (!formData.startDate || !formData.endDate) {
+        alert("Both start and end dates are required for renewable items");
+        return;
+      }
+      if (formData.startDate > formData.endDate) {
+        alert("End date must be after start date");
+        return;
+      }
+    }
+
     try {
       setSaving(true);
       setUploadingImages(true);
@@ -393,10 +436,14 @@ const OnlineForm: React.FC = () => {
         image2Url = await uploadImage(image2File, 2);
       }
 
+      // Prepare data for submission
       const itemData = {
         name: (formData.name || "").trim(),
         detail: (formData.detail || "").trim(),
         category: formData.category || "",
+        // If not renewable, set dates to null
+        startDate: isRenewable ? formData.startDate : null,
+        endDate: isRenewable ? formData.endDate : null,
         image1: image1Url,
         image2: image2Url,
         updatedAt: new Date(),
@@ -501,8 +548,8 @@ const OnlineForm: React.FC = () => {
     return "";
   };
 
-  const formatDate = (timestamp?: number): string => {
-    if (!timestamp) return "Unknown";
+  const formatDate = (timestamp?: number | null): string => {
+    if (!timestamp) return "Not applicable";
     try {
       const date = new Date(timestamp);
       if (isNaN(date.getTime())) return "Invalid date";
@@ -795,6 +842,114 @@ const OnlineForm: React.FC = () => {
                 </select>
               )}
             </div>
+
+            {/* Renewable Toggle - Show in both add and edit modes */}
+            {!isViewMode && (
+              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <input
+                  type="checkbox"
+                  id="isRenewable"
+                  checked={isRenewable}
+                  onChange={(e) => {
+                    setIsRenewable(e.target.checked);
+                    if (!e.target.checked) {
+                      // Clear dates when unchecking
+                      setFormData({
+                        ...formData,
+                        startDate: null,
+                        endDate: null,
+                      });
+                    } else {
+                      // Set default dates when checking (today to 30 days from now)
+                      // But only if dates are currently null
+                      if (!formData.startDate || !formData.endDate) {
+                        const now = Date.now();
+                        const thirtyDaysFromNow =
+                          now + 30 * 24 * 60 * 60 * 1000;
+                        setFormData({
+                          ...formData,
+                          startDate: now,
+                          endDate: thirtyDaysFromNow,
+                        });
+                      }
+                    }
+                  }}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  disabled={saving || uploadingImages}
+                />
+                <label
+                  htmlFor="isRenewable"
+                  className="text-sm font-medium text-gray-700 cursor-pointer"
+                >
+                  This item has renewal dates
+                </label>
+                <span className="text-xs text-gray-500">
+                  (Check if this item requires start and end dates)
+                </span>
+              </div>
+            )}
+
+            {/* Date Range Fields - Show if renewable OR (in view mode and dates exist) */}
+            {(isRenewable ||
+              (isViewMode && formData.startDate && formData.endDate)) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date {!isViewMode && "*"}
+                  </label>
+                  {isViewMode ? (
+                    <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
+                      {formatDate(formData.startDate)}
+                    </div>
+                  ) : (
+                    <input
+                      type="date"
+                      value={formatDateInput(formData.startDate)}
+                      onChange={(e) => {
+                        const dateValue = e.target.value;
+                        setFormData({
+                          ...formData,
+                          startDate: dateValue
+                            ? new Date(dateValue).getTime()
+                            : null,
+                        });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      required={isRenewable}
+                      disabled={saving || uploadingImages}
+                    />
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    End Date {!isViewMode && "*"}
+                  </label>
+                  {isViewMode ? (
+                    <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
+                      {formatDate(formData.endDate)}
+                    </div>
+                  ) : (
+                    <input
+                      type="date"
+                      value={formatDateInput(formData.endDate)}
+                      onChange={(e) => {
+                        const dateValue = e.target.value;
+                        setFormData({
+                          ...formData,
+                          endDate: dateValue
+                            ? new Date(dateValue).getTime()
+                            : null,
+                        });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      required={isRenewable}
+                      disabled={saving || uploadingImages}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* DETAILS FIELD */}
             <div>

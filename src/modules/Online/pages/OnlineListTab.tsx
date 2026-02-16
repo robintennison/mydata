@@ -12,14 +12,13 @@ const OnlineListTab: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [categories, setCategories] = useState<string[]>(["All"]);
   const { settings } = useSettings();
-  const showDelete = settings?.showDelete || false; // Get the showDelete setting
+  const showDelete = settings?.showDelete || false;
 
   useEffect(() => {
     fetchData();
   }, []);
 
   useEffect(() => {
-    // Extract unique categories from items
     const uniqueCategories = Array.from(
       new Set(items.map((item) => item.category).filter(Boolean)),
     ).sort();
@@ -41,6 +40,9 @@ const OnlineListTab: React.FC = () => {
           name: data.name || "",
           detail: data.detail || "",
           category: data.category || "",
+          // Handle nullable dates - if field doesn't exist or is null, set to null
+          startDate: data.startDate !== undefined ? data.startDate : null,
+          endDate: data.endDate !== undefined ? data.endDate : null,
           image1: data.image1 || "",
           image2: data.image2 || "",
           createdAt: data.createdAt || Date.now(),
@@ -57,32 +59,55 @@ const OnlineListTab: React.FC = () => {
     }
   };
 
+  const formatDate = (timestamp?: number | null): string => {
+    if (!timestamp) return "N/A";
+    try {
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) return "Invalid date";
+      return date.toLocaleDateString();
+    } catch (error) {
+      return "Invalid date";
+    }
+  };
+
+  // Check if item has renewal dates and get status
+  const getItemStatus = (
+    item: OnlineItem,
+  ): { text: string; className: string } => {
+    if (!item.startDate || !item.endDate) {
+      return { text: "No renewal", className: "bg-gray-100 text-gray-600" };
+    }
+
+    const now = Date.now();
+    if (now >= item.startDate && now <= item.endDate) {
+      return { text: "● Active", className: "bg-green-100 text-green-700" };
+    } else if (now < item.startDate) {
+      return { text: "○ Upcoming", className: "bg-blue-100 text-blue-700" };
+    } else {
+      return { text: "○ Expired", className: "bg-red-100 text-red-700" };
+    }
+  };
+
   const filteredItems = items.filter((item) => {
-    // Filter by search term
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.detail.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.category.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Filter by category
     const matchesCategory =
       selectedCategory === "All" || item.category === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
 
-  // Handle row click - go to edit mode if showDelete is true, otherwise view mode
   const handleRowClick = (itemId: string) => {
     if (showDelete) {
-      // If showDelete is enabled, go to edit mode
       navigate(`/online/items/edit/${itemId}`);
     } else {
-      // If showDelete is disabled, go to view mode
       navigate(`/online/items/view/${itemId}`);
     }
   };
 
-  // Handle edit button click - always goes to edit mode
   const handleEditClick = (e: React.MouseEvent, itemId: string) => {
     e.stopPropagation();
     navigate(`/online/items/edit/${itemId}`);
@@ -101,7 +126,6 @@ const OnlineListTab: React.FC = () => {
     <div className="w-full h-full flex flex-col">
       {/* Search and Filter Row */}
       <div className="p-2 bg-white border-b border-gray-200 flex gap-2 items-center shrink-0">
-        {/* Search Input */}
         <div className="flex-[2] min-w-0 relative">
           <input
             type="text"
@@ -115,7 +139,6 @@ const OnlineListTab: React.FC = () => {
           </span>
         </div>
 
-        {/* Category Filter Dropdown */}
         <div className="flex-1 min-w-0 relative">
           <select
             value={selectedCategory}
@@ -160,7 +183,6 @@ const OnlineListTab: React.FC = () => {
           </div>
         ) : (
           <div className="p-2">
-            {/* Results Info */}
             <div className="flex justify-between items-center mb-2 px-1 py-1">
               <span className="text-xs text-gray-600">
                 {filteredItems.length} item
@@ -180,65 +202,100 @@ const OnlineListTab: React.FC = () => {
               )}
             </div>
 
-            {/* Items List */}
             <div className="space-y-2 pb-4">
-              {filteredItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-lg border border-gray-200 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onClick={() => handleRowClick(item.id)}
-                  tabIndex={0}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      handleRowClick(item.id);
-                    }
-                  }}
-                >
-                  <div className="p-3 flex items-center min-h-12">
-                    {/* Image thumbnail if available */}
-                    {(item.image1 || item.image2) && (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden mr-3 flex-shrink-0 bg-gray-50 flex items-center justify-center">
-                        <img
-                          src={item.image1 || item.image2}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
+              {filteredItems.map((item) => {
+                const status = getItemStatus(item);
+                const hasRenewal = item.startDate && item.endDate;
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="text-sm font-semibold text-gray-900 truncate">
-                          {item.name}
-                        </span>
-                        {item.category && (
-                          <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded truncate max-w-[120px]">
-                            {item.category}
-                          </span>
+                return (
+                  <div
+                    key={item.id}
+                    className={`bg-white rounded-lg border cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      hasRenewal
+                        ? "border-l-4 border-l-green-500"
+                        : "border-gray-200"
+                    }`}
+                    onClick={() => handleRowClick(item.id)}
+                    tabIndex={0}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        handleRowClick(item.id);
+                      }
+                    }}
+                  >
+                    <div className="p-3">
+                      <div className="flex items-start min-h-12">
+                        {/* Image thumbnail if available */}
+                        {(item.image1 || item.image2) && (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden mr-3 flex-shrink-0 bg-gray-50 flex items-center justify-center">
+                            <img
+                              src={item.image1 || item.image2}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className="text-sm font-semibold text-gray-900 truncate">
+                              {item.name}
+                            </span>
+                            {item.category && (
+                              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded truncate max-w-[120px]">
+                                {item.category}
+                              </span>
+                            )}
+                            {/* Status indicator */}
+                            <span
+                              className={`text-xs px-1.5 py-0.5 rounded ${status.className}`}
+                            >
+                              {status.text}
+                            </span>
+                          </div>
+
+                          {item.detail && (
+                            <div className="text-xs text-gray-600 truncate leading-relaxed mb-1">
+                              {item.detail}
+                            </div>
+                          )}
+
+                          {/* Date range display - only show if renewable */}
+                          {hasRenewal && (
+                            <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
+                              <span className="flex items-center gap-1">
+                                <span className="text-gray-400">📅</span>
+                                {formatDate(item.startDate)} -{" "}
+                                {formatDate(item.endDate)}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Show "No renewal" badge if no dates */}
+                          {!hasRenewal && (
+                            <div className="text-xs text-gray-400 italic">
+                              No renewal date
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Edit button only - conditionally shown based on settings */}
+                        {showDelete && (
+                          <div className="ml-2 flex-shrink-0">
+                            <button
+                              className="px-3 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+                              onClick={(e) => handleEditClick(e, item.id)}
+                              title="Edit"
+                            >
+                              ✏️
+                            </button>
+                          </div>
                         )}
                       </div>
-                      {item.detail && (
-                        <div className="text-xs text-gray-600 truncate leading-relaxed">
-                          {item.detail}
-                        </div>
-                      )}
                     </div>
-
-                    {/* Edit button only - conditionally shown based on settings */}
-                    {showDelete && (
-                      <div className="ml-2">
-                        <button
-                          className="px-3 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
-                          onClick={(e) => handleEditClick(e, item.id)}
-                          title="Edit"
-                        >
-                          ✏️
-                        </button>
-                      </div>
-                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

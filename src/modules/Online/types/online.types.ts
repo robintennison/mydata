@@ -12,6 +12,8 @@ export interface OnlineItem {
   name: string;
   detail: string;
   category: string;
+  startDate?: number | null; // Only relevant if isRenewable is true
+  endDate?: number | null;   // Only relevant if isRenewable is true
   image1: string;
   image2: string;
   createdAt?: number;

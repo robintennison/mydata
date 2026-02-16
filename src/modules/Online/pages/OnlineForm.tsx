@@ -104,9 +104,6 @@ const OnlineForm: React.FC = () => {
   const isEditMode = mode === "edit";
   const isViewMode = mode === "view";
 
-  // State for toggling renewable option
-  const [isRenewable, setIsRenewable] = useState(false);
-
   const [formData, setFormData] = useState<Partial<OnlineItem>>({
     id: "",
     name: "",
@@ -180,7 +177,6 @@ const OnlineForm: React.FC = () => {
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
-      setIsRenewable(false);
       resetFileStates();
     }
   }, [id, location.pathname]);
@@ -265,9 +261,6 @@ const OnlineForm: React.FC = () => {
         } else if (!file2Type && data.image2) {
           file2Type = FILE_TYPES.IMAGE; // Old image data
         }
-
-        // Set renewable state based on whether dates exist
-        setIsRenewable(!!(startDate && endDate));
 
         setFormData({
           id: itemDoc.id,
@@ -554,22 +547,14 @@ const OnlineForm: React.FC = () => {
       return;
     }
 
-    // Validate dates only if item is renewable
-    if (isRenewable) {
-      // Only validate end date is required
-      if (!formData.endDate) {
-        alert("End date is required for renewable items");
-        return;
-      }
-      // Only validate date order if both dates exist
-      if (
-        formData.startDate &&
-        formData.endDate &&
-        formData.startDate > formData.endDate
-      ) {
-        alert("End date must be after start date");
-        return;
-      }
+    // Only validate date order if both dates exist
+    if (
+      formData.startDate &&
+      formData.endDate &&
+      formData.startDate > formData.endDate
+    ) {
+      alert("End date must be after start date");
+      return;
     }
 
     try {
@@ -603,9 +588,9 @@ const OnlineForm: React.FC = () => {
         name: (formData.name || "").trim(),
         detail: (formData.detail || "").trim(),
         category: formData.category || "",
-        // If not renewable, set dates to null
-        startDate: isRenewable ? formData.startDate : null,
-        endDate: isRenewable ? formData.endDate : null,
+        // Dates are now always included (can be null)
+        startDate: formData.startDate,
+        endDate: formData.endDate,
         // Always save as file fields (new format)
         file1: file1Url,
         file2: file2Url,
@@ -717,7 +702,7 @@ const OnlineForm: React.FC = () => {
   };
 
   const formatDate = (timestamp?: number | null): string => {
-    if (!timestamp) return "Not applicable";
+    if (!timestamp) return "Not specified";
     try {
       const date = new Date(timestamp);
       if (isNaN(date.getTime())) return "Invalid date";
@@ -1081,114 +1066,62 @@ const OnlineForm: React.FC = () => {
               )}
             </div>
 
-            {/* Renewable Toggle - Show in both add and edit modes */}
-            {!isViewMode && (
-              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <input
-                  type="checkbox"
-                  id="isRenewable"
-                  checked={isRenewable}
-                  onChange={(e) => {
-                    setIsRenewable(e.target.checked);
-                    if (!e.target.checked) {
-                      // Clear dates when unchecking
+            {/* Date Range Fields - Always visible in edit/add mode, show in view mode if dates exist */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start Date {!isViewMode && "(Optional)"}
+                </label>
+                {isViewMode ? (
+                  <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
+                    {formatDate(formData.startDate)}
+                  </div>
+                ) : (
+                  <input
+                    type="date"
+                    value={formatDateInput(formData.startDate)}
+                    onChange={(e) => {
+                      const dateValue = e.target.value;
                       setFormData({
                         ...formData,
-                        startDate: null,
-                        endDate: null,
+                        startDate: dateValue
+                          ? new Date(dateValue).getTime()
+                          : null,
                       });
-                    } else {
-                      // Only set default end date when checking (30 days from now)
-                      // Start date remains null/optional
-                      if (!formData.endDate) {
-                        const now = Date.now();
-                        const thirtyDaysFromNow =
-                          now + 30 * 24 * 60 * 60 * 1000;
-                        setFormData({
-                          ...formData,
-                          endDate: thirtyDaysFromNow,
-                          // Don't set start date automatically
-                        });
-                      }
-                    }
-                  }}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                  disabled={saving || uploadingFiles}
-                />
-                <label
-                  htmlFor="isRenewable"
-                  className="text-sm font-medium text-gray-700 cursor-pointer"
-                >
-                  This item has renewal dates
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    disabled={saving || uploadingFiles}
+                  />
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Date {!isViewMode && "(Optional)"}
                 </label>
-                <span className="text-xs text-gray-500">
-                  (Check if this item requires an end date - start date is
-                  optional)
-                </span>
+                {isViewMode ? (
+                  <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
+                    {formatDate(formData.endDate)}
+                  </div>
+                ) : (
+                  <input
+                    type="date"
+                    value={formatDateInput(formData.endDate)}
+                    onChange={(e) => {
+                      const dateValue = e.target.value;
+                      setFormData({
+                        ...formData,
+                        endDate: dateValue
+                          ? new Date(dateValue).getTime()
+                          : null,
+                      });
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    disabled={saving || uploadingFiles}
+                  />
+                )}
               </div>
-            )}
-
-            {/* Date Range Fields - Show if renewable OR (in view mode and either date exists) */}
-            {(isRenewable ||
-              (isViewMode && (formData.startDate || formData.endDate))) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date {!isViewMode && "(Optional)"}
-                  </label>
-                  {isViewMode ? (
-                    <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
-                      {formatDate(formData.startDate) || "Not specified"}
-                    </div>
-                  ) : (
-                    <input
-                      type="date"
-                      value={formatDateInput(formData.startDate)}
-                      onChange={(e) => {
-                        const dateValue = e.target.value;
-                        setFormData({
-                          ...formData,
-                          startDate: dateValue
-                            ? new Date(dateValue).getTime()
-                            : null,
-                        });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      // Remove required attribute for start date
-                      disabled={saving || uploadingFiles}
-                    />
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Date {!isViewMode && "*"}
-                  </label>
-                  {isViewMode ? (
-                    <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
-                      {formatDate(formData.endDate) || "Not specified"}
-                    </div>
-                  ) : (
-                    <input
-                      type="date"
-                      value={formatDateInput(formData.endDate)}
-                      onChange={(e) => {
-                        const dateValue = e.target.value;
-                        setFormData({
-                          ...formData,
-                          endDate: dateValue
-                            ? new Date(dateValue).getTime()
-                            : null,
-                        });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      required={isRenewable} // End date still required
-                      disabled={saving || uploadingFiles}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
+            </div>
 
             {/* DETAILS FIELD */}
             <div>

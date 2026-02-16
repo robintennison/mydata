@@ -11,7 +11,13 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
-import { OnlineItem, Category } from "../types/online.types";
+import {
+  OnlineItem,
+  Category,
+  FileType,
+  FileInfo,
+  FILE_TYPES,
+} from "../types/online.types";
 import { useSettings } from "../../../contexts/SettingsContext";
 import {
   optimizeFile,
@@ -50,12 +56,29 @@ const formatDateInput = (timestamp?: number | null): string => {
   }
 };
 
-interface OptimizationInfo {
-  originalSize: number;
-  optimizedSize: number;
-  savedPercentage: number;
-  fileName: string;
-}
+// Helper to determine file type from name
+const getFileTypeFromName = (filename: string): FileType => {
+  const imageExtensions = ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif"];
+  const pdfExtensions = ["pdf"];
+
+  const extension = filename.split(".").pop()?.toLowerCase() || "";
+
+  if (imageExtensions.includes(extension)) return FILE_TYPES.IMAGE;
+  if (pdfExtensions.includes(extension)) return FILE_TYPES.PDF;
+  return FILE_TYPES.NONE;
+};
+
+// Helper to get file icon based on type
+const getFileIcon = (type: FileType): string => {
+  switch (type) {
+    case FILE_TYPES.IMAGE:
+      return "🖼️";
+    case FILE_TYPES.PDF:
+      return "📄";
+    default:
+      return "📁";
+  }
+};
 
 const OnlineForm: React.FC = () => {
   const navigate = useNavigate();
@@ -91,34 +114,48 @@ const OnlineForm: React.FC = () => {
     category: "",
     startDate: null,
     endDate: null,
-    image1: "",
-    image2: "",
+    file1: "",
+    file2: "",
+    file1Type: FILE_TYPES.NONE,
+    file2Type: FILE_TYPES.NONE,
+    file1Name: "",
+    file2Name: "",
     createdAt: Date.now(),
     updatedAt: Date.now(),
   });
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
 
-  // Image states
-  const [image1File, setImage1File] = useState<File | null>(null);
-  const [image2File, setImage2File] = useState<File | null>(null);
-  const [image1Optimization, setImage1Optimization] =
-    useState<OptimizationInfo | null>(null);
-  const [image2Optimization, setImage2Optimization] =
-    useState<OptimizationInfo | null>(null);
-  const [imageErrors, setImageErrors] = useState<{
-    image1?: string;
-    image2?: string;
-  }>({});
+  // File states with proper typing
+  const [file1Info, setFile1Info] = useState<FileInfo>({
+    file: null,
+    optimization: null,
+    type: FILE_TYPES.NONE,
+    url: "",
+    name: "",
+  });
 
-  // Use image size hooks for both images
-  const { size: image1Size, loading: loadingImage1Size } = useImageSize(
-    formData.image1 || null,
+  const [file2Info, setFile2Info] = useState<FileInfo>({
+    file: null,
+    optimization: null,
+    type: FILE_TYPES.NONE,
+    url: "",
+    name: "",
+  });
+
+  // Use image size hooks for images only
+  const { size: file1Size, loading: loadingFile1Size } = useImageSize(
+    formData.file1 && formData.file1Type === FILE_TYPES.IMAGE
+      ? formData.file1
+      : null,
   );
-  const { size: image2Size, loading: loadingImage2Size } = useImageSize(
-    formData.image2 || null,
+  const { size: file2Size, loading: loadingFile2Size } = useImageSize(
+    formData.file2 && formData.file2Type === FILE_TYPES.IMAGE
+      ? formData.file2
+      : null,
   );
 
   useEffect(() => {
@@ -134,22 +171,35 @@ const OnlineForm: React.FC = () => {
         category: "",
         startDate: null,
         endDate: null,
-        image1: "",
-        image2: "",
+        file1: "",
+        file2: "",
+        file1Type: FILE_TYPES.NONE,
+        file2Type: FILE_TYPES.NONE,
+        file1Name: "",
+        file2Name: "",
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
       setIsRenewable(false);
-      resetImageStates();
+      resetFileStates();
     }
   }, [id, location.pathname]);
 
-  const resetImageStates = () => {
-    setImage1File(null);
-    setImage2File(null);
-    setImage1Optimization(null);
-    setImage2Optimization(null);
-    setImageErrors({});
+  const resetFileStates = () => {
+    setFile1Info({
+      file: null,
+      optimization: null,
+      type: FILE_TYPES.NONE,
+      url: "",
+      name: "",
+    });
+    setFile2Info({
+      file: null,
+      optimization: null,
+      type: FILE_TYPES.NONE,
+      url: "",
+      name: "",
+    });
   };
 
   const fetchCategories = async () => {
@@ -189,8 +239,34 @@ const OnlineForm: React.FC = () => {
         const startDate = parseTimestamp(data.startDate);
         const endDate = parseTimestamp(data.endDate);
 
+        // Check if this is old data (has image fields) or new data (has file fields)
+        const hasOldImageFields =
+          data.image1 !== undefined || data.image2 !== undefined;
+
+        // Determine file types from stored type or URL
+        let file1Type = data.file1Type;
+        if (!file1Type && data.file1) {
+          file1Type = data.file1?.match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/i)
+            ? FILE_TYPES.IMAGE
+            : data.file1?.match(/\.pdf$/i)
+              ? FILE_TYPES.PDF
+              : FILE_TYPES.NONE;
+        } else if (!file1Type && data.image1) {
+          file1Type = FILE_TYPES.IMAGE; // Old image data
+        }
+
+        let file2Type = data.file2Type;
+        if (!file2Type && data.file2) {
+          file2Type = data.file2?.match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/i)
+            ? FILE_TYPES.IMAGE
+            : data.file2?.match(/\.pdf$/i)
+              ? FILE_TYPES.PDF
+              : FILE_TYPES.NONE;
+        } else if (!file2Type && data.image2) {
+          file2Type = FILE_TYPES.IMAGE; // Old image data
+        }
+
         // Set renewable state based on whether dates exist
-        // This ensures the checkbox is properly checked if dates exist
         setIsRenewable(!!(startDate && endDate));
 
         setFormData({
@@ -200,12 +276,21 @@ const OnlineForm: React.FC = () => {
           category: data.category || "",
           startDate: startDate,
           endDate: endDate,
-          image1: data.image1 || "",
-          image2: data.image2 || "",
+          // Handle both old and new field names
+          file1: data.file1 || data.image1 || "",
+          file2: data.file2 || data.image2 || "",
+          file1Type: file1Type || FILE_TYPES.NONE,
+          file2Type: file2Type || FILE_TYPES.NONE,
+          file1Name:
+            data.file1Name ||
+            (hasOldImageFields && data.image1 ? "Legacy Image" : ""),
+          file2Name:
+            data.file2Name ||
+            (hasOldImageFields && data.image2 ? "Legacy Image" : ""),
           createdAt: parseTimestamp(data.createdAt) || Date.now(),
           updatedAt: parseTimestamp(data.updatedAt) || Date.now(),
         });
-        resetImageStates();
+        resetFileStates();
       } else {
         alert("Item not found");
         navigate("/online", { state: { activeTab: "items" } });
@@ -219,183 +304,244 @@ const OnlineForm: React.FC = () => {
     }
   };
 
-  const handleImageChange = async (
+  const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    imageNumber: 1 | 2,
+    fileNumber: 1 | 2,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "image/webp",
-      "image/jpg",
-      "image/heic",
-      "image/heif",
-    ];
+    // Determine file type
+    const fileType = getFileTypeFromName(file.name);
 
-    const validation = validateFile(file, allowedTypes, 5); // 5MB max
-    if (!validation.valid) {
-      setImageErrors((prev) => ({
-        ...prev,
-        [`image${imageNumber}`]: validation.error,
-      }));
+    if (fileType === FILE_TYPES.NONE) {
+      const errorInfo: Partial<FileInfo> = {
+        error: "Unsupported file type. Please upload images or PDF files.",
+        file: null,
+        optimization: null,
+        type: FILE_TYPES.NONE,
+        url: "",
+        name: "",
+      };
+
+      if (fileNumber === 1) {
+        setFile1Info((prev) => ({ ...prev, ...errorInfo }));
+      } else {
+        setFile2Info((prev) => ({ ...prev, ...errorInfo }));
+      }
       return;
     }
 
-    // Clear any previous error
-    setImageErrors((prev) => ({
-      ...prev,
-      [`image${imageNumber}`]: undefined,
-    }));
+    // Set allowed types based on file type detection
+    const allowedTypes =
+      fileType === FILE_TYPES.IMAGE
+        ? [
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp",
+            "image/jpg",
+            "image/heic",
+            "image/heif",
+          ]
+        : ["application/pdf"];
 
-    // Set file
-    if (imageNumber === 1) {
-      setImage1File(file);
-    } else {
-      setImage2File(file);
-    }
-
-    // Optimize the file in background
-    try {
-      const optimized = await optimizeFile(file);
-      const originalSize = file.size;
-      const optimizedSize = optimized.size;
-      const savedPercentage =
-        ((originalSize - optimizedSize) / originalSize) * 100;
-
-      const optimizationInfo = {
-        originalSize,
-        optimizedSize,
-        savedPercentage,
-        fileName: file.name,
+    const validation = validateFile(file, allowedTypes, 10); // 10MB max for both types
+    if (!validation.valid) {
+      const errorInfo: Partial<FileInfo> = {
+        error: validation.error,
+        file: null,
+        optimization: null,
+        type: fileType,
+        url: "",
+        name: file.name,
       };
 
-      if (imageNumber === 1) {
-        setImage1Optimization(optimizationInfo);
+      if (fileNumber === 1) {
+        setFile1Info((prev) => ({ ...prev, ...errorInfo }));
       } else {
-        setImage2Optimization(optimizationInfo);
+        setFile2Info((prev) => ({ ...prev, ...errorInfo }));
       }
-
-      console.log(
-        `Image ${imageNumber} optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
-      );
-    } catch (err: any) {
-      console.error(`Error optimizing image ${imageNumber}:`, err);
-      if (imageNumber === 1) {
-        setImage1Optimization(null);
-      } else {
-        setImage2Optimization(null);
-      }
+      return;
     }
-  };
 
-  const handleRemoveImage = (imageNumber: 1 | 2) => {
-    if (imageNumber === 1) {
-      setImage1File(null);
-      setImage1Optimization(null);
-      setImageErrors((prev) => ({ ...prev, image1: undefined }));
+    // Clear any previous error and set file info
+    const fileInfo: Partial<FileInfo> = {
+      error: undefined,
+      file: file,
+      optimization: null,
+      type: fileType,
+      url: "",
+      name: file.name,
+    };
 
-      // Reset file input
-      const input = document.getElementById(
-        `image${imageNumber}Input`,
-      ) as HTMLInputElement;
-      if (input) input.value = "";
+    if (fileNumber === 1) {
+      setFile1Info((prev) => ({ ...prev, ...fileInfo }));
     } else {
-      setImage2File(null);
-      setImage2Optimization(null);
-      setImageErrors((prev) => ({ ...prev, image2: undefined }));
+      setFile2Info((prev) => ({ ...prev, ...fileInfo }));
+    }
 
-      // Reset file input
-      const input = document.getElementById(
-        `image${imageNumber}Input`,
-      ) as HTMLInputElement;
-      if (input) input.value = "";
+    // Optimize the file in background (only images are optimized, PDFs are kept as is)
+    if (fileType === FILE_TYPES.IMAGE) {
+      try {
+        const optimized = await optimizeFile(file);
+        const originalSize = file.size;
+        const optimizedSize = optimized.size;
+        const savedPercentage =
+          ((originalSize - optimizedSize) / originalSize) * 100;
+
+        const optimizationInfo = {
+          originalSize,
+          optimizedSize,
+          savedPercentage,
+          fileName: file.name,
+        };
+
+        const optimizationUpdate: Partial<FileInfo> = {
+          optimization: optimizationInfo,
+          file: optimized, // Use optimized file
+        };
+
+        if (fileNumber === 1) {
+          setFile1Info((prev) => ({ ...prev, ...optimizationUpdate }));
+        } else {
+          setFile2Info((prev) => ({ ...prev, ...optimizationUpdate }));
+        }
+
+        console.log(
+          `File ${fileNumber} optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
+        );
+      } catch (err: any) {
+        console.error(`Error optimizing file ${fileNumber}:`, err);
+        const optimizationUpdate: Partial<FileInfo> = {
+          optimization: null,
+        };
+
+        if (fileNumber === 1) {
+          setFile1Info((prev) => ({ ...prev, ...optimizationUpdate }));
+        } else {
+          setFile2Info((prev) => ({ ...prev, ...optimizationUpdate }));
+        }
+      }
     }
   };
 
-  const handleDeleteExistingImage = async (imageNumber: 1 | 2) => {
-    const imageUrl = imageNumber === 1 ? formData.image1 : formData.image2;
-    if (!imageUrl) return;
+  const handleRemoveFile = (fileNumber: 1 | 2) => {
+    const resetInfo: FileInfo = {
+      file: null,
+      optimization: null,
+      type: FILE_TYPES.NONE,
+      url: "",
+      name: "",
+      error: undefined,
+    };
 
+    if (fileNumber === 1) {
+      setFile1Info(resetInfo);
+    } else {
+      setFile2Info(resetInfo);
+    }
+
+    // Reset file input
+    const input = document.getElementById(
+      `file${fileNumber}Input`,
+    ) as HTMLInputElement;
+    if (input) input.value = "";
+  };
+
+  const handleDeleteExistingFile = async (fileNumber: 1 | 2) => {
+    const fileUrl = fileNumber === 1 ? formData.file1 : formData.file2;
+    const fileType =
+      (fileNumber === 1 ? formData.file1Type : formData.file2Type) ||
+      FILE_TYPES.NONE;
+
+    if (!fileUrl) return;
+
+    const fileTypeDisplay = fileType === FILE_TYPES.IMAGE ? "Image" : "PDF";
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete Image ${imageNumber}? This action cannot be undone.`,
+      `Are you sure you want to delete ${fileTypeDisplay} ${fileNumber}? This action cannot be undone.`,
     );
 
     if (!confirmDelete) return;
 
     try {
-      // Extract file path from URL
-      const url = new URL(imageUrl);
-      const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+      // Try to delete from storage - only if it's a Firebase Storage URL
+      if (fileUrl.includes("firebasestorage.googleapis.com")) {
+        const url = new URL(fileUrl);
+        const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
 
-      if (pathMatch) {
-        const filePath = decodeURIComponent(pathMatch[1]);
-        const storageRef = ref(storage, filePath);
+        if (pathMatch) {
+          const filePath = decodeURIComponent(pathMatch[1]);
+          const storageRef = ref(storage, filePath);
 
-        // Delete file from storage
-        await deleteObject(storageRef);
-
-        // Update form data
-        if (imageNumber === 1) {
-          setFormData((prev) => ({ ...prev, image1: "" }));
-        } else {
-          setFormData((prev) => ({ ...prev, image2: "" }));
+          // Delete file from storage
+          await deleteObject(storageRef);
         }
-
-        alert(`Image ${imageNumber} deleted successfully!`);
       }
+
+      // Update form data
+      if (fileNumber === 1) {
+        setFormData((prev) => ({
+          ...prev,
+          file1: "",
+          file1Type: FILE_TYPES.NONE,
+          file1Name: "",
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          file2: "",
+          file2Type: FILE_TYPES.NONE,
+          file2Name: "",
+        }));
+      }
+
+      alert(`${fileTypeDisplay} ${fileNumber} deleted successfully!`);
     } catch (error: any) {
-      console.error(`Error deleting image ${imageNumber}:`, error);
-      alert(`Failed to delete image: ${error.message}`);
+      console.error(`Error deleting file ${fileNumber}:`, error);
+      alert(`Failed to delete file: ${error.message}`);
     }
   };
+  const uploadFile = async (
+    fileInfo: FileInfo,
+    fileNumber: 1 | 2,
+  ): Promise<{ url: string; type: FileType; name: string }> => {
+    if (!fileInfo.file) throw new Error("No file to upload");
 
-  const uploadImage = async (
-    file: File,
-    imageNumber: 1 | 2,
-  ): Promise<string> => {
     try {
-      let fileToUpload = file;
+      let fileToUpload = fileInfo.file;
 
-      // Optimize the image before upload
-      const optimization =
-        imageNumber === 1 ? image1Optimization : image2Optimization;
-      if (optimization && optimization.savedPercentage > 0) {
-        try {
-          fileToUpload = await optimizeFile(file);
-          console.log(
-            `Uploading optimized image ${imageNumber}: ${formatFileSize(fileToUpload.size)}`,
-          );
-        } catch (err) {
-          console.error(
-            `Error during final optimization for image ${imageNumber}:`,
-            err,
-          );
-        }
+      // Use optimized version if available and it's an image
+      if (fileInfo.type === FILE_TYPES.IMAGE && fileInfo.optimization) {
+        fileToUpload = fileInfo.file; // Already optimized in handleFileChange
+        console.log(
+          `Uploading optimized file ${fileNumber}: ${formatFileSize(fileToUpload.size)}`,
+        );
       }
 
       // Generate a unique filename
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substring(2, 9);
       const fileExtension = fileToUpload.name.split(".").pop();
-      const fileName = `online_${imageNumber}_${timestamp}_${randomId}.${fileExtension}`;
+      const fileType = fileInfo.type === FILE_TYPES.IMAGE ? "image" : "pdf";
+      const fileName = `online_${fileType}_${fileNumber}_${timestamp}_${randomId}.${fileExtension}`;
 
       // Create storage reference
-      const storageRef = ref(storage, `online_images/${fileName}`);
+      const storageRef = ref(storage, `online_files/${fileName}`);
 
-      // Upload optimized file
+      // Upload file
       const snapshot = await uploadBytes(storageRef, fileToUpload);
 
       // Get download URL
       const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${snapshot.ref.bucket}/o/${encodeURIComponent(snapshot.ref.fullPath)}?alt=media`;
 
-      return downloadURL;
+      return {
+        url: downloadURL,
+        type: fileInfo.type,
+        name: fileInfo.file.name, // Store original filename
+      };
     } catch (error: any) {
-      console.error(`Error uploading image ${imageNumber}:`, error);
+      console.error(`Error uploading file ${fileNumber}:`, error);
       throw error;
     }
   };
@@ -422,21 +568,31 @@ const OnlineForm: React.FC = () => {
 
     try {
       setSaving(true);
-      setUploadingImages(true);
+      setUploadingFiles(true);
       const db = getFirestore();
 
-      let image1Url = formData.image1 || "";
-      let image2Url = formData.image2 || "";
+      let file1Url = formData.file1 || "";
+      let file2Url = formData.file2 || "";
+      let file1Type = formData.file1Type || FILE_TYPES.NONE;
+      let file2Type = formData.file2Type || FILE_TYPES.NONE;
+      let file1Name = formData.file1Name || "";
+      let file2Name = formData.file2Name || "";
 
-      // Upload new images if selected
-      if (image1File) {
-        image1Url = await uploadImage(image1File, 1);
+      // Upload new files if selected
+      if (file1Info.file) {
+        const result = await uploadFile(file1Info, 1);
+        file1Url = result.url;
+        file1Type = result.type;
+        file1Name = result.name;
       }
-      if (image2File) {
-        image2Url = await uploadImage(image2File, 2);
+      if (file2Info.file) {
+        const result = await uploadFile(file2Info, 2);
+        file2Url = result.url;
+        file2Type = result.type;
+        file2Name = result.name;
       }
 
-      // Prepare data for submission
+      // Prepare data for submission - always save as new format
       const itemData = {
         name: (formData.name || "").trim(),
         detail: (formData.detail || "").trim(),
@@ -444,12 +600,18 @@ const OnlineForm: React.FC = () => {
         // If not renewable, set dates to null
         startDate: isRenewable ? formData.startDate : null,
         endDate: isRenewable ? formData.endDate : null,
-        image1: image1Url,
-        image2: image2Url,
+        // Always save as file fields (new format)
+        file1: file1Url,
+        file2: file2Url,
+        file1Type: file1Type,
+        file2Type: file2Type,
+        file1Name: file1Name,
+        file2Name: file2Name,
         updatedAt: new Date(),
         ...(isAddMode ? { createdAt: new Date() } : {}),
       };
 
+      // Remove old image fields if they exist (to clean up)
       if (isEditMode && id) {
         await setDoc(doc(db, "online", id), itemData, { merge: true });
         alert("Item updated successfully!");
@@ -465,7 +627,7 @@ const OnlineForm: React.FC = () => {
       let errorMessage = "Failed to save item";
       if (error.message?.includes("quota")) {
         errorMessage =
-          "Storage quota exceeded. Images are optimized to save space.";
+          "Storage quota exceeded. Files are optimized to save space.";
       } else if (error.code === "storage/unauthorized") {
         errorMessage =
           "Upload failed: You don't have permission to upload files.";
@@ -476,7 +638,7 @@ const OnlineForm: React.FC = () => {
       alert(errorMessage);
     } finally {
       setSaving(false);
-      setUploadingImages(false);
+      setUploadingFiles(false);
     }
   };
 
@@ -492,10 +654,10 @@ const OnlineForm: React.FC = () => {
     try {
       setSaving(true);
 
-      // Delete images from storage if they exist
-      if (formData.image1) {
+      // Delete files from storage if they exist
+      if (formData.file1) {
         try {
-          const url = new URL(formData.image1);
+          const url = new URL(formData.file1);
           const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
           if (pathMatch) {
             const filePath = decodeURIComponent(pathMatch[1]);
@@ -503,13 +665,13 @@ const OnlineForm: React.FC = () => {
             await deleteObject(storageRef);
           }
         } catch (error) {
-          console.error("Error deleting image 1:", error);
+          console.error("Error deleting file 1:", error);
         }
       }
 
-      if (formData.image2) {
+      if (formData.file2) {
         try {
-          const url = new URL(formData.image2);
+          const url = new URL(formData.file2);
           const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
           if (pathMatch) {
             const filePath = decodeURIComponent(pathMatch[1]);
@@ -517,7 +679,7 @@ const OnlineForm: React.FC = () => {
             await deleteObject(storageRef);
           }
         } catch (error) {
-          console.error("Error deleting image 2:", error);
+          console.error("Error deleting file 2:", error);
         }
       }
 
@@ -559,51 +721,73 @@ const OnlineForm: React.FC = () => {
     }
   };
 
-  const renderImageSection = (imageNumber: 1 | 2) => {
+  const renderFileSection = (fileNumber: 1 | 2) => {
     const isView = isViewMode;
-    const file = imageNumber === 1 ? image1File : image2File;
-    const optimization =
-      imageNumber === 1 ? image1Optimization : image2Optimization;
-    const error = imageNumber === 1 ? imageErrors.image1 : imageErrors.image2;
-    const existingImage = imageNumber === 1 ? formData.image1 : formData.image2;
-    const hasExistingImage = !!existingImage;
-    const hasNewFile = !!file;
-    const imageSize = imageNumber === 1 ? image1Size : image2Size;
-    const loadingSize =
-      imageNumber === 1 ? loadingImage1Size : loadingImage2Size;
+    const fileInfo = fileNumber === 1 ? file1Info : file2Info;
+    const existingFileUrl = fileNumber === 1 ? formData.file1 : formData.file2;
+    // Provide default value of NONE if undefined
+    const existingFileType =
+      (fileNumber === 1 ? formData.file1Type : formData.file2Type) ||
+      FILE_TYPES.NONE;
+    const existingFileName =
+      fileNumber === 1 ? formData.file1Name : formData.file2Name;
+    const hasExistingFile = !!existingFileUrl;
+    const hasNewFile = !!fileInfo.file;
+    const fileSize = fileNumber === 1 ? file1Size : file2Size;
+    const loadingSize = fileNumber === 1 ? loadingFile1Size : loadingFile2Size;
 
     return (
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Image {imageNumber}
+          File {fileNumber} {hasExistingFile && getFileIcon(existingFileType)}
         </label>
 
         {isView ? (
           <div className="text-center">
-            {existingImage ? (
+            {hasExistingFile ? (
               <div className="relative">
-                <img
-                  src={existingImage}
-                  alt={`Image ${imageNumber}`}
-                  className="max-w-full max-h-48 rounded-lg border border-gray-300 mx-auto"
-                />
-                <ImageSizeBadge
-                  size={imageSize}
-                  loading={loadingSize}
-                  position="overlay"
-                />
+                {existingFileType === FILE_TYPES.IMAGE ? (
+                  <img
+                    src={existingFileUrl}
+                    alt={`File ${fileNumber}`}
+                    className="max-w-full max-h-48 rounded-lg border border-gray-300 mx-auto"
+                  />
+                ) : (
+                  <div className="p-6 bg-gray-50 border border-gray-300 rounded-lg flex flex-col items-center">
+                    <span className="text-4xl mb-2">📄</span>
+                    <span className="text-sm font-medium text-gray-700 mb-1">
+                      {existingFileName || "PDF Document"}
+                    </span>
+                    <a
+                      href={existingFileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 text-sm underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      View PDF
+                    </a>
+                  </div>
+                )}
+                {existingFileType === FILE_TYPES.IMAGE && (
+                  <ImageSizeBadge
+                    size={fileSize}
+                    loading={loadingSize}
+                    position="overlay"
+                  />
+                )}
               </div>
             ) : (
               <div className="p-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-gray-500 text-sm">
-                No image
+                No file
               </div>
             )}
 
             {/* Size badge below image in view mode */}
-            {existingImage && (
+            {hasExistingFile && existingFileType === FILE_TYPES.IMAGE && (
               <div className="mt-2 text-center">
                 <ImageSizeBadge
-                  size={imageSize}
+                  size={fileSize}
                   loading={loadingSize}
                   position="below"
                 />
@@ -614,86 +798,132 @@ const OnlineForm: React.FC = () => {
           <>
             {/* File input */}
             <input
-              id={`image${imageNumber}Input`}
+              id={`file${fileNumber}Input`}
               type="file"
-              accept="image/*"
-              onChange={(e) => handleImageChange(e, imageNumber)}
+              accept="image/*,.pdf"
+              onChange={(e) => handleFileChange(e, fileNumber)}
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
-              disabled={saving || uploadingImages}
+              disabled={saving || uploadingFiles}
             />
+            <p className="text-xs text-gray-500 mb-2">
+              Supported: Images (JPG, PNG, GIF, WEBP, HEIC) and PDF files (Max:
+              10MB)
+            </p>
 
             {/* Error message */}
-            {error && (
+            {fileInfo.error && (
               <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
-                ⚠️ {error}
+                ⚠️ {fileInfo.error}
               </div>
             )}
 
-            {/* Optimization info */}
-            {optimization && optimization.savedPercentage > 0 && (
-              <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex flex-col text-green-800 text-xs">
-                  <div className="flex items-center gap-1 font-medium mb-1">
-                    <span>🎯</span>
-                    <span>
-                      {optimization.savedPercentage.toFixed(1)}% space saved
-                    </span>
-                  </div>
-                  <div className="font-mono text-xs">
-                    {formatFileSize(optimization.originalSize)} →{" "}
-                    {formatFileSize(optimization.optimizedSize)}
+            {/* Optimization info - only for images */}
+            {fileInfo.optimization &&
+              fileInfo.optimization.savedPercentage > 0 && (
+                <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex flex-col text-green-800 text-xs">
+                    <div className="flex items-center gap-1 font-medium mb-1">
+                      <span>🎯</span>
+                      <span>
+                        {fileInfo.optimization.savedPercentage.toFixed(1)}%
+                        space saved
+                      </span>
+                    </div>
+                    <div className="font-mono text-xs">
+                      {formatFileSize(fileInfo.optimization.originalSize)} →{" "}
+                      {formatFileSize(fileInfo.optimization.optimizedSize)}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Image preview and actions */}
+            {/* File preview and actions */}
             <div className="space-y-3">
-              {/* Existing image preview */}
-              {hasExistingImage && !hasNewFile && (
+              {/* Existing file preview */}
+              {hasExistingFile && !hasNewFile && (
                 <div className="relative">
-                  <img
-                    src={existingImage}
-                    alt={`Current Image ${imageNumber}`}
-                    className="max-w-full max-h-36 rounded-lg border border-gray-300"
-                  />
-                  <ImageSizeBadge
-                    size={imageSize}
-                    loading={loadingSize}
-                    position="overlay"
-                  />
+                  {existingFileType === FILE_TYPES.IMAGE ? (
+                    <>
+                      <img
+                        src={existingFileUrl}
+                        alt={`Current File ${fileNumber}`}
+                        className="max-w-full max-h-36 rounded-lg border border-gray-300"
+                      />
+                      <ImageSizeBadge
+                        size={fileSize}
+                        loading={loadingSize}
+                        position="overlay"
+                      />
+                    </>
+                  ) : (
+                    <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg flex items-center gap-3">
+                      <span className="text-2xl">📄</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-gray-700">
+                          {existingFileName || "PDF Document"}
+                        </div>
+                        <a
+                          href={existingFileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 text-xs underline"
+                        >
+                          View PDF
+                        </a>
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-2 flex gap-2">
                     <button
                       type="button"
-                      onClick={() => handleDeleteExistingImage(imageNumber)}
-                      disabled={saving || uploadingImages}
+                      onClick={() => handleDeleteExistingFile(fileNumber)}
+                      disabled={saving || uploadingFiles}
                       className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-medium hover:bg-red-100 disabled:opacity-50"
                     >
-                      Delete Image
+                      Delete{" "}
+                      {existingFileType === FILE_TYPES.IMAGE ? "Image" : "PDF"}
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* New image preview */}
-              {hasNewFile && (
+              {/* New file preview */}
+              {hasNewFile && fileInfo.file && (
                 <div className="relative">
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt={`New Image ${imageNumber}`}
-                    className="max-w-full max-h-36 rounded-lg border border-gray-300"
-                  />
-                  {/* Size badge for new file */}
-                  <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    <span className="font-medium">
-                      {formatFileSize(file.size)}
-                    </span>
-                  </div>
+                  {fileInfo.type === FILE_TYPES.IMAGE ? (
+                    <img
+                      src={URL.createObjectURL(fileInfo.file)}
+                      alt={`New File ${fileNumber}`}
+                      className="max-w-full max-h-36 rounded-lg border border-gray-300"
+                    />
+                  ) : (
+                    <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg flex items-center gap-3">
+                      <span className="text-2xl">📄</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-gray-700">
+                          {fileInfo.file.name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          PDF Document • {formatFileSize(fileInfo.file.size)}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Size badge for new image files */}
+                  {fileInfo.type === FILE_TYPES.IMAGE && (
+                    <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                      <span className="font-medium">
+                        {formatFileSize(fileInfo.file.size)}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="mt-2 flex gap-2">
                     <button
                       type="button"
-                      onClick={() => handleRemoveImage(imageNumber)}
-                      disabled={saving || uploadingImages}
+                      onClick={() => handleRemoveFile(fileNumber)}
+                      disabled={saving || uploadingFiles}
                       className="px-3 py-1 bg-gray-50 text-gray-700 border border-gray-300 rounded text-xs font-medium hover:bg-gray-100 disabled:opacity-50"
                     >
                       Remove
@@ -704,15 +934,17 @@ const OnlineForm: React.FC = () => {
             </div>
 
             {/* Size badge below existing image */}
-            {hasExistingImage && !hasNewFile && (
-              <div className="mt-2 text-center">
-                <ImageSizeBadge
-                  size={imageSize}
-                  loading={loadingSize}
-                  position="below"
-                />
-              </div>
-            )}
+            {hasExistingFile &&
+              !hasNewFile &&
+              existingFileType === FILE_TYPES.IMAGE && (
+                <div className="mt-2 text-center">
+                  <ImageSizeBadge
+                    size={fileSize}
+                    loading={loadingSize}
+                    position="below"
+                  />
+                </div>
+              )}
           </>
         )}
       </div>
@@ -810,7 +1042,7 @@ const OnlineForm: React.FC = () => {
                 } disabled:bg-gray-100 disabled:cursor-not-allowed`}
                 placeholder="Enter item name"
                 required={!isViewMode}
-                disabled={isViewMode || saving || uploadingImages}
+                disabled={isViewMode || saving || uploadingFiles}
                 readOnly={isViewMode}
                 autoFocus={!isViewMode}
               />
@@ -831,7 +1063,7 @@ const OnlineForm: React.FC = () => {
                     setFormData({ ...formData, category: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  disabled={saving || uploadingImages}
+                  disabled={saving || uploadingFiles}
                 >
                   <option value="">Select Category</option>
                   {categories.map((cat) => (
@@ -875,7 +1107,7 @@ const OnlineForm: React.FC = () => {
                     }
                   }}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                  disabled={saving || uploadingImages}
+                  disabled={saving || uploadingFiles}
                 />
                 <label
                   htmlFor="isRenewable"
@@ -916,7 +1148,7 @@ const OnlineForm: React.FC = () => {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                       required={isRenewable}
-                      disabled={saving || uploadingImages}
+                      disabled={saving || uploadingFiles}
                     />
                   )}
                 </div>
@@ -944,7 +1176,7 @@ const OnlineForm: React.FC = () => {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                       required={isRenewable}
-                      disabled={saving || uploadingImages}
+                      disabled={saving || uploadingFiles}
                     />
                   )}
                 </div>
@@ -969,14 +1201,14 @@ const OnlineForm: React.FC = () => {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-y min-h-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter item details"
-                  disabled={saving || uploadingImages}
+                  disabled={saving || uploadingFiles}
                 />
               )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderImageSection(1)}
-              {renderImageSection(2)}
+              {renderFileSection(1)}
+              {renderFileSection(2)}
             </div>
 
             {/* Optimization note */}
@@ -986,14 +1218,17 @@ const OnlineForm: React.FC = () => {
                   <div className="text-blue-500 mt-0.5">ℹ️</div>
                   <div className="text-xs text-blue-800">
                     <div className="font-medium mb-1">
-                      Automatic Image Optimization
+                      File Support & Optimization
                     </div>
                     <div>
-                      Images are automatically compressed to save storage space.
-                      HEIC files are converted to JPEG.
+                      • Images are automatically compressed to save storage
+                      space. HEIC files are converted to JPEG.
+                    </div>
+                    <div>
+                      • PDF files are uploaded as-is without compression.
                     </div>
                     <div className="mt-1 text-blue-600">
-                      Max file size: 5MB | Recommended: Images under 1MB
+                      Max file size: 10MB | Supported: Images and PDFs
                     </div>
                   </div>
                 </div>
@@ -1032,7 +1267,7 @@ const OnlineForm: React.FC = () => {
                       navigate("/online", { state: { activeTab: "items" } })
                     }
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
-                    disabled={saving || uploadingImages}
+                    disabled={saving || uploadingFiles}
                   >
                     Cancel
                   </button>
@@ -1043,7 +1278,7 @@ const OnlineForm: React.FC = () => {
                       type="button"
                       onClick={handleDelete}
                       className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:opacity-50"
-                      disabled={saving || uploadingImages}
+                      disabled={saving || uploadingFiles}
                     >
                       {saving ? "Deleting..." : "Delete"}
                     </button>
@@ -1052,9 +1287,9 @@ const OnlineForm: React.FC = () => {
                   <button
                     type="submit"
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
-                    disabled={saving || uploadingImages}
+                    disabled={saving || uploadingFiles}
                   >
-                    {saving || uploadingImages
+                    {saving || uploadingFiles
                       ? "Saving..."
                       : isAddMode
                         ? "Add Item"

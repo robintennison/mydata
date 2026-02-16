@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { OnlineItem } from "../types/online.types";
+import { OnlineItem, FILE_TYPES } from "../types/online.types";
 import { useSettings } from "../../../contexts/SettingsContext";
 
 const OnlineListTab: React.FC = () => {
@@ -35,6 +35,11 @@ const OnlineListTab: React.FC = () => {
       const itemsList: OnlineItem[] = [];
       itemsSnapshot.forEach((doc) => {
         const data = doc.data();
+
+        // Check if this is old data (has image fields) or new data (has file fields)
+        const hasOldImageFields =
+          data.image1 !== undefined || data.image2 !== undefined;
+
         itemsList.push({
           id: doc.id,
           name: data.name || "",
@@ -43,8 +48,22 @@ const OnlineListTab: React.FC = () => {
           // Handle nullable dates - if field doesn't exist or is null, set to null
           startDate: data.startDate !== undefined ? data.startDate : null,
           endDate: data.endDate !== undefined ? data.endDate : null,
-          image1: data.image1 || "",
-          image2: data.image2 || "",
+          // Handle both old and new field names
+          file1: data.file1 || data.image1 || "",
+          file2: data.file2 || data.image2 || "",
+          // Determine file types based on what's available
+          file1Type:
+            data.file1Type ||
+            (data.image1 ? FILE_TYPES.IMAGE : FILE_TYPES.NONE),
+          file2Type:
+            data.file2Type ||
+            (data.image2 ? FILE_TYPES.IMAGE : FILE_TYPES.NONE),
+          file1Name:
+            data.file1Name ||
+            (hasOldImageFields && data.image1 ? "Legacy Image" : ""),
+          file2Name:
+            data.file2Name ||
+            (hasOldImageFields && data.image2 ? "Legacy Image" : ""),
           createdAt: data.createdAt || Date.now(),
           updatedAt: data.updatedAt || Date.now(),
         });
@@ -86,6 +105,35 @@ const OnlineListTab: React.FC = () => {
     } else {
       return { text: "○ Expired", className: "bg-red-100 text-red-700" };
     }
+  };
+
+  // Get file icon based on type
+  const getFileIcon = (type: string): string => {
+    switch (type) {
+      case FILE_TYPES.IMAGE:
+        return "🖼️";
+      case FILE_TYPES.PDF:
+        return "📄";
+      default:
+        return "📁";
+    }
+  };
+
+  // Check if item has any files
+  const hasFiles = (item: OnlineItem): boolean => {
+    return !!(item.file1 || item.file2);
+  };
+
+  // Get file info display
+  const getFileDisplay = (item: OnlineItem): string => {
+    const files = [];
+    if (item.file1 && item.file1Type !== FILE_TYPES.NONE) {
+      files.push(`${getFileIcon(item.file1Type)} File 1`);
+    }
+    if (item.file2 && item.file2Type !== FILE_TYPES.NONE) {
+      files.push(`${getFileIcon(item.file2Type)} File 2`);
+    }
+    return files.join(" • ");
   };
 
   const filteredItems = items.filter((item) => {
@@ -161,7 +209,7 @@ const OnlineListTab: React.FC = () => {
       <div className="flex-1 overflow-y-auto">
         {filteredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-5 text-center h-full">
-            <div className="text-4xl mb-4 opacity-50">🛒</div>
+            <div className="text-4xl mb-4 opacity-50">📋</div>
             <div className="text-lg font-medium text-gray-600 mb-2">
               {searchTerm || selectedCategory !== "All"
                 ? "No matching items found"
@@ -206,6 +254,8 @@ const OnlineListTab: React.FC = () => {
               {filteredItems.map((item) => {
                 const status = getItemStatus(item);
                 const hasRenewal = item.startDate && item.endDate;
+                const hasAttachments = hasFiles(item);
+                const fileDisplay = getFileDisplay(item);
 
                 return (
                   <div
@@ -225,17 +275,6 @@ const OnlineListTab: React.FC = () => {
                   >
                     <div className="p-3">
                       <div className="flex items-start min-h-12">
-                        {/* Image thumbnail if available */}
-                        {(item.image1 || item.image2) && (
-                          <div className="w-12 h-12 rounded-lg overflow-hidden mr-3 flex-shrink-0 bg-gray-50 flex items-center justify-center">
-                            <img
-                              src={item.image1 || item.image2}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
-
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <span className="text-sm font-semibold text-gray-900 truncate">
@@ -257,6 +296,14 @@ const OnlineListTab: React.FC = () => {
                           {item.detail && (
                             <div className="text-xs text-gray-600 truncate leading-relaxed mb-1">
                               {item.detail}
+                            </div>
+                          )}
+
+                          {/* File attachment indicator */}
+                          {hasAttachments && (
+                            <div className="text-xs text-purple-600 flex items-center gap-1 mb-1">
+                              <span>📎</span>
+                              <span className="truncate">{fileDisplay}</span>
                             </div>
                           )}
 

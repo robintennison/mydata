@@ -556,11 +556,17 @@ const OnlineForm: React.FC = () => {
 
     // Validate dates only if item is renewable
     if (isRenewable) {
-      if (!formData.startDate || !formData.endDate) {
-        alert("Both start and end dates are required for renewable items");
+      // Only validate end date is required
+      if (!formData.endDate) {
+        alert("End date is required for renewable items");
         return;
       }
-      if (formData.startDate > formData.endDate) {
+      // Only validate date order if both dates exist
+      if (
+        formData.startDate &&
+        formData.endDate &&
+        formData.startDate > formData.endDate
+      ) {
         alert("End date must be after start date");
         return;
       }
@@ -715,8 +721,7 @@ const OnlineForm: React.FC = () => {
     try {
       const date = new Date(timestamp);
       if (isNaN(date.getTime())) return "Invalid date";
-    //  return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-    return date.toLocaleDateString();
+      return date.toLocaleDateString();
     } catch (error) {
       return "Error formatting date";
     }
@@ -1093,16 +1098,16 @@ const OnlineForm: React.FC = () => {
                         endDate: null,
                       });
                     } else {
-                      // Set default dates when checking (today to 30 days from now)
-                      // But only if dates are currently null
-                      if (!formData.startDate || !formData.endDate) {
+                      // Only set default end date when checking (30 days from now)
+                      // Start date remains null/optional
+                      if (!formData.endDate) {
                         const now = Date.now();
                         const thirtyDaysFromNow =
                           now + 30 * 24 * 60 * 60 * 1000;
                         setFormData({
                           ...formData,
-                          startDate: now,
                           endDate: thirtyDaysFromNow,
+                          // Don't set start date automatically
                         });
                       }
                     }
@@ -1117,22 +1122,23 @@ const OnlineForm: React.FC = () => {
                   This item has renewal dates
                 </label>
                 <span className="text-xs text-gray-500">
-                  (Check if this item requires start and end dates)
+                  (Check if this item requires an end date - start date is
+                  optional)
                 </span>
               </div>
             )}
 
-            {/* Date Range Fields - Show if renewable OR (in view mode and dates exist) */}
+            {/* Date Range Fields - Show if renewable OR (in view mode and either date exists) */}
             {(isRenewable ||
-              (isViewMode && formData.startDate && formData.endDate)) && (
+              (isViewMode && (formData.startDate || formData.endDate))) && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date {!isViewMode && "*"}
+                    Start Date {!isViewMode && "(Optional)"}
                   </label>
                   {isViewMode ? (
                     <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
-                      {formatDate(formData.startDate)}
+                      {formatDate(formData.startDate) || "Not specified"}
                     </div>
                   ) : (
                     <input
@@ -1148,7 +1154,7 @@ const OnlineForm: React.FC = () => {
                         });
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      required={isRenewable}
+                      // Remove required attribute for start date
                       disabled={saving || uploadingFiles}
                     />
                   )}
@@ -1160,7 +1166,7 @@ const OnlineForm: React.FC = () => {
                   </label>
                   {isViewMode ? (
                     <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
-                      {formatDate(formData.endDate)}
+                      {formatDate(formData.endDate) || "Not specified"}
                     </div>
                   ) : (
                     <input
@@ -1176,7 +1182,7 @@ const OnlineForm: React.FC = () => {
                         });
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      required={isRenewable}
+                      required={isRenewable} // End date still required
                       disabled={saving || uploadingFiles}
                     />
                   )}

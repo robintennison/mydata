@@ -11,6 +11,7 @@ const OnlineListTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [categories, setCategories] = useState<string[]>(["All"]);
+  const [showWithEndDate, setShowWithEndDate] = useState(false);
   const { settings } = useSettings();
   const showDelete = settings?.showDelete || false;
 
@@ -93,18 +94,37 @@ const OnlineListTab: React.FC = () => {
   const getItemStatus = (
     item: OnlineItem,
   ): { text: string; className: string } => {
-    if (!item.startDate || !item.endDate) {
+    // If there's no end date, it's not a renewable item
+    if (!item.endDate) {
       return { text: "No renewal", className: "bg-gray-100 text-gray-600" };
     }
 
-    const now = Date.now();
-    if (now >= item.startDate && now <= item.endDate) {
-      return { text: "● Active", className: "bg-green-100 text-green-700" };
-    } else if (now < item.startDate) {
-      return { text: "○ Upcoming", className: "bg-blue-100 text-blue-700" };
-    } else {
-      return { text: "○ Expired", className: "bg-red-100 text-red-700" };
+    // If there's an end date but no start date, treat as a date-only item
+    if (item.endDate && !item.startDate) {
+      const now = Date.now();
+      if (now <= item.endDate) {
+        return {
+          text: "● Active until",
+          className: "bg-green-100 text-green-700",
+        };
+      } else {
+        return { text: "○ Expired", className: "bg-red-100 text-red-700" };
+      }
     }
+
+    // Full renewal with both dates
+    if (item.startDate && item.endDate) {
+      const now = Date.now();
+      if (now >= item.startDate && now <= item.endDate) {
+        return { text: "● Active", className: "bg-green-100 text-green-700" };
+      } else if (now < item.startDate) {
+        return { text: "○ Upcoming", className: "bg-blue-100 text-blue-700" };
+      } else {
+        return { text: "○ Expired", className: "bg-red-100 text-red-700" };
+      }
+    }
+
+    return { text: "No renewal", className: "bg-gray-100 text-gray-600" };
   };
 
   // Get file icon based on type
@@ -136,17 +156,44 @@ const OnlineListTab: React.FC = () => {
     return files.join(" • ");
   };
 
-  const filteredItems = items.filter((item) => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.detail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter and sort items
+  const getFilteredItems = () => {
+    let filtered = items.filter((item) => {
+      const matchesSearch =
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.detail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory =
-      selectedCategory === "All" || item.category === selectedCategory;
+      const matchesCategory =
+        selectedCategory === "All" || item.category === selectedCategory;
 
-    return matchesSearch && matchesCategory;
-  });
+      const matchesEndDateFilter = showWithEndDate
+        ? item.endDate != null
+        : true;
+
+      return matchesSearch && matchesCategory && matchesEndDateFilter;
+    });
+
+    // Sort by end date ascending if showWithEndDate is true
+    if (showWithEndDate) {
+      filtered = filtered.sort((a, b) => {
+        // Items with endDate come first, sorted by date
+        if (a.endDate && b.endDate) {
+          return a.endDate - b.endDate;
+        } else if (a.endDate && !b.endDate) {
+          return -1; // a has endDate, b doesn't
+        } else if (!a.endDate && b.endDate) {
+          return 1; // b has endDate, a doesn't
+        } else {
+          return 0; // both don't have endDate
+        }
+      });
+    }
+
+    return filtered;
+  };
+
+  const filteredItems = getFilteredItems();
 
   const handleRowClick = (itemId: string) => {
     if (showDelete) {
@@ -161,6 +208,10 @@ const OnlineListTab: React.FC = () => {
     navigate(`/online/items/edit/${itemId}`);
   };
 
+  const handleEndDateFilterToggle = () => {
+    setShowWithEndDate(!showWithEndDate);
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-15 px-5 flex-1">
@@ -173,7 +224,7 @@ const OnlineListTab: React.FC = () => {
   return (
     <div className="w-full h-full flex flex-col">
       {/* Search and Filter Row */}
-      <div className="p-2 bg-white border-b border-gray-200 flex gap-2 items-center shrink-0">
+      <div className="p-2 bg-white border-b border-gray-200 flex gap-2 items-center shrink-0 flex-wrap">
         <div className="flex-[2] min-w-0 relative">
           <input
             type="text"
@@ -203,6 +254,24 @@ const OnlineListTab: React.FC = () => {
             ▼
           </div>
         </div>
+
+        {/* End Date Filter Button */}
+        <button
+          onClick={handleEndDateFilterToggle}
+          className={`px-3 py-2.5 text-sm rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            showWithEndDate
+              ? "bg-blue-500 text-white border-blue-600 hover:bg-blue-600"
+              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+          }`}
+          title="Show only items with end dates, sorted by earliest end date"
+        >
+          <span className="flex items-center gap-1">
+            📅
+            {showWithEndDate
+              ? " Showing with end dates"
+              : " Show with end dates"}
+          </span>
+        </button>
       </div>
 
       {/* Content Area */}
@@ -211,16 +280,18 @@ const OnlineListTab: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-20 px-5 text-center h-full">
             <div className="text-4xl mb-4 opacity-50">📋</div>
             <div className="text-lg font-medium text-gray-600 mb-2">
-              {searchTerm || selectedCategory !== "All"
+              {searchTerm || selectedCategory !== "All" || showWithEndDate
                 ? "No matching items found"
                 : "No items yet"}
             </div>
             <div className="text-sm text-gray-400">
               {!searchTerm &&
                 selectedCategory === "All" &&
+                !showWithEndDate &&
                 "Add your first item using the ＋ button"}
+              {showWithEndDate && "No items with end dates found"}
             </div>
-            {!searchTerm && selectedCategory === "All" && (
+            {!searchTerm && selectedCategory === "All" && !showWithEndDate && (
               <button
                 onClick={() => navigate("/online/items/add")}
                 className="mt-4 px-4 py-2 bg-blue-500 text-white border-none rounded cursor-pointer text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -236,12 +307,16 @@ const OnlineListTab: React.FC = () => {
                 {filteredItems.length} item
                 {filteredItems.length !== 1 ? "s" : ""}
                 {selectedCategory !== "All" && ` in ${selectedCategory}`}
+                {showWithEndDate && " (with end dates)"}
               </span>
-              {(searchTerm || selectedCategory !== "All") && (
+              {(searchTerm ||
+                selectedCategory !== "All" ||
+                showWithEndDate) && (
                 <button
                   onClick={() => {
                     setSearchTerm("");
                     setSelectedCategory("All");
+                    setShowWithEndDate(false);
                   }}
                   className="text-xs text-blue-500 cursor-pointer px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -254,6 +329,7 @@ const OnlineListTab: React.FC = () => {
               {filteredItems.map((item) => {
                 const status = getItemStatus(item);
                 const hasRenewal = item.startDate && item.endDate;
+                const hasOnlyEndDate = !item.startDate && item.endDate;
                 const hasAttachments = hasFiles(item);
                 const fileDisplay = getFileDisplay(item);
 
@@ -263,7 +339,9 @@ const OnlineListTab: React.FC = () => {
                     className={`bg-white rounded-lg border cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       hasRenewal
                         ? "border-l-4 border-l-green-500"
-                        : "border-gray-200"
+                        : hasOnlyEndDate
+                          ? "border-l-4 border-l-orange-500"
+                          : "border-gray-200"
                     }`}
                     onClick={() => handleRowClick(item.id)}
                     tabIndex={0}
@@ -307,21 +385,27 @@ const OnlineListTab: React.FC = () => {
                             </div>
                           )}
 
-                          {/* Date range display - only show if renewable */}
-                          {hasRenewal && (
+                          {/* Date display - always show if end date exists */}
+                          {item.endDate && (
                             <div className="text-xs text-gray-500 flex items-center gap-2 flex-wrap">
                               <span className="flex items-center gap-1">
                                 <span className="text-gray-400">📅</span>
-                                {formatDate(item.startDate)} -{" "}
-                                {formatDate(item.endDate)}
+                                {item.startDate ? (
+                                  <>
+                                    {formatDate(item.startDate)} -{" "}
+                                    {formatDate(item.endDate)}
+                                  </>
+                                ) : (
+                                  <>Ends: {formatDate(item.endDate)}</>
+                                )}
                               </span>
                             </div>
                           )}
 
-                          {/* Show "No renewal" badge if no dates */}
-                          {!hasRenewal && (
+                          {/* Show "No dates" message only if no dates at all */}
+                          {!item.endDate && !item.startDate && (
                             <div className="text-xs text-gray-400 italic">
-                              No renewal date
+                              No dates set
                             </div>
                           )}
                         </div>

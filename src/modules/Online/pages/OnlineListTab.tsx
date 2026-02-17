@@ -11,7 +11,6 @@ const OnlineListTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [categories, setCategories] = useState<string[]>(["All"]);
-  const [showWithEndDate, setShowWithEndDate] = useState(false);
   const { settings } = useSettings();
   const showDelete = settings?.showDelete || false;
 
@@ -156,9 +155,9 @@ const OnlineListTab: React.FC = () => {
     return files.join(" • ");
   };
 
-  // Filter and sort items
+  // Filter items
   const getFilteredItems = () => {
-    let filtered = items.filter((item) => {
+    return items.filter((item) => {
       const matchesSearch =
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.detail.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -167,30 +166,8 @@ const OnlineListTab: React.FC = () => {
       const matchesCategory =
         selectedCategory === "All" || item.category === selectedCategory;
 
-      const matchesEndDateFilter = showWithEndDate
-        ? item.endDate != null
-        : true;
-
-      return matchesSearch && matchesCategory && matchesEndDateFilter;
+      return matchesSearch && matchesCategory;
     });
-
-    // Sort by end date ascending if showWithEndDate is true
-    if (showWithEndDate) {
-      filtered = filtered.sort((a, b) => {
-        // Items with endDate come first, sorted by date
-        if (a.endDate && b.endDate) {
-          return a.endDate - b.endDate;
-        } else if (a.endDate && !b.endDate) {
-          return -1; // a has endDate, b doesn't
-        } else if (!a.endDate && b.endDate) {
-          return 1; // b has endDate, a doesn't
-        } else {
-          return 0; // both don't have endDate
-        }
-      });
-    }
-
-    return filtered;
   };
 
   const filteredItems = getFilteredItems();
@@ -206,10 +183,6 @@ const OnlineListTab: React.FC = () => {
   const handleEditClick = (e: React.MouseEvent, itemId: string) => {
     e.stopPropagation();
     navigate(`/online/items/edit/${itemId}`);
-  };
-
-  const handleEndDateFilterToggle = () => {
-    setShowWithEndDate(!showWithEndDate);
   };
 
   if (loading) {
@@ -254,24 +227,6 @@ const OnlineListTab: React.FC = () => {
             ▼
           </div>
         </div>
-
-        {/* End Date Filter Button */}
-        <button
-          onClick={handleEndDateFilterToggle}
-          className={`px-3 py-2.5 text-sm rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            showWithEndDate
-              ? "bg-blue-500 text-white border-blue-600 hover:bg-blue-600"
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-          }`}
-          title="Show only items with end dates, sorted by earliest end date"
-        >
-          <span className="flex items-center gap-1">
-            📅
-            {showWithEndDate
-              ? " Showing with end dates"
-              : " Show with end dates"}
-          </span>
-        </button>
       </div>
 
       {/* Content Area */}
@@ -280,18 +235,16 @@ const OnlineListTab: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-20 px-5 text-center h-full">
             <div className="text-4xl mb-4 opacity-50">📋</div>
             <div className="text-lg font-medium text-gray-600 mb-2">
-              {searchTerm || selectedCategory !== "All" || showWithEndDate
+              {searchTerm || selectedCategory !== "All"
                 ? "No matching items found"
                 : "No items yet"}
             </div>
             <div className="text-sm text-gray-400">
               {!searchTerm &&
                 selectedCategory === "All" &&
-                !showWithEndDate &&
                 "Add your first item using the ＋ button"}
-              {showWithEndDate && "No items with end dates found"}
             </div>
-            {!searchTerm && selectedCategory === "All" && !showWithEndDate && (
+            {!searchTerm && selectedCategory === "All" && (
               <button
                 onClick={() => navigate("/online/items/add")}
                 className="mt-4 px-4 py-2 bg-blue-500 text-white border-none rounded cursor-pointer text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -307,16 +260,12 @@ const OnlineListTab: React.FC = () => {
                 {filteredItems.length} item
                 {filteredItems.length !== 1 ? "s" : ""}
                 {selectedCategory !== "All" && ` in ${selectedCategory}`}
-                {showWithEndDate && " (with end dates)"}
               </span>
-              {(searchTerm ||
-                selectedCategory !== "All" ||
-                showWithEndDate) && (
+              {(searchTerm || selectedCategory !== "All") && (
                 <button
                   onClick={() => {
                     setSearchTerm("");
                     setSelectedCategory("All");
-                    setShowWithEndDate(false);
                   }}
                   className="text-xs text-blue-500 cursor-pointer px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >

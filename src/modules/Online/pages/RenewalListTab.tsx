@@ -62,7 +62,7 @@ const RenewalListTab: React.FC = () => {
 
       // Filter items that have end dates and sort by end date ascending
       const itemsWithEndDates = itemsList
-        .filter((item) => item.endDate != null)
+        .filter(item => item.endDate != null)
         .sort((a, b) => {
           if (a.endDate && b.endDate) {
             return a.endDate - b.endDate;
@@ -184,8 +184,8 @@ const RenewalListTab: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-20 px-5 text-center h-full">
             <div className="text-4xl mb-4 opacity-50">🔄</div>
             <div className="text-lg font-medium text-gray-600 mb-2">
-              {searchTerm
-                ? "No matching renewals found"
+              {searchTerm 
+                ? "No matching renewals found" 
                 : "No items with end dates yet"}
             </div>
             <div className="text-sm text-gray-400">
@@ -213,13 +213,11 @@ const RenewalListTab: React.FC = () => {
             {/* Renewals List - Single Row Layout */}
             <div className="space-y-1.5 pb-4">
               {filteredItems.map((item) => {
-                const statusInfo = item.endDate
-                  ? getStatusInfo(item.endDate)
-                  : {
-                      classes: "bg-gray-100 text-gray-600",
-                      text: "No date",
-                      icon: "⚪",
-                    };
+                const statusInfo = item.endDate ? getStatusInfo(item.endDate) : {
+                  classes: "bg-gray-100 text-gray-600",
+                  text: "No date",
+                  icon: "⚪",
+                };
 
                 return (
                   <div
@@ -257,9 +255,7 @@ const RenewalListTab: React.FC = () => {
                         {/* Middle: End Date */}
                         <div className="flex items-center gap-1 min-w-[100px] justify-end">
                           <span className="text-xs text-gray-500">
-                            {item.endDate
-                              ? formatDate(item.endDate)
-                              : "No end date"}
+                            {item.endDate ? formatDate(item.endDate) : "No end date"}
                           </span>
                         </div>
 

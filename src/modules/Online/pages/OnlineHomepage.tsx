@@ -134,8 +134,13 @@ const OnlineHomepage: React.FC = () => {
         });
         break;
       case "renewals":
-        navigate("/online/renewals/add", {
-          state: { returnTo: "/online", activeTab: "renewals" },
+        // For renewals tab, navigate to the same OnlineForm as items
+        navigate("/online/items/add", {
+          state: {
+            returnTo: "/online",
+            activeTab: "renewals",
+            fromRenewalsTab: true, // Optional flag if you need to know it came from renewals tab
+          },
         });
         break;
       case "categories":
@@ -151,7 +156,7 @@ const OnlineHomepage: React.FC = () => {
       case "items":
         return "Add Online Item";
       case "renewals":
-        return "Add Renewal";
+        return "Add Online Item"; // Changed from "Add Renewal" to "Add Online Item"
       case "categories":
         return "Add Category";
       default:

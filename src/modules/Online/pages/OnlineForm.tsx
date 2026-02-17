@@ -25,6 +25,7 @@ import {
   formatFileSize,
 } from "../../../utils/fileOptimizer";
 import { useImageSize, ImageSizeBadge } from "../../../utils/imageSizeUtils";
+import { formatDate } from "../../../utils/formatters";
 
 // Helper function to safely parse timestamps
 const parseTimestamp = (timestamp: any): number | null => {
@@ -42,18 +43,6 @@ const parseTimestamp = (timestamp: any): number | null => {
     }
   }
   return null;
-};
-
-// Helper to format date for input fields (YYYY-MM-DD)
-const formatDateInput = (timestamp?: number | null): string => {
-  if (!timestamp) return "";
-  try {
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return "";
-    return date.toISOString().split("T")[0];
-  } catch (error) {
-    return "";
-  }
 };
 
 // Helper to determine file type from name
@@ -88,6 +77,14 @@ const OnlineForm: React.FC = () => {
   const showDelete = settings?.showDelete || false;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [storage] = useState(() => getStorage());
+
+  // Calendar refs
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const [showCalendar, setShowCalendar] = useState<"start" | "end" | null>(
+    null,
+  );
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [showYearSelector, setShowYearSelector] = useState(false);
 
   const getModeFromPath = (): "add" | "edit" | "view" => {
     const path = location.pathname;
@@ -154,6 +151,25 @@ const OnlineForm: React.FC = () => {
       ? formData.file2
       : null,
   );
+
+  // Close calendar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as Node) &&
+        !(event.target as HTMLElement).closest(".date-input")
+      ) {
+        setShowCalendar(null);
+        setShowYearSelector(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     fetchCategories();
@@ -295,6 +311,150 @@ const OnlineForm: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Calendar helper functions
+  const openCalendar = (field: "start" | "end") => {
+    setShowCalendar(field);
+    setShowYearSelector(false);
+    // Set current month based on the selected date
+    const dateValue = field === "start" ? formData.startDate : formData.endDate;
+    setCurrentMonth(dateValue ? new Date(dateValue) : new Date());
+  };
+
+  const selectDate = (date: Date, field: "start" | "end") => {
+    setFormData((prev) => ({
+      ...prev,
+      [field === "start" ? "startDate" : "endDate"]: date.getTime(),
+    }));
+    setShowCalendar(null);
+    setShowYearSelector(false);
+  };
+
+  const navigateMonth = (direction: "prev" | "next") => {
+    const newMonth = new Date(currentMonth);
+    if (direction === "prev") {
+      newMonth.setMonth(newMonth.getMonth() - 1);
+    } else {
+      newMonth.setMonth(newMonth.getMonth() + 1);
+    }
+    setCurrentMonth(newMonth);
+  };
+
+  const navigateYear = (direction: "prev" | "next") => {
+    const newMonth = new Date(currentMonth);
+    if (direction === "prev") {
+      newMonth.setFullYear(newMonth.getFullYear() - 1);
+    } else {
+      newMonth.setFullYear(newMonth.getFullYear() + 1);
+    }
+    setCurrentMonth(newMonth);
+  };
+
+  const selectYear = (year: number) => {
+    const newMonth = new Date(currentMonth);
+    newMonth.setFullYear(year);
+    setCurrentMonth(newMonth);
+    setShowYearSelector(false);
+  };
+
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (year: number, month: number) => {
+    return new Date(year, month, 1).getDay();
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isSelectedDate = (date: Date, field: "start" | "end") => {
+    const selectedDate =
+      field === "start" ? formData.startDate : formData.endDate;
+    if (!selectedDate) return false;
+    const compareDate = new Date(selectedDate);
+    return (
+      date.getDate() === compareDate.getDate() &&
+      date.getMonth() === compareDate.getMonth() &&
+      date.getFullYear() === compareDate.getFullYear()
+    );
+  };
+
+  const renderCalendar = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const daysInMonth = getDaysInMonth(year, month);
+    const firstDay = getFirstDayOfMonth(year, month);
+
+    const days = [];
+
+    // Empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`empty-${i}`} className="py-2.5"></div>);
+    }
+
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const isTodayDate = isToday(date);
+      const isSelectedStart = isSelectedDate(date, "start");
+      const isSelectedEnd = isSelectedDate(date, "end");
+      const isSelected =
+        showCalendar === "start" ? isSelectedStart : isSelectedEnd;
+
+      days.push(
+        <button
+          key={day}
+          onClick={() => selectDate(date, showCalendar!)}
+          className={`py-2.5 bg-transparent border-none rounded text-sm transition-all ${
+            isSelected
+              ? "bg-blue-500 text-white font-semibold"
+              : "text-gray-800 hover:bg-gray-100"
+          } ${isTodayDate && !isSelected ? "border-2 border-blue-500" : ""}`}
+          type="button"
+        >
+          {day}
+        </button>,
+      );
+    }
+
+    return days;
+  };
+
+  const renderYearSelector = () => {
+    const currentYear = currentMonth.getFullYear();
+    const startYear = currentYear - 6;
+    const years = [];
+
+    for (let year = startYear; year <= startYear + 12; year++) {
+      years.push(
+        <button
+          key={year}
+          onClick={() => selectYear(year)}
+          className={`py-2.5 border-none rounded text-sm transition-all ${
+            year === currentYear
+              ? "bg-blue-500 text-white font-semibold"
+              : "bg-transparent text-gray-800 hover:bg-gray-100"
+          }`}
+          type="button"
+        >
+          {year}
+        </button>,
+      );
+    }
+
+    return (
+      <div className="max-h-72 overflow-y-auto p-2.5 grid grid-cols-4 gap-2">
+        {years}
+      </div>
+    );
   };
 
   const handleFileChange = async (
@@ -495,6 +655,7 @@ const OnlineForm: React.FC = () => {
       alert(`Failed to delete file: ${error.message}`);
     }
   };
+
   const uploadFile = async (
     fileInfo: FileInfo,
     fileNumber: 1 | 2,
@@ -694,19 +855,16 @@ const OnlineForm: React.FC = () => {
     return "Item Details";
   };
 
-  // const getPageSubtitle = () => {
-  //   if (isAddMode) return "Create a new online item";
-  //   if (isEditMode) return "Update item details";
-  //   if (isViewMode) return "View item details";
-  //   return "";
-  // };
-
-  const formatDate = (timestamp?: number | null): string => {
+  const formatDateDisplay = (timestamp?: number | null): string => {
     if (!timestamp) return "Not specified";
     try {
       const date = new Date(timestamp);
       if (isNaN(date.getTime())) return "Invalid date";
-      return date.toLocaleDateString();
+      return formatDate(timestamp, "en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
     } catch (error) {
       return "Error formatting date";
     }
@@ -1061,7 +1219,7 @@ const OnlineForm: React.FC = () => {
               )}
             </div>
 
-            {/* Date Range Fields - Always visible in edit/add mode, show in view mode if dates exist */}
+            {/* Date Range Fields with Custom Calendar */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1069,24 +1227,27 @@ const OnlineForm: React.FC = () => {
                 </label>
                 {isViewMode ? (
                   <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
-                    {formatDate(formData.startDate)}
+                    {formatDateDisplay(formData.startDate)}
                   </div>
                 ) : (
-                  <input
-                    type="date"
-                    value={formatDateInput(formData.startDate)}
-                    onChange={(e) => {
-                      const dateValue = e.target.value;
-                      setFormData({
-                        ...formData,
-                        startDate: dateValue
-                          ? new Date(dateValue).getTime()
-                          : null,
-                      });
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    disabled={saving || uploadingFiles}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatDateDisplay(formData.startDate)}
+                      readOnly
+                      onClick={() => openCalendar("start")}
+                      className="date-input w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition cursor-pointer pr-10"
+                      placeholder="Select start date"
+                    />
+                    <button
+                      onClick={() => openCalendar("start")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 p-1"
+                      title="Pick start date"
+                      type="button"
+                    >
+                      📅
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -1096,27 +1257,149 @@ const OnlineForm: React.FC = () => {
                 </label>
                 {isViewMode ? (
                   <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 min-h-[40px] flex items-center">
-                    {formatDate(formData.endDate)}
+                    {formatDateDisplay(formData.endDate)}
                   </div>
                 ) : (
-                  <input
-                    type="date"
-                    value={formatDateInput(formData.endDate)}
-                    onChange={(e) => {
-                      const dateValue = e.target.value;
-                      setFormData({
-                        ...formData,
-                        endDate: dateValue
-                          ? new Date(dateValue).getTime()
-                          : null,
-                      });
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    disabled={saving || uploadingFiles}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatDateDisplay(formData.endDate)}
+                      readOnly
+                      onClick={() => openCalendar("end")}
+                      className="date-input w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition cursor-pointer pr-10"
+                      placeholder="Select end date"
+                    />
+                    <button
+                      onClick={() => openCalendar("end")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 p-1"
+                      title="Pick end date"
+                      type="button"
+                    >
+                      📅
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
+
+            {/* Calendar Popup */}
+            {showCalendar && !isViewMode && (
+              <div
+                ref={calendarRef}
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 rounded-xl shadow-2xl z-[10001] p-5 w-[90%] max-w-sm max-h-[80vh] overflow-hidden"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => navigateYear("prev")}
+                      className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
+                      title="Previous Year"
+                      type="button"
+                    >
+                      &lt;&lt;
+                    </button>
+                    <button
+                      onClick={() => navigateMonth("prev")}
+                      className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
+                      title="Previous Month"
+                      type="button"
+                    >
+                      &lt;
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setShowYearSelector(!showYearSelector)}
+                    className="px-2 py-1 text-sm font-semibold text-gray-800 hover:bg-gray-100 rounded"
+                    title="Select Year"
+                    type="button"
+                  >
+                    {currentMonth.toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </button>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => navigateMonth("next")}
+                      className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
+                      title="Next Month"
+                      type="button"
+                    >
+                      &gt;
+                    </button>
+                    <button
+                      onClick={() => navigateYear("next")}
+                      className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
+                      title="Next Year"
+                      type="button"
+                    >
+                      &gt;&gt;
+                    </button>
+                  </div>
+                </div>
+
+                {showYearSelector ? (
+                  renderYearSelector()
+                ) : (
+                  <>
+                    <div className="grid grid-cols-7 mb-2">
+                      {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+                        <div
+                          key={day}
+                          className="text-center text-xs text-gray-500 font-medium py-1"
+                        >
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1">
+                      {renderCalendar()}
+                    </div>
+                  </>
+                )}
+
+                <div className="flex justify-center gap-2.5 mt-4">
+                  <button
+                    onClick={() => {
+                      const today = new Date();
+                      selectDate(today, showCalendar);
+                    }}
+                    className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600"
+                    type="button"
+                  >
+                    Today
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowCalendar(null);
+                      setShowYearSelector(false);
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300"
+                    type="button"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        [showCalendar === "start" ? "startDate" : "endDate"]:
+                          null,
+                      }));
+                      setShowCalendar(null);
+                      setShowYearSelector(false);
+                    }}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200"
+                    type="button"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* DETAILS FIELD */}
             <div>
@@ -1154,7 +1437,7 @@ const OnlineForm: React.FC = () => {
                     Created
                   </label>
                   <div className="text-sm text-gray-900">
-                    {formatDate(formData.createdAt)}
+                    {formatDateDisplay(formData.createdAt)}
                   </div>
                 </div>
                 <div>
@@ -1162,7 +1445,7 @@ const OnlineForm: React.FC = () => {
                     Last Updated
                   </label>
                   <div className="text-sm text-gray-900">
-                    {formatDate(formData.updatedAt)}
+                    {formatDateDisplay(formData.updatedAt)}
                   </div>
                 </div>
               </div>

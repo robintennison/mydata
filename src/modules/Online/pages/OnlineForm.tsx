@@ -694,12 +694,12 @@ const OnlineForm: React.FC = () => {
     return "Item Details";
   };
 
-  const getPageSubtitle = () => {
-    if (isAddMode) return "Create a new online item";
-    if (isEditMode) return "Update item details";
-    if (isViewMode) return "View item details";
-    return "";
-  };
+  // const getPageSubtitle = () => {
+  //   if (isAddMode) return "Create a new online item";
+  //   if (isEditMode) return "Update item details";
+  //   if (isViewMode) return "View item details";
+  //   return "";
+  // };
 
   const formatDate = (timestamp?: number | null): string => {
     if (!timestamp) return "Not specified";
@@ -796,10 +796,6 @@ const OnlineForm: React.FC = () => {
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
               disabled={saving || uploadingFiles}
             />
-            <p className="text-xs text-gray-500 mb-2">
-              Supported: Images (JPG, PNG, GIF, WEBP, HEIC) and PDF files (Max:
-              10MB)
-            </p>
 
             {/* Error message */}
             {fileInfo.error && (
@@ -992,7 +988,6 @@ const OnlineForm: React.FC = () => {
               <h1 className="text-lg font-semibold text-gray-900">
                 {getPageTitle()}
               </h1>
-              <p className="text-sm text-gray-500">{getPageSubtitle()}</p>
             </div>
           </div>
 
@@ -1150,30 +1145,6 @@ const OnlineForm: React.FC = () => {
               {renderFileSection(1)}
               {renderFileSection(2)}
             </div>
-
-            {/* Optimization note */}
-            {!isViewMode && (
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <div className="text-blue-500 mt-0.5">ℹ️</div>
-                  <div className="text-xs text-blue-800">
-                    <div className="font-medium mb-1">
-                      File Support & Optimization
-                    </div>
-                    <div>
-                      • Images are automatically compressed to save storage
-                      space. HEIC files are converted to JPEG.
-                    </div>
-                    <div>
-                      • PDF files are uploaded as-is without compression.
-                    </div>
-                    <div className="mt-1 text-blue-600">
-                      Max file size: 10MB | Supported: Images and PDFs
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Timestamps - Show in View mode */}
             {isViewMode && (

@@ -31,7 +31,6 @@ import VerificationTab from "../modules/Jewellery/pages/VerificationTab";
 // Import Online pages
 import CategoryForm from "../modules/Online/pages/CategoryForm";
 import OnlineForm from "../modules/Online/pages/OnlineForm";
-import RenewalForm from "../modules/Online/pages/RenewalForm";
 import OnlineHomepage from "../modules/Online/pages/OnlineHomepage";
 
 // Import ViewDepositPage
@@ -292,26 +291,6 @@ const allRoutes: RouteConfig[] = [
     path: "/online/items/view/:id",
     element: <OnlineForm />,
     title: "View Item",
-    requiresAuth: true,
-  },
-  {
-    path: "/online/renewals/add",
-    element: <RenewalForm />,
-    title: "Add Renewal",
-    icon: "➕",
-    requiresAuth: true,
-  },
-  {
-    path: "/online/renewals/edit/:id",
-    element: <RenewalForm />,
-    title: "Edit Renewal",
-    icon: "✏️",
-    requiresAuth: true,
-  },
-  {
-    path: "/online/renewals/view/:id",
-    element: <RenewalForm />,
-    title: "View Renewal",
     requiresAuth: true,
   },
 ];

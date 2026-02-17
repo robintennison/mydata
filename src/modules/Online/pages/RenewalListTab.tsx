@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { Renewal } from "../types/online.types";
-import { useSettings } from "../../../contexts/SettingsContext"; // Import SettingsContext
+import { OnlineItem, FILE_TYPES } from "../types/online.types";
+import { useSettings } from "../../../contexts/SettingsContext";
 
 // Helper function for conditional classes
 const cls = (...classes: (string | boolean | undefined)[]) =>
@@ -10,60 +10,76 @@ const cls = (...classes: (string | boolean | undefined)[]) =>
 
 const RenewalListTab: React.FC = () => {
   const navigate = useNavigate();
-  const [renewals, setRenewals] = useState<Renewal[]>([]);
+  const [items, setItems] = useState<OnlineItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const { settings } = useSettings(); // Get settings from context
+  const { settings } = useSettings();
 
   useEffect(() => {
-    fetchRenewals();
+    fetchOnlineItems();
   }, []);
 
-  const fetchRenewals = async () => {
+  const fetchOnlineItems = async () => {
     try {
       setLoading(true);
       const db = getFirestore();
-      const renewalsRef = collection(db, "renewals");
-      const snapshot = await getDocs(renewalsRef);
+      const itemsRef = collection(db, "online");
+      const itemsSnapshot = await getDocs(itemsRef);
 
-      const renewalsList: Renewal[] = [];
-      snapshot.forEach((doc) => {
+      const itemsList: OnlineItem[] = [];
+      itemsSnapshot.forEach((doc) => {
         const data = doc.data();
 
-        const convertToTimestamp = (field: any): number => {
-          if (!field) return Date.now();
-          if (field && typeof field === "object" && "toDate" in field) {
-            return field.toDate().getTime();
-          }
-          if (typeof field === "number") return field;
-          if (typeof field === "string") {
-            const parsed = Date.parse(field);
-            return isNaN(parsed) ? Date.now() : parsed;
-          }
-          return Date.now();
-        };
+        // Check if this is old data (has image fields) or new data (has file fields)
+        const hasOldImageFields =
+          data.image1 !== undefined || data.image2 !== undefined;
 
-        renewalsList.push({
+        itemsList.push({
           id: doc.id,
           name: data.name || "",
-          startDate: convertToTimestamp(data.startDate),
-          endDate: convertToTimestamp(data.endDate),
-          comments: data.comments || "",
-          createdAt: convertToTimestamp(data.createdAt),
-          updatedAt: convertToTimestamp(data.updatedAt),
+          detail: data.detail || "",
+          category: data.category || "",
+          startDate: data.startDate !== undefined ? data.startDate : null,
+          endDate: data.endDate !== undefined ? data.endDate : null,
+          file1: data.file1 || data.image1 || "",
+          file2: data.file2 || data.image2 || "",
+          file1Type:
+            data.file1Type ||
+            (data.image1 ? FILE_TYPES.IMAGE : FILE_TYPES.NONE),
+          file2Type:
+            data.file2Type ||
+            (data.image2 ? FILE_TYPES.IMAGE : FILE_TYPES.NONE),
+          file1Name:
+            data.file1Name ||
+            (hasOldImageFields && data.image1 ? "Legacy Image" : ""),
+          file2Name:
+            data.file2Name ||
+            (hasOldImageFields && data.image2 ? "Legacy Image" : ""),
+          createdAt: data.createdAt || Date.now(),
+          updatedAt: data.updatedAt || Date.now(),
         });
       });
 
-      renewalsList.sort((a, b) => a.endDate - b.endDate);
-      setRenewals(renewalsList);
+      // Filter items that have end dates and sort by end date ascending
+      const itemsWithEndDates = itemsList
+        .filter((item) => item.endDate != null)
+        .sort((a, b) => {
+          if (a.endDate && b.endDate) {
+            return a.endDate - b.endDate;
+          }
+          return 0;
+        });
+
+      setItems(itemsWithEndDates);
     } catch (error) {
-      console.error("Error fetching renewals:", error);
+      console.error("Error fetching online items:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (timestamp: number) => {
+  const formatDate = (timestamp?: number | null): string => {
+    if (!timestamp) return "-";
     try {
       const date = new Date(timestamp);
       if (isNaN(date.getTime())) return "-";
@@ -113,12 +129,27 @@ const RenewalListTab: React.FC = () => {
     }
   };
 
-  const filteredRenewals = renewals.filter(
-    (renewal) =>
-      renewal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (renewal.comments &&
-        renewal.comments.toLowerCase().includes(searchTerm.toLowerCase())),
+  const filteredItems = items.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.detail &&
+        item.detail.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.category &&
+        item.category.toLowerCase().includes(searchTerm.toLowerCase())),
   );
+
+  const handleRowClick = (itemId: string) => {
+    if (settings?.showDelete) {
+      navigate(`/online/items/edit/${itemId}`);
+    } else {
+      navigate(`/online/items/view/${itemId}`);
+    }
+  };
+
+  const handleEditClick = (e: React.MouseEvent, itemId: string) => {
+    e.stopPropagation();
+    navigate(`/online/items/edit/${itemId}`);
+  };
 
   if (loading) {
     return (
@@ -149,31 +180,25 @@ const RenewalListTab: React.FC = () => {
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto">
-        {filteredRenewals.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-5 text-center h-full">
             <div className="text-4xl mb-4 opacity-50">🔄</div>
             <div className="text-lg font-medium text-gray-600 mb-2">
-              {searchTerm ? "No matching renewals found" : "No renewals yet"}
+              {searchTerm
+                ? "No matching renewals found"
+                : "No items with end dates yet"}
             </div>
             <div className="text-sm text-gray-400">
-              {!searchTerm && "Add your first renewal"}
+              {!searchTerm && "Add end dates to online items to see them here"}
             </div>
-            {!searchTerm && (
-              <button
-                onClick={() => navigate("/online/renewals/add")}
-                className="mt-4 px-4 py-2 bg-blue-500 text-white border-none rounded cursor-pointer text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Add Renewal
-              </button>
-            )}
           </div>
         ) : (
           <div className="p-2">
             {/* Results Info */}
             <div className="flex justify-between items-center mb-2 px-1 py-1">
               <span className="text-xs text-gray-600">
-                {filteredRenewals.length} renewal
-                {filteredRenewals.length !== 1 ? "s" : ""}
+                {filteredItems.length} renewal
+                {filteredItems.length !== 1 ? "s" : ""}
               </span>
               {searchTerm && (
                 <button
@@ -187,70 +212,82 @@ const RenewalListTab: React.FC = () => {
 
             {/* Renewals List - Single Row Layout */}
             <div className="space-y-1.5 pb-4">
-              {filteredRenewals.map((renewal) => {
-                const statusInfo = getStatusInfo(renewal.endDate);
+              {filteredItems.map((item) => {
+                const statusInfo = item.endDate
+                  ? getStatusInfo(item.endDate)
+                  : {
+                      classes: "bg-gray-100 text-gray-600",
+                      text: "No date",
+                      icon: "⚪",
+                    };
 
                 return (
                   <div
-                    key={renewal.id}
+                    key={item.id}
                     className="bg-white rounded-lg border border-gray-200 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onClick={() =>
-                      navigate(`/online/renewals/edit/${renewal.id}`)
-                    }
+                    onClick={() => handleRowClick(item.id)}
                     tabIndex={0}
                     onKeyPress={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
-                        navigate(`/online/renewals/edit/${renewal.id}`);
+                        handleRowClick(item.id);
                       }
                     }}
                   >
                     <div className="p-3">
                       <div className="flex items-center justify-between gap-2">
-                        {/* Left: Name */}
+                        {/* Left: Name and Category */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-semibold text-gray-900 truncate">
-                              {renewal.name}
+                              {item.name}
                             </span>
+                            {item.category && (
+                              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded truncate max-w-[120px]">
+                                {item.category}
+                              </span>
+                            )}
                           </div>
+                          {item.detail && (
+                            <div className="text-xs text-gray-500 truncate mt-0.5">
+                              {item.detail}
+                            </div>
+                          )}
                         </div>
 
                         {/* Middle: End Date */}
                         <div className="flex items-center gap-1 min-w-[100px] justify-end">
                           <span className="text-xs text-gray-500">
-                            {formatDate(renewal.endDate)}
+                            {item.endDate
+                              ? formatDate(item.endDate)
+                              : "No end date"}
                           </span>
                         </div>
 
                         {/* Right: Status and Actions */}
                         <div className="flex items-center gap-2 ml-2">
                           {/* Status Indicator */}
-                          <div
-                            className={cls(
-                              "text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1",
-                              statusInfo.classes,
-                            )}
-                          >
-                            <span>{statusInfo.icon}</span>
-                            <span>{statusInfo.text}</span>
-                          </div>
+                          {item.endDate && (
+                            <div
+                              className={cls(
+                                "text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1",
+                                statusInfo.classes,
+                              )}
+                            >
+                              <span>{statusInfo.icon}</span>
+                              <span>{statusInfo.text}</span>
+                            </div>
+                          )}
 
                           {/* Action Buttons - Only show edit if showDelete is true */}
                           {settings?.showDelete && (
                             <div className="flex gap-1">
                               <button
                                 className="px-2 py-1.5 bg-green-500 text-white border-none rounded cursor-pointer text-xs font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(
-                                    `/online/renewals/edit/${renewal.id}`,
-                                  );
-                                }}
+                                onClick={(e) => handleEditClick(e, item.id)}
                                 title="Edit"
                               >
                                 ✏️
                               </button>
-                              {/* Removed delete button as per requirement */}
                             </div>
                           )}
                         </div>

@@ -71,6 +71,7 @@ export const useOnlineForm = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState(false);
 
   // File states
@@ -603,7 +604,7 @@ export const useOnlineForm = () => {
     if (!confirmDelete) return;
 
     try {
-      setSaving(true);
+      setDeleting(true);
 
       if (formData.file1) {
         try {
@@ -642,7 +643,7 @@ export const useOnlineForm = () => {
       console.error("Error deleting item:", error);
       alert("Failed to delete item");
     } finally {
-      setSaving(false);
+      setDeleting(false);
     }
   };
 
@@ -660,6 +661,7 @@ export const useOnlineForm = () => {
     categories,
     loading,
     saving,
+    deleting,
     uploadingFiles,
     file1Info,
     file2Info,

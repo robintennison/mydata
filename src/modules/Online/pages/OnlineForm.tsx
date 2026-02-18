@@ -22,6 +22,7 @@ const OnlineForm: React.FC = () => {
     categories,
     loading,
     saving,
+    deleting,
     uploadingFiles,
     file1Info,
     file2Info,
@@ -207,7 +208,7 @@ const OnlineForm: React.FC = () => {
               accept="image/*,.pdf"
               onChange={(e) => handleFileChange(e, fileNumber)}
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
-              disabled={saving || uploadingFiles}
+              disabled={saving || deleting || uploadingFiles}
             />
 
             {fileInfo.error && (
@@ -273,7 +274,7 @@ const OnlineForm: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleDeleteExistingFile(fileNumber)}
-                      disabled={saving || uploadingFiles}
+                      disabled={saving || deleting || uploadingFiles}
                       className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-medium hover:bg-red-100 disabled:opacity-50"
                     >
                       Delete{" "}
@@ -317,7 +318,7 @@ const OnlineForm: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleRemoveFile(fileNumber)}
-                      disabled={saving || uploadingFiles}
+                      disabled={saving || deleting || uploadingFiles}
                       className="px-3 py-1 bg-gray-50 text-gray-700 border border-gray-300 rounded text-xs font-medium hover:bg-gray-100 disabled:opacity-50"
                     >
                       Remove
@@ -433,7 +434,7 @@ const OnlineForm: React.FC = () => {
                 } disabled:bg-gray-100 disabled:cursor-not-allowed`}
                 placeholder="Enter item name"
                 required={!isViewMode}
-                disabled={isViewMode || saving || uploadingFiles}
+                disabled={isViewMode || saving || deleting || uploadingFiles}
                 readOnly={isViewMode}
                 autoFocus={!isViewMode}
               />
@@ -454,7 +455,7 @@ const OnlineForm: React.FC = () => {
                     setFormData({ ...formData, category: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  disabled={saving || uploadingFiles}
+                  disabled={saving || deleting || uploadingFiles}
                 >
                   <option value="">Select Category</option>
                   {categories.map((cat) => (
@@ -666,7 +667,7 @@ const OnlineForm: React.FC = () => {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-y min-h-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter item details"
-                  disabled={saving || uploadingFiles}
+                  disabled={saving || deleting || uploadingFiles}
                 />
               )}
             </div>
@@ -708,7 +709,7 @@ const OnlineForm: React.FC = () => {
                       navigate("/online", { state: { activeTab: "items" } })
                     }
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
-                    disabled={saving || uploadingFiles}
+                    disabled={saving || deleting || uploadingFiles}
                   >
                     Cancel
                   </button>
@@ -718,16 +719,16 @@ const OnlineForm: React.FC = () => {
                       type="button"
                       onClick={handleDelete}
                       className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:opacity-50"
-                      disabled={saving || uploadingFiles}
+                      disabled={saving || deleting || uploadingFiles}
                     >
-                      {saving ? "Deleting..." : "Delete"}
+                      {deleting ? "Deleting..." : "Delete"}
                     </button>
                   )}
 
                   <button
                     type="submit"
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
-                    disabled={saving || uploadingFiles}
+                    disabled={saving || deleting || uploadingFiles}
                   >
                     {saving || uploadingFiles
                       ? "Saving..."

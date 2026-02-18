@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useOnlineForm } from "./useOnlineForm";
 import { useImageSize } from "../../../utils/imageSizeUtils";
 import { formatFileSize } from "../../../utils/fileOptimizer";
@@ -12,9 +12,13 @@ import {
   isSelectedDate,
 } from "../../../utils/onlineFormHelpers";
 import { FILE_TYPES } from "../types/online.types";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 const OnlineForm: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [downloadingFile1, setDownloadingFile1] = useState(false);
+  const [downloadingFile2, setDownloadingFile2] = useState(false);
+  const [storage] = useState(() => getStorage());
 
   const {
     formData,
@@ -61,6 +65,135 @@ const OnlineForm: React.FC = () => {
       ? formData.file2
       : null,
   );
+
+  // Helper function to extract path from Firebase Storage URL
+  const extractPathFromUrl = (url: string): string => {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+
+      // Firebase Storage URLs have format: /v0/b/{bucket}/o/{path}?alt=media&token={token}
+      const match = pathname.match(/\/o\/(.+)/);
+      if (match) {
+        // Decode the path (it's URL encoded)
+        const encodedPath = match[1];
+        return decodeURIComponent(encodedPath);
+      }
+      return url;
+    } catch (e) {
+      return url;
+    }
+  };
+
+  // Helper function to generate appropriate filename
+  const generateFilename = (
+    fileNumber: 1 | 2,
+    fileType: string,
+    originalName?: string,
+  ): string => {
+    let filename = originalName || `File_${fileNumber}`;
+
+    // Clean filename (remove special characters)
+    filename = filename.replace(/[^a-zA-Z0-9_.-]/g, "_");
+
+    // Try to get extension from URL if no original name
+    if (!originalName) {
+      const url = fileNumber === 1 ? formData.file1 : formData.file2;
+      if (url) {
+        const extensionMatch = url.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
+        if (extensionMatch) {
+          const ext = extensionMatch[1].toLowerCase();
+          if (["jpg", "jpeg", "png", "gif", "webp", "pdf"].includes(ext)) {
+            if (!filename.includes(".")) {
+              return `${filename}.${ext}`;
+            }
+          }
+        }
+      }
+    }
+
+    // Add appropriate extension based on file type
+    if (fileType === FILE_TYPES.IMAGE && !filename.includes(".")) {
+      return `${filename}.jpg`;
+    } else if (fileType === FILE_TYPES.PDF && !filename.includes(".")) {
+      return `${filename}.pdf`;
+    }
+
+    return filename;
+  };
+
+  const handleDownload = async (fileNumber: 1 | 2) => {
+    const fileUrl = fileNumber === 1 ? formData.file1 : formData.file2;
+    const fileType =
+      (fileNumber === 1 ? formData.file1Type : formData.file2Type) ||
+      FILE_TYPES.NONE;
+    const fileName = fileNumber === 1 ? formData.file1Name : formData.file2Name;
+
+    if (!fileUrl) {
+      alert("No file available to download.");
+      return;
+    }
+
+    // Set downloading state
+    if (fileNumber === 1) {
+      setDownloadingFile1(true);
+    } else {
+      setDownloadingFile2(true);
+    }
+
+    try {
+      let downloadUrl = fileUrl;
+
+      // Check if it's a Firebase Storage URL
+      if (fileUrl.includes("firebasestorage.googleapis.com")) {
+        try {
+          // Try to get a download URL using the Firebase Storage SDK
+          // This bypasses CORS restrictions
+          const storageRef = ref(storage, extractPathFromUrl(fileUrl));
+          downloadUrl = await getDownloadURL(storageRef);
+          console.log("Got download URL via SDK");
+        } catch (storageError) {
+          console.log(
+            "Could not get download URL via SDK, using original URL",
+            storageError,
+          );
+        }
+      }
+
+      // Create filename
+      const filename = generateFilename(fileNumber, fileType, fileName);
+
+      // Create a download link
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.target = "_blank"; // Open in new tab to avoid CORS issues
+      link.download = filename;
+
+      // Append to body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+      }, 100);
+    } catch (error) {
+      console.error(`Error downloading file ${fileNumber}:`, error);
+
+      // Fallback method: Open the file in a new tab for manual download
+      alert(
+        `Could not automatically download the file. Opening in a new tab instead.\n\nYou can right-click and select "Save as..." to download it.`,
+      );
+      window.open(fileUrl, "_blank");
+    } finally {
+      // Reset downloading state
+      if (fileNumber === 1) {
+        setDownloadingFile1(false);
+      } else {
+        setDownloadingFile2(false);
+      }
+    }
+  };
 
   const renderCalendarDays = () => {
     if (!showCalendar) return null;
@@ -143,6 +276,8 @@ const OnlineForm: React.FC = () => {
     const hasNewFile = !!fileInfo.file;
     const fileSize = fileNumber === 1 ? file1Size : file2Size;
     const loadingSize = fileNumber === 1 ? loadingFile1Size : loadingFile2Size;
+    const isDownloading =
+      fileNumber === 1 ? downloadingFile1 : downloadingFile2;
 
     return (
       <div>
@@ -155,26 +290,47 @@ const OnlineForm: React.FC = () => {
             {hasExistingFile ? (
               <div className="relative">
                 {existingFileType === FILE_TYPES.IMAGE ? (
-                  <img
-                    src={existingFileUrl}
-                    alt={`File ${fileNumber}`}
-                    className="max-w-full max-h-48 rounded-lg border border-gray-300 mx-auto"
-                  />
+                  <>
+                    <img
+                      src={existingFileUrl}
+                      alt={`File ${fileNumber}`}
+                      className="max-w-full max-h-48 rounded-lg border border-gray-300 mx-auto"
+                    />
+                    {/* Download button for image */}
+                    <button
+                      onClick={() => handleDownload(fileNumber)}
+                      disabled={isDownloading}
+                      className="absolute top-2 right-2 bg-black/70 text-white p-2 rounded-full hover:bg-black/90 transition-colors shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                      title="Download image"
+                    >
+                      {isDownloading ? "⏳" : "⬇️"}
+                    </button>
+                  </>
                 ) : (
-                  <div className="p-6 bg-gray-50 border border-gray-300 rounded-lg flex flex-col items-center">
+                  <div className="p-6 bg-gray-50 border border-gray-300 rounded-lg flex flex-col items-center relative">
                     <span className="text-4xl mb-2">📄</span>
                     <span className="text-sm font-medium text-gray-700 mb-1">
                       {existingFileName || "PDF Document"}
                     </span>
-                    <a
-                      href={existingFileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 text-sm underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      View PDF
-                    </a>
+                    <div className="flex gap-3 mt-2">
+                      <a
+                        href={existingFileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        View PDF
+                      </a>
+                      <span className="text-gray-400">|</span>
+                      <button
+                        onClick={() => handleDownload(fileNumber)}
+                        disabled={isDownloading}
+                        className="text-green-600 hover:text-green-800 text-sm underline disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isDownloading ? "Downloading..." : "Download PDF"}
+                      </button>
+                    </div>
                   </div>
                 )}
                 {existingFileType === FILE_TYPES.IMAGE && (
@@ -191,12 +347,19 @@ const OnlineForm: React.FC = () => {
               </div>
             )}
             {hasExistingFile && existingFileType === FILE_TYPES.IMAGE && (
-              <div className="mt-2 text-center">
+              <div className="mt-2 flex justify-center gap-4">
                 <ImageSizeBadge
                   size={fileSize}
                   loading={loadingSize}
                   position="below"
                 />
+                <button
+                  onClick={() => handleDownload(fileNumber)}
+                  disabled={isDownloading}
+                  className="text-blue-600 hover:text-blue-800 text-sm underline flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isDownloading ? "⏳ Downloading..." : "⬇️ Download"}
+                </button>
               </div>
             )}
           </div>

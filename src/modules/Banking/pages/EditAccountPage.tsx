@@ -422,7 +422,7 @@ const EditAccountPage: React.FC = () => {
                 className="flex-1 px-4 py-3 bg-red-50 text-red-700 border border-red-200 rounded-lg font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
                 disabled={submitting}
               >
-                Delete Account
+                Delete
               </button>
 
               <button
@@ -432,7 +432,7 @@ const EditAccountPage: React.FC = () => {
                 }`}
                 disabled={submitting}
               >
-                {submitting ? "Saving..." : "Save Changes"}
+                {submitting ? "Saving..." : "Save"}
               </button>
             </div>
           </form>

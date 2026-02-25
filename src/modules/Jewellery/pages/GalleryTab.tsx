@@ -68,7 +68,10 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
         const sortedItems = items.sort((a, b) => b.code.localeCompare(a.code));
 
         setJewelleryItems(sortedItems);
-        setFilteredItems(sortedItems.filter((item) => item.active));
+        // Only show items with images initially
+        setFilteredItems(
+          sortedItems.filter((item) => item.active && item.imageUrl),
+        );
         setLocationOptions(Array.from(locations));
         setBoughtForOptions(Array.from(boughtFor));
       } catch (error) {
@@ -110,6 +113,9 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
       result = result.filter((item) => item.boughtFor === boughtForFilter);
     }
 
+    // CRITICAL FIX: Only show items with images
+    result = result.filter((item) => item.imageUrl);
+
     // Sort by code in descending order (Z → A, newest first)
     const sortedResult = result.sort((a, b) => b.code.localeCompare(a.code));
 
@@ -148,9 +154,12 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
         <div className="grid grid-cols-3 gap-2.5 mb-3.75">
           <div className="bg-gray-50 rounded-lg p-3 text-center">
             <div className="text-lg font-semibold text-blue-500 mb-1">
-              {jewelleryItems.filter((item) => item.active).length}
+              {
+                jewelleryItems.filter((item) => item.active && item.imageUrl)
+                  .length
+              }
             </div>
-            <div className="text-xs text-gray-500">Active</div>
+            <div className="text-xs text-gray-500">With Images</div>
           </div>
 
           <div className="bg-amber-50 rounded-lg p-3 text-center">
@@ -159,7 +168,8 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                 jewelleryItems.filter(
                   (item) =>
                     item.verificationStatus !== VerificationStatus.VERIFIED &&
-                    item.active,
+                    item.active &&
+                    item.imageUrl,
                 ).length
               }
             </div>
@@ -172,7 +182,8 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                 jewelleryItems.filter(
                   (item) =>
                     item.verificationStatus === VerificationStatus.MISSING &&
-                    item.active,
+                    item.active &&
+                    item.imageUrl,
                 ).length
               }
             </div>
@@ -299,8 +310,8 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
               {searchTerm ||
               locationFilter !== "All" ||
               boughtForFilter !== "All"
-                ? "No items match your filters"
-                : "No jewellery items found"}
+                ? "No images match your filters"
+                : "No images found"}
             </p>
           </div>
         ) : (
@@ -313,7 +324,7 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
               >
                 {/* Image Container with Overlay Info */}
                 <div className="w-full h-full relative bg-gray-50 m-0 p-0">
-                  {item.imageUrl ? (
+                  {item.imageUrl && (
                     <>
                       <img
                         src={item.imageUrl}
@@ -350,36 +361,6 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
                         </div>
                       </div>
                     </>
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-500 m-0 p-0">
-                      <div className="text-3xl mb-1.5 opacity-50">💎</div>
-                      <div className="flex flex-col items-center gap-px text-center m-0 p-0">
-                        <div className="text-xs font-semibold text-gray-700 m-0">
-                          {item.code}
-                        </div>
-                        <div className="text-[10px] text-gray-400 m-0">
-                          {item.weight}g
-                        </div>
-
-                        {/* Status Badge - Only show if not VERIFIED */}
-                        {item.verificationStatus !==
-                          VerificationStatus.VERIFIED && (
-                          <div
-                            className={`text-[8px] px-1 py-0.5 rounded font-semibold tracking-wide uppercase mt-1 bg-white/90 ${
-                              item.verificationStatus ===
-                              VerificationStatus.MISSING
-                                ? "bg-red-100 text-red-600"
-                                : "bg-gray-100 text-gray-500"
-                            }`}
-                          >
-                            {item.verificationStatus ===
-                            VerificationStatus.MISSING
-                              ? "MISSING"
-                              : "NOT VERIFIED"}
-                          </div>
-                        )}
-                      </div>
-                    </div>
                   )}
                 </div>
               </div>

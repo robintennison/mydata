@@ -41,10 +41,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
   // Debug logging
   useEffect(() => {
-    console.log("=== BankingHomePage Debug ===");
-    console.log("appSettings from SettingsContext:", appSettings);
-    console.log("EMW_interest value:", appSettings?.EMW_interest);
-    console.log("EMW_Date value:", appSettings?.EMW_Date);
     console.log(
       "All settings keys:",
       appSettings ? Object.keys(appSettings) : [],
@@ -311,8 +307,12 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
               {/* Table Header */}
               <div className="flex items-center py-1 px-0 bg-gray-50 border-b border-gray-200 font-semibold text-xs text-gray-700">
                 <div className="flex-1 px-0.5 min-w-[45px]">Month</div>
-                <div className="flex-1 px-0.5 text-right min-w-[40px]">Sav</div>
-                <div className="flex-1 px-0.5 text-right min-w-[40px]">Dep</div>
+                <div className="flex-1 px-0.5 text-right min-w-[40px]">
+                  Savings
+                </div>
+                <div className="flex-1 px-0.5 text-right min-w-[40px]">
+                  Deposits
+                </div>
                 <div className="flex-1 px-0.5 text-right min-w-[40px]">
                   Total
                 </div>

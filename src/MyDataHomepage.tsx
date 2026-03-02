@@ -96,27 +96,26 @@ const MyDataHomepage: React.FC = () => {
   }, []);
 
   // Memoize calculations for better performance
-  const { totalBalance, upcomingMaturities, expiredMaturities } =
-    useMemo(() => {
-      if (loading || accounts.length === 0) {
-        return {
-          totalBalance: 0,
-          upcomingMaturities: [],
-          expiredMaturities: [],
-        };
-      }
-
+  const { upcomingMaturities, expiredMaturities } = useMemo(() => {
+    if (loading || accounts.length === 0) {
       return {
-        totalBalance: calculateTotalBalance(
-          accounts,
-          deposits,
-          adjustments,
-          appSettings?.showInactive,
-        ),
-        upcomingMaturities: getNextMaturities(deposits, 5),
-        expiredMaturities: getExpiredMaturities(deposits, 5, true), // true = only active deposits
+        totalBalance: 0,
+        upcomingMaturities: [],
+        expiredMaturities: [],
       };
-    }, [accounts, deposits, adjustments, appSettings?.showInactive, loading]);
+    }
+
+    return {
+      totalBalance: calculateTotalBalance(
+        accounts,
+        deposits,
+        adjustments,
+        appSettings?.showInactive,
+      ),
+      upcomingMaturities: getNextMaturities(deposits, 5),
+      expiredMaturities: getExpiredMaturities(deposits, 5, true), // true = only active deposits
+    };
+  }, [accounts, deposits, adjustments, appSettings?.showInactive, loading]);
 
   // Format lakhs for display (without L suffix)
   const formatLakhs = (amount: number): string => {
@@ -142,9 +141,6 @@ const MyDataHomepage: React.FC = () => {
     if (!comments || comments.trim().length === 0) return "";
     return comments.substring(0, 5) + (comments.length > 5 ? "..." : "");
   };
-
-  // Calculate active deposits count
-  const activeDepositsCount = deposits.filter((d) => d.active !== false).length;
 
   if (loading) {
     return (
@@ -177,51 +173,7 @@ const MyDataHomepage: React.FC = () => {
 
   return (
     <>
-      {/* EMW Stats Row - Compact for mobile */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3 p-0 mb-4">
-        {/* Total Balance Card */}
-        <div
-          className="bg-white rounded-lg p-2 sm:p-3 text-center shadow-sm border border-gray-200 transition-all duration-200 cursor-pointer flex flex-col justify-center min-h-[60px] sm:min-h-[70px] hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onClick={() => navigate("/banking")}
-          tabIndex={0}
-          onKeyPress={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              navigate("/banking");
-            }
-          }}
-        >
-          <div className="text-[10px] sm:text-xs font-semibold text-gray-600 mb-0.5 sm:mb-1">
-            Total Balance
-          </div>
-          <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-600 my-0.5 sm:my-1 md:my-2 break-all leading-tight">
-            {formatLakhs(totalBalance)}
-          </div>
-        </div>
-
-        {/* Total Accounts Card */}
-        <div
-          className="bg-white rounded-lg p-2 sm:p-3 text-center shadow-sm border border-gray-200 transition-all duration-200 cursor-pointer flex flex-col justify-center min-h-[60px] sm:min-h-[70px] hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onClick={() => navigate("/banking/accounts")}
-          tabIndex={0}
-          onKeyPress={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              navigate("/banking/accounts");
-            }
-          }}
-        >
-          <div className="text-[10px] sm:text-xs font-semibold text-gray-600 mb-0.5 sm:mb-1">
-            Accounts
-          </div>
-          <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-600 my-0.5 sm:my-1 md:my-2 break-all leading-tight">
-            {accounts.length}
-          </div>
-          <div className="text-[10px] sm:text-xs text-gray-600">
-            {activeDepositsCount} dep
-          </div>
-        </div>
-      </div>
-
-      {/* Online Items with End Dates Section - New section below EMW stats */}
+      {/* Online Items with End Dates Section */}
       <div
         className="bg-white rounded-lg my-3 p-3 sm:p-4 shadow-sm border border-gray-200 shrink-0"
         style={{

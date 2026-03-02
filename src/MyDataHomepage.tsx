@@ -10,7 +10,6 @@ import {
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { DocumentData } from "firebase/firestore";
-import { calculateEMW, getEmwSettings } from "./utils/emwCalculations";
 
 // Add OnlineItem interface
 interface OnlineItem {
@@ -119,10 +118,6 @@ const MyDataHomepage: React.FC = () => {
       };
     }, [accounts, deposits, adjustments, appSettings?.showInactive, loading]);
 
-  // Get EMW settings and calculate EMW amount AFTER totalBalance is available
-  const emwSettings = getEmwSettings(appSettings);
-  const emwAmount = calculateEMW(totalBalance, emwSettings.targetDate);
-
   // Format lakhs for display (without L suffix)
   const formatLakhs = (amount: number): string => {
     return (amount / 100000).toFixed(2);
@@ -184,22 +179,6 @@ const MyDataHomepage: React.FC = () => {
     <>
       {/* EMW Stats Row - Compact for mobile */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3 p-0 mb-4">
-        {/* EMW Card */}
-        <div className="bg-white rounded-lg p-2 sm:p-3 text-center shadow-sm border border-gray-200 transition-all duration-200 cursor-pointer flex flex-col justify-center min-h-[60px] sm:min-h-[70px] hover:shadow-md hover:-translate-y-0.5">
-          <div className="text-[10px] sm:text-xs font-semibold text-gray-600 mb-0.5 sm:mb-1">
-            <div className="flex items-center gap-0.5 sm:gap-1 justify-center">
-              <span className="bg-blue-600 text-white px-1 py-0.5 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs">
-                EMW
-              </span>
-              <span className="hidden sm:inline">Monthly</span>
-              <span className="inline sm:hidden">Mon</span>
-            </div>
-          </div>
-          <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 my-0.5 sm:my-1 md:my-2 break-all leading-tight">
-            {formatLakhs(emwAmount)}
-          </div>
-        </div>
-
         {/* Total Balance Card */}
         <div
           className="bg-white rounded-lg p-2 sm:p-3 text-center shadow-sm border border-gray-200 transition-all duration-200 cursor-pointer flex flex-col justify-center min-h-[60px] sm:min-h-[70px] hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"

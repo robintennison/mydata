@@ -121,11 +121,7 @@ const MyDataHomepage: React.FC = () => {
 
   // Get EMW settings and calculate EMW amount AFTER totalBalance is available
   const emwSettings = getEmwSettings(appSettings);
-  const emwAmount = calculateEMW(
-    totalBalance,
-    emwSettings.targetDate,
-    emwSettings.interestRate,
-  );
+  const emwAmount = calculateEMW(totalBalance, emwSettings.targetDate);
 
   // Format lakhs for display (without L suffix)
   const formatLakhs = (amount: number): string => {
@@ -201,9 +197,6 @@ const MyDataHomepage: React.FC = () => {
           </div>
           <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 my-0.5 sm:my-1 md:my-2 break-all leading-tight">
             {formatLakhs(emwAmount)}
-          </div>
-          <div className="text-[10px] sm:text-xs text-gray-600">
-            {emwSettings.interestRate}%
           </div>
         </div>
 

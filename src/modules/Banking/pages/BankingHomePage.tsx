@@ -138,11 +138,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
   // Get EMW settings and calculate EMW amount
   const emwSettings = getEmwSettings(appSettings);
-  const emwAmount = calculateEMW(
-    totalBankBalance,
-    emwSettings.targetDate,
-    emwSettings.interestRate,
-  );
+  const emwAmount = calculateEMW(totalBankBalance, emwSettings.targetDate);
 
   // Calculate actual withdrawal rate from last 6 months history
   const calculateActualWithdrawalRate = () => {
@@ -240,9 +236,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
             </div>
             <div className="text-base font-bold text-blue-800 leading-tight">
               {formatLakhs(emwAmount)}
-            </div>
-            <div className="text-xs text-gray-500 mt-0.5">
-              {emwSettings.interestRate}%
             </div>
           </div>
 

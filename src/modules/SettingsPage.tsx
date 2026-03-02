@@ -600,7 +600,7 @@ const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Add Location Dialog */}
+      {/* Add Location Dialog edited*/}
       {showAddLoc &&
         renderDialog(
           "Add Location",

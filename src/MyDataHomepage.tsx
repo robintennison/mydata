@@ -10,6 +10,7 @@ import {
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { DocumentData } from "firebase/firestore";
+import { calculateEMW, getEmwSettings } from "./utils/emwCalculations";
 
 // Add OnlineItem interface
 interface OnlineItem {
@@ -118,6 +119,14 @@ const MyDataHomepage: React.FC = () => {
       };
     }, [accounts, deposits, adjustments, appSettings?.showInactive, loading]);
 
+  // Get EMW settings and calculate EMW amount AFTER totalBalance is available
+  const emwSettings = getEmwSettings(appSettings);
+  const emwAmount = calculateEMW(
+    totalBalance,
+    emwSettings.targetDate,
+    emwSettings.interestRate,
+  );
+
   // Format lakhs for display (without L suffix)
   const formatLakhs = (amount: number): string => {
     return (amount / 100000).toFixed(2);
@@ -145,85 +154,6 @@ const MyDataHomepage: React.FC = () => {
 
   // Calculate active deposits count
   const activeDepositsCount = deposits.filter((d) => d.active !== false).length;
-
-  // Calculate EMW (Equivalent Monthly Withdrawal)
-  const calculateEMW = (
-    currentBalance: number,
-    targetDate: Date,
-    annualInterestRate: number = 5,
-  ): number => {
-    if (currentBalance <= 0) return 0;
-
-    const today = new Date();
-    if (targetDate <= today) return 0;
-
-    // Calculate number of months until target date
-    const monthsDiff =
-      (targetDate.getFullYear() - today.getFullYear()) * 12 +
-      (targetDate.getMonth() - today.getMonth());
-
-    if (monthsDiff <= 0) return currentBalance;
-
-    // Convert annual interest rate to monthly rate
-    const monthlyInterestRate = annualInterestRate / 12 / 100;
-
-    // Calculate EMW using the formula: PMT = PV × r / [1 - (1 + r)^-n]
-    const numerator = currentBalance * monthlyInterestRate;
-    const denominator = 1 - Math.pow(1 + monthlyInterestRate, -monthsDiff);
-
-    if (denominator <= 0) {
-      return currentBalance / monthsDiff; // Simple division without interest
-    }
-
-    const emw = numerator / denominator;
-
-    // Round to 2 decimal places
-    return Math.round(emw * 100) / 100;
-  };
-
-  // Get EMW settings from app settings
-  const getEmwSettings = () => {
-    // Default values
-    let interestRate = 5; // 5% default
-    let targetDateStr = "2044-10"; // November 2044 default
-
-    if (appSettings) {
-      // Use EMW_Interest from settings or default
-      interestRate =
-        appSettings.EMW_interest !== undefined ? appSettings.EMW_interest : 5;
-
-      // Use EMW_Date from settings or default
-      targetDateStr = appSettings.EMW_Date || "2044-10";
-    }
-
-    // Parse target date string (format: YYYY-MM)
-    let targetDate: Date;
-    try {
-      const [year, month] = targetDateStr.split("-").map(Number);
-      targetDate = new Date(year, month - 1, 1); // month is 0-indexed
-    } catch (error) {
-      // Fallback to default date if parsing fails
-      console.error("Error parsing EMW date:", error);
-      targetDate = new Date(2044, 10, 1); // November 2044
-      targetDateStr = "2044-10";
-    }
-
-    return {
-      interestRate,
-      targetDate,
-      targetDateStr,
-    };
-  };
-
-  // Get EMW settings
-  const emwSettings = getEmwSettings();
-
-  // Calculate EMW using settings values
-  const emwAmount = calculateEMW(
-    totalBalance,
-    emwSettings.targetDate,
-    emwSettings.interestRate,
-  );
 
   if (loading) {
     return (

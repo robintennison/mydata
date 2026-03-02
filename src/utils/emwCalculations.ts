@@ -4,13 +4,13 @@
  * Calculate EMW (Equivalent Monthly Withdrawal) amount
  * @param currentBalance - Current total balance
  * @param targetDate - Target date for withdrawals
- * @param annualInterestRate - Annual interest rate as percentage (default: 5%)
+ * @param annualInterestRate - Annual interest rate as percentage (default: 0%)
  * @returns EMW amount rounded to 2 decimal places
  */
 export const calculateEMW = (
   currentBalance: number,
   targetDate: Date,
-  annualInterestRate: number = 5,
+  annualInterestRate: number = 0,
 ): number => {
   if (currentBalance <= 0) return 0;
 
@@ -48,16 +48,16 @@ export const calculateEMW = (
  */
 export const getEmwSettings = (appSettings: any) => {
   // Default values
-  let interestRate = 5; // 5% default
-  let targetDateStr = "2044-10"; // November 2044 default
+  let interestRate = 0; // 0% default
+  let targetDateStr = "2039-10"; // November 2039 default
 
   if (appSettings) {
     // Use EMW_Interest from settings or default
     interestRate =
-      appSettings.EMW_interest !== undefined ? appSettings.EMW_interest : 5;
+      appSettings.EMW_interest !== undefined ? appSettings.EMW_interest : 0;
 
     // Use EMW_Date from settings or default
-    targetDateStr = appSettings.EMW_Date || "2044-10";
+    targetDateStr = appSettings.EMW_Date || "2039-10";
   }
 
   // Parse target date string (format: YYYY-MM)
@@ -68,8 +68,8 @@ export const getEmwSettings = (appSettings: any) => {
   } catch (error) {
     // Fallback to default date if parsing fails
     console.error("Error parsing EMW date:", error);
-    targetDate = new Date(2044, 10, 1); // November 2044
-    targetDateStr = "2044-10";
+    targetDate = new Date(2039, 10, 1); // November 2039
+    targetDateStr = "2039-10";
   }
 
   return {

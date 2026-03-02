@@ -34,15 +34,24 @@ const SettingsPage: React.FC = () => {
     makingTax: 0,
     resaleDiscount: 0,
     liabilities: 0,
-    emwInterest: 5,
+    emwInterest: 0,
   });
 
+  // EMW state
   const [emwDate, setEmwDate] = useState("2044-10");
+  const [targetAge, setTargetAge] = useState<number | null>(null);
+  const [useAgeMode, setUseAgeMode] = useState(false); // Toggle between Age and Date mode
 
+  // Editing states
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [editingEmwDate, setEditingEmwDate] = useState(false);
-  const [emwDateValue, setEmwDateValue] = useState("");
+  const [editingTargetDate, setEditingTargetDate] = useState(false);
+  const [editingTargetAge, setEditingTargetAge] = useState(false);
+  const [targetDateValue, setTargetDateValue] = useState("");
+  const [targetAgeValue, setTargetAgeValue] = useState("");
+
+  // Date of birth (Oct 17, 1959)
+  const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
 
   useEffect(() => {
     if (settings) {
@@ -52,14 +61,103 @@ const SettingsPage: React.FC = () => {
         resaleDiscount: settings.resaleDiscountPercent || 0,
         liabilities: settings.liabilities || 0,
         emwInterest:
-          settings.EMW_interest !== undefined ? settings.EMW_interest : 5,
+          settings.EMW_interest !== undefined ? settings.EMW_interest : 0,
       });
 
       if (settings.EMW_Date) {
         setEmwDate(settings.EMW_Date);
+        // Calculate target age from date
+        const calculatedAge = calculateAgeFromDate(settings.EMW_Date);
+        setTargetAge(calculatedAge);
       }
     }
   }, [settings]);
+
+  // Calculate age from date string (YYYY-MM)
+  const calculateAgeFromDate = (dateStr: string): number => {
+    try {
+      const [year, month] = dateStr.split("-").map(Number);
+      const targetDate = new Date(year, month - 1, 1);
+
+      let age = targetDate.getFullYear() - DOB.getFullYear();
+      const monthDiff = targetDate.getMonth() - DOB.getMonth();
+
+      // Adjust age if birthday hasn't occurred yet in the target month
+      if (monthDiff < 0) {
+        age--;
+      }
+
+      return age;
+    } catch (e) {
+      return 0;
+    }
+  };
+
+  // Calculate target date from age
+  const calculateDateFromAge = (age: number): string => {
+    const targetYear = DOB.getFullYear() + age;
+    // Use the same month as DOB (October)
+    return `${targetYear}-10`; // October
+  };
+
+  const toggleMode = () => {
+    setUseAgeMode(!useAgeMode);
+    // Cancel any ongoing edits when switching modes
+    setEditingTargetDate(false);
+    setEditingTargetAge(false);
+  };
+
+  const handleStartTargetDateEdit = () => {
+    setEditingTargetDate(true);
+    setTargetDateValue(emwDate);
+  };
+
+  const handleStartTargetAgeEdit = () => {
+    setEditingTargetAge(true);
+    setTargetAgeValue(targetAge?.toString() || "");
+  };
+
+  const handleSaveTargetDateEdit = () => {
+    if (!targetDateValue.trim()) return;
+
+    const dateRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
+    if (!dateRegex.test(targetDateValue)) {
+      alert("Please enter date in YYYY-MM format (e.g., 2039-10)");
+      return;
+    }
+
+    setEmwDate(targetDateValue);
+    const newAge = calculateAgeFromDate(targetDateValue);
+    setTargetAge(newAge);
+    updateSettings({ EMW_Date: targetDateValue } as any);
+    setEditingTargetDate(false);
+  };
+
+  const handleSaveTargetAgeEdit = () => {
+    if (!targetAgeValue.trim()) return;
+
+    const age = parseInt(targetAgeValue);
+    if (isNaN(age) || age < 0 || age > 150) {
+      alert("Please enter a valid age (0-150)");
+      return;
+    }
+
+    const newDate = calculateDateFromAge(age);
+    setEmwDate(newDate);
+    setTargetAge(age);
+    updateSettings({ EMW_Date: newDate } as any);
+    setEditingTargetAge(false);
+  };
+
+  const handleCancelTargetDateEdit = () => {
+    setEditingTargetDate(false);
+    setTargetDateValue("");
+  };
+
+  const handleCancelTargetAgeEdit = () => {
+    setEditingTargetAge(false);
+    setTargetAgeValue("");
+  };
 
   const handleStartEdit = (field: string, value: number) => {
     setEditingField(field);
@@ -91,7 +189,7 @@ const SettingsPage: React.FC = () => {
         settingsField = "liabilities";
         break;
       case "emwInterest":
-        settingsField = "EMW_Interest";
+        settingsField = "EMW_interest";
         break;
     }
 
@@ -106,30 +204,6 @@ const SettingsPage: React.FC = () => {
   const handleCancelEdit = () => {
     setEditingField(null);
     setEditValue("");
-  };
-
-  const handleStartEmwDateEdit = () => {
-    setEditingEmwDate(true);
-    setEmwDateValue(emwDate);
-  };
-
-  const handleSaveEmwDateEdit = () => {
-    if (!emwDateValue.trim()) return;
-
-    const dateRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
-    if (!dateRegex.test(emwDateValue)) {
-      alert("Please enter date in YYYY-MM format (e.g., 2039-10)");
-      return;
-    }
-
-    setEmwDate(emwDateValue);
-    updateSettings({ EMW_Date: emwDateValue } as any);
-    setEditingEmwDate(false);
-  };
-
-  const handleCancelEmwDateEdit = () => {
-    setEditingEmwDate(false);
-    setEmwDateValue("");
   };
 
   const handleEditValueChange = (value: string) => {
@@ -533,6 +607,7 @@ const SettingsPage: React.FC = () => {
           <h3 className="m-0 mb-4 text-lg font-semibold text-gray-900 flex items-center justify-between">
             EMW (Equated Monthly Withdrawal) Settings
           </h3>
+
           {renderEditableField(
             "EMW Interest Rate",
             "emwInterest",
@@ -540,61 +615,148 @@ const SettingsPage: React.FC = () => {
             "%",
           )}
 
-          {/* EMW Target Date */}
-          <div className="flex justify-between items-center py-3 border-b border-gray-100">
-            <div className="flex-1 pr-4">
-              <div className="font-medium text-gray-900 mb-1 text-sm">
-                EMW Target Date
+          {/* Toggle between Age and Date mode */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={toggleMode}
+              className="px-3 py-1.5 text-xs font-medium rounded-full bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Switch to {useAgeMode ? "Date" : "Age"} Mode
+            </button>
+          </div>
+
+          {/* Target Date Input */}
+          {!useAgeMode && (
+            <div className="flex justify-between items-center py-3 border-b border-gray-100">
+              <div className="flex-1 pr-4">
+                <div className="font-medium text-gray-900 mb-1 text-sm">
+                  Target Date
+                </div>
               </div>
+              {editingTargetDate ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={targetDateValue}
+                    onChange={(e) => setTargetDateValue(e.target.value)}
+                    placeholder="YYYY-MM"
+                    className="w-24 p-2 text-sm border border-gray-300 rounded text-right focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    autoFocus
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleSaveTargetDateEdit()
+                    }
+                  />
+                  <div className="flex gap-1">
+                    <button
+                      onClick={handleSaveTargetDateEdit}
+                      className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-emerald-500 text-white hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                      title="Save"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={handleCancelTargetDateEdit}
+                      className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                      title="Cancel"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-700 text-right">
+                      {formatEmwDate(emwDate)}
+                    </div>
+                    <div className="text-xs text-gray-500 font-normal">
+                      ({emwDate})
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleStartTargetDateEdit}
+                    className="bg-transparent border-none text-base cursor-pointer text-gray-500 p-0.5 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                    title="Edit"
+                  >
+                    ✏️
+                  </button>
+                </div>
+              )}
             </div>
-            {editingEmwDate ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={emwDateValue}
-                  onChange={(e) => setEmwDateValue(e.target.value)}
-                  placeholder="YYYY-MM"
-                  className="w-22 p-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  autoFocus
-                  onKeyPress={(e) =>
-                    e.key === "Enter" && handleSaveEmwDateEdit()
-                  }
-                />
-                <div className="flex gap-1">
-                  <button
-                    onClick={handleSaveEmwDateEdit}
-                    className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-emerald-500 text-white hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                    title="Save"
-                  >
-                    ✓
-                  </button>
-                  <button
-                    onClick={handleCancelEmwDateEdit}
-                    className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                    title="Cancel"
-                  >
-                    ✕
-                  </button>
+          )}
+
+          {/* Target Age Input */}
+          {useAgeMode && (
+            <div className="flex justify-between items-center py-3 border-b border-gray-100">
+              <div className="flex-1 pr-4">
+                <div className="font-medium text-gray-900 mb-1 text-sm">
+                  Target Age
                 </div>
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <div>
-                  <div className="text-sm font-semibold text-gray-700 text-right">
-                    {formatEmwDate(emwDate)}
-                  </div>
-                  <div className="text-xs text-gray-500 font-normal">
-                    ({emwDate})
+              {editingTargetAge ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={targetAgeValue}
+                    onChange={(e) => {
+                      if (/^\d*$/.test(e.target.value)) {
+                        setTargetAgeValue(e.target.value);
+                      }
+                    }}
+                    placeholder="Age"
+                    className="w-20 p-2 text-sm border border-gray-300 rounded text-right focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    autoFocus
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleSaveTargetAgeEdit()
+                    }
+                  />
+                  <span className="text-gray-700 text-sm">years</span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={handleSaveTargetAgeEdit}
+                      className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-emerald-500 text-white hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                      title="Save"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={handleCancelTargetAgeEdit}
+                      className="p-1.5 border-none rounded cursor-pointer text-sm flex items-center justify-center min-w-8 h-8 transition-all bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                      title="Cancel"
+                    >
+                      ✕
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={handleStartEmwDateEdit}
-                  className="bg-transparent border-none text-base cursor-pointer text-gray-500 p-0.5 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-                  title="Edit"
-                >
-                  ✏️
-                </button>
-              </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-700 text-right">
+                      {targetAge} years
+                    </div>
+                    <div className="text-xs text-gray-500 font-normal">
+                      (at age {targetAge})
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleStartTargetAgeEdit}
+                    className="bg-transparent border-none text-base cursor-pointer text-gray-500 p-0.5 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                    title="Edit"
+                  >
+                    ✏️
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Show both values for reference when in either mode */}
+          <div className="mt-3 text-xs text-gray-500 text-right">
+            {!useAgeMode && targetAge && (
+              <div>Equivalent age: {targetAge} years</div>
+            )}
+            {useAgeMode && emwDate && (
+              <div>Target date: {formatEmwDate(emwDate)}</div>
             )}
           </div>
         </div>

@@ -1,9 +1,9 @@
-// src/modules/banking/BankingHomePage.tsx (Tailwind Version)
+// src/modules/banking/BankingHomePage.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
-import Header from "../../../components/Layout/Header"; // Import Header
+import Header from "../../../components/Layout/Header";
 import { calculateEMW, getEmwSettings } from "../../../utils/emwCalculations";
 
 // Import the tab components
@@ -24,18 +24,40 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { loading, accounts, deposits, history, adjustments, settings } =
-    useBankingData();
-  const { settings: appSettings } = useSettings();
+  // Use only one settings source - from SettingsContext
+  const {
+    loading: bankingLoading,
+    accounts,
+    deposits,
+    history,
+    adjustments,
+  } = useBankingData();
+  const { settings: appSettings, loading: settingsLoading } = useSettings();
 
   // State for active tab
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "accounts" | "deposits" | "history" | "summary"
   >("dashboard");
 
+  // Debug logging
+  useEffect(() => {
+    console.log("=== BankingHomePage Debug ===");
+    console.log("appSettings from SettingsContext:", appSettings);
+    console.log("EMW_interest value:", appSettings?.EMW_interest);
+    console.log("EMW_Date value:", appSettings?.EMW_Date);
+    console.log(
+      "All settings keys:",
+      appSettings ? Object.keys(appSettings) : [],
+    );
+
+    if (appSettings) {
+      const emwSettings = getEmwSettings(appSettings);
+      console.log("Parsed EMW settings:", emwSettings);
+    }
+  }, [appSettings]);
+
   // Handle navigation state to set active tab
   useEffect(() => {
-    // Check if there's state in the location (passed from navigation)
     if (location.state && location.state.activeTab) {
       const tabFromState = location.state.activeTab;
       if (
@@ -44,14 +66,12 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         )
       ) {
         setActiveTab(tabFromState as any);
-
-        // Clear the state after using it to prevent issues on refresh
         window.history.replaceState({}, document.title);
       }
     }
   }, [location.state]);
 
-  // Handle Add button click - UPDATED to be passed to Header
+  // Handle Add button click
   const handleAddClick = () => {
     switch (activeTab) {
       case "accounts":
@@ -94,7 +114,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     }
   };
 
-  // Format numbers in lakhs with 2 decimals (no currency symbol or "L" label)
+  // Format numbers in lakhs with 2 decimals
   const formatLakhs = (amount: number): string => {
     return (amount / 100000).toFixed(2);
   };
@@ -105,30 +125,25 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     0,
   );
 
-  // Apply filtering based on settings (same as Android)
-  const filteredDeposits = settings.showInactive
+  // Apply filtering based on settings
+  const filteredDeposits = appSettings?.showInactive
     ? deposits
     : deposits.filter((deposit) => deposit.active !== false);
 
-  // FIXED: Handle undefined adjustmentAmount with default value 0
   const totalDeposits = accounts.reduce((total, account) => {
     const accountId = account.id;
 
-    // 1. Base deposits for this account
     const baseDeposits = filteredDeposits
       .filter((deposit) => deposit.accountId === accountId)
       .reduce((sum, deposit) => sum + deposit.amount, 0);
 
-    // 2. Adjustments for this account - FIXED: Use 0 if adjustmentAmount is undefined
     const adjustmentsTotal = adjustments
       .filter((adj) => adj.accountId === accountId)
       .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
 
-    // 3. Add them together (Android logic)
     return total + baseDeposits + adjustmentsTotal;
   }, 0);
 
-  // Calculate total bank balance (savings + deposits)
   const totalBankBalance = totalSavings + totalDeposits;
 
   // Get last 6 months history (sorted by date - newest first)
@@ -138,7 +153,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
   // Get EMW settings and calculate EMW amount
   const emwSettings = getEmwSettings(appSettings);
-  const emwAmount = calculateEMW(totalBankBalance, emwSettings.targetDate);
+  const emwAmount = calculateEMW(
+    totalBankBalance,
+    emwSettings.targetDate,
+    emwSettings.interestRate,
+  );
 
   // Calculate actual withdrawal rate from last 6 months history
   const calculateActualWithdrawalRate = () => {
@@ -149,19 +168,15 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         monthsCount: 0,
       };
 
-    // Calculate total balance (savings + deposits) for each month
     const monthlyBalances = last6Months.map((record) => ({
       month: record.month,
       totalBalance: record.savings + record.totalDeposits,
     }));
 
-    // Calculate total drop over the period
     const firstMonth = monthlyBalances[0];
     const lastMonth = monthlyBalances[monthlyBalances.length - 1];
     const totalDrop = firstMonth.totalBalance - lastMonth.totalBalance;
-
-    // Calculate monthly average drop
-    const monthsCount = monthlyBalances.length - 1; // Number of intervals
+    const monthsCount = monthlyBalances.length - 1;
     const monthlyRate = monthsCount > 0 ? totalDrop / monthsCount : 0;
 
     return {
@@ -173,11 +188,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
   const actualWithdrawalData = calculateActualWithdrawalRate();
 
-  // Calculate last month's withdrawal (difference between current and previous month)
+  // Calculate last month's withdrawal
   const calculateLastMonthWithdrawal = () => {
     if (last6Months.length < 2) return 0;
 
-    const currentMonth = last6Months[0]; // Already sorted newest first
+    const currentMonth = last6Months[0];
     const previousMonth = last6Months[1];
 
     if (!currentMonth || !previousMonth) return 0;
@@ -185,12 +200,12 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     const currentBalance = currentMonth.savings + currentMonth.totalDeposits;
     const previousBalance = previousMonth.savings + previousMonth.totalDeposits;
 
-    return previousBalance - currentBalance; // Positive = withdrawal, Negative = deposit
+    return previousBalance - currentBalance;
   };
 
   const lastMonthWithdrawal = calculateLastMonthWithdrawal();
 
-  // Dashboard content component with HistoryTab-style table and Pie Charts
+  // Dashboard content component
   const DashboardContent = () => (
     <>
       {/* Top 3 Cards in Single Row - Compact */}
@@ -236,6 +251,9 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
             </div>
             <div className="text-base font-bold text-blue-800 leading-tight">
               {formatLakhs(emwAmount)}
+            </div>
+            <div className="text-xs text-gray-500 mt-0.5">
+              @ {emwSettings.interestRate}%
             </div>
           </div>
 
@@ -290,7 +308,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
             </div>
           ) : (
             <div>
-              {/* Table Header - Compact */}
+              {/* Table Header */}
               <div className="flex items-center py-1 px-0 bg-gray-50 border-b border-gray-200 font-semibold text-xs text-gray-700">
                 <div className="flex-1 px-0.5 min-w-[45px]">Month</div>
                 <div className="flex-1 px-0.5 text-right min-w-[40px]">Sav</div>
@@ -300,16 +318,14 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
                 </div>
               </div>
 
-              {/* Table Rows - Compact */}
+              {/* Table Rows */}
               {last6Months.map((record) => {
-                // Use formatLakhs function to convert rupees to lakhs with 2 decimals
                 const savingsDisplay = formatLakhs(record.savings);
                 const depositsDisplay = formatLakhs(record.totalDeposits);
                 const totalDisplay = formatLakhs(
                   record.savings + record.totalDeposits,
                 );
 
-                // Format month to "MMM YY" format
                 const [year, month] = record.month.split("-");
                 const date = new Date(parseInt(year), parseInt(month) - 1, 1);
                 const monthName = date.toLocaleDateString("en-IN", {
@@ -322,22 +338,15 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
                     key={record.month}
                     className="flex items-center py-1 px-0 border-b border-gray-100 min-h-6 last:border-b-0"
                   >
-                    {/* Month */}
                     <div className="flex-1 px-0.5 text-xs text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap min-w-[45px]">
                       {monthName}
                     </div>
-
-                    {/* Savings */}
                     <div className="flex-1 px-0.5 text-xs font-semibold text-green-600 text-right min-w-[40px]">
                       {savingsDisplay}
                     </div>
-
-                    {/* Deposits */}
                     <div className="flex-1 px-0.5 text-xs font-semibold text-orange-500 text-right min-w-[40px]">
                       {depositsDisplay}
                     </div>
-
-                    {/* Total */}
                     <div className="flex-1 px-0.5 text-xs font-semibold text-blue-600 text-right min-w-[40px]">
                       {totalDisplay}
                     </div>
@@ -345,7 +354,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
                 );
               })}
 
-              {/* Show count of records - Compact */}
               <div className="text-xs text-gray-400 text-center py-1 border-t border-gray-100 bg-gray-50">
                 {Math.min(last6Months.length, 6)} of {history.length} records
               </div>
@@ -354,23 +362,24 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         </div>
       </div>
 
-      {/* Pie Charts Section - Below Recent History Table */}
+      {/* Pie Charts Section */}
       <div className="flex flex-col gap-2 px-2 pb-2">
         {/* Top: Savings Pie Chart */}
         <SavingsPieChart accounts={accounts} />
 
-        {/* Bottom: Deposit Pie Chart */}
+        {/* Bottom: Deposit Pie Chart - Using appSettings for showInactive */}
         <DepositPieChart
           accounts={accounts}
           deposits={deposits}
           adjustments={adjustments}
-          showInactive={settings.showInactive}
+          showInactive={appSettings?.showInactive || false}
         />
       </div>
     </>
   );
 
-  if (loading) {
+  // Combined loading state
+  if (bankingLoading || settingsLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
@@ -388,7 +397,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         addButtonTitle={getAddButtonTitle()}
       />
 
-      {/* Tabs Navigation - Mobile First with Larger Icons */}
+      {/* Tabs Navigation */}
       <div className="w-full bg-white border-b border-gray-200 sticky top-14 z-10">
         <div className="flex overflow-x-auto px-1 py-0 gap-0.5">
           <button
@@ -458,14 +467,14 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         </div>
       </div>
 
-      {/* Tab Content - Mobile First */}
+      {/* Tab Content */}
       <div
         className={`flex-1 w-full mx-auto overflow-y-auto ${
           activeTab === "dashboard" ||
           activeTab === "history" ||
           activeTab === "summary"
-            ? "px-0" // No horizontal padding
-            : "p-2" // Small padding for other tabs
+            ? "px-0"
+            : "p-2"
         }`}
       >
         {activeTab === "dashboard" && <DashboardContent />}

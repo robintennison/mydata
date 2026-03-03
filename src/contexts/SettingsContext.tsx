@@ -5,6 +5,7 @@ import React, {
   useState,
   useEffect,
   ReactNode,
+  useRef,
 } from "react";
 import {
   doc,
@@ -77,15 +78,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const { setError } = useError();
   const [hasPermissionError, setHasPermissionError] = useState(false);
 
-  useEffect(() => {
-    // Don't try to load settings if we already know we don't have permission
-    if (hasPermissionError) {
-      console.log("Using default settings due to previous permission error");
-      setSettings(defaultSettings);
-      setLoading(false);
-      return;
-    }
+  // Store last known good settings to prevent data loss
+  const lastKnownSettings = useRef<Settings | null>(null);
 
+  useEffect(() => {
     const settingsRef = doc(firestore, "settings", "app");
 
     const unsubscribe = onSnapshot(
@@ -94,26 +90,29 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
 
-          setSettings({
-            locations: data.locations || [],
-            boughtFor: data.boughtFor || [],
-            goldRatePerGram: data.goldRatePerGram || 0,
-            makingTaxPercent: data.makingTaxPercent || 0,
-            resaleDiscountPercent: data.resaleDiscountPercent || 0,
-            liabilities: data.liabilities || 0,
-            showInactive: data.showInactive || false,
-            showDelete: data.showDelete || false,
+          // Create settings from Firebase data
+          const firebaseSettings: Settings = {
+            locations: data.locations ?? [],
+            boughtFor: data.boughtFor ?? [],
+            goldRatePerGram: data.goldRatePerGram ?? 0,
+            makingTaxPercent: data.makingTaxPercent ?? 0,
+            resaleDiscountPercent: data.resaleDiscountPercent ?? 0,
+            liabilities: data.liabilities ?? 0,
+            showInactive: data.showInactive ?? false,
+            showDelete: data.showDelete ?? false,
             EMW_interest: data.EMW_interest ?? 5,
-            EMW_Date: data.EMW_Date || "2044-10",
-          });
+            EMW_Date: data.EMW_Date ?? "2044-10",
+          };
+
+          // Store as last known good settings
+          lastKnownSettings.current = firebaseSettings;
+          setSettings(firebaseSettings);
           setHasPermissionError(false); // Reset if we succeed
         } else {
-          // Only try to create default settings if we have permission
-          setDoc(settingsRef, defaultSettings).catch(() => {
-            // If we can't create, just use defaults without error
-            setSettings(defaultSettings);
-          });
+          // Document doesn't exist - create it
+          setDoc(settingsRef, defaultSettings).catch(console.error);
           setSettings(defaultSettings);
+          lastKnownSettings.current = defaultSettings;
         }
         setLoading(false);
       },
@@ -123,35 +122,65 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         // Check if it's a permission error
         if (error.code === "permission-denied") {
           console.log(
-            "Permission denied for settings - using defaults without Firestore",
+            "Permission denied for settings - using last known settings if available",
           );
-          setHasPermissionError(true); // Mark that we don't have permission
-          setSettings(defaultSettings);
+          setHasPermissionError(true);
+
+          // IMPORTANT: Use last known settings instead of defaults if available
+          if (lastKnownSettings.current) {
+            console.log(
+              "Using last known settings:",
+              lastKnownSettings.current,
+            );
+            setSettings(lastKnownSettings.current);
+          } else {
+            console.log("No last known settings, using defaults");
+            setSettings(defaultSettings);
+          }
           // DON'T set error for permission-denied - it's expected before login
         } else if (
           error.code === "unavailable" ||
           error.message.includes("network")
         ) {
-          console.log("Firebase unavailable - using default settings");
-          setSettings(defaultSettings);
+          console.log(
+            "Firebase unavailable - using last known settings if available",
+          );
+
+          // Use last known settings during network issues
+          if (lastKnownSettings.current) {
+            setSettings(lastKnownSettings.current);
+          } else {
+            setSettings(defaultSettings);
+          }
           setError("Firebase connection error.");
         } else {
           // Only show error for unexpected errors
           setError("Firebase connection error.");
+          // Still try to use last known settings
+          if (lastKnownSettings.current) {
+            setSettings(lastKnownSettings.current);
+          }
         }
         setLoading(false);
       },
     );
 
     return () => unsubscribe();
-  }, [setError, hasPermissionError]); // Add hasPermissionError to dependencies
+  }, [setError]); // Remove hasPermissionError from dependencies
 
   const updateSettings = async (updates: Partial<Settings>) => {
+    // Optimistically update local state
+    setSettings((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updates };
+      // Update last known settings
+      lastKnownSettings.current = updated;
+      return updated;
+    });
+
     // If we had permission errors, don't try to update Firestore
     if (hasPermissionError) {
       console.log("Cannot update settings: No Firestore permission");
-      // Still update local state for better UX
-      setSettings((prev) => (prev ? { ...prev, ...updates } : null));
       return;
     }
 
@@ -168,17 +197,19 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     const trimmed = location.trim();
     if (!trimmed) return;
 
+    // Optimistically update local state
+    setSettings((prev) => {
+      if (!prev) return null;
+      const updated = {
+        ...prev,
+        locations: [...prev.locations, trimmed],
+      };
+      lastKnownSettings.current = updated;
+      return updated;
+    });
+
     if (hasPermissionError) {
       console.log("Cannot add location: No Firestore permission");
-      // Update local state
-      setSettings((prev) =>
-        prev
-          ? {
-              ...prev,
-              locations: [...prev.locations, trimmed],
-            }
-          : null,
-      );
       return;
     }
 
@@ -194,17 +225,19 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   };
 
   const removeLocation = async (location: string) => {
+    // Optimistically update local state
+    setSettings((prev) => {
+      if (!prev) return null;
+      const updated = {
+        ...prev,
+        locations: prev.locations.filter((l) => l !== location),
+      };
+      lastKnownSettings.current = updated;
+      return updated;
+    });
+
     if (hasPermissionError) {
       console.log("Cannot remove location: No Firestore permission");
-      // Update local state
-      setSettings((prev) =>
-        prev
-          ? {
-              ...prev,
-              locations: prev.locations.filter((l) => l !== location),
-            }
-          : null,
-      );
       return;
     }
 
@@ -223,17 +256,19 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     const trimmed = purpose.trim();
     if (!trimmed) return;
 
+    // Optimistically update local state
+    setSettings((prev) => {
+      if (!prev) return null;
+      const updated = {
+        ...prev,
+        boughtFor: [...prev.boughtFor, trimmed],
+      };
+      lastKnownSettings.current = updated;
+      return updated;
+    });
+
     if (hasPermissionError) {
       console.log("Cannot add boughtFor: No Firestore permission");
-      // Update local state
-      setSettings((prev) =>
-        prev
-          ? {
-              ...prev,
-              boughtFor: [...prev.boughtFor, trimmed],
-            }
-          : null,
-      );
       return;
     }
 
@@ -249,17 +284,19 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   };
 
   const removeBoughtFor = async (purpose: string) => {
+    // Optimistically update local state
+    setSettings((prev) => {
+      if (!prev) return null;
+      const updated = {
+        ...prev,
+        boughtFor: prev.boughtFor.filter((p) => p !== purpose),
+      };
+      lastKnownSettings.current = updated;
+      return updated;
+    });
+
     if (hasPermissionError) {
       console.log("Cannot remove boughtFor: No Firestore permission");
-      // Update local state
-      setSettings((prev) =>
-        prev
-          ? {
-              ...prev,
-              boughtFor: prev.boughtFor.filter((p) => p !== purpose),
-            }
-          : null,
-      );
       return;
     }
 
@@ -277,7 +314,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   return (
     <SettingsContext.Provider
       value={{
-        settings: settings || defaultSettings, // Always return settings
+        settings, // Don't fallback to defaultSettings here
         loading,
         updateSettings,
         addLocation,

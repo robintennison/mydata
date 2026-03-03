@@ -37,8 +37,8 @@ const SettingsPage: React.FC = () => {
     emwInterest: 0,
   });
 
-  // EMW state
-  const [emwDate, setEmwDate] = useState("2044-10");
+  // EMW state - start with empty values
+  const [emwDate, setEmwDate] = useState<string>("");
   const [targetAge, setTargetAge] = useState<number | null>(null);
   const [useAgeMode, setUseAgeMode] = useState(false); // Toggle between Age and Date mode
 
@@ -54,27 +54,35 @@ const SettingsPage: React.FC = () => {
   const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
 
   useEffect(() => {
+    // Update local state whenever settings change from context
     if (settings) {
+      console.log("Settings updated:", settings);
+
       setFinancialSettings({
-        goldRate: settings.goldRatePerGram || 0,
-        makingTax: settings.makingTaxPercent || 0,
-        resaleDiscount: settings.resaleDiscountPercent || 0,
-        liabilities: settings.liabilities || 0,
-        emwInterest:
-          settings.EMW_interest !== undefined ? settings.EMW_interest : 0,
+        goldRate: settings.goldRatePerGram ?? 0,
+        makingTax: settings.makingTaxPercent ?? 0,
+        resaleDiscount: settings.resaleDiscountPercent ?? 0,
+        liabilities: settings.liabilities ?? 0,
+        emwInterest: settings.EMW_interest ?? 0,
       });
 
+      // Only set EMW date and calculate age if we have a valid date
       if (settings.EMW_Date) {
         setEmwDate(settings.EMW_Date);
-        // Calculate target age from date
         const calculatedAge = calculateAgeFromDate(settings.EMW_Date);
         setTargetAge(calculatedAge);
+      } else {
+        // If no date in settings, use default
+        setEmwDate("2044-10");
+        setTargetAge(85);
       }
     }
   }, [settings]);
 
   // Calculate age from date string (YYYY-MM)
   const calculateAgeFromDate = (dateStr: string): number => {
+    if (!dateStr) return 85; // Return default age if no date
+
     try {
       const [year, month] = dateStr.split("-").map(Number);
       const targetDate = new Date(year, month - 1, 1);
@@ -89,7 +97,7 @@ const SettingsPage: React.FC = () => {
 
       return age;
     } catch (e) {
-      return 0;
+      return 85; // Return default age on error
     }
   };
 
@@ -274,6 +282,8 @@ const SettingsPage: React.FC = () => {
   };
 
   const formatEmwDate = (dateStr: string) => {
+    if (!dateStr) return "Loading...";
+
     try {
       const [year, month] = dateStr.split("-");
       const date = new Date(parseInt(year), parseInt(month) - 1, 1);
@@ -537,13 +547,13 @@ const SettingsPage: React.FC = () => {
             "Show Inactive Items",
             "Show inactive jewellery in lists and gallery",
             "showInactive",
-            settings?.showInactive || false,
+            settings?.showInactive ?? false,
           )}
           {renderToggleField(
             "Show Delete Action",
             "Display the edit and delete control on Edit screen",
             "showDelete",
-            settings?.showDelete || false,
+            settings?.showDelete ?? false,
           )}
         </div>
 
@@ -583,22 +593,22 @@ const SettingsPage: React.FC = () => {
         {/* Locations Management - Compact */}
         {renderListSection(
           "Locations",
-          settings?.locations?.length || 0,
+          settings?.locations?.length ?? 0,
           locExpanded,
           setLocExpanded,
           setShowAddLoc,
-          settings?.locations || [],
+          settings?.locations ?? [],
           "location",
         )}
 
         {/* Bought For Management - Compact */}
         {renderListSection(
           "Bought For",
-          settings?.boughtFor?.length || 0,
+          settings?.boughtFor?.length ?? 0,
           bfExpanded,
           setBfExpanded,
           setShowAddBf,
-          settings?.boughtFor || [],
+          settings?.boughtFor ?? [],
           "boughtFor",
         )}
 
@@ -667,16 +677,19 @@ const SettingsPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <div>
                     <div className="text-sm font-semibold text-gray-700 text-right">
-                      {formatEmwDate(emwDate)}
+                      {emwDate ? formatEmwDate(emwDate) : "Loading..."}
                     </div>
-                    <div className="text-xs text-gray-500 font-normal">
-                      ({emwDate})
-                    </div>
+                    {emwDate && (
+                      <div className="text-xs text-gray-500 font-normal">
+                        ({emwDate})
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={handleStartTargetDateEdit}
                     className="bg-transparent border-none text-base cursor-pointer text-gray-500 p-0.5 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
                     title="Edit"
+                    disabled={!emwDate}
                   >
                     ✏️
                   </button>
@@ -732,16 +745,19 @@ const SettingsPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <div>
                     <div className="text-sm font-semibold text-gray-700 text-right">
-                      {targetAge} years
+                      {targetAge !== null ? `${targetAge} years` : "Loading..."}
                     </div>
-                    <div className="text-xs text-gray-500 font-normal">
-                      (at age {targetAge})
-                    </div>
+                    {targetAge !== null && (
+                      <div className="text-xs text-gray-500 font-normal">
+                        (at age {targetAge})
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={handleStartTargetAgeEdit}
                     className="bg-transparent border-none text-base cursor-pointer text-gray-500 p-0.5 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
                     title="Edit"
+                    disabled={targetAge === null}
                   >
                     ✏️
                   </button>
@@ -762,7 +778,7 @@ const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Add Location Dialog edited*/}
+      {/* Add Location Dialog */}
       {showAddLoc &&
         renderDialog(
           "Add Location",

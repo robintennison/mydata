@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import Header from "../../../components/Layout/Header";
-import { calculateEMW, getEmwSettings } from "../../../utils/emwCalculations";
 
 // Import the tab components
 import AccountsTab from "./AccountsTab";
@@ -38,19 +37,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "accounts" | "deposits" | "history" | "summary"
   >("dashboard");
-
-  // Debug logging
-  useEffect(() => {
-    console.log(
-      "All settings keys:",
-      appSettings ? Object.keys(appSettings) : [],
-    );
-
-    if (appSettings) {
-      const emwSettings = getEmwSettings(appSettings);
-      console.log("Parsed EMW settings:", emwSettings);
-    }
-  }, [appSettings]);
 
   // Handle navigation state to set active tab
   useEffect(() => {
@@ -147,60 +133,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     .sort((a, b) => b.month.localeCompare(a.month))
     .slice(0, 6);
 
-  // Get EMW settings and calculate EMW amount
-  const emwSettings = getEmwSettings(appSettings);
-  const emwAmount = calculateEMW(
-    totalBankBalance,
-    emwSettings.targetDate,
-    emwSettings.interestRate,
-  );
-
-  // Calculate actual withdrawal rate from last 6 months history
-  const calculateActualWithdrawalRate = () => {
-    if (last6Months.length < 2)
-      return {
-        monthlyRate: 0,
-        totalDrop: 0,
-        monthsCount: 0,
-      };
-
-    const monthlyBalances = last6Months.map((record) => ({
-      month: record.month,
-      totalBalance: record.savings + record.totalDeposits,
-    }));
-
-    const firstMonth = monthlyBalances[0];
-    const lastMonth = monthlyBalances[monthlyBalances.length - 1];
-    const totalDrop = firstMonth.totalBalance - lastMonth.totalBalance;
-    const monthsCount = monthlyBalances.length - 1;
-    const monthlyRate = monthsCount > 0 ? totalDrop / monthsCount : 0;
-
-    return {
-      monthlyRate,
-      totalDrop,
-      monthsCount,
-    };
-  };
-
-  const actualWithdrawalData = calculateActualWithdrawalRate();
-
-  // Calculate last month's withdrawal
-  const calculateLastMonthWithdrawal = () => {
-    if (last6Months.length < 2) return 0;
-
-    const currentMonth = last6Months[0];
-    const previousMonth = last6Months[1];
-
-    if (!currentMonth || !previousMonth) return 0;
-
-    const currentBalance = currentMonth.savings + currentMonth.totalDeposits;
-    const previousBalance = previousMonth.savings + previousMonth.totalDeposits;
-
-    return previousBalance - currentBalance;
-  };
-
-  const lastMonthWithdrawal = calculateLastMonthWithdrawal();
-
   // Dashboard content component
   const DashboardContent = () => (
     <>
@@ -228,63 +160,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
             <div className="text-xs text-gray-500 mb-0.5">Total</div>
             <div className="text-base font-bold text-gray-900 leading-tight">
               {formatLakhs(totalBankBalance)}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* EMW Section - Single Row - Compact */}
-      <div className="px-2 py-2">
-        <div className="grid grid-cols-3 gap-1.5 mb-3">
-          {/* EMW Card */}
-          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs font-semibold text-blue-800 mb-1 flex items-center justify-center gap-1">
-              <span className="bg-blue-500 text-white px-1 py-0.5 rounded text-xs">
-                EMW
-              </span>
-              <span className="hidden sm:inline">Monthly</span>
-              <span className="sm:hidden">Mon</span>
-            </div>
-            <div className="text-base font-bold text-blue-800 leading-tight">
-              {formatLakhs(emwAmount)}
-            </div>
-            <div className="text-xs text-gray-500 mt-0.5">
-              @ {emwSettings.interestRate}%
-            </div>
-          </div>
-
-          {/* Actual Rate Card */}
-          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs font-semibold text-gray-700 mb-1">
-              Actual (6m)
-            </div>
-            <div
-              className={`text-base font-bold leading-tight ${
-                actualWithdrawalData.monthlyRate >= emwAmount
-                  ? "text-red-600"
-                  : "text-green-600"
-              }`}
-            >
-              {formatLakhs(actualWithdrawalData.monthlyRate)}
-            </div>
-            <div className="text-xs text-gray-500 mt-0.5">avg/month</div>
-          </div>
-
-          {/* Last Month Card */}
-          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs font-semibold text-gray-700 mb-1">
-              Last Month
-            </div>
-            <div
-              className={`text-base font-bold leading-tight ${
-                lastMonthWithdrawal >= 0 ? "text-red-600" : "text-green-600"
-              }`}
-            >
-              {lastMonthWithdrawal >= 0 ? "-" : "+"}
-              {formatLakhs(Math.abs(lastMonthWithdrawal))}
-            </div>
-            <div className="text-xs text-gray-500 mt-0.5">
-              {lastMonthWithdrawal >= 0 ? "withdraw" : "deposit"}
             </div>
           </div>
         </div>

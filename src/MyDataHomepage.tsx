@@ -2,14 +2,15 @@ import React, { useMemo, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBankingData } from "./modules/Banking/hooks/useBankingData";
 import { useSettings } from "./contexts/SettingsContext";
+import { useJewellerySettings } from "./modules/Jewellery/hooks/useSettingsData";
 import {
-  calculateTotalBalance,
   getNextMaturities,
   getExpiredMaturities,
 } from "./modules/Banking/utils/bankingCalculations";
+import { calculateEMW, getEmwSettings } from "./utils/emwCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { DocumentData } from "firebase/firestore";
+import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
 // Add OnlineItem interface
 interface OnlineItem {
@@ -29,12 +30,36 @@ interface OnlineItem {
   updatedAt: number;
 }
 
+// Add JewelleryItem interface (matching the structure from Firestore)
+interface JewelleryItem {
+  id: string;
+  code: string;
+  description: string;
+  weight: number;
+  location: string;
+  boughtFor: string;
+  purchaseDate: number;
+  imageUrl: string;
+  active: boolean;
+  billId?: string;
+  lastVerified?: number;
+  verificationStatus?: string;
+  verificationNotes?: string;
+}
+
 const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
   const { settings: appSettings } = useSettings();
-  const { accounts, deposits, adjustments, loading } = useBankingData();
+  const { goldRate, settings: jewellerySettings } = useJewellerySettings();
+  const { accounts, deposits, adjustments, history, loading } =
+    useBankingData();
   const [onlineItems, setOnlineItems] = useState<OnlineItem[]>([]);
   const [onlineItemsLoading, setOnlineItemsLoading] = useState(true);
+  const [jewelleryItems, setJewelleryItems] = useState<JewelleryItem[]>([]);
+  const [jewelleryLoading, setJewelleryLoading] = useState(true);
+
+  // Get resale discount percentage from jewellery settings
+  const resaleDiscountPercent = jewellerySettings?.resaleDiscountPercent || 0;
 
   // Fetch online items
   useEffect(() => {
@@ -95,31 +120,217 @@ const MyDataHomepage: React.FC = () => {
     fetchOnlineItems();
   }, []);
 
+  // Fetch jewellery items
+  useEffect(() => {
+    const fetchJewelleryItems = async () => {
+      try {
+        setJewelleryLoading(true);
+        const db = getFirestore();
+        const itemsRef = collection(db, "jewellery");
+        const itemsSnapshot = await getDocs(itemsRef);
+
+        const itemsList: JewelleryItem[] = [];
+        itemsSnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+          const data = doc.data();
+          itemsList.push({
+            id: doc.id,
+            code: data.code || "",
+            description: data.description || "",
+            weight: data.weight || 0,
+            location: data.location || "",
+            boughtFor: data.boughtFor || "",
+            purchaseDate: data.purchaseDate || 0,
+            imageUrl: data.imageUrl || "",
+            active: data.active !== false,
+            billId: data.billId,
+            lastVerified: data.lastVerified || 0,
+            verificationStatus: data.verificationStatus,
+            verificationNotes: data.verificationNotes || "",
+          });
+        });
+
+        setJewelleryItems(itemsList);
+      } catch (error) {
+        console.error("Error fetching jewellery items:", error);
+      } finally {
+        setJewelleryLoading(false);
+      }
+    };
+
+    fetchJewelleryItems();
+  }, []);
+
   // Memoize calculations for better performance
-  const { upcomingMaturities, expiredMaturities } = useMemo(() => {
+  const {
+    upcomingMaturities,
+    expiredMaturities,
+    totalSavings,
+    totalDeposits,
+    totalBankBalance,
+    totalJewelleryWeight,
+    totalJewellerySellValue,
+    totalAssets,
+    emwAmount,
+    actualWithdrawalData,
+    lastMonthWithdrawal,
+  } = useMemo(() => {
     if (loading || accounts.length === 0) {
       return {
-        totalBalance: 0,
         upcomingMaturities: [],
         expiredMaturities: [],
+        totalSavings: 0,
+        totalDeposits: 0,
+        totalBankBalance: 0,
+        totalJewelleryWeight: 0,
+        totalJewellerySellValue: 0,
+        totalAssets: 0,
+        emwAmount: 0,
+        actualWithdrawalData: { monthlyRate: 0, totalDrop: 0, monthsCount: 0 },
+        lastMonthWithdrawal: 0,
       };
     }
 
-    return {
-      totalBalance: calculateTotalBalance(
-        accounts,
-        deposits,
-        adjustments,
-        appSettings?.showInactive,
-      ),
-      upcomingMaturities: getNextMaturities(deposits, 5),
-      expiredMaturities: getExpiredMaturities(deposits, 5, true), // true = only active deposits
+    // Calculate total savings
+    const totalSavings = accounts.reduce(
+      (sum, account) => sum + account.savingsAmount,
+      0,
+    );
+
+    // Calculate total deposits with filtering
+    const filteredDeposits = appSettings?.showInactive
+      ? deposits
+      : deposits.filter((deposit) => deposit.active !== false);
+
+    const totalDeposits = accounts.reduce((total, account) => {
+      const accountId = account.id;
+
+      const baseDeposits = filteredDeposits
+        .filter((deposit) => deposit.accountId === accountId)
+        .reduce((sum, deposit) => sum + deposit.amount, 0);
+
+      const adjustmentsTotal = adjustments
+        .filter((adj) => adj.accountId === accountId)
+        .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
+
+      return total + baseDeposits + adjustmentsTotal;
+    }, 0);
+
+    const totalBankBalance = totalSavings + totalDeposits;
+
+    // Calculate jewellery stats (only active items)
+    const activeJewelleryItems = jewelleryItems.filter(
+      (item) => item.active !== false,
+    );
+    const totalJewelleryWeight = activeJewelleryItems.reduce(
+      (sum, item) => sum + (item.weight || 0),
+      0,
+    );
+
+    // Calculate sell value exactly as in JewelleryHome component:
+    // goldValue = totalWeight * goldRate
+    // sellValue = goldValue * (1 - resaleDiscountPercent / 100)
+    const goldValue = totalJewelleryWeight * goldRate;
+    const totalJewellerySellValue =
+      goldValue * (1 - resaleDiscountPercent / 100);
+
+    // Calculate total assets
+    const totalAssets = totalBankBalance + totalJewellerySellValue;
+
+    // Calculate EMW
+    const emwSettings = getEmwSettings(appSettings);
+    const emwAmount = calculateEMW(
+      totalBankBalance,
+      emwSettings.targetDate,
+      emwSettings.interestRate,
+    );
+
+    // Get last 6 months history for withdrawal calculations
+    const last6Months = [...history]
+      .sort((a, b) => b.month.localeCompare(a.month))
+      .slice(0, 6);
+
+    // Calculate actual withdrawal rate from last 6 months history
+    const calculateActualWithdrawalRate = () => {
+      if (last6Months.length < 2)
+        return {
+          monthlyRate: 0,
+          totalDrop: 0,
+          monthsCount: 0,
+        };
+
+      const monthlyBalances = last6Months.map((record) => ({
+        month: record.month,
+        totalBalance: record.savings + record.totalDeposits,
+      }));
+
+      const firstMonth = monthlyBalances[0];
+      const lastMonth = monthlyBalances[monthlyBalances.length - 1];
+      const totalDrop = firstMonth.totalBalance - lastMonth.totalBalance;
+      const monthsCount = monthlyBalances.length - 1;
+      const monthlyRate = monthsCount > 0 ? totalDrop / monthsCount : 0;
+
+      return {
+        monthlyRate,
+        totalDrop,
+        monthsCount,
+      };
     };
-  }, [accounts, deposits, adjustments, appSettings?.showInactive, loading]);
+
+    // Calculate last month's withdrawal
+    const calculateLastMonthWithdrawal = () => {
+      if (last6Months.length < 2) return 0;
+
+      const currentMonth = last6Months[0];
+      const previousMonth = last6Months[1];
+
+      if (!currentMonth || !previousMonth) return 0;
+
+      const currentBalance = currentMonth.savings + currentMonth.totalDeposits;
+      const previousBalance =
+        previousMonth.savings + previousMonth.totalDeposits;
+
+      return previousBalance - currentBalance;
+    };
+
+    return {
+      upcomingMaturities: getNextMaturities(deposits, 5),
+      expiredMaturities: getExpiredMaturities(deposits, 5, true),
+      totalSavings,
+      totalDeposits,
+      totalBankBalance,
+      totalJewelleryWeight,
+      totalJewellerySellValue,
+      totalAssets,
+      emwAmount,
+      actualWithdrawalData: calculateActualWithdrawalRate(),
+      lastMonthWithdrawal: calculateLastMonthWithdrawal(),
+    };
+  }, [
+    accounts,
+    deposits,
+    adjustments,
+    history,
+    jewelleryItems,
+    goldRate,
+    resaleDiscountPercent,
+    appSettings,
+    loading,
+  ]);
 
   // Format lakhs for display (without L suffix)
   const formatLakhs = (amount: number): string => {
     return (amount / 100000).toFixed(2);
+  };
+
+  // Format in lakhs without any suffix (for privacy)
+  const formatLargeAmount = (amount: number): string => {
+    // Always convert to lakhs (divide by 100,000) and show with 2 decimal places
+    return (amount / 100000).toFixed(2);
+  };
+
+  // Format weight in grams
+  const formatWeight = (weight: number): string => {
+    return weight.toFixed(1) + "g";
   };
 
   // Updated date format to show 8 characters (dd/mm/yy)
@@ -142,7 +353,10 @@ const MyDataHomepage: React.FC = () => {
     return comments.substring(0, 5) + (comments.length > 5 ? "..." : "");
   };
 
-  if (loading) {
+  // Get EMW settings for display
+  const emwSettings = getEmwSettings(appSettings);
+
+  if (loading || jewelleryLoading) {
     return (
       <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-4 px-2 sm:px-4 box-border overflow-x-hidden">
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-gray-50 text-gray-700">
@@ -173,6 +387,103 @@ const MyDataHomepage: React.FC = () => {
 
   return (
     <>
+      {/* Top Row - EMW Cards */}
+      <div className="px-2 py-3">
+        <div className="grid grid-cols-3 gap-1.5 mb-1">
+          {/* EMW Card */}
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs font-semibold text-blue-800 mb-1 flex items-center justify-center gap-1">
+              <span className="bg-blue-500 text-white px-1 py-0.5 rounded text-xs">
+                EMW
+              </span>
+              <span className="hidden sm:inline">Monthly</span>
+              <span className="sm:hidden">Mon</span>
+            </div>
+            <div className="text-base font-bold text-blue-800 leading-tight">
+              {formatLakhs(emwAmount)}
+            </div>
+            <div className="text-xs text-gray-500 mt-0.5">
+              @ {emwSettings.interestRate}%
+            </div>
+          </div>
+
+          {/* Actual Rate Card */}
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs font-semibold text-gray-700 mb-1">
+              Actual (6m)
+            </div>
+            <div
+              className={`text-base font-bold leading-tight ${
+                actualWithdrawalData.monthlyRate >= emwAmount
+                  ? "text-red-600"
+                  : "text-green-600"
+              }`}
+            >
+              {formatLakhs(actualWithdrawalData.monthlyRate)}
+            </div>
+            <div className="text-xs text-gray-500 mt-0.5">avg/month</div>
+          </div>
+
+          {/* Last Month Card */}
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs font-semibold text-gray-700 mb-1">
+              Last Month
+            </div>
+            <div
+              className={`text-base font-bold leading-tight ${
+                lastMonthWithdrawal >= 0 ? "text-red-600" : "text-green-600"
+              }`}
+            >
+              {lastMonthWithdrawal >= 0 ? "-" : "+"}
+              {formatLakhs(Math.abs(lastMonthWithdrawal))}
+            </div>
+            <div className="text-xs text-gray-500 mt-0.5">
+              {lastMonthWithdrawal >= 0 ? "withdraw" : "deposit"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Second Row - Asset Cards */}
+      <div className="px-2 py-1">
+        <div className="grid grid-cols-3 gap-1.5 mb-1">
+          {/* Total Bank Balance Card */}
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs text-gray-500 mb-0.5">Bank Balance</div>
+            <div className="text-base font-bold text-blue-600 leading-tight">
+              {formatLargeAmount(totalBankBalance)}
+            </div>
+            <div className="text-[10px] text-gray-400 mt-0.5">
+              S: {formatLakhs(totalSavings)} | D: {formatLakhs(totalDeposits)}
+            </div>
+          </div>
+
+          {/* Jewellery Sell Value Card */}
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs text-gray-500 mb-0.5">Jewellery Value</div>
+            <div className="text-base font-bold text-amber-600 leading-tight">
+              {formatLargeAmount(totalJewellerySellValue)}
+            </div>
+            <div className="text-[10px] text-gray-400 mt-0.5">
+              {formatWeight(totalJewelleryWeight)} | -{resaleDiscountPercent}%
+            </div>
+          </div>
+
+          {/* Total Assets Card */}
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center bg-gradient-to-br from-blue-50 to-amber-50">
+            <div className="text-xs font-semibold text-gray-700 mb-0.5">
+              Total Assets
+            </div>
+            <div className="text-base font-bold text-purple-700 leading-tight">
+              {formatLargeAmount(totalAssets)}
+            </div>
+            <div className="text-[10px] text-gray-500 mt-0.5">
+              Bank + Jewellery
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Online Items with End Dates Section */}
       <div
         className="bg-white rounded-lg my-3 p-3 sm:p-4 shadow-sm border border-gray-200 shrink-0"

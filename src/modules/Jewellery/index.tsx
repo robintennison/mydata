@@ -17,6 +17,8 @@ import Header from "../../components/Layout/Header";
 
 type TabType = "dashboard" | "list" | "gallery" | "bills" | "verification";
 
+const PAVAN_TO_GRAMS = 8; // 1 Pavan = 8 grams
+
 const JewelleryHome: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,10 +31,10 @@ const JewelleryHome: React.FC = () => {
     sellValue: 0,
   });
   const [personsWeight, setPersonsWeight] = useState<
-    { person: string; totalWeight: number }[]
+    { person: string; totalWeight: number; totalPavans: number }[]
   >([]);
   const [locationWeight, setLocationWeight] = useState<
-    { location: string; totalWeight: number }[]
+    { location: string; totalWeight: number; totalPavans: number }[]
   >([]);
   const [loading, setLoading] = useState(true);
 
@@ -119,14 +121,22 @@ const JewelleryHome: React.FC = () => {
         // Calculate sell value (gold rate - resale discount percentage)
         const sellValue = goldValue * (1 - resaleDiscountPercent / 100);
 
-        // Convert personWeightMap to array and sort by weight descending
+        // Convert personWeightMap to array with Pavan values and sort by weight descending
         const personsArray = Object.entries(personWeightMap)
-          .map(([person, totalWeight]) => ({ person, totalWeight }))
+          .map(([person, totalWeight]) => ({
+            person,
+            totalWeight,
+            totalPavans: totalWeight / PAVAN_TO_GRAMS,
+          }))
           .sort((a, b) => b.totalWeight - a.totalWeight);
 
-        // Convert locationWeightMap to array and sort by weight descending
+        // Convert locationWeightMap to array with Pavan values and sort by weight descending
         const locationsArray = Object.entries(locationWeightMap)
-          .map(([location, totalWeight]) => ({ location, totalWeight }))
+          .map(([location, totalWeight]) => ({
+            location,
+            totalWeight,
+            totalPavans: totalWeight / PAVAN_TO_GRAMS,
+          }))
           .sort((a, b) => b.totalWeight - a.totalWeight);
 
         setStats({
@@ -166,8 +176,17 @@ const JewelleryHome: React.FC = () => {
     return `${weight.toFixed(1)}`;
   };
 
+  const formatPavans = (pavans: number): string => {
+    return `${pavans.toFixed(1)}P`;
+  };
+
   const formatPercent = (percent: number): string => {
     return `${percent}%`;
+  };
+
+  // Format weight with Pavan in parentheses
+  const formatWeightWithPavan = (weight: number, pavans: number): string => {
+    return `${formatWeight(weight)} (${formatPavans(pavans)})`;
   };
 
   // Handle Add button click for Header
@@ -244,7 +263,10 @@ const JewelleryHome: React.FC = () => {
                     Total Weight
                   </div>
                   <div className="text-base font-semibold text-blue-500">
-                    {formatWeight(stats.totalWeight)}
+                    {formatWeightWithPavan(
+                      stats.totalWeight,
+                      stats.totalWeight / PAVAN_TO_GRAMS,
+                    )}
                   </div>
                   <div className="text-[10px] text-gray-400 mt-1">
                     {stats.totalItems} items
@@ -310,8 +332,11 @@ const JewelleryHome: React.FC = () => {
                           >
                             {item.person}
                           </div>
-                          <div className="text-xs font-semibold text-gray-900 whitespace-nowrap min-w-[50px] text-right">
-                            {formatWeight(item.totalWeight)}
+                          <div className="text-xs font-semibold text-gray-900 whitespace-nowrap">
+                            {formatWeightWithPavan(
+                              item.totalWeight,
+                              item.totalPavans,
+                            )}
                           </div>
                         </div>
                       ))}
@@ -349,8 +374,11 @@ const JewelleryHome: React.FC = () => {
                           >
                             {item.location}
                           </div>
-                          <div className="text-xs font-semibold text-gray-900 whitespace-nowrap min-w-[50px] text-right">
-                            {formatWeight(item.totalWeight)}
+                          <div className="text-xs font-semibold text-gray-900 whitespace-nowrap">
+                            {formatWeightWithPavan(
+                              item.totalWeight,
+                              item.totalPavans,
+                            )}
                           </div>
                         </div>
                       ))}

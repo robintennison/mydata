@@ -1,5 +1,4 @@
 // src/modules/banking/DepositsTab.tsx (Tailwind Version)
-
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
@@ -26,7 +25,6 @@ const DepositsTab: React.FC = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
   const { loading, accounts, deposits } = useBankingData();
-
   const [filterAccount, setFilterAccount] = useState("All");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
@@ -73,7 +71,6 @@ const DepositsTab: React.FC = () => {
       const accountB = accounts.find((acc) => acc.id === b.accountId);
       const codeA = accountA?.acctCode || "";
       const codeB = accountB?.acctCode || "";
-
       if (sortBy === "account") {
         // Sort by account code
         if (codeA < codeB) return -1;
@@ -127,7 +124,6 @@ const DepositsTab: React.FC = () => {
               {filterAccount === "All" ? "All" : filterAccount}
             </span>
           </button>
-
           {/* Filter Dropdown */}
           {showFilterDropdown && (
             <>
@@ -142,7 +138,6 @@ const DepositsTab: React.FC = () => {
                 <div className="px-3 py-2 text-xs text-gray-600 border-b border-gray-200">
                   Filter by Account
                 </div>
-
                 <div>
                   <button
                     onClick={() => {
@@ -157,7 +152,6 @@ const DepositsTab: React.FC = () => {
                   >
                     All Accounts
                   </button>
-
                   {/* Sort accounts by acctCode */}
                   {accounts
                     .filter((acc) => isAccountActive(acc))
@@ -183,7 +177,6 @@ const DepositsTab: React.FC = () => {
             </>
           )}
         </div>
-
         {/* Sort Button */}
         <div className="relative">
           <button
@@ -193,7 +186,6 @@ const DepositsTab: React.FC = () => {
           >
             <span>{sortBy === "account" ? "🔢" : "📅"}</span>
           </button>
-
           {/* Sort Dropdown */}
           {showSortDropdown && (
             <>
@@ -208,7 +200,6 @@ const DepositsTab: React.FC = () => {
                 <div className="px-3 py-2 text-xs text-gray-600 border-b border-gray-200">
                   Sort By
                 </div>
-
                 <div className="max-h-64 overflow-y-auto">
                   <button
                     onClick={() => {
@@ -226,7 +217,6 @@ const DepositsTab: React.FC = () => {
                       <span>Account Code</span>
                     </div>
                   </button>
-
                   <button
                     onClick={() => {
                       setSortBy("date");
@@ -279,47 +269,66 @@ const DepositsTab: React.FC = () => {
                 <div className="w-12 px-1 flex-shrink-0"></div>
               )}
             </div>
-
             {/* Table Rows - FLEXIBLE WITH MIN-WIDTHS */}
             <div>
               {filteredDeposits.map((deposit) => {
                 const accountName = getAccountName(deposit.accountId);
-
+                const isInactive = !deposit.active;
                 return (
                   <div
                     key={deposit.id}
-                    className="bg-white border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className={`border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
+                      isInactive ? "bg-red-50/30 opacity-70" : "bg-white"
+                    }`}
                     onClick={() => handleRowClick(deposit.id)}
                   >
                     <div className="flex items-center py-1.5 px-2 min-h-9">
                       {/* Account - Flexible */}
                       <div className="flex-grow px-1 min-w-0">
-                        <div className="text-xs text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
+                        <div
+                          className={`text-xs overflow-hidden text-ellipsis whitespace-nowrap ${
+                            isInactive ? "text-gray-500" : "text-gray-800"
+                          }`}
+                        >
                           {accountName}
                           {deposit.comments && (
-                            <span className="text-[10px] text-gray-500 ml-1">
+                            <span
+                              className={`text-[10px] ml-1 ${
+                                isInactive ? "text-gray-400" : "text-gray-500"
+                              }`}
+                            >
                               {deposit.comments.length > 10
                                 ? `${deposit.comments.substring(0, 10)}...`
                                 : deposit.comments}
                             </span>
                           )}
+                          {isInactive && (
+                            <span className="text-[9px] bg-red-100 text-red-600 px-1 py-px rounded ml-1">
+                              Inactive
+                            </span>
+                          )}
                         </div>
                       </div>
-
                       {/* Date - Fixed minimum width */}
                       <div className="px-1 min-w-[80px] flex-shrink-0">
-                        <div className="text-xs text-gray-600 font-mono tracking-tight whitespace-nowrap">
+                        <div
+                          className={`text-xs font-mono tracking-tight whitespace-nowrap ${
+                            isInactive ? "text-gray-500" : "text-gray-600"
+                          }`}
+                        >
                           {formatDate(deposit.endDate)}
                         </div>
                       </div>
-
                       {/* Amount - Fixed minimum width */}
                       <div className="px-1 min-w-[70px] text-right flex-shrink-0">
-                        <div className="text-xs font-semibold text-blue-600">
+                        <div
+                          className={`text-xs font-semibold ${
+                            isInactive ? "text-gray-500" : "text-blue-600"
+                          }`}
+                        >
                           {formatInLakhs(deposit.amount)}
                         </div>
                       </div>
-
                       {/* Edit button */}
                       {settings?.showDelete && (
                         <div className="w-12 flex justify-center px-1 flex-shrink-0">
@@ -340,7 +349,6 @@ const DepositsTab: React.FC = () => {
                 );
               })}
             </div>
-
             {/* Total Summary Footer - SIMPLE */}
             <div className="bg-gray-50 border-t border-gray-300 px-2 py-2">
               <div className="flex justify-between items-center mb-1">
@@ -358,7 +366,6 @@ const DepositsTab: React.FC = () => {
                   </div>
                 </div>
               </div>
-
               {/* Sort Info - Compact */}
               <div className="text-[10px] text-gray-400 text-center pt-1 border-t border-dashed border-gray-300 mt-1">
                 Sorted by {sortBy === "account" ? "account code" : "end date"}

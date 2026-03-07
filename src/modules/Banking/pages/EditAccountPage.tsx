@@ -29,27 +29,9 @@ const EditAccountPage: React.FC = () => {
     mpin: "",
   });
 
-  // Function to escape special characters in textarea
-  const escapeTextareaValue = (text: string): string => {
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;")
-      .replace(/\*/g, "&#42;");
-  };
+  // REMOVED: escapeTextareaValue function - no longer needed
 
-  // Function to unescape when saving
-  const unescapeTextareaValue = (text: string): string => {
-    return text
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'")
-      .replace(/&#42;/g, "*");
-  };
+  // REMOVED: unescapeTextareaValue function - no longer needed
 
   useEffect(() => {
     if (!id) {
@@ -67,14 +49,10 @@ const EditAccountPage: React.FC = () => {
 
       setAccount(foundAccount);
 
-      // Escape the text before displaying in textarea
-      const escapedDetails = foundAccount.acctDetails
-        ? escapeTextareaValue(foundAccount.acctDetails)
-        : "";
-
+      // FIXED: Use the raw account details directly, no escaping
       setFormData({
         acctCode: foundAccount.acctCode || "",
-        acctDetails: escapedDetails,
+        acctDetails: foundAccount.acctDetails || "", // ← Direct assignment, no escaping
         savingsAmount: foundAccount.savingsAmount?.toString() || "0",
         mpin: foundAccount.mpin || "",
       });
@@ -140,13 +118,11 @@ const EditAccountPage: React.FC = () => {
     try {
       setSubmitting(true);
 
-      // Unescape the text before saving
-      const unescapedDetails = unescapeTextareaValue(formData.acctDetails);
-
+      // FIXED: Use the raw form data directly, no unescaping needed
       const accountData: BankAccount = {
         id: id,
         acctCode: formData.acctCode.trim(),
-        acctDetails: unescapedDetails.trim(),
+        acctDetails: formData.acctDetails.trim(), // ← Direct assignment, no unescaping
         savingsAmount: parseFloat(formData.savingsAmount) || 0,
         mpin: formData.mpin,
       };
@@ -190,10 +166,7 @@ const EditAccountPage: React.FC = () => {
     const hasChanges =
       account &&
       (formData.acctCode !== account.acctCode ||
-        formData.acctDetails !==
-          (account.acctDetails
-            ? escapeTextareaValue(account.acctDetails)
-            : "") ||
+        formData.acctDetails !== (account.acctDetails || "") || // ← Direct comparison
         formData.savingsAmount !== (account.savingsAmount?.toString() || "0") ||
         formData.mpin !== account.mpin);
 
@@ -287,14 +260,14 @@ const EditAccountPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Account Details - Show unescaped in view mode */}
+            {/* Account Details - FIXED: Show raw data directly */}
             <div className="mb-5">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Account Details *
               </label>
               <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 min-h-[150px] whitespace-pre-wrap">
-                {unescapeTextareaValue(formData.acctDetails) ||
-                  "No details provided"}
+                {formData.acctDetails || "No details provided"}{" "}
+                {/* ← Direct display */}
               </div>
             </div>
 
@@ -351,7 +324,7 @@ const EditAccountPage: React.FC = () => {
               />
             </div>
 
-            {/* Account Details - Using escaped value */}
+            {/* Account Details - FIXED: Using raw value directly */}
             <div className="mb-5">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Account Details *

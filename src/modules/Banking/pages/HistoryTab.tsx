@@ -179,18 +179,12 @@ const HistoryTab: React.FC = () => {
                     <span className="text-xl font-bold text-gray-800">
                       Age {zeroBalanceAge}
                     </span>
-                    <span className="text-xs text-gray-500">
-                      (Born: 17 Oct 1959)
-                    </span>
                   </div>
                   <div className="text-xs text-gray-600 mt-1.5">
-                    Based on last 6 months • Monthly consumption:{" "}
+                    Consumption Rate - 6 months:{" "}
                     <span className="font-semibold text-amber-700">
-                      ₹{monthlyConsumption.toFixed(2)}L
+                      {monthlyConsumption.toFixed(2)}
                     </span>
-                  </div>
-                  <div className="text-[10px] text-gray-400 mt-1">
-                    Assuming consumption rate remains constant
                   </div>
                 </div>
               </div>

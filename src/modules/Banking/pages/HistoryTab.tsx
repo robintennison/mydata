@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import HistoryChart from "./HistoryChart";
 import { useBankingData } from "../hooks/useBankingData";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import { useSettings } from "../../../contexts/SettingsContext";
+
+// Date of birth: 17th October 1959
+const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
 
 const HistoryTab: React.FC = () => {
   const { settings } = useSettings();
@@ -16,6 +19,73 @@ const HistoryTab: React.FC = () => {
     null,
   );
   const [isSaving, setIsSaving] = useState(false);
+
+  // State for age prediction
+  const [zeroBalanceAge, setZeroBalanceAge] = useState<number | null>(null);
+  const [monthlyConsumption, setMonthlyConsumption] = useState<number | null>(
+    null,
+  );
+
+  // Calculate age when balance will become zero
+  useEffect(() => {
+    if (history.length < 2) {
+      setZeroBalanceAge(null);
+      setMonthlyConsumption(null);
+      return;
+    }
+
+    // Get last 6 months, sorted chronologically
+    const sortedHistory = [...history]
+      .sort((a, b) => a.month.localeCompare(b.month))
+      .slice(-6);
+
+    if (sortedHistory.length < 2) return;
+
+    // Calculate total balance for each month (savings + deposits)
+    const balances = sortedHistory.map(
+      (record) => record.savings + record.totalDeposits,
+    );
+
+    // Get first and last month balances
+    const firstBalance = balances[0];
+    const lastBalance = balances[balances.length - 1];
+
+    // Calculate monthly consumption rate
+    const monthsDiff = sortedHistory.length - 1;
+    const totalReduction = firstBalance - lastBalance;
+    const monthlyRate = totalReduction / monthsDiff;
+
+    // Store monthly consumption for display
+    setMonthlyConsumption(monthlyRate / 100000);
+
+    if (monthlyRate > 0) {
+      // Calculate months until zero
+      const monthsUntilZero = lastBalance / monthlyRate;
+
+      // Calculate date when balance becomes zero
+      const lastMonthStr = sortedHistory[sortedHistory.length - 1].month;
+      const [year, month] = lastMonthStr.split("-").map(Number);
+
+      // Create date object for last record (first day of that month)
+      const lastRecordDate = new Date(year, month - 1, 1);
+
+      // Add months until zero
+      const zeroDate = new Date(lastRecordDate);
+      zeroDate.setMonth(zeroDate.getMonth() + Math.ceil(monthsUntilZero));
+
+      // Calculate age at that date (rounded)
+      let age = zeroDate.getFullYear() - DOB.getFullYear();
+      const m = zeroDate.getMonth() - DOB.getMonth();
+      if (m < 0 || (m === 0 && zeroDate.getDate() < DOB.getDate())) {
+        age--;
+      }
+
+      setZeroBalanceAge(age);
+    } else {
+      // If balance is increasing or not decreasing
+      setZeroBalanceAge(null);
+    }
+  }, [history]);
 
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
   const formatLakhs = (lakhs: number): string => lakhs.toFixed(2);
@@ -94,6 +164,57 @@ const HistoryTab: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full px-2 py-2">
+      {/* Age Prediction Card - Positioned at the top */}
+      {history.length >= 2 && (
+        <div className="mb-3">
+          {zeroBalanceAge !== null && monthlyConsumption !== null ? (
+            <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">🔮</div>
+                <div className="flex-1">
+                  <div className="text-xs font-medium text-amber-700 uppercase tracking-wide mb-1">
+                    Balance Zero Forecast
+                  </div>
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="text-xl font-bold text-gray-800">
+                      Age {zeroBalanceAge}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      (Born: 17 Oct 1959)
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1.5">
+                    Based on last 6 months • Monthly consumption:{" "}
+                    <span className="font-semibold text-amber-700">
+                      ₹{monthlyConsumption.toFixed(2)}L
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-gray-400 mt-1">
+                    Assuming consumption rate remains constant
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">📈</div>
+                <div className="flex-1">
+                  <div className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                    Balance Trend
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    {monthlyConsumption !== null && monthlyConsumption <= 0
+                      ? "Your balance is increasing or stable. No zero balance predicted."
+                      : "Not enough data for prediction. Need at least 2 months of history."}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Chart with margin */}
       <div className="bg-white mb-3 border border-gray-200 rounded-lg p-2">
         <HistoryChart history={history} compact={true} />

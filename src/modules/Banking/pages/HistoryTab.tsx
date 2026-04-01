@@ -26,6 +26,29 @@ const HistoryTab: React.FC = () => {
     null,
   );
 
+  // Calculate target age from EMW_Date in settings - EXACT SAME LOGIC as SettingsPage
+  const getTargetAgeFromSettings = (): number | null => {
+    if (!settings?.EMW_Date) return null;
+
+    try {
+      const [year, month] = settings.EMW_Date.split("-").map(Number);
+      // Use the first day of the month (matching SettingsPage logic)
+      const targetDate = new Date(year, month - 1, 1);
+
+      let age = targetDate.getFullYear() - DOB.getFullYear();
+      const monthDiff = targetDate.getMonth() - DOB.getMonth();
+
+      // Adjust age if birthday hasn't occurred yet in the target month
+      if (monthDiff < 0) {
+        age--;
+      }
+
+      return age;
+    } catch (e) {
+      return null;
+    }
+  };
+
   // Calculate age when balance will become zero
   useEffect(() => {
     if (history.length < 2) {
@@ -162,10 +185,12 @@ const HistoryTab: React.FC = () => {
     );
   }
 
+  const targetAge = getTargetAgeFromSettings();
+
   return (
     <div className="flex flex-col h-full px-2 py-2">
       {/* Age Prediction Card - Positioned at the top */}
-      {history.length >= 2 && (
+      {history.length >= 2 && targetAge !== null && (
         <div className="mb-3">
           {zeroBalanceAge !== null && monthlyConsumption !== null ? (
             <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm">
@@ -179,12 +204,30 @@ const HistoryTab: React.FC = () => {
                     <span className="text-xl font-bold text-gray-800">
                       Age {zeroBalanceAge}
                     </span>
+                    <span className="text-xs text-gray-500">
+                      (Target: age {targetAge})
+                    </span>
                   </div>
                   <div className="text-xs text-gray-600 mt-1.5">
                     Consumption Rate - 6 months:{" "}
                     <span className="font-semibold text-amber-700">
                       {monthlyConsumption.toFixed(2)}
                     </span>
+                    {zeroBalanceAge < targetAge && (
+                      <span className="block text-green-600 mt-0.5">
+                        ✓ Will reach zero before target age
+                      </span>
+                    )}
+                    {zeroBalanceAge > targetAge && (
+                      <span className="block text-orange-600 mt-0.5">
+                        ⚠ Will reach zero after target age
+                      </span>
+                    )}
+                    {zeroBalanceAge === targetAge && (
+                      <span className="block text-blue-600 mt-0.5">
+                        ✓ Will reach zero exactly at target age
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -200,7 +243,7 @@ const HistoryTab: React.FC = () => {
                   <div className="text-sm text-gray-700">
                     {monthlyConsumption !== null && monthlyConsumption <= 0
                       ? "Your balance is increasing or stable. No zero balance predicted."
-                      : "Not enough data for prediction. Need at least 2 months of history."}
+                      : "Your balance is not decreasing. No zero balance predicted."}
                   </div>
                 </div>
               </div>

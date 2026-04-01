@@ -44,14 +44,14 @@ interface SettingsContextType {
 const defaultSettings: Settings = {
   locations: [],
   boughtFor: [],
-  goldRatePerGram: 0,
-  makingTaxPercent: 0,
-  resaleDiscountPercent: 0,
+  goldRatePerGram: 15000,
+  makingTaxPercent: 14,
+  resaleDiscountPercent: 5,
   liabilities: 0,
   showInactive: false,
   showDelete: false,
-  EMW_interest: 5,
-  EMW_Date: "2044-10",
+  EMW_interest: 0,
+  EMW_Date: "2039-10",
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(

@@ -346,14 +346,14 @@ const SummaryTab: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* Summary Table */}
+          {/* Summary Table - Optimized for mobile with flex layout */}
           <div className="bg-white rounded-lg border border-gray-300 overflow-hidden">
             {/* Table Header */}
             <div className="flex items-center py-2 bg-gray-50 border-b border-gray-300 text-xs font-semibold text-gray-700">
-              <div className="w-[38%] px-2">Account</div>
-              <div className="w-[25%] px-1 text-right">Savings</div>
-              <div className="w-[25%] px-1 text-right">Deposits</div>
-              <div className="w-[12%] px-1 text-center">Edit</div>
+              <div className="flex-1 pl-2 pr-1">Account</div>
+              <div className="w-[70px] px-0.5 text-right">Savings</div>
+              <div className="w-[70px] px-0.5 text-right">Deposits</div>
+              <div className="w-[60px] pr-2 text-right">Edit</div>
             </div>
 
             {/* Table Rows */}
@@ -369,21 +369,21 @@ const SummaryTab: React.FC = () => {
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
                     } ${!isEditing ? "hover:bg-gray-100 cursor-pointer" : ""}`}
                   >
-                    {/* Account Code */}
-                    <div className="w-[38%] px-2 min-w-0">
+                    {/* Account Code - Takes remaining space */}
+                    <div className="flex-1 pl-2 pr-1 min-w-0">
                       <div className="text-sm font-medium text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
                         {summary.accountCode}
                       </div>
                     </div>
 
-                    {/* Savings Amount */}
-                    <div className="w-[25%] px-1 text-right">
+                    {/* Savings Amount - Fixed width */}
+                    <div className="w-[70px] px-0.5 text-right">
                       {isEditing ? (
                         <input
                           type="number"
                           value={editedSavings}
                           onChange={(e) => setEditedSavings(e.target.value)}
-                          className="w-20 p-1 border border-gray-300 rounded text-sm text-right focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none"
+                          className="w-full max-w-[60px] p-1 border border-gray-300 rounded text-xs text-right focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none"
                           step="0.01"
                           min="0"
                           placeholder="0.00"
@@ -396,14 +396,14 @@ const SummaryTab: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Deposits Amount */}
-                    <div className="w-[25%] px-1 text-right">
+                    {/* Deposits Amount - Fixed width */}
+                    <div className="w-[70px] px-0.5 text-right">
                       {isEditing ? (
                         <input
                           type="number"
                           value={editedDeposits}
                           onChange={(e) => setEditedDeposits(e.target.value)}
-                          className="w-20 p-1 border border-gray-300 rounded text-sm text-right focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none"
+                          className="w-full max-w-[60px] p-1 border border-gray-300 rounded text-xs text-right focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none"
                           step="0.01"
                           min="0"
                           placeholder="0.00"
@@ -416,13 +416,13 @@ const SummaryTab: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Action Column */}
-                    <div className="w-[12%] px-1 flex justify-center">
+                    {/* Action Column - Fixed width with right alignment */}
+                    <div className="w-[60px] pr-2 flex justify-end">
                       {isEditing ? (
-                        <div className="flex gap-1.5">
+                        <div className="flex gap-1">
                           <button
                             onClick={() => saveEdits(summary.accountId)}
-                            className="w-7 h-7 bg-green-500 text-white rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-6 h-6 bg-green-500 text-white rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-xs flex-shrink-0"
                             title="Save"
                             disabled={isSaving}
                           >
@@ -434,7 +434,7 @@ const SummaryTab: React.FC = () => {
                           </button>
                           <button
                             onClick={cancelEditing}
-                            className="w-7 h-7 bg-red-500 text-white rounded flex items-center justify-center hover:bg-red-600"
+                            className="w-6 h-6 bg-red-500 text-white rounded flex items-center justify-center hover:bg-red-600 text-xs flex-shrink-0"
                             title="Cancel"
                             disabled={isSaving}
                           >
@@ -450,14 +450,14 @@ const SummaryTab: React.FC = () => {
                               summary.deposits,
                             )
                           }
-                          className="w-7 h-7 bg-blue-500 text-white rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-6 h-6 bg-blue-500 text-white rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-xs flex-shrink-0"
                           title="Edit"
                           disabled={editingAccountId !== null}
                         >
                           ✏️
                         </button>
                       ) : (
-                        <div className="w-7 h-7"></div>
+                        <div className="w-6 h-6"></div>
                       )}
                     </div>
                   </div>
@@ -467,14 +467,14 @@ const SummaryTab: React.FC = () => {
 
             {/* Totals Row */}
             <div className="flex items-center py-2.5 bg-gray-50 border-t border-gray-300 font-semibold text-sm">
-              <div className="w-[38%] px-2">TOTAL</div>
-              <div className="w-[25%] px-1 text-right text-blue-600">
+              <div className="flex-1 pl-2 pr-1">TOTAL</div>
+              <div className="w-[70px] px-0.5 text-right text-blue-600">
                 {formatInLakhs(totalSavings)}
               </div>
-              <div className="w-[25%] px-1 text-right text-blue-600">
+              <div className="w-[70px] px-0.5 text-right text-blue-600">
                 {formatInLakhs(totalDeposits)}
               </div>
-              <div className="w-[12%] px-1"></div>
+              <div className="w-[60px] pr-2"></div>
             </div>
           </div>
 
@@ -488,7 +488,7 @@ const SummaryTab: React.FC = () => {
           <div className="mt-4 flex flex-col items-center">
             <button
               onClick={handleHistoryUpdate}
-              className={`px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[220px] flex items-center justify-center`}
+              className={`px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[220px] flex items-center justify-center text-sm`}
               disabled={isUpdatingHistory || !currentMonth}
             >
               {isUpdatingHistory ? (

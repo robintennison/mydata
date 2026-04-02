@@ -155,6 +155,11 @@ const OnlineListTab: React.FC = () => {
     return files.join(" • ");
   };
 
+  // Clear search term
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
   // Filter items
   const getFilteredItems = () => {
     return items.filter((item) => {
@@ -206,9 +211,19 @@ const OnlineListTab: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full p-2.5 pl-3 pr-10 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           />
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-            🔍
-          </span>
+          {searchTerm ? (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          ) : (
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+              🔍
+            </span>
+          )}
         </div>
 
         <div className="flex-1 min-w-0 relative">

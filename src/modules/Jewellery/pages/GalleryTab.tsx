@@ -84,6 +84,11 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
     fetchJewellery();
   }, []);
 
+  // Clear search term
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
   // Apply filters and sorting
   useEffect(() => {
     let result = jewelleryItems;
@@ -192,13 +197,28 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
         </div>
 
         <div className="mb-3.75 flex gap-2">
-          <input
-            type="text"
-            placeholder="Search items..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 py-2 px-3 border border-gray-200 rounded-md text-sm"
-          />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder="Search items..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full py-2 px-3 border border-gray-200 rounded-md text-sm"
+            />
+            {searchTerm ? (
+              <button
+                onClick={clearSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            ) : (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                🔍
+              </span>
+            )}
+          </div>
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
@@ -238,13 +258,28 @@ const GalleryTab: React.FC<GalleryTabProps> = ({ compact = false }) => {
         </button>
 
         {/* Search Field - Takes priority */}
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 min-w-0 py-1 px-1.5 rounded border border-gray-300 text-xs bg-white text-gray-900 shrink max-w-30 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 placeholder:text-xs"
-        />
+        <div className="flex-1 min-w-0 relative">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full py-1 pl-1.5 pr-5 rounded border border-gray-300 text-xs bg-white text-gray-900 shrink focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 placeholder:text-xs"
+          />
+          {searchTerm ? (
+            <button
+              onClick={clearSearch}
+              className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none text-xs"
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          ) : (
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
+              🔍
+            </span>
+          )}
+        </div>
 
         {/* Location Filter - Compact */}
         <div className="flex shrink-0 min-w-0">

@@ -272,6 +272,11 @@ const ListTab: React.FC = () => {
     new Set(jewelleryItems.map((item) => item.boughtFor).filter(Boolean)),
   ).sort();
 
+  // Clear search term
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
   const handleRefresh = () => {
     setLoading(true);
     setJewelleryItems([]);
@@ -460,16 +465,18 @@ const ListTab: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full py-2 pl-3 pr-8 rounded-lg border border-gray-200 text-xs bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
-                🔍
-              </div>
-              {searchTerm && (
+              {searchTerm ? (
                 <button
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-7 top-1/2 -translate-y-1/2 bg-transparent text-gray-400 cursor-pointer text-sm p-0 hover:text-gray-600 focus:outline-none"
+                  onClick={clearSearch}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  aria-label="Clear search"
                 >
-                  ×
+                  ✕
                 </button>
+              ) : (
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                  🔍
+                </div>
               )}
             </div>
           </div>

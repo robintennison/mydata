@@ -16,7 +16,6 @@ import MyDataHomepage from "../MyDataHomepage";
 
 // Import History pages
 import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage";
-import HistoryDetailManager from "../modules/Banking/pages/HistoryDetailManager"; // NEW: Import the history detail manager
 
 // Import Jewellery pages
 import JewelleryHome from "../modules/Jewellery/index";
@@ -156,17 +155,6 @@ const allRoutes: RouteConfig[] = [
     icon: "✏️",
     requiresAuth: true,
     needsUserData: true,
-  },
-  // NEW: History Detail Management Route
-  {
-    path: "/banking/history-detail",
-    element: <HistoryDetailManager />,
-    title: "History Detail",
-    icon: "📊",
-    requiresAuth: true,
-    needsUserData: true,
-    noLayoutPadding: false,
-    hideHeader: false,
   },
 
   // Jewellery Module Routes

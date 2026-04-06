@@ -79,7 +79,12 @@ const HistoryDetailTab: React.FC = () => {
         id: doc.id,
         ...doc.data(),
       })) as Account[];
-      setAccounts(accountsList);
+
+      // Sort accounts by acctCode
+      const sortedAccounts = [...accountsList].sort((a, b) =>
+        a.acctCode.localeCompare(b.acctCode),
+      );
+      setAccounts(sortedAccounts);
 
       // Load history for selected month
       const historyRef = collection(firestore, "history_detail");

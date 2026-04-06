@@ -30,17 +30,25 @@ interface HistoryDetail {
 const HistoryDetailTab: React.FC = () => {
   const { settings } = useSettings();
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [historyData, setHistoryData] = useState<Map<string, HistoryDetail>>(new Map());
+  const [historyData, setHistoryData] = useState<Map<string, HistoryDetail>>(
+    new Map(),
+  );
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
-  const [editingCell, setEditingCell] = useState<{ acctCode: string; field: "savings" | "deposits" } | null>(null);
+  const [editingCell, setEditingCell] = useState<{
+    acctCode: string;
+    field: "savings" | "deposits";
+  } | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   // Available months for dropdown (last 12 months + next 6 months)
   const availableMonths = React.useMemo(() => {
@@ -67,9 +75,9 @@ const HistoryDetailTab: React.FC = () => {
       // Load all accounts
       const accountsRef = collection(firestore, "accounts");
       const accountsSnapshot = await getDocs(accountsRef);
-      const accountsList = accountsSnapshot.docs.map(doc => ({
+      const accountsList = accountsSnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Account[];
       setAccounts(accountsList);
 
@@ -77,9 +85,9 @@ const HistoryDetailTab: React.FC = () => {
       const historyRef = collection(firestore, "history_detail");
       const q = query(historyRef, where("month", "==", selectedMonth));
       const historySnapshot = await getDocs(q);
-      
+
       const historyMap = new Map<string, HistoryDetail>();
-      historySnapshot.docs.forEach(doc => {
+      historySnapshot.docs.forEach((doc) => {
         const data = doc.data() as HistoryDetail;
         historyMap.set(data.acctCode, data);
       });
@@ -97,7 +105,11 @@ const HistoryDetailTab: React.FC = () => {
     setTimeout(() => setStatusMessage(null), 3000);
   };
 
-  const startEditing = (acctCode: string, field: "savings" | "deposits", currentValue: number) => {
+  const startEditing = (
+    acctCode: string,
+    field: "savings" | "deposits",
+    currentValue: number,
+  ) => {
     const lakhsValue = (currentValue / 100000).toFixed(2);
     setEditingCell({ acctCode, field });
     setEditValue(lakhsValue);
@@ -112,21 +124,23 @@ const HistoryDetailTab: React.FC = () => {
     try {
       setSaving(true);
       const valueInLakhs = parseFloat(editValue);
-      
+
       if (isNaN(valueInLakhs)) {
         showStatus("error", "Please enter a valid number");
         return;
       }
 
       const valueInRupees = Math.round(valueInLakhs * 100000);
-      
+
       // Get existing record or create new one
       const existingRecord = historyData.get(acctCode);
       const updatedRecord: HistoryDetail = {
         acctCode,
         month: selectedMonth,
-        savings: field === "savings" ? valueInRupees : (existingRecord?.savings || 0),
-        deposits: field === "deposits" ? valueInRupees : (existingRecord?.deposits || 0),
+        savings:
+          field === "savings" ? valueInRupees : existingRecord?.savings || 0,
+        deposits:
+          field === "deposits" ? valueInRupees : existingRecord?.deposits || 0,
       };
 
       // Save to Firestore
@@ -135,13 +149,16 @@ const HistoryDetailTab: React.FC = () => {
       await setDoc(historyRef, updatedRecord, { merge: true });
 
       // Update local state
-      setHistoryData(prev => {
+      setHistoryData((prev) => {
         const newMap = new Map(prev);
         newMap.set(acctCode, updatedRecord);
         return newMap;
       });
 
-      showStatus("success", `${field === "savings" ? "Savings" : "Deposits"} updated successfully!`);
+      showStatus(
+        "success",
+        `${field === "savings" ? "Savings" : "Deposits"} updated successfully!`,
+      );
       cancelEditing();
     } catch (error: any) {
       console.error("Error saving:", error);
@@ -159,7 +176,7 @@ const HistoryDetailTab: React.FC = () => {
       await deleteDoc(historyRef);
 
       // Update local state
-      setHistoryData(prev => {
+      setHistoryData((prev) => {
         const newMap = new Map(prev);
         newMap.delete(acctCode);
         return newMap;
@@ -175,7 +192,10 @@ const HistoryDetailTab: React.FC = () => {
     }
   };
 
-  const getCurrentValue = (acctCode: string, field: "savings" | "deposits"): number => {
+  const getCurrentValue = (
+    acctCode: string,
+    field: "savings" | "deposits",
+  ): number => {
     const record = historyData.get(acctCode);
     if (!record) return 0;
     return field === "savings" ? record.savings : record.deposits;
@@ -202,11 +222,13 @@ const HistoryDetailTab: React.FC = () => {
     <div className="flex flex-col h-full px-2 py-2">
       {/* Status Message */}
       {statusMessage && (
-        <div className={`mb-3 p-2 rounded-lg text-xs ${
-          statusMessage.type === "success" 
-            ? "bg-green-50 border border-green-200 text-green-700" 
-            : "bg-red-50 border border-red-200 text-red-700"
-        }`}>
+        <div
+          className={`mb-3 p-2 rounded-lg text-xs ${
+            statusMessage.type === "success"
+              ? "bg-green-50 border border-green-200 text-green-700"
+              : "bg-red-50 border border-red-200 text-red-700"
+          }`}
+        >
           {statusMessage.text}
         </div>
       )}
@@ -216,15 +238,19 @@ const HistoryDetailTab: React.FC = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <span className="text-sm">📅</span>
-            <span className="text-xs font-semibold text-gray-800">Select Month</span>
+            <span className="text-xs font-semibold text-gray-800">
+              Select Month
+            </span>
           </div>
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
             className="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            {availableMonths.map(month => (
-              <option key={month} value={month}>{month}</option>
+            {availableMonths.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
             ))}
           </select>
         </div>
@@ -246,7 +272,9 @@ const HistoryDetailTab: React.FC = () => {
         <div className="flex justify-between items-center py-2 bg-white rounded-t-lg px-1 mb-1">
           <div className="flex items-center gap-1">
             <span>📊</span>
-            <span className="text-xs font-semibold text-gray-800">Account History</span>
+            <span className="text-xs font-semibold text-gray-800">
+              Account History
+            </span>
           </div>
           <div className="text-[10px] text-gray-600">
             {totalAccounts} accounts
@@ -267,10 +295,10 @@ const HistoryDetailTab: React.FC = () => {
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {/* Table Header */}
             <div className="flex items-center py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2">
-              <div className="w-1/4 px-1">Account Code</div>
-              <div className="w-1/4 px-1">Account Details</div>
-              <div className="w-1/4 px-1 text-right">Savings (₹ L)</div>
-              <div className="w-1/4 px-1 text-right">Deposits (₹ L)</div>
+              <div className="w-1/4 px-1">Account </div>
+              <div className="w-1/4 px-1">MPIN</div>
+              <div className="w-1/4 px-1 text-right">Savings </div>
+              <div className="w-1/4 px-1 text-right">Deposits </div>
               {settings?.showDelete && <div className="w-14 px-1"></div>}
             </div>
 
@@ -279,8 +307,12 @@ const HistoryDetailTab: React.FC = () => {
               const savings = getCurrentValue(account.acctCode, "savings");
               const deposits = getCurrentValue(account.acctCode, "deposits");
               const hasRecord = historyData.has(account.acctCode);
-              const isEditingSavings = editingCell?.acctCode === account.acctCode && editingCell?.field === "savings";
-              const isEditingDeposits = editingCell?.acctCode === account.acctCode && editingCell?.field === "deposits";
+              const isEditingSavings =
+                editingCell?.acctCode === account.acctCode &&
+                editingCell?.field === "savings";
+              const isEditingDeposits =
+                editingCell?.acctCode === account.acctCode &&
+                editingCell?.field === "deposits";
 
               return (
                 <div
@@ -294,9 +326,9 @@ const HistoryDetailTab: React.FC = () => {
                     {account.acctCode}
                   </div>
 
-                  {/* Account Details */}
+                  {/* MPIN */}
                   <div className="w-1/4 px-1 text-xs text-gray-600 overflow-hidden text-ellipsis whitespace-nowrap">
-                    {account.acctDetails}
+                    {account.mpin}
                   </div>
 
                   {/* Savings */}
@@ -330,12 +362,16 @@ const HistoryDetailTab: React.FC = () => {
                       </div>
                     ) : (
                       <div className="flex items-center justify-end gap-1 group">
-                        <span className={`text-xs font-semibold ${savings > 0 ? "text-green-600" : "text-gray-400"} text-right`}>
+                        <span
+                          className={`text-xs font-semibold ${savings > 0 ? "text-green-600" : "text-gray-400"} text-right`}
+                        >
                           {formatLakhs(savings)}
                         </span>
                         {settings?.showDelete && (
                           <button
-                            onClick={() => startEditing(account.acctCode, "savings", savings)}
+                            onClick={() =>
+                              startEditing(account.acctCode, "savings", savings)
+                            }
                             className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
                             disabled={editingCell !== null}
                           >
@@ -377,12 +413,20 @@ const HistoryDetailTab: React.FC = () => {
                       </div>
                     ) : (
                       <div className="flex items-center justify-end gap-1 group">
-                        <span className={`text-xs font-semibold ${deposits > 0 ? "text-orange-500" : "text-gray-400"} text-right`}>
+                        <span
+                          className={`text-xs font-semibold ${deposits > 0 ? "text-orange-500" : "text-gray-400"} text-right`}
+                        >
                           {formatLakhs(deposits)}
                         </span>
                         {settings?.showDelete && (
                           <button
-                            onClick={() => startEditing(account.acctCode, "deposits", deposits)}
+                            onClick={() =>
+                              startEditing(
+                                account.acctCode,
+                                "deposits",
+                                deposits,
+                              )
+                            }
                             className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
                             disabled={editingCell !== null}
                           >
@@ -441,7 +485,8 @@ const HistoryDetailTab: React.FC = () => {
             </h3>
             <p className="text-gray-600 mb-5 leading-relaxed">
               Are you sure you want to delete the history record for{" "}
-              <strong>{deleteConfirm}</strong> for month <strong>{selectedMonth}</strong>?
+              <strong>{deleteConfirm}</strong> for month{" "}
+              <strong>{selectedMonth}</strong>?
             </p>
             <div className="flex gap-2.5">
               <button

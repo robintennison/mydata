@@ -751,12 +751,7 @@ const MyDataHomepage: React.FC = () => {
 
       {/* Asset Distribution Chart */}
       <div className="mt-4 mb-2">
-        <CombinedAssetBarChart
-          accounts={accounts}
-          deposits={deposits}
-          adjustments={adjustments}
-          showInactive={appSettings?.showInactive}
-        />
+        <CombinedAssetBarChart />
       </div>
     </>
   );

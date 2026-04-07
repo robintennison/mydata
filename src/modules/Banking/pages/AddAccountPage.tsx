@@ -55,11 +55,6 @@ const AddAccountPage: React.FC = () => {
       return false;
     }
 
-    if (!formData.mpin.trim()) {
-      setError("MPIN is required");
-      return false;
-    }
-
     return true;
   };
 
@@ -196,10 +191,9 @@ const AddAccountPage: React.FC = () => {
               className="block text-sm font-medium text-gray-700 mb-1"
               htmlFor="mpin"
             >
-              MPIN *
+              MPIN
             </label>
             <input
-              type="password"
               id="mpin"
               name="mpin"
               value={formData.mpin}

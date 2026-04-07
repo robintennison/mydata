@@ -28,8 +28,8 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     loading: bankingLoading,
     accounts,
     deposits,
-    history,
     adjustments,
+    historyDetail, // NEW: Get historyDetail data
   } = useBankingData();
   const { settings: appSettings, loading: settingsLoading } = useSettings();
 
@@ -114,37 +114,77 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     return (amount / 100000).toFixed(2);
   };
 
-  // Calculate totals for dashboard tab
-  const totalSavings = accounts.reduce(
-    (sum, account) => sum + account.savingsAmount,
-    0,
-  );
+  // Get current month in YYYY-MM format
+  const getCurrentMonth = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
+  };
 
-  // Apply filtering based on settings
-  const filteredDeposits = appSettings?.showInactive
-    ? deposits
-    : deposits.filter((deposit) => deposit.active !== false);
+  // Get data for current month from history_detail
+  const getCurrentMonthData = () => {
+    const currentMonth = getCurrentMonth();
+    const currentMonthRecords =
+      historyDetail?.filter((record) => record.month === currentMonth) || [];
 
-  const totalDeposits = accounts.reduce((total, account) => {
-    const accountId = account.id;
+    // Calculate totals for current month
+    const totalSavings = currentMonthRecords.reduce(
+      (sum, record) => sum + (record.savings || 0),
+      0,
+    );
 
-    const baseDeposits = filteredDeposits
-      .filter((deposit) => deposit.accountId === accountId)
-      .reduce((sum, deposit) => sum + deposit.amount, 0);
+    const totalDeposits = currentMonthRecords.reduce(
+      (sum, record) => sum + (record.deposits || 0),
+      0,
+    );
 
-    const adjustmentsTotal = adjustments
-      .filter((adj) => adj.accountId === accountId)
-      .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
+    const totalBankBalance = totalSavings + totalDeposits;
 
-    return total + baseDeposits + adjustmentsTotal;
-  }, 0);
+    return {
+      totalSavings,
+      totalDeposits,
+      totalBankBalance,
+    };
+  };
 
-  const totalBankBalance = totalSavings + totalDeposits;
+  // Get last 6 months history from history_detail (sorted by date - newest first)
+  const getLast6MonthsFromHistoryDetail = () => {
+    if (!historyDetail || historyDetail.length === 0) return [];
 
-  // Get last 6 months history (sorted by date - newest first)
-  const last6Months = [...history]
-    .sort((a, b) => b.month.localeCompare(a.month))
-    .slice(0, 6);
+    // Group by month and aggregate savings and deposits
+    const monthMap = new Map();
+
+    historyDetail.forEach((record) => {
+      const month = record.month;
+      if (!monthMap.has(month)) {
+        monthMap.set(month, {
+          month: month,
+          savings: 0,
+          deposits: 0,
+        });
+      }
+      const monthData = monthMap.get(month);
+      monthData.savings += record.savings || 0;
+      monthData.deposits += record.deposits || 0;
+    });
+
+    // Convert map to array and sort by month (newest first)
+    const sortedMonths = Array.from(monthMap.values())
+      .sort((a, b) => b.month.localeCompare(a.month))
+      .slice(0, 6);
+
+    return sortedMonths;
+  };
+
+  // Get current month data for top cards
+  const currentMonthData = getCurrentMonthData();
+  const totalSavings = currentMonthData.totalSavings;
+  const totalDeposits = currentMonthData.totalDeposits;
+  const totalBankBalance = currentMonthData.totalBankBalance;
+
+  // Get last 6 months from history_detail for recent history section
+  const last6MonthsFromHistoryDetail = getLast6MonthsFromHistoryDetail();
 
   // Dashboard content component
   const DashboardContent = () => (
@@ -186,7 +226,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
             <span>Recent History (6 Months)</span>
           </div>
 
-          {last6Months.length === 0 ? (
+          {last6MonthsFromHistoryDetail.length === 0 ? (
             <div className="text-center py-2 text-gray-500 text-xs">
               No history data available
             </div>
@@ -207,11 +247,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
               </div>
 
               {/* Table Rows */}
-              {last6Months.map((record) => {
+              {last6MonthsFromHistoryDetail.map((record) => {
                 const savingsDisplay = formatLakhs(record.savings);
-                const depositsDisplay = formatLakhs(record.totalDeposits);
+                const depositsDisplay = formatLakhs(record.deposits);
                 const totalDisplay = formatLakhs(
-                  record.savings + record.totalDeposits,
+                  record.savings + record.deposits,
                 );
 
                 const [year, month] = record.month.split("-");
@@ -243,7 +283,8 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
               })}
 
               <div className="text-xs text-gray-400 text-center py-1 border-t border-gray-100 bg-gray-50">
-                {Math.min(last6Months.length, 6)} of {history.length} records
+                {Math.min(last6MonthsFromHistoryDetail.length, 6)} of{" "}
+                {historyDetail?.length || 0} records
               </div>
             </div>
           )}

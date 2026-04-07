@@ -7,6 +7,7 @@ import type {
   Deposit,
   History,
   DepositAdjustment,
+  HistoryDetail, // Add this import
 } from "../../../types/banking.types";
 
 export interface BankingData {
@@ -15,6 +16,7 @@ export interface BankingData {
   deposits: Deposit[];
   history: History[];
   adjustments: DepositAdjustment[];
+  historyDetail: HistoryDetail[]; // Add this property
   settings: { showInactive: boolean };
 }
 
@@ -24,6 +26,7 @@ export const useBankingData = (): BankingData => {
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [history, setHistory] = useState<History[]>([]);
   const [adjustments, setAdjustments] = useState<DepositAdjustment[]>([]);
+  const [historyDetail, setHistoryDetail] = useState<HistoryDetail[]>([]); // Add this state
   const { setError } = useError();
   const [settings, setSettings] = useState<{ showInactive: boolean }>({
     showInactive: false, // Default value
@@ -83,6 +86,19 @@ export const useBankingData = (): BankingData => {
         );
         setAdjustments(adjustmentsData);
 
+        // Load history_detail
+        const historyDetailSnapshot = await getDocs(
+          collection(firestore, "history_detail")
+        );
+        const historyDetailData = historyDetailSnapshot.docs.map(
+          (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as HistoryDetail)
+        );
+        setHistoryDetail(historyDetailData);
+
         // Load settings
         try {
           const settingsSnapshot = await getDocs(
@@ -114,6 +130,7 @@ export const useBankingData = (): BankingData => {
     deposits,
     history,
     adjustments,
+    historyDetail, // Add this to the return object
     settings,
   };
 };

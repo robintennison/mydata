@@ -183,3 +183,11 @@ export interface BankingSortOptions {
 export type WithOptionalIsActive<T> = T & {
   isActive?: boolean;
 };
+
+export interface HistoryDetail {
+  id?: string; // Document ID from Firestore
+  month: string; // Format: YYYY-MM
+  acctCode: string; // Account code
+  savings: number; // Savings amount for this account in this month
+  deposits: number; // Deposits amount for this account in this month
+}

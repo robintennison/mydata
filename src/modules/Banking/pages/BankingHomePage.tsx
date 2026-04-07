@@ -8,8 +8,7 @@ import Header from "../../../components/Layout/Header";
 import AccountsTab from "./AccountsTab";
 import DepositsTab from "./DepositsTab";
 import HistoryTab from "./HistoryTab";
-import SummaryTab from "./SummaryTab";
-import HistoryDetailTab from "./HistoryDetailTab"; // NEW: Import History Detail Tab
+import HistoryDetailTab from "./HistoryDetailTab"; // Import History Detail Tab
 
 // Import the pie chart components
 import DepositPieChart from "./DepositPieChart";
@@ -29,18 +28,13 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     accounts,
     deposits,
     adjustments,
-    historyDetail, // NEW: Get historyDetail data
+    historyDetail, // Get historyDetail data
   } = useBankingData();
   const { settings: appSettings, loading: settingsLoading } = useSettings();
 
   // State for active tab
   const [activeTab, setActiveTab] = useState<
-    | "dashboard"
-    | "accounts"
-    | "deposits"
-    | "history"
-    | "historydetail"
-    | "summary"
+    "dashboard" | "accounts" | "deposits" | "history" | "historydetail"
   >("dashboard");
 
   // Handle navigation state to set active tab
@@ -54,7 +48,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
           "deposits",
           "history",
           "historydetail",
-          "summary",
         ].includes(tabFromState)
       ) {
         setActiveTab(tabFromState as any);
@@ -81,9 +74,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         break;
       case "historydetail":
         // No action needed for history detail
-        break;
-      case "summary":
-        alert("Use edit buttons in the summary table to modify values");
         break;
       case "dashboard":
       default:
@@ -393,19 +383,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
             <span className="text-base">📋</span>
             <span className="hidden xs:block text-[10px] mt-0.5">Detl</span>
           </button>
-
-          <button
-            onClick={() => setActiveTab("summary")}
-            className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
-              activeTab === "summary"
-                ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
-                : "bg-transparent text-gray-500 border-b-2 border-transparent"
-            }`}
-            title="Summary"
-          >
-            <span className="text-base">📈</span>
-            <span className="hidden xs:block text-[10px] mt-0.5">Summ</span>
-          </button>
         </div>
       </div>
 
@@ -414,8 +391,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         className={`flex-1 w-full mx-auto overflow-y-auto ${
           activeTab === "dashboard" ||
           activeTab === "history" ||
-          activeTab === "historydetail" ||
-          activeTab === "summary"
+          activeTab === "historydetail"
             ? "px-0"
             : "p-2"
         }`}
@@ -425,7 +401,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         {activeTab === "deposits" && <DepositsTab />}
         {activeTab === "history" && <HistoryTab />}
         {activeTab === "historydetail" && <HistoryDetailTab />}
-        {activeTab === "summary" && <SummaryTab />}
       </div>
     </div>
   );

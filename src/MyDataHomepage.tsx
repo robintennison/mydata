@@ -59,12 +59,7 @@ const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
   const { settings: appSettings } = useSettings();
   const { goldRate, settings: jewellerySettings } = useJewellerySettings();
-  const {
-    accounts,
-    deposits,
-    history,
-    loading: bankingLoading,
-  } = useBankingData();
+  const { accounts, deposits, loading: bankingLoading } = useBankingData();
   const [onlineItems, setOnlineItems] = useState<OnlineItem[]>([]);
   const [onlineItemsLoading, setOnlineItemsLoading] = useState(true);
   const [jewelleryItems, setJewelleryItems] = useState<JewelleryItem[]>([]);
@@ -74,6 +69,7 @@ const MyDataHomepage: React.FC = () => {
   const [currentMonthHistory, setCurrentMonthHistory] = useState<
     HistoryDetail[]
   >([]);
+  const [allHistoryData, setAllHistoryData] = useState<HistoryDetail[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
 
   // Get resale discount percentage from jewellery settings
@@ -87,44 +83,42 @@ const MyDataHomepage: React.FC = () => {
     return `${year}-${month}`;
   };
 
-  // Fetch current month data from history_detail
+  // Fetch ALL history_detail data
   useEffect(() => {
-    const fetchCurrentMonthData = async () => {
+    const fetchAllHistoryData = async () => {
       try {
         setHistoryLoading(true);
-        const currentMonth = getCurrentMonth();
         const historyDetailRef = collection(getFirestore(), "history_detail");
         const querySnapshot = await getDocs(historyDetailRef);
 
-        const currentMonthRecords: HistoryDetail[] = [];
+        const allRecords: HistoryDetail[] = [];
 
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          const month = data.month;
-
-          // Only include records from current month
-          if (month === currentMonth) {
-            currentMonthRecords.push({
-              acctCode: data.acctCode || "",
-              month: data.month || "",
-              savings: data.savings || 0,
-              deposits: data.deposits || 0,
-            });
-          }
+          allRecords.push({
+            acctCode: data.acctCode || "",
+            month: data.month || "",
+            savings: data.savings || 0,
+            deposits: data.deposits || 0,
+          });
         });
 
+        setAllHistoryData(allRecords);
+
+        // Also filter for current month separately
+        const currentMonth = getCurrentMonth();
+        const currentMonthRecords = allRecords.filter(
+          (record) => record.month === currentMonth,
+        );
         setCurrentMonthHistory(currentMonthRecords);
       } catch (error) {
-        console.error(
-          "Error fetching history_detail for current month:",
-          error,
-        );
+        console.error("Error fetching history_detail data:", error);
       } finally {
         setHistoryLoading(false);
       }
     };
 
-    fetchCurrentMonthData();
+    fetchAllHistoryData();
   }, []);
 
   // Fetch online items
@@ -226,7 +220,7 @@ const MyDataHomepage: React.FC = () => {
     fetchJewelleryItems();
   }, []);
 
-  // Memoize calculations using history_detail data only
+  // Memoize calculations using all history_detail data
   const {
     totalSavings,
     totalDeposits,
@@ -258,7 +252,7 @@ const MyDataHomepage: React.FC = () => {
 
     const totalBankBalance = totalSavings + totalDeposits;
 
-    // Calculate EMW using settings (target date and interest rate from settings)
+    // Calculate EMW using settings
     const emwSettings = getEmwSettings(appSettings);
     const emwAmount = calculateEMW(
       totalBankBalance,
@@ -266,10 +260,28 @@ const MyDataHomepage: React.FC = () => {
       emwSettings.interestRate,
     );
 
-    // Get last 6 months history from props for withdrawal calculations
-    const last6Months = [...history]
-      .sort((a, b) => b.month.localeCompare(a.month))
-      .slice(0, 6);
+    // Calculate monthly balances from all history data
+    const monthlyBalancesMap = new Map<string, number>();
+
+    allHistoryData.forEach((record) => {
+      const month = record.month;
+      const totalBalance = record.savings + record.deposits;
+
+      if (monthlyBalancesMap.has(month)) {
+        const existing = monthlyBalancesMap.get(month)!;
+        monthlyBalancesMap.set(month, existing + totalBalance);
+      } else {
+        monthlyBalancesMap.set(month, totalBalance);
+      }
+    });
+
+    // Convert to array and sort by month (newest first)
+    const monthlyBalances = Array.from(monthlyBalancesMap.entries())
+      .map(([month, totalBalance]) => ({ month, totalBalance }))
+      .sort((a, b) => b.month.localeCompare(a.month));
+
+    // Get last 6 months
+    const last6Months = monthlyBalances.slice(0, 6);
 
     // Calculate actual withdrawal rate from last 6 months history
     const calculateActualWithdrawalRate = () => {
@@ -280,15 +292,10 @@ const MyDataHomepage: React.FC = () => {
           monthsCount: 0,
         };
 
-      const monthlyBalances = last6Months.map((record) => ({
-        month: record.month,
-        totalBalance: (record.savings || 0) + (record.totalDeposits || 0),
-      }));
-
-      const firstMonth = monthlyBalances[0];
-      const lastMonth = monthlyBalances[monthlyBalances.length - 1];
+      const firstMonth = last6Months[last6Months.length - 1]; // oldest in the 6-month window
+      const lastMonth = last6Months[0]; // newest
       const totalDrop = firstMonth.totalBalance - lastMonth.totalBalance;
-      const monthsCount = monthlyBalances.length - 1;
+      const monthsCount = last6Months.length - 1;
       const monthlyRate = monthsCount > 0 ? totalDrop / monthsCount : 0;
 
       return {
@@ -300,19 +307,12 @@ const MyDataHomepage: React.FC = () => {
 
     // Calculate last month's withdrawal
     const calculateLastMonthWithdrawal = () => {
-      if (last6Months.length < 2) return 0;
+      if (monthlyBalances.length < 2) return 0;
 
-      const currentMonth = last6Months[0];
-      const previousMonth = last6Months[1];
+      const currentMonthBalance = monthlyBalances[0]?.totalBalance || 0;
+      const previousMonthBalance = monthlyBalances[1]?.totalBalance || 0;
 
-      if (!currentMonth || !previousMonth) return 0;
-
-      const currentBalance =
-        (currentMonth.savings || 0) + (currentMonth.totalDeposits || 0);
-      const previousBalance =
-        (previousMonth.savings || 0) + (previousMonth.totalDeposits || 0);
-
-      return previousBalance - currentBalance;
+      return previousMonthBalance - currentMonthBalance;
     };
 
     return {
@@ -323,7 +323,7 @@ const MyDataHomepage: React.FC = () => {
       actualWithdrawalData: calculateActualWithdrawalRate(),
       lastMonthWithdrawal: calculateLastMonthWithdrawal(),
     };
-  }, [currentMonthHistory, appSettings, history]);
+  }, [currentMonthHistory, allHistoryData, appSettings]);
 
   // Memoize jewellery calculations separately
   const { totalJewelleryWeight, totalJewellerySellValue, totalAssets } =
@@ -445,7 +445,7 @@ const MyDataHomepage: React.FC = () => {
       {/* Top Row - EMW Cards */}
       <div className="px-2 py-3">
         <div className="grid grid-cols-3 gap-1.5 mb-1">
-          {/* EMW Card - Now based on history_detail data */}
+          {/* EMW Card - Based on history_detail data */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs font-semibold text-blue-800 mb-1 flex items-center justify-center gap-1">
               <span className="bg-blue-500 text-white px-1 py-0.5 rounded text-xs">
@@ -499,7 +499,7 @@ const MyDataHomepage: React.FC = () => {
         </div>
       </div>
 
-      {/* Second Row - Asset Cards - Now based on history_detail data */}
+      {/* Second Row - Asset Cards - Based on history_detail data */}
       <div className="px-2 py-1">
         <div className="grid grid-cols-3 gap-1.5 mb-1">
           {/* Total Bank Balance Card - From history_detail current month */}

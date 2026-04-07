@@ -14,9 +14,6 @@ import Layout from "../components/Layout/Layout";
 import LoginForm from "../components/Auth/Login";
 import MyDataHomepage from "../MyDataHomepage";
 
-// Import History pages
-import EditHistoryPage from "../modules/Banking/pages/EditHistoryPage";
-
 // Import Jewellery pages
 import JewelleryHome from "../modules/Jewellery/index";
 import JewelleryList from "../modules/Jewellery/pages/ListTab";
@@ -137,22 +134,6 @@ const allRoutes: RouteConfig[] = [
     element: <ViewDepositPage />,
     title: "View Deposit",
     icon: "👁️",
-    requiresAuth: true,
-    needsUserData: true,
-  },
-  {
-    path: "/banking/history/add",
-    element: <EditHistoryPage />,
-    title: "Add History",
-    icon: "➕",
-    requiresAuth: true,
-    needsUserData: true,
-  },
-  {
-    path: "/banking/history/edit/:month",
-    element: <EditHistoryPage />,
-    title: "Edit History",
-    icon: "✏️",
     requiresAuth: true,
     needsUserData: true,
   },

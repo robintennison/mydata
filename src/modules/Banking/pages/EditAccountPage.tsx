@@ -25,13 +25,8 @@ const EditAccountPage: React.FC = () => {
   const [formData, setFormData] = useState({
     acctCode: "",
     acctDetails: "",
-    savingsAmount: "",
     mpin: "",
   });
-
-  // REMOVED: escapeTextareaValue function - no longer needed
-
-  // REMOVED: unescapeTextareaValue function - no longer needed
 
   useEffect(() => {
     if (!id) {
@@ -49,11 +44,9 @@ const EditAccountPage: React.FC = () => {
 
       setAccount(foundAccount);
 
-      // FIXED: Use the raw account details directly, no escaping
       setFormData({
         acctCode: foundAccount.acctCode || "",
-        acctDetails: foundAccount.acctDetails || "", // ← Direct assignment, no escaping
-        savingsAmount: foundAccount.savingsAmount?.toString() || "0",
+        acctDetails: foundAccount.acctDetails || "",
         mpin: foundAccount.mpin || "",
       });
       setError(null);
@@ -63,14 +56,9 @@ const EditAccountPage: React.FC = () => {
   // Calculate textarea height based on content
   useEffect(() => {
     if (textareaRef.current) {
-      // Reset height to auto to get the scrollHeight
       textareaRef.current.style.height = "auto";
-
-      // Calculate the new height based on scrollHeight
       const newHeight = Math.max(150, textareaRef.current.scrollHeight);
       setTextareaHeight(newHeight);
-
-      // Set the height on the textarea
       textareaRef.current.style.height = `${newHeight}px`;
     }
   }, [formData.acctDetails, isViewMode]);
@@ -89,11 +77,6 @@ const EditAccountPage: React.FC = () => {
     }
     if (!formData.acctDetails.trim()) {
       setError("Account Details are required");
-      return false;
-    }
-    const amount = parseFloat(formData.savingsAmount);
-    if (isNaN(amount) || amount < 0) {
-      setError("Please enter a valid savings amount");
       return false;
     }
     if (formData.mpin.length === 0) {
@@ -118,12 +101,10 @@ const EditAccountPage: React.FC = () => {
     try {
       setSubmitting(true);
 
-      // FIXED: Use the raw form data directly, no unescaping needed
       const accountData: BankAccount = {
         id: id,
         acctCode: formData.acctCode.trim(),
-        acctDetails: formData.acctDetails.trim(), // ← Direct assignment, no unescaping
-        savingsAmount: parseFloat(formData.savingsAmount) || 0,
+        acctDetails: formData.acctDetails.trim(),
         mpin: formData.mpin,
       };
 
@@ -166,8 +147,7 @@ const EditAccountPage: React.FC = () => {
     const hasChanges =
       account &&
       (formData.acctCode !== account.acctCode ||
-        formData.acctDetails !== (account.acctDetails || "") || // ← Direct comparison
-        formData.savingsAmount !== (account.savingsAmount?.toString() || "0") ||
+        formData.acctDetails !== (account.acctDetails || "") ||
         formData.mpin !== account.mpin);
 
     if (hasChanges) {
@@ -260,26 +240,13 @@ const EditAccountPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Account Details - FIXED: Show raw data directly */}
+            {/* Account Details */}
             <div className="mb-5">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Account Details *
               </label>
               <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 min-h-[150px] whitespace-pre-wrap">
-                {formData.acctDetails || "No details provided"}{" "}
-                {/* ← Direct display */}
-              </div>
-            </div>
-
-            {/* Savings Amount */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Savings Amount *
-              </label>
-              <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900">
-                {parseFloat(formData.savingsAmount || "0").toLocaleString(
-                  "en-IN",
-                )}
+                {formData.acctDetails || "No details provided"}
               </div>
             </div>
 
@@ -324,7 +291,7 @@ const EditAccountPage: React.FC = () => {
               />
             </div>
 
-            {/* Account Details - FIXED: Using raw value directly */}
+            {/* Account Details */}
             <div className="mb-5">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Account Details *
@@ -343,24 +310,6 @@ const EditAccountPage: React.FC = () => {
               <div className="text-xs text-gray-500 mt-1">
                 Characters: {formData.acctDetails.length}/1000
               </div>
-            </div>
-
-            {/* Savings Amount */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Savings Amount *
-              </label>
-              <input
-                type="number"
-                placeholder="0.00"
-                value={formData.savingsAmount}
-                onChange={(e) => handleChange("savingsAmount", e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100"
-                required
-                min="0"
-                step="0.01"
-                disabled={submitting}
-              />
             </div>
 
             {/* MPIN */}

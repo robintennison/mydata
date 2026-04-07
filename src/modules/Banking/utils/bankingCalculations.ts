@@ -3,16 +3,6 @@ import { BankAccount, Deposit, DepositAdjustment } from "../../../types/banking.
 /**
  * Calculates the total balance across all accounts, including savings and adjusted deposits.
  */
-export const calculateTotalBalance = (
-    accounts: BankAccount[],
-    deposits: Deposit[],
-    adjustments: DepositAdjustment[],
-    showInactive: boolean = false
-): number => {
-    const totalSavings = accounts.reduce((sum, account) => sum + account.savingsAmount, 0);
-    const totalDeposits = calculateTotalDeposits(accounts, deposits, adjustments, showInactive);
-    return totalSavings + totalDeposits;
-};
 
 /**
  * Calculates the total deposits across all accounts, matching the Android/BankingHomePage logic.

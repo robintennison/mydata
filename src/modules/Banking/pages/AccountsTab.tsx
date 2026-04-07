@@ -12,18 +12,6 @@ const AccountsTab: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<any>(null);
 
-  // Format currency without rupee symbol, in lakhs without 'L' suffix
-  const formatCurrency = (amount: number): string => {
-    // Convert to lakhs (divide by 100,000)
-    const amountInLakhs = amount / 100000;
-
-    // Format with Indian number grouping (lakhs and crores)
-    return new Intl.NumberFormat("en-IN", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amountInLakhs);
-  };
-
   // Helper function to check if account is active
   const isAccountActive = (account: any): boolean => {
     // If isActive property exists, use it
@@ -47,19 +35,6 @@ const AccountsTab: React.FC = () => {
   const sortedAccounts = [...filteredAccounts].sort((a, b) => {
     return a.acctCode.localeCompare(b.acctCode);
   });
-
-  // Calculate total savings for filtered accounts
-  const totalSavings = sortedAccounts.reduce((sum, account) => {
-    return sum + account.savingsAmount;
-  }, 0);
-
-  // Count active and inactive accounts for stats
-  const activeAccountsCount = accounts.filter((account) =>
-    isAccountActive(account),
-  ).length;
-  const inactiveAccountsCount = accounts.filter(
-    (account) => !isAccountActive(account),
-  ).length;
 
   // Truncate account code to 12 characters
   const truncateAccountCode = (code: string): string => {
@@ -124,8 +99,6 @@ const AccountsTab: React.FC = () => {
             <div className="flex items-center py-1.5 px-2 bg-gray-50 border-b border-gray-300 font-semibold text-xs text-gray-700">
               {/* Account Column */}
               <div className="w-[38%] px-0.5 text-left">Account</div>
-              {/* Savings Column */}
-              <div className="w-[27%] px-0.5 text-left">Savings</div>
               {/* MPIN Column - More space */}
               <div className="w-[28%] px-0.5 text-left">MPIN</div>
               {/* Edit Button Column - Minimal space */}
@@ -167,17 +140,6 @@ const AccountsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Savings Column */}
-                      <div className="w-[27%] text-left px-0.5">
-                        <div
-                          className={`text-xs font-semibold whitespace-nowrap ${
-                            isActive ? "text-blue-600" : "text-gray-500"
-                          }`}
-                        >
-                          {formatCurrency(account.savingsAmount)}
-                        </div>
-                      </div>
-
                       {/* MPIN Column - More space now */}
                       <div className="w-[28%] text-left px-0.5">
                         <div className="font-mono text-xs text-black overflow-hidden text-ellipsis whitespace-nowrap font-medium">
@@ -201,29 +163,6 @@ const AccountsTab: React.FC = () => {
                   </div>
                 );
               })}
-            </div>
-
-            {/* Total Savings Footer - COMPACT */}
-            <div className="bg-gray-50 border-t border-gray-300 px-2 py-1.5 flex justify-between items-center">
-              <div className="flex flex-col justify-center">
-                <div className="text-[10px] text-gray-600">
-                  {settings?.showInactive
-                    ? `${sortedAccounts.length} of ${accounts.length} accounts`
-                    : `${sortedAccounts.length} active accounts`}
-                </div>
-                <div className="text-[8px] text-gray-400 mt-0.5">
-                  ({activeAccountsCount} active, {inactiveAccountsCount}{" "}
-                  inactive)
-                </div>
-              </div>
-              <div className="text-right flex flex-col justify-center items-end">
-                <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
-                  Total Savings
-                </div>
-                <div className="text-xs font-bold text-blue-600">
-                  {formatCurrency(totalSavings)}
-                </div>
-              </div>
             </div>
           </div>
         )}

@@ -4,7 +4,6 @@ import { Timestamp } from "firebase/firestore";
 export interface BankAccount {
   id: string;
   acctCode: string;
-  savingsAmount: number;
   acctDetails: string;
   mpin: string;
   isActive?: boolean; // Add this property for active/inactive filtering
@@ -42,17 +41,6 @@ export interface DepositAdjustment {
   updatedAt?: Timestamp | number;
 }
 
-// Derived/calculated types
-export interface AccountSummary {
-  accountId: string;
-  acctCode: string;
-  savings: number;
-  deposits: number;
-  adjustments: number;
-  netBalance: number;
-  isActive?: boolean; // Optional, can inherit from BankAccount
-}
-
 export interface ChartPoint {
   month: string;
   value: number;
@@ -64,7 +52,6 @@ export interface ChartPoint {
 export interface AccountFormData {
   id: string;
   acctCode: string;
-  savingsAmount: number;
   acctDetails: string;
   mpin: string;
   isActive?: boolean; // Add to form data as well
@@ -112,7 +99,6 @@ export interface DepositsTabProps {
 }
 
 export interface SummaryTabProps {
-  summaries: AccountSummary[];
   accounts: BankAccount[];
   deposits: Deposit[];
   adjustments: DepositAdjustment[];

@@ -47,19 +47,85 @@ interface JewelleryItem {
   verificationNotes?: string;
 }
 
+// Add HistoryDetail interface
+interface HistoryDetail {
+  acctCode: string;
+  month: string;
+  savings: number;
+  deposits: number;
+}
+
 const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
   const { settings: appSettings } = useSettings();
   const { goldRate, settings: jewellerySettings } = useJewellerySettings();
-  const { accounts, deposits, adjustments, history, loading } =
-    useBankingData();
+  const {
+    accounts,
+    deposits,
+    history,
+    loading: bankingLoading,
+  } = useBankingData();
   const [onlineItems, setOnlineItems] = useState<OnlineItem[]>([]);
   const [onlineItemsLoading, setOnlineItemsLoading] = useState(true);
   const [jewelleryItems, setJewelleryItems] = useState<JewelleryItem[]>([]);
   const [jewelleryLoading, setJewelleryLoading] = useState(true);
 
+  // State for history_detail data
+  const [currentMonthHistory, setCurrentMonthHistory] = useState<
+    HistoryDetail[]
+  >([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+
   // Get resale discount percentage from jewellery settings
   const resaleDiscountPercent = jewellerySettings?.resaleDiscountPercent || 0;
+
+  // Get current month in YYYY-MM format
+  const getCurrentMonth = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
+  };
+
+  // Fetch current month data from history_detail
+  useEffect(() => {
+    const fetchCurrentMonthData = async () => {
+      try {
+        setHistoryLoading(true);
+        const currentMonth = getCurrentMonth();
+        const historyDetailRef = collection(getFirestore(), "history_detail");
+        const querySnapshot = await getDocs(historyDetailRef);
+
+        const currentMonthRecords: HistoryDetail[] = [];
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const month = data.month;
+
+          // Only include records from current month
+          if (month === currentMonth) {
+            currentMonthRecords.push({
+              acctCode: data.acctCode || "",
+              month: data.month || "",
+              savings: data.savings || 0,
+              deposits: data.deposits || 0,
+            });
+          }
+        });
+
+        setCurrentMonthHistory(currentMonthRecords);
+      } catch (error) {
+        console.error(
+          "Error fetching history_detail for current month:",
+          error,
+        );
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    fetchCurrentMonthData();
+  }, []);
 
   // Fetch online items
   useEffect(() => {
@@ -160,83 +226,39 @@ const MyDataHomepage: React.FC = () => {
     fetchJewelleryItems();
   }, []);
 
-  // Memoize calculations for better performance
+  // Memoize calculations using history_detail data only
   const {
-    upcomingMaturities,
-    expiredMaturities,
     totalSavings,
     totalDeposits,
     totalBankBalance,
-    totalJewelleryWeight,
-    totalJewellerySellValue,
-    totalAssets,
     emwAmount,
     actualWithdrawalData,
     lastMonthWithdrawal,
   } = useMemo(() => {
-    if (loading || accounts.length === 0) {
+    // Use current month history data
+    if (currentMonthHistory.length === 0) {
       return {
-        upcomingMaturities: [],
-        expiredMaturities: [],
         totalSavings: 0,
         totalDeposits: 0,
         totalBankBalance: 0,
-        totalJewelleryWeight: 0,
-        totalJewellerySellValue: 0,
-        totalAssets: 0,
         emwAmount: 0,
         actualWithdrawalData: { monthlyRate: 0, totalDrop: 0, monthsCount: 0 },
         lastMonthWithdrawal: 0,
       };
     }
 
-    // Calculate total savings
-    const totalSavings = accounts.reduce(
-      (sum, account) => sum + account.savingsAmount,
-      0,
-    );
+    // Calculate totals from current month history
+    let totalSavings = 0;
+    let totalDeposits = 0;
 
-    // Calculate total deposits with filtering
-    const filteredDeposits = appSettings?.showInactive
-      ? deposits
-      : deposits.filter((deposit) => deposit.active !== false);
-
-    const totalDeposits = accounts.reduce((total, account) => {
-      const accountId = account.id;
-
-      const baseDeposits = filteredDeposits
-        .filter((deposit) => deposit.accountId === accountId)
-        .reduce((sum, deposit) => sum + deposit.amount, 0);
-
-      const adjustmentsTotal = adjustments
-        .filter((adj) => adj.accountId === accountId)
-        .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
-
-      return total + baseDeposits + adjustmentsTotal;
-    }, 0);
+    currentMonthHistory.forEach((record) => {
+      totalSavings += record.savings;
+      totalDeposits += record.deposits;
+    });
 
     const totalBankBalance = totalSavings + totalDeposits;
 
-    // Calculate jewellery stats (only active items)
-    const activeJewelleryItems = jewelleryItems.filter(
-      (item) => item.active !== false,
-    );
-    const totalJewelleryWeight = activeJewelleryItems.reduce(
-      (sum, item) => sum + (item.weight || 0),
-      0,
-    );
-
-    // Calculate sell value exactly as in JewelleryHome component:
-    // goldValue = totalWeight * goldRate
-    // sellValue = goldValue * (1 - resaleDiscountPercent / 100)
-    const goldValue = totalJewelleryWeight * goldRate;
-    const totalJewellerySellValue =
-      goldValue * (1 - resaleDiscountPercent / 100);
-
-    // Calculate total assets
-    const totalAssets = totalBankBalance + totalJewellerySellValue;
-
-    // Calculate EMW
+    // Calculate EMW using settings (target date and interest rate from settings)
     const emwSettings = getEmwSettings(appSettings);
     const emwAmount = calculateEMW(
       totalBankBalance,
@@ -244,7 +266,7 @@ const MyDataHomepage: React.FC = () => {
       emwSettings.interestRate,
     );
 
-    // Get last 6 months history for withdrawal calculations
+    // Get last 6 months history from props for withdrawal calculations
     const last6Months = [...history]
       .sort((a, b) => b.month.localeCompare(a.month))
       .slice(0, 6);
@@ -260,7 +282,7 @@ const MyDataHomepage: React.FC = () => {
 
       const monthlyBalances = last6Months.map((record) => ({
         month: record.month,
-        totalBalance: record.savings + record.totalDeposits,
+        totalBalance: (record.savings || 0) + (record.totalDeposits || 0),
       }));
 
       const firstMonth = monthlyBalances[0];
@@ -285,37 +307,67 @@ const MyDataHomepage: React.FC = () => {
 
       if (!currentMonth || !previousMonth) return 0;
 
-      const currentBalance = currentMonth.savings + currentMonth.totalDeposits;
+      const currentBalance =
+        (currentMonth.savings || 0) + (currentMonth.totalDeposits || 0);
       const previousBalance =
-        previousMonth.savings + previousMonth.totalDeposits;
+        (previousMonth.savings || 0) + (previousMonth.totalDeposits || 0);
 
       return previousBalance - currentBalance;
     };
 
     return {
-      upcomingMaturities: getNextMaturities(deposits, 5),
-      expiredMaturities: getExpiredMaturities(deposits, 5, true),
       totalSavings,
       totalDeposits,
       totalBankBalance,
-      totalJewelleryWeight,
-      totalJewellerySellValue,
-      totalAssets,
       emwAmount,
       actualWithdrawalData: calculateActualWithdrawalRate(),
       lastMonthWithdrawal: calculateLastMonthWithdrawal(),
     };
-  }, [
-    accounts,
-    deposits,
-    adjustments,
-    history,
-    jewelleryItems,
-    goldRate,
-    resaleDiscountPercent,
-    appSettings,
-    loading,
-  ]);
+  }, [currentMonthHistory, appSettings, history]);
+
+  // Memoize jewellery calculations separately
+  const { totalJewelleryWeight, totalJewellerySellValue, totalAssets } =
+    useMemo(() => {
+      // Calculate jewellery stats (only active items)
+      const activeJewelleryItems = jewelleryItems.filter(
+        (item) => item.active !== false,
+      );
+      const totalJewelleryWeight = activeJewelleryItems.reduce(
+        (sum, item) => sum + (item.weight || 0),
+        0,
+      );
+
+      // Calculate sell value exactly as in JewelleryHome component:
+      // goldValue = totalWeight * goldRate
+      // sellValue = goldValue * (1 - resaleDiscountPercent / 100)
+      const goldValue = totalJewelleryWeight * goldRate;
+      const totalJewellerySellValue =
+        goldValue * (1 - resaleDiscountPercent / 100);
+
+      // Calculate total assets
+      const totalAssets = totalBankBalance + totalJewellerySellValue;
+
+      return {
+        totalJewelleryWeight,
+        totalJewellerySellValue,
+        totalAssets,
+      };
+    }, [jewelleryItems, goldRate, resaleDiscountPercent, totalBankBalance]);
+
+  // Memoize maturities calculations (still need deposits for this)
+  const { upcomingMaturities, expiredMaturities } = useMemo(() => {
+    if (bankingLoading || deposits.length === 0) {
+      return {
+        upcomingMaturities: [],
+        expiredMaturities: [],
+      };
+    }
+
+    return {
+      upcomingMaturities: getNextMaturities(deposits, 5),
+      expiredMaturities: getExpiredMaturities(deposits, 5, true),
+    };
+  }, [deposits, bankingLoading]);
 
   // Format lakhs for display (without L suffix)
   const formatLakhs = (amount: number): string => {
@@ -356,7 +408,10 @@ const MyDataHomepage: React.FC = () => {
   // Get EMW settings for display
   const emwSettings = getEmwSettings(appSettings);
 
-  if (loading || jewelleryLoading) {
+  // Combined loading state
+  const isLoading = historyLoading || bankingLoading || jewelleryLoading;
+
+  if (isLoading) {
     return (
       <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-4 px-2 sm:px-4 box-border overflow-x-hidden">
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-gray-50 text-gray-700">
@@ -390,7 +445,7 @@ const MyDataHomepage: React.FC = () => {
       {/* Top Row - EMW Cards */}
       <div className="px-2 py-3">
         <div className="grid grid-cols-3 gap-1.5 mb-1">
-          {/* EMW Card */}
+          {/* EMW Card - Now based on history_detail data */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs font-semibold text-blue-800 mb-1 flex items-center justify-center gap-1">
               <span className="bg-blue-500 text-white px-1 py-0.5 rounded text-xs">
@@ -407,7 +462,7 @@ const MyDataHomepage: React.FC = () => {
             </div>
           </div>
 
-          {/* Actual Rate Card */}
+          {/* Actual Rate Card - Based on history_detail historical data */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs font-semibold text-gray-700 mb-1">
               Actual (6m)
@@ -424,7 +479,7 @@ const MyDataHomepage: React.FC = () => {
             <div className="text-xs text-gray-500 mt-0.5">avg/month</div>
           </div>
 
-          {/* Last Month Card */}
+          {/* Last Month Card - Based on history_detail historical data */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs font-semibold text-gray-700 mb-1">
               Last Month
@@ -444,10 +499,10 @@ const MyDataHomepage: React.FC = () => {
         </div>
       </div>
 
-      {/* Second Row - Asset Cards */}
+      {/* Second Row - Asset Cards - Now based on history_detail data */}
       <div className="px-2 py-1">
         <div className="grid grid-cols-3 gap-1.5 mb-1">
-          {/* Total Bank Balance Card */}
+          {/* Total Bank Balance Card - From history_detail current month */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs text-gray-500 mb-0.5">Bank Balance</div>
             <div className="text-base font-bold text-blue-600 leading-tight">
@@ -458,7 +513,7 @@ const MyDataHomepage: React.FC = () => {
             </div>
           </div>
 
-          {/* Jewellery Sell Value Card */}
+          {/* Jewellery Sell Value Card - Still from jewellery table */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs text-gray-500 mb-0.5">Jewellery Value</div>
             <div className="text-base font-bold text-amber-600 leading-tight">
@@ -469,7 +524,7 @@ const MyDataHomepage: React.FC = () => {
             </div>
           </div>
 
-          {/* Total Assets Card */}
+          {/* Total Assets Card - Combines history_detail bank balance + jewellery */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center bg-gradient-to-br from-blue-50 to-amber-50">
             <div className="text-xs font-semibold text-gray-700 mb-0.5">
               Total Assets
@@ -484,7 +539,7 @@ const MyDataHomepage: React.FC = () => {
         </div>
       </div>
 
-      {/* Online Items with End Dates Section */}
+      {/* Online Items with End Dates Section - Unchanged */}
       <div
         className="bg-white rounded-lg my-3 p-3 sm:p-4 shadow-sm border border-gray-200 shrink-0"
         style={{
@@ -591,7 +646,7 @@ const MyDataHomepage: React.FC = () => {
         )}
       </div>
 
-      {/* Maturities Section - Compact */}
+      {/* Maturities Section - Compact (still uses deposits table) */}
       <div
         className="bg-white rounded-lg my-3 p-3 sm:p-4 shadow-sm border border-gray-200 shrink-0"
         style={{

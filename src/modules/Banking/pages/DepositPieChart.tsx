@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -9,49 +9,133 @@ import {
 } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { collection, query, getDocs } from "firebase/firestore";
+import { firestore } from "../../../lib/firebase";
 
 // Register Chart.js components for Pie chart
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 interface DepositPieChartProps {
-  accounts: any[];
-  deposits: any[];
-  adjustments: any[];
+  accounts?: any[];
+  deposits?: any[];
+  adjustments?: any[];
   showInactive?: boolean;
 }
 
+interface AccountDepositSummary {
+  acctCode: string;
+  deposits: number;
+}
+
 const DepositPieChart: React.FC<DepositPieChartProps> = ({
-  accounts,
-  deposits,
-  adjustments,
+  accounts: propAccounts,
+  deposits: propDeposits,
+  adjustments: propAdjustments,
   showInactive = false,
 }) => {
-  // Prepare data for pie chart
+  const [currentMonthData, setCurrentMonthData] = useState<
+    AccountDepositSummary[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+
+  // Get current month in YYYY-MM format
+  const getCurrentMonth = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
+  };
+
+  // Fetch deposit data from history_detail for current month
+  useEffect(() => {
+    const fetchCurrentMonthDeposits = async () => {
+      try {
+        setLoading(true);
+        const currentMonth = getCurrentMonth();
+        const historyDetailRef = collection(firestore, "history_detail");
+        const q = query(historyDetailRef);
+        const querySnapshot = await getDocs(q);
+
+        // Map to store deposit data for current month
+        const accountMap = new Map<string, number>();
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const month = data.month;
+          const acctCode = data.acctCode;
+          const deposits = data.deposits || 0;
+
+          // Only include records from current month
+          if (month === currentMonth && acctCode && deposits > 0) {
+            if (accountMap.has(acctCode)) {
+              const existing = accountMap.get(acctCode)!;
+              accountMap.set(acctCode, existing + deposits);
+            } else {
+              accountMap.set(acctCode, deposits);
+            }
+          }
+        });
+
+        // Convert map to array of AccountDepositSummary
+        const accountSummaries: AccountDepositSummary[] = [];
+        accountMap.forEach((deposits, acctCode) => {
+          accountSummaries.push({
+            acctCode: acctCode,
+            deposits: deposits,
+          });
+        });
+
+        setCurrentMonthData(accountSummaries);
+      } catch (error) {
+        console.error(
+          "Error fetching history_detail for deposit pie chart:",
+          error,
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCurrentMonthDeposits();
+  }, []);
+
+  // Prepare data for pie chart using current month data from history_detail
   const chartData = useMemo(() => {
-    if (!accounts.length) return null;
+    // If we have data from history_detail, use it; otherwise fall back to props for backward compatibility
+    let dataSource: AccountDepositSummary[] = [];
 
-    // Filter active deposits if needed
-    const filteredDeposits = showInactive
-      ? deposits
-      : deposits.filter((d) => d.active !== false);
+    if (currentMonthData.length > 0) {
+      dataSource = currentMonthData;
+    } else if (propAccounts && propAccounts.length > 0) {
+      // Fall back to props-based calculation for backward compatibility
+      const filteredDeposits = showInactive
+        ? propDeposits || []
+        : (propDeposits || []).filter((d) => d.active !== false);
 
-    const summaries = accounts.map((account) => {
-      // Calculate base deposits for this account
-      const baseDeposits = filteredDeposits
-        .filter((deposit) => deposit.accountId === account.id)
-        .reduce((sum, deposit) => sum + deposit.amount, 0);
+      const summaries = propAccounts.map((account) => {
+        const baseDeposits = filteredDeposits
+          .filter((deposit) => deposit.accountId === account.id)
+          .reduce((sum, deposit) => sum + deposit.amount, 0);
 
-      // Calculate adjustments for this account
-      const adjustmentsTotal = adjustments
-        .filter((adj) => adj.accountId === account.id)
-        .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
+        const adjustmentsTotal = (propAdjustments || [])
+          .filter((adj) => adj.accountId === account.id)
+          .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
 
-      // Total deposits = base deposits + adjustments
-      return {
-        label: account.acctCode || account.id,
-        value: (baseDeposits + adjustmentsTotal) / 100000, // in Lakhs
-      };
-    });
+        return {
+          acctCode: account.acctCode || account.id,
+          deposits: baseDeposits + adjustmentsTotal,
+        };
+      });
+
+      dataSource = summaries;
+    }
+
+    if (!dataSource.length) return null;
+
+    const summaries = dataSource.map((account) => ({
+      label: account.acctCode,
+      value: account.deposits / 100000, // in Lakhs
+    }));
 
     const activeSummaries = summaries.filter((s) => s.value > 0);
 
@@ -108,9 +192,15 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
     };
 
     return data;
-  }, [accounts, deposits, adjustments, showInactive]);
+  }, [
+    currentMonthData,
+    propAccounts,
+    propDeposits,
+    propAdjustments,
+    showInactive,
+  ]);
 
-  const chardOptions: ChartOptions<"pie"> = {
+  const chartOptions: ChartOptions<"pie"> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -171,17 +261,50 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
     },
   };
 
-  if (!chartData) return null;
+  if (loading) {
+    return (
+      <div className="pb-2">
+        <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+          <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <span>📊</span>
+            <span>Deposit Distribution</span>
+          </div>
+          <div className="h-[360px] relative flex items-center justify-center">
+            <div className="text-gray-500">Loading deposit data...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!chartData) {
+    return (
+      <div className="pb-2">
+        <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+          <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <span>📊</span>
+            <span>Deposit Distribution</span>
+          </div>
+          <div className="h-[360px] relative flex items-center justify-center">
+            <div className="text-gray-500 text-center">
+              <div className="text-4xl mb-2">📭</div>
+              <div>No deposit data available for current month</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-2">
       <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
         <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
           <span>📊</span>
-          <span>Deposit Distribution</span>
+          <span>Deposit Distribution - Current Month</span>
         </div>
         <div className="h-[360px] relative">
-          <Pie data={chartData} options={chardOptions} />
+          <Pie data={chartData} options={chartOptions} />
         </div>
       </div>
     </div>

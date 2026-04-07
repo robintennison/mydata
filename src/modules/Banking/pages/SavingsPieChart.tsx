@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -9,20 +9,96 @@ import {
 } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { collection, query, getDocs } from "firebase/firestore";
+import { firestore } from "../../../lib/firebase";
 
 // Register Chart.js components for Pie chart
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 interface SavingsPieChartProps {
-  accounts: any[];
+  accounts?: any[]; // Keep for backward compatibility but won't be used
 }
 
-const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
-  // Prepare data for pie chart
-  const chartData = useMemo(() => {
-    if (!accounts.length) return null;
+interface AccountSummary {
+  acctCode: string;
+  savingsAmount: number;
+}
 
-    const summaries = accounts.map((account) => ({
+const SavingsPieChart: React.FC<SavingsPieChartProps> = ({
+  accounts: propAccounts,
+}) => {
+  const [currentMonthData, setCurrentMonthData] = useState<AccountSummary[]>(
+    [],
+  );
+  const [loading, setLoading] = useState(true);
+
+  // Get current month in YYYY-MM format
+  const getCurrentMonth = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
+  };
+
+  // Fetch data from history_detail for current month
+  useEffect(() => {
+    const fetchCurrentMonthData = async () => {
+      try {
+        setLoading(true);
+        const currentMonth = getCurrentMonth();
+        const historyDetailRef = collection(firestore, "history_detail");
+        const q = query(historyDetailRef);
+        const querySnapshot = await getDocs(q);
+
+        // Map to store account data for current month
+        const accountMap = new Map<string, number>();
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const month = data.month;
+          const acctCode = data.acctCode;
+          const savings = data.savings || 0;
+
+          // Only include records from current month
+          if (month === currentMonth && acctCode && savings > 0) {
+            if (accountMap.has(acctCode)) {
+              const existing = accountMap.get(acctCode)!;
+              accountMap.set(acctCode, existing + savings);
+            } else {
+              accountMap.set(acctCode, savings);
+            }
+          }
+        });
+
+        // Convert map to array of AccountSummary
+        const accountSummaries: AccountSummary[] = [];
+        accountMap.forEach((savingsAmount, acctCode) => {
+          accountSummaries.push({
+            acctCode: acctCode,
+            savingsAmount: savingsAmount,
+          });
+        });
+
+        setCurrentMonthData(accountSummaries);
+      } catch (error) {
+        console.error("Error fetching history_detail for pie chart:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCurrentMonthData();
+  }, []);
+
+  // Prepare data for pie chart using current month data from history_detail
+  const chartData = useMemo(() => {
+    // If we have prop accounts and no data from history_detail, fall back to props
+    const dataSource =
+      currentMonthData.length > 0 ? currentMonthData : propAccounts || [];
+
+    if (!dataSource.length) return null;
+
+    const summaries = dataSource.map((account) => ({
       label: account.acctCode || account.id,
       value: Math.floor(account.savingsAmount / 1000), // in Thousands, floor to ignore decimals
     }));
@@ -82,9 +158,9 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
     };
 
     return data;
-  }, [accounts]);
+  }, [currentMonthData, propAccounts]);
 
-  const chardOptions: ChartOptions<"pie"> = {
+  const chartOptions: ChartOptions<"pie"> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -143,17 +219,50 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({ accounts }) => {
     },
   };
 
-  if (!chartData) return null;
+  if (loading) {
+    return (
+      <div className="pb-2">
+        <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+          <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <span>📊</span>
+            <span>Savings Distribution</span>
+          </div>
+          <div className="h-[360px] relative flex items-center justify-center">
+            <div className="text-gray-500">Loading savings data...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!chartData) {
+    return (
+      <div className="pb-2">
+        <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+          <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <span>📊</span>
+            <span>Savings Distribution</span>
+          </div>
+          <div className="h-[360px] relative flex items-center justify-center">
+            <div className="text-gray-500 text-center">
+              <div className="text-4xl mb-2">📭</div>
+              <div>No savings data available for current month</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-2">
       <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
         <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
           <span>📊</span>
-          <span>Savings Distribution</span>
+          <span>Savings Distribution - Current Month</span>
         </div>
         <div className="h-[360px] relative">
-          <Pie data={chartData} options={chardOptions} />
+          <Pie data={chartData} options={chartOptions} />
         </div>
       </div>
     </div>

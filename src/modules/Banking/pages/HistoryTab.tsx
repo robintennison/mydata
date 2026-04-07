@@ -15,21 +15,19 @@ import { useSettings } from "../../../contexts/SettingsContext";
 // Date of birth: 17th October 1959
 const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
 
-// Define the HistoryDetail type from the database
-interface HistoryDetail {
+// Define the aggregated monthly data
+interface MonthlySummary {
   month: string;
-  acctCode: string;
   savings: number;
   deposits: number;
 }
 
 const HistoryTab: React.FC = () => {
   const { settings } = useSettings();
-  const { loading: bankingDataLoading, history: bankingHistory } =
-    useBankingData();
+  const { loading: bankingDataLoading } = useBankingData();
 
-  // State for history_detail data
-  const [historyDetail, setHistoryDetail] = useState<HistoryDetail[]>([]);
+  // State for aggregated monthly data
+  const [monthlyData, setMonthlyData] = useState<MonthlySummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [editingMonth, setEditingMonth] = useState<string | null>(null);
@@ -46,27 +44,59 @@ const HistoryTab: React.FC = () => {
     null,
   );
 
-  // Fetch data from history_detail table
+  // Fetch and aggregate data from history_detail table
   useEffect(() => {
-    const fetchHistoryDetail = async () => {
+    const fetchAndAggregateHistoryDetail = async () => {
       try {
         setLoading(true);
         const historyDetailRef = collection(firestore, "history_detail");
         const q = query(historyDetailRef);
         const querySnapshot = await getDocs(q);
 
-        const historyData: HistoryDetail[] = [];
+        // Map to store aggregated data by month
+        const aggregatedData = new Map<
+          string,
+          { savings: number; deposits: number }
+        >();
+
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          historyData.push({
-            month: data.month,
-            acctCode: data.acctCode,
-            savings: data.savings,
-            deposits: data.deposits,
+          const month = data.month;
+
+          // Skip records with null, undefined, or empty month
+          if (!month || month.trim() === "") {
+            console.log("Skipping record with empty month:", doc.id);
+            return;
+          }
+
+          const savings = data.savings || 0;
+          const deposits = data.deposits || 0;
+
+          if (aggregatedData.has(month)) {
+            const existing = aggregatedData.get(month)!;
+            aggregatedData.set(month, {
+              savings: existing.savings + savings,
+              deposits: existing.deposits + deposits,
+            });
+          } else {
+            aggregatedData.set(month, {
+              savings: savings,
+              deposits: deposits,
+            });
+          }
+        });
+
+        // Convert map to array of MonthlySummary
+        const monthlySummaries: MonthlySummary[] = [];
+        aggregatedData.forEach((value, month) => {
+          monthlySummaries.push({
+            month: month,
+            savings: value.savings,
+            deposits: value.deposits,
           });
         });
 
-        setHistoryDetail(historyData);
+        setMonthlyData(monthlySummaries);
       } catch (error) {
         console.error("Error fetching history_detail:", error);
       } finally {
@@ -74,7 +104,7 @@ const HistoryTab: React.FC = () => {
       }
     };
 
-    fetchHistoryDetail();
+    fetchAndAggregateHistoryDetail();
   }, []);
 
   // Calculate target age from EMW_Date in settings - EXACT SAME LOGIC as SettingsPage
@@ -100,16 +130,16 @@ const HistoryTab: React.FC = () => {
     }
   };
 
-  // Calculate age when balance will become zero using history_detail data
+  // Calculate age when balance will become zero using aggregated data
   useEffect(() => {
-    if (historyDetail.length < 2) {
+    if (monthlyData.length < 2) {
       setZeroBalanceAge(null);
       setMonthlyConsumption(null);
       return;
     }
 
     // Get last 6 months, sorted chronologically
-    const sortedHistory = [...historyDetail]
+    const sortedHistory = [...monthlyData]
       .sort((a, b) => a.month.localeCompare(b.month))
       .slice(-6);
 
@@ -159,7 +189,7 @@ const HistoryTab: React.FC = () => {
       // If balance is increasing or not decreasing
       setZeroBalanceAge(null);
     }
-  }, [historyDetail]);
+  }, [monthlyData]);
 
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
   const formatLakhs = (lakhs: number): string => lakhs.toFixed(2);
@@ -188,34 +218,118 @@ const HistoryTab: React.FC = () => {
         return;
       }
 
-      const savingsRupees = savingsLakhs * 100000;
-      const depositsRupees = depositsLakhs * 100000;
+      const newSavingsRupees = savingsLakhs * 100000;
+      const newDepositsRupees = depositsLakhs * 100000;
 
-      // Update in history_detail table
-      const historyRef = doc(firestore, "history_detail", month);
-      await updateDoc(historyRef, {
-        savings: savingsRupees,
-        deposits: depositsRupees,
-        updatedAt: new Date(),
-      });
-
-      // Refresh the data
+      // Get all records for this month from history_detail
       const historyDetailRef = collection(firestore, "history_detail");
       const q = query(historyDetailRef);
       const querySnapshot = await getDocs(q);
 
-      const updatedHistoryData: HistoryDetail[] = [];
+      const recordsToUpdate: Array<{
+        id: string;
+        currentSavings: number;
+        currentDeposits: number;
+      }> = [];
+      let currentTotalSavings = 0;
+      let currentTotalDeposits = 0;
+
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        updatedHistoryData.push({
-          month: data.month,
-          acctCode: data.acctCode,
-          savings: data.savings,
-          deposits: data.deposits,
+        if (data.month === month) {
+          const savings = data.savings || 0;
+          const deposits = data.deposits || 0;
+          recordsToUpdate.push({
+            id: doc.id,
+            currentSavings: savings,
+            currentDeposits: deposits,
+          });
+          currentTotalSavings += savings;
+          currentTotalDeposits += deposits;
+        }
+      });
+
+      if (recordsToUpdate.length === 0) {
+        alert("No records found for this month");
+        setIsSaving(false);
+        return;
+      }
+
+      // Calculate the difference to distribute
+      const savingsDiff = newSavingsRupees - currentTotalSavings;
+      const depositsDiff = newDepositsRupees - currentTotalDeposits;
+
+      // Distribute the difference proportionally across records
+      // For simplicity, we'll update the first record with the total difference
+      // Alternatively, you could distribute proportionally based on current values
+
+      const updatePromises = recordsToUpdate.map(async (record, index) => {
+        const recordRef = doc(firestore, "history_detail", record.id);
+        let updatedSavings = record.currentSavings;
+        let updatedDeposits = record.currentDeposits;
+
+        if (index === 0) {
+          // Apply all differences to the first record
+          updatedSavings = record.currentSavings + savingsDiff;
+          updatedDeposits = record.currentDeposits + depositsDiff;
+
+          // Ensure no negative values
+          updatedSavings = Math.max(0, updatedSavings);
+          updatedDeposits = Math.max(0, updatedDeposits);
+        }
+
+        return updateDoc(recordRef, {
+          savings: updatedSavings,
+          deposits: updatedDeposits,
+          updatedAt: new Date(),
         });
       });
 
-      setHistoryDetail(updatedHistoryData);
+      await Promise.all(updatePromises);
+
+      // Refresh the aggregated data
+      const refreshSnapshot = await getDocs(q);
+      const aggregatedData = new Map<
+        string,
+        { savings: number; deposits: number }
+      >();
+
+      refreshSnapshot.forEach((doc) => {
+        const data = doc.data();
+        const monthKey = data.month;
+
+        // Skip records with null, undefined, or empty month
+        if (!monthKey || monthKey.trim() === "") {
+          return;
+        }
+
+        const savings = data.savings || 0;
+        const deposits = data.deposits || 0;
+
+        if (aggregatedData.has(monthKey)) {
+          const existing = aggregatedData.get(monthKey)!;
+          aggregatedData.set(monthKey, {
+            savings: existing.savings + savings,
+            deposits: existing.deposits + deposits,
+          });
+        } else {
+          aggregatedData.set(monthKey, {
+            savings: savings,
+            deposits: deposits,
+          });
+        }
+      });
+
+      const updatedMonthlyData: MonthlySummary[] = [];
+      aggregatedData.forEach((value, monthKey) => {
+        updatedMonthlyData.push({
+          month: monthKey,
+          savings: value.savings,
+          deposits: value.deposits,
+        });
+      });
+
+      setMonthlyData(updatedMonthlyData);
       cancelEditing();
       alert("✓ History updated successfully!");
     } catch (error: any) {
@@ -228,38 +342,89 @@ const HistoryTab: React.FC = () => {
 
   const executeDelete = async () => {
     if (!deleteConfirmMonth) return;
-    try {
-      const historyRef = doc(firestore, "history_detail", deleteConfirmMonth);
-      await deleteDoc(historyRef);
 
-      // Refresh the data
+    if (
+      !confirm(
+        `Are you sure you want to delete ALL records for ${deleteConfirmMonth}?`,
+      )
+    ) {
+      setDeleteConfirmMonth(null);
+      return;
+    }
+
+    try {
+      // Get all records for this month from history_detail
       const historyDetailRef = collection(firestore, "history_detail");
       const q = query(historyDetailRef);
       const querySnapshot = await getDocs(q);
 
-      const updatedHistoryData: HistoryDetail[] = [];
+      const deletePromises: Promise<void>[] = [];
+
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        updatedHistoryData.push({
-          month: data.month,
-          acctCode: data.acctCode,
-          savings: data.savings,
-          deposits: data.deposits,
+        if (data.month === deleteConfirmMonth) {
+          const recordRef = doc.ref;
+          deletePromises.push(deleteDoc(recordRef));
+        }
+      });
+
+      await Promise.all(deletePromises);
+
+      // Refresh the aggregated data
+      const refreshSnapshot = await getDocs(q);
+      const aggregatedData = new Map<
+        string,
+        { savings: number; deposits: number }
+      >();
+
+      refreshSnapshot.forEach((doc) => {
+        const data = doc.data();
+        const monthKey = data.month;
+
+        // Skip records with null, undefined, or empty month
+        if (!monthKey || monthKey.trim() === "") {
+          return;
+        }
+
+        const savings = data.savings || 0;
+        const deposits = data.deposits || 0;
+
+        if (aggregatedData.has(monthKey)) {
+          const existing = aggregatedData.get(monthKey)!;
+          aggregatedData.set(monthKey, {
+            savings: existing.savings + savings,
+            deposits: existing.deposits + deposits,
+          });
+        } else {
+          aggregatedData.set(monthKey, {
+            savings: savings,
+            deposits: deposits,
+          });
+        }
+      });
+
+      const updatedMonthlyData: MonthlySummary[] = [];
+      aggregatedData.forEach((value, monthKey) => {
+        updatedMonthlyData.push({
+          month: monthKey,
+          savings: value.savings,
+          deposits: value.deposits,
         });
       });
 
-      setHistoryDetail(updatedHistoryData);
+      setMonthlyData(updatedMonthlyData);
       setDeleteConfirmMonth(null);
-      alert("✓ History record deleted!");
+      alert("✓ History records deleted!");
     } catch (error: any) {
       console.error("Error deleting history:", error);
       alert(`Failed to delete: ${error.message || "Unknown error"}`);
     }
   };
 
-  const filteredHistory = [...historyDetail].sort((a, b) =>
-    b.month.localeCompare(a.month),
-  );
+  // Filter out any entries with empty month before sorting and displaying
+  const filteredHistory = [...monthlyData]
+    .filter((record) => record.month && record.month.trim() !== "")
+    .sort((a, b) => b.month.localeCompare(a.month));
 
   if (loading || bankingDataLoading) {
     return (
@@ -275,7 +440,7 @@ const HistoryTab: React.FC = () => {
   return (
     <div className="flex flex-col h-full px-2 py-2">
       {/* Age Prediction Card - Positioned at the top */}
-      {historyDetail.length >= 2 && targetAge !== null && (
+      {monthlyData.length >= 2 && targetAge !== null && (
         <div className="mb-3">
           {zeroBalanceAge !== null && monthlyConsumption !== null ? (
             <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm">
@@ -337,14 +502,16 @@ const HistoryTab: React.FC = () => {
         </div>
       )}
 
-      {/* Chart with margin - Transform data for chart component */}
+      {/* Chart with margin - Use aggregated data */}
       <div className="bg-white mb-3 border border-gray-200 rounded-lg p-2">
         <HistoryChart
-          history={historyDetail.map((item) => ({
-            month: item.month,
-            savings: item.savings,
-            totalDeposits: item.deposits, // Map deposits to totalDeposits for chart
-          }))}
+          history={monthlyData
+            .filter((item) => item.month && item.month.trim() !== "")
+            .map((item) => ({
+              month: item.month,
+              savings: item.savings,
+              totalDeposits: item.deposits,
+            }))}
           compact={true}
         />
       </div>
@@ -358,7 +525,8 @@ const HistoryTab: React.FC = () => {
             <span className="text-xs font-semibold text-gray-800">History</span>
           </div>
           <div className="text-[10px] text-gray-600">
-            {historyDetail.length} record{historyDetail.length !== 1 ? "s" : ""}
+            {filteredHistory.length} month
+            {filteredHistory.length !== 1 ? "s" : ""}
           </div>
         </div>
 
@@ -369,7 +537,7 @@ const HistoryTab: React.FC = () => {
               No history records
             </div>
             <div className="text-sm text-gray-400">
-              Update current month summary to create history
+              Add history records to see them here
             </div>
           </div>
         ) : (
@@ -383,7 +551,7 @@ const HistoryTab: React.FC = () => {
               {settings?.showDelete && <div className="w-14 px-1"></div>}
             </div>
 
-            {/* Table Rows - Using deposits field from history_detail */}
+            {/* Table Rows - Showing aggregated data */}
             {filteredHistory.map((record) => {
               const isEditing = editingMonth === record.month;
               const savingsValue = rupeesToLakhs(record.savings);
@@ -511,7 +679,7 @@ const HistoryTab: React.FC = () => {
               Confirm Delete
             </h3>
             <p className="text-gray-600 mb-5 leading-relaxed">
-              Are you sure you want to delete the history record for{" "}
+              Are you sure you want to delete ALL history records for{" "}
               <strong>{deleteConfirmMonth}</strong>?
             </p>
             <div className="flex gap-2.5">
@@ -525,7 +693,7 @@ const HistoryTab: React.FC = () => {
                 onClick={executeDelete}
                 className="flex-1 py-2.5 bg-red-500 border-none rounded-lg text-white font-medium cursor-pointer hover:bg-red-600 transition-colors"
               >
-                Delete
+                Delete All
               </button>
             </div>
           </div>

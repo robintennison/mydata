@@ -442,13 +442,30 @@ const HistoryDetailTab: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Actions */}
+                  {/* Actions - Edit and Delete buttons */}
                   {settings?.showDelete && (
-                    <div className="w-14 flex justify-end px-1">
+                    <div className="w-14 flex justify-end gap-1 px-1">
+                      {/* Edit button - only show if there's a record to edit */}
+                      {hasRecord && (
+                        <button
+                          onClick={() => {
+                            // You can add edit functionality here if needed
+                            // For now, we're just showing the edit button
+                            // The savings/deposits already have their own edit buttons
+                          }}
+                          className="text-blue-500 hover:text-blue-700 transition-colors text-base p-1 min-w-[28px] touch-manipulation"
+                          disabled={editingCell !== null || saving}
+                          title="Edit"
+                        >
+                          ✏️
+                        </button>
+                      )}
+
+                      {/* Delete button */}
                       {hasRecord && (
                         <button
                           onClick={() => setDeleteConfirm(account.acctCode)}
-                          className="text-red-500 hover:text-red-700 transition-colors text-base p-1 min-w-[32px] touch-manipulation"
+                          className="text-red-500 hover:text-red-700 transition-colors text-base p-1 min-w-[28px] touch-manipulation"
                           disabled={editingCell !== null || saving}
                           title="Delete"
                         >

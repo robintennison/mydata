@@ -1,16 +1,36 @@
 import React, { useState, useEffect } from "react";
 import HistoryChart from "./HistoryChart";
 import { useBankingData } from "../hooks/useBankingData";
-import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  query,
+  getDocs,
+} from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import { useSettings } from "../../../contexts/SettingsContext";
 
 // Date of birth: 17th October 1959
 const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
 
+// Define the HistoryDetail type from the database
+interface HistoryDetail {
+  month: string;
+  acctCode: string;
+  savings: number;
+  deposits: number;
+}
+
 const HistoryTab: React.FC = () => {
   const { settings } = useSettings();
-  const { loading, history } = useBankingData();
+  const { loading: bankingDataLoading, history: bankingHistory } =
+    useBankingData();
+
+  // State for history_detail data
+  const [historyDetail, setHistoryDetail] = useState<HistoryDetail[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [editingMonth, setEditingMonth] = useState<string | null>(null);
   const [editedSavings, setEditedSavings] = useState("");
@@ -25,6 +45,37 @@ const HistoryTab: React.FC = () => {
   const [monthlyConsumption, setMonthlyConsumption] = useState<number | null>(
     null,
   );
+
+  // Fetch data from history_detail table
+  useEffect(() => {
+    const fetchHistoryDetail = async () => {
+      try {
+        setLoading(true);
+        const historyDetailRef = collection(firestore, "history_detail");
+        const q = query(historyDetailRef);
+        const querySnapshot = await getDocs(q);
+
+        const historyData: HistoryDetail[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          historyData.push({
+            month: data.month,
+            acctCode: data.acctCode,
+            savings: data.savings,
+            deposits: data.deposits,
+          });
+        });
+
+        setHistoryDetail(historyData);
+      } catch (error) {
+        console.error("Error fetching history_detail:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistoryDetail();
+  }, []);
 
   // Calculate target age from EMW_Date in settings - EXACT SAME LOGIC as SettingsPage
   const getTargetAgeFromSettings = (): number | null => {
@@ -49,16 +100,16 @@ const HistoryTab: React.FC = () => {
     }
   };
 
-  // Calculate age when balance will become zero
+  // Calculate age when balance will become zero using history_detail data
   useEffect(() => {
-    if (history.length < 2) {
+    if (historyDetail.length < 2) {
       setZeroBalanceAge(null);
       setMonthlyConsumption(null);
       return;
     }
 
     // Get last 6 months, sorted chronologically
-    const sortedHistory = [...history]
+    const sortedHistory = [...historyDetail]
       .sort((a, b) => a.month.localeCompare(b.month))
       .slice(-6);
 
@@ -66,7 +117,7 @@ const HistoryTab: React.FC = () => {
 
     // Calculate total balance for each month (savings + deposits)
     const balances = sortedHistory.map(
-      (record) => record.savings + record.totalDeposits,
+      (record) => record.savings + record.deposits,
     );
 
     // Get first and last month balances
@@ -108,7 +159,7 @@ const HistoryTab: React.FC = () => {
       // If balance is increasing or not decreasing
       setZeroBalanceAge(null);
     }
-  }, [history]);
+  }, [historyDetail]);
 
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
   const formatLakhs = (lakhs: number): string => lakhs.toFixed(2);
@@ -140,14 +191,31 @@ const HistoryTab: React.FC = () => {
       const savingsRupees = savingsLakhs * 100000;
       const depositsRupees = depositsLakhs * 100000;
 
-      const historyRef = doc(firestore, "history", month);
+      // Update in history_detail table
+      const historyRef = doc(firestore, "history_detail", month);
       await updateDoc(historyRef, {
         savings: savingsRupees,
-        totalDeposits: depositsRupees,
+        deposits: depositsRupees,
         updatedAt: new Date(),
       });
 
-      window.location.reload();
+      // Refresh the data
+      const historyDetailRef = collection(firestore, "history_detail");
+      const q = query(historyDetailRef);
+      const querySnapshot = await getDocs(q);
+
+      const updatedHistoryData: HistoryDetail[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        updatedHistoryData.push({
+          month: data.month,
+          acctCode: data.acctCode,
+          savings: data.savings,
+          deposits: data.deposits,
+        });
+      });
+
+      setHistoryDetail(updatedHistoryData);
       cancelEditing();
       alert("✓ History updated successfully!");
     } catch (error: any) {
@@ -161,9 +229,26 @@ const HistoryTab: React.FC = () => {
   const executeDelete = async () => {
     if (!deleteConfirmMonth) return;
     try {
-      const historyRef = doc(firestore, "history", deleteConfirmMonth);
+      const historyRef = doc(firestore, "history_detail", deleteConfirmMonth);
       await deleteDoc(historyRef);
-      window.location.reload();
+
+      // Refresh the data
+      const historyDetailRef = collection(firestore, "history_detail");
+      const q = query(historyDetailRef);
+      const querySnapshot = await getDocs(q);
+
+      const updatedHistoryData: HistoryDetail[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        updatedHistoryData.push({
+          month: data.month,
+          acctCode: data.acctCode,
+          savings: data.savings,
+          deposits: data.deposits,
+        });
+      });
+
+      setHistoryDetail(updatedHistoryData);
       setDeleteConfirmMonth(null);
       alert("✓ History record deleted!");
     } catch (error: any) {
@@ -172,11 +257,11 @@ const HistoryTab: React.FC = () => {
     }
   };
 
-  const filteredHistory = history.sort((a, b) =>
+  const filteredHistory = [...historyDetail].sort((a, b) =>
     b.month.localeCompare(a.month),
   );
 
-  if (loading) {
+  if (loading || bankingDataLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-5">
         <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
@@ -190,7 +275,7 @@ const HistoryTab: React.FC = () => {
   return (
     <div className="flex flex-col h-full px-2 py-2">
       {/* Age Prediction Card - Positioned at the top */}
-      {history.length >= 2 && targetAge !== null && (
+      {historyDetail.length >= 2 && targetAge !== null && (
         <div className="mb-3">
           {zeroBalanceAge !== null && monthlyConsumption !== null ? (
             <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm">
@@ -252,9 +337,16 @@ const HistoryTab: React.FC = () => {
         </div>
       )}
 
-      {/* Chart with margin */}
+      {/* Chart with margin - Transform data for chart component */}
       <div className="bg-white mb-3 border border-gray-200 rounded-lg p-2">
-        <HistoryChart history={history} compact={true} />
+        <HistoryChart
+          history={historyDetail.map((item) => ({
+            month: item.month,
+            savings: item.savings,
+            totalDeposits: item.deposits, // Map deposits to totalDeposits for chart
+          }))}
+          compact={true}
+        />
       </div>
 
       {/* Table with proper margins */}
@@ -266,7 +358,7 @@ const HistoryTab: React.FC = () => {
             <span className="text-xs font-semibold text-gray-800">History</span>
           </div>
           <div className="text-[10px] text-gray-600">
-            {history.length} record{history.length !== 1 ? "s" : ""}
+            {historyDetail.length} record{historyDetail.length !== 1 ? "s" : ""}
           </div>
         </div>
 
@@ -291,11 +383,11 @@ const HistoryTab: React.FC = () => {
               {settings?.showDelete && <div className="w-14 px-1"></div>}
             </div>
 
-            {/* Table Rows */}
+            {/* Table Rows - Using deposits field from history_detail */}
             {filteredHistory.map((record) => {
               const isEditing = editingMonth === record.month;
               const savingsValue = rupeesToLakhs(record.savings);
-              const depositsValue = rupeesToLakhs(record.totalDeposits);
+              const depositsValue = rupeesToLakhs(record.deposits);
               const totalValue = savingsValue + depositsValue;
 
               return (
@@ -383,7 +475,7 @@ const HistoryTab: React.FC = () => {
                               startEditing(
                                 record.month,
                                 record.savings,
-                                record.totalDeposits,
+                                record.deposits,
                               )
                             }
                             className="w-7 h-7 p-0 bg-blue-500 text-white text-xs rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 transition-colors"

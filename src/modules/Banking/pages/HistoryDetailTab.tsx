@@ -322,7 +322,7 @@ const HistoryDetailTab: React.FC = () => {
               return (
                 <div
                   key={account.id}
-                  className={`flex items-center py-2 border-b border-gray-100 min-h-8 px-2 hover:bg-gray-50 last:border-b-0 ${
+                  className={`flex items-center py-2 border-b border-gray-100 min-h-12 px-2 hover:bg-gray-50 last:border-b-0 ${
                     hasRecord ? "bg-green-50/30" : ""
                   }`}
                 >
@@ -339,12 +339,12 @@ const HistoryDetailTab: React.FC = () => {
                   {/* Savings */}
                   <div className="w-1/4 px-1">
                     {isEditingSavings ? (
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1.5">
                         <input
                           type="number"
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          className="w-16 p-1 border border-gray-300 rounded text-xs text-right"
+                          className="w-20 p-1.5 border border-gray-300 rounded text-sm text-right"
                           step="0.01"
                           min="0"
                           autoFocus
@@ -352,14 +352,14 @@ const HistoryDetailTab: React.FC = () => {
                         />
                         <button
                           onClick={() => saveEdit(account.acctCode, "savings")}
-                          className="w-5 h-5 bg-green-500 text-white text-xs rounded flex items-center justify-center hover:bg-green-600"
+                          className="min-w-[32px] h-8 bg-green-500 text-white text-sm rounded-md flex items-center justify-center px-2 hover:bg-green-600 active:bg-green-700 transition-colors touch-manipulation"
                           disabled={saving}
                         >
                           ✓
                         </button>
                         <button
                           onClick={cancelEditing}
-                          className="w-5 h-5 bg-gray-400 text-white text-xs rounded flex items-center justify-center hover:bg-gray-500"
+                          className="min-w-[32px] h-8 bg-gray-400 text-white text-sm rounded-md flex items-center justify-center px-2 hover:bg-gray-500 active:bg-gray-600 transition-colors touch-manipulation"
                           disabled={saving}
                         >
                           ✕
@@ -377,7 +377,7 @@ const HistoryDetailTab: React.FC = () => {
                             onClick={() =>
                               startEditing(account.acctCode, "savings", savings)
                             }
-                            className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 min-w-[28px] touch-manipulation"
                             disabled={editingCell !== null}
                           >
                             ✏️
@@ -390,12 +390,12 @@ const HistoryDetailTab: React.FC = () => {
                   {/* Deposits */}
                   <div className="w-1/4 px-1">
                     {isEditingDeposits ? (
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1.5">
                         <input
                           type="number"
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          className="w-16 p-1 border border-gray-300 rounded text-xs text-right"
+                          className="w-20 p-1.5 border border-gray-300 rounded text-sm text-right"
                           step="0.01"
                           min="0"
                           autoFocus
@@ -403,14 +403,14 @@ const HistoryDetailTab: React.FC = () => {
                         />
                         <button
                           onClick={() => saveEdit(account.acctCode, "deposits")}
-                          className="w-5 h-5 bg-green-500 text-white text-xs rounded flex items-center justify-center hover:bg-green-600"
+                          className="min-w-[32px] h-8 bg-green-500 text-white text-sm rounded-md flex items-center justify-center px-2 hover:bg-green-600 active:bg-green-700 transition-colors touch-manipulation"
                           disabled={saving}
                         >
                           ✓
                         </button>
                         <button
                           onClick={cancelEditing}
-                          className="w-5 h-5 bg-gray-400 text-white text-xs rounded flex items-center justify-center hover:bg-gray-500"
+                          className="min-w-[32px] h-8 bg-gray-400 text-white text-sm rounded-md flex items-center justify-center px-2 hover:bg-gray-500 active:bg-gray-600 transition-colors touch-manipulation"
                           disabled={saving}
                         >
                           ✕
@@ -432,7 +432,7 @@ const HistoryDetailTab: React.FC = () => {
                                 deposits,
                               )
                             }
-                            className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 min-w-[28px] touch-manipulation"
                             disabled={editingCell !== null}
                           >
                             ✏️
@@ -448,7 +448,7 @@ const HistoryDetailTab: React.FC = () => {
                       {hasRecord && (
                         <button
                           onClick={() => setDeleteConfirm(account.acctCode)}
-                          className="text-red-500 hover:text-red-700 transition-colors text-xs"
+                          className="text-red-500 hover:text-red-700 transition-colors text-base p-1 min-w-[32px] touch-manipulation"
                           disabled={editingCell !== null || saving}
                           title="Delete"
                         >

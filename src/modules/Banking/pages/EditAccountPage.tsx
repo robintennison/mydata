@@ -308,17 +308,6 @@ const EditAccountPage: React.FC = () => {
             {/* 6-Month Trend Chart - Only show when showDelete is false */}
             {!settings?.showDelete && (
               <div className="mt-6">
-                {/* Debug info - remove after testing */}
-                <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
-                  Debug: Found {accountHistory.length} month(s) of data for{" "}
-                  {account?.acctCode || "N/A"}
-                  {accountHistory.length > 0 && (
-                    <pre className="mt-1 text-xs overflow-x-auto">
-                      {JSON.stringify(accountHistory, null, 2)}
-                    </pre>
-                  )}
-                </div>
-
                 <HistoryChart history={accountHistory} compact={false} />
               </div>
             )}

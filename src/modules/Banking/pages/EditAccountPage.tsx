@@ -4,12 +4,19 @@ import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
 import type { BankAccount } from "../../../types/banking.types";
+import HistoryChart from "./HistoryChart";
+
+interface History {
+  month: string;
+  savings: number;
+  totalDeposits: number;
+}
 
 const EditAccountPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { settings } = useSettings();
-  const { accounts, loading: dataLoading } = useBankingData();
+  const { accounts, loading: dataLoading, historyDetail } = useBankingData(); // Changed from 'history' to 'historyDetail'
   const { handleSaveAccount, handleDeleteAccount } = useBankingOperations();
 
   const isViewMode = !settings?.showDelete;
@@ -19,6 +26,7 @@ const EditAccountPage: React.FC = () => {
   const [account, setAccount] = useState<BankAccount | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [textareaHeight, setTextareaHeight] = useState<number>(150);
+  const [accountHistory, setAccountHistory] = useState<History[]>([]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -27,6 +35,43 @@ const EditAccountPage: React.FC = () => {
     acctDetails: "",
     mpin: "",
   });
+
+  // Filter history data for the current account from historyDetail
+  useEffect(() => {
+    console.log("HistoryDetail data:", historyDetail); // Debug log
+
+    if (isViewMode && account && historyDetail && historyDetail.length > 0) {
+      // Filter historyDetail by acctCode
+      const filteredHistory = historyDetail.filter(
+        (item: any) => item.acctCode === account.acctCode,
+      );
+
+      console.log(
+        "Filtered history for account:",
+        account.acctCode,
+        filteredHistory,
+      );
+
+      // Transform to the format expected by HistoryChart
+      const transformedHistory: History[] = filteredHistory.map(
+        (item: any) => ({
+          month: item.month,
+          savings: item.savings || 0,
+          totalDeposits: item.deposits || 0,
+        }),
+      );
+
+      // Sort by month (oldest first)
+      const sortedHistory = [...transformedHistory].sort((a, b) =>
+        a.month.localeCompare(b.month),
+      );
+
+      setAccountHistory(sortedHistory);
+    } else if (isViewMode && account) {
+      console.log("No history data available for account:", account.acctCode);
+      setAccountHistory([]);
+    }
+  }, [isViewMode, account, historyDetail]);
 
   useEffect(() => {
     if (!id) {
@@ -259,6 +304,24 @@ const EditAccountPage: React.FC = () => {
                 {formData.mpin || "Not set"}
               </div>
             </div>
+
+            {/* 6-Month Trend Chart - Only show when showDelete is false */}
+            {!settings?.showDelete && (
+              <div className="mt-6">
+                {/* Debug info - remove after testing */}
+                <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
+                  Debug: Found {accountHistory.length} month(s) of data for{" "}
+                  {account?.acctCode || "N/A"}
+                  {accountHistory.length > 0 && (
+                    <pre className="mt-1 text-xs overflow-x-auto">
+                      {JSON.stringify(accountHistory, null, 2)}
+                    </pre>
+                  )}
+                </div>
+
+                <HistoryChart history={accountHistory} compact={false} />
+              </div>
+            )}
 
             {/* Back Button only in view mode */}
             <div className="pt-4 border-t border-gray-200">

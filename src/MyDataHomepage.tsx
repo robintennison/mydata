@@ -504,18 +504,18 @@ const MyDataHomepage: React.FC = () => {
         <div className="grid grid-cols-3 gap-1.5 mb-1">
           {/* Total Bank Balance Card - From history_detail current month */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 mb-0.5">Bank Balance</div>
+            <div className="text-xs text-gray-500 mb-0.5">Cash</div>
             <div className="text-base font-bold text-blue-600 leading-tight">
               {formatLargeAmount(totalBankBalance)}
             </div>
             <div className="text-[10px] text-gray-400 mt-0.5">
-              S: {formatLakhs(totalSavings)} | D: {formatLakhs(totalDeposits)}
+              {formatLakhs(totalSavings)} + {formatLakhs(totalDeposits)}
             </div>
           </div>
 
           {/* Jewellery Sell Value Card - Still from jewellery table */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 mb-0.5">Jewellery Value</div>
+            <div className="text-xs text-gray-500 mb-0.5">Gold</div>
             <div className="text-base font-bold text-amber-600 leading-tight">
               {formatLargeAmount(totalJewellerySellValue)}
             </div>
@@ -527,14 +527,12 @@ const MyDataHomepage: React.FC = () => {
           {/* Total Assets Card - Combines history_detail bank balance + jewellery */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center bg-gradient-to-br from-blue-50 to-amber-50">
             <div className="text-xs font-semibold text-gray-700 mb-0.5">
-              Total Assets
+              Total
             </div>
             <div className="text-base font-bold text-purple-700 leading-tight">
               {formatLargeAmount(totalAssets)}
             </div>
-            <div className="text-[10px] text-gray-500 mt-0.5">
-              Bank + Jewellery
-            </div>
+            <div className="text-[10px] text-gray-500 mt-0.5">Cash + Gold</div>
           </div>
         </div>
       </div>

@@ -28,7 +28,7 @@ const DepositsTab: React.FC = () => {
   const [filterAccount, setFilterAccount] = useState("All");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>("account");
+  const [sortBy, setSortBy] = useState<SortOption>("date"); // CHANGED: default to "date"
   const [localDeposits, setLocalDeposits] = useState<Deposit[]>([]);
 
   // Refs for dropdowns
@@ -78,7 +78,7 @@ const DepositsTab: React.FC = () => {
         // If same account, then sort by endDate ascending
         return a.endDate - b.endDate;
       } else {
-        // Sort by date
+        // Sort by date (endDate) - CHANGED: sort by endDate ascending (earliest first)
         if (a.endDate < b.endDate) return -1;
         if (a.endDate > b.endDate) return 1;
         // If same date, then sort by account code

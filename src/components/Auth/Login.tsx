@@ -1,6 +1,6 @@
 // components/Auth/Login.tsx
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import "./Login.css"; // Make sure you have this CSS file
 
@@ -74,7 +74,7 @@ const Login: React.FC = () => {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h1>MyData Finance</h1>
+          <h1>MyData</h1>
           <p>Sign in to your account</p>
         </div>
 
@@ -123,24 +123,6 @@ const Login: React.FC = () => {
               "Sign In"
             )}
           </button>
-
-          <div className="login-footer">
-            <p>
-              Don't have an account?{" "}
-              <Link to="/signup" className="link">
-                Sign up here
-              </Link>
-            </p>
-
-            {/* Demo credentials for testing */}
-            <div className="demo-credentials">
-              <p>
-                <strong>Demo Credentials:</strong>
-              </p>
-              <p>Email: demo@example.com</p>
-              <p>Password: password</p>
-            </div>
-          </div>
         </form>
       </div>
     </div>

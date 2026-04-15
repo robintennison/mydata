@@ -184,7 +184,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         <div className="grid grid-cols-3 gap-1.5 mb-3">
           {/* Total Savings Card */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 mb-0.5">Savings</div>
+            <div className="text-xs text-gray-500 mb-0.5">Water</div>
             <div className="text-base font-bold text-gray-900 leading-tight">
               {formatLakhs(totalSavings)}
             </div>
@@ -192,7 +192,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           {/* Total Deposits Card */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 mb-0.5">Deposits</div>
+            <div className="text-xs text-gray-500 mb-0.5"> Fog </div>
             <div className="text-base font-bold text-gray-900 leading-tight">
               {formatLakhs(totalDeposits)}
             </div>
@@ -226,11 +226,9 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
               <div className="flex items-center py-1 px-0 bg-gray-50 border-b border-gray-200 font-semibold text-xs text-gray-700">
                 <div className="flex-1 px-0.5 min-w-[45px]">Month</div>
                 <div className="flex-1 px-0.5 text-right min-w-[40px]">
-                  Savings
+                  Water
                 </div>
-                <div className="flex-1 px-0.5 text-right min-w-[40px]">
-                  Deposits
-                </div>
+                <div className="flex-1 px-0.5 text-right min-w-[40px]">Fog</div>
                 <div className="flex-1 px-0.5 text-right min-w-[40px]">
                   Total
                 </div>

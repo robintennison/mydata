@@ -504,7 +504,7 @@ const MyDataHomepage: React.FC = () => {
         <div className="grid grid-cols-3 gap-1.5 mb-1">
           {/* Total Bank Balance Card - From history_detail current month */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 mb-0.5">Cash</div>
+            <div className="text-xs text-gray-500 mb-0.5">Liquid</div>
             <div className="text-base font-bold text-blue-600 leading-tight">
               {formatLargeAmount(totalBankBalance)}
             </div>
@@ -515,7 +515,7 @@ const MyDataHomepage: React.FC = () => {
 
           {/* Jewellery Sell Value Card - Still from jewellery table */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 mb-0.5">Gold</div>
+            <div className="text-xs text-gray-500 mb-0.5">Ice</div>
             <div className="text-base font-bold text-amber-600 leading-tight">
               {formatLargeAmount(totalJewellerySellValue)}
             </div>
@@ -532,7 +532,7 @@ const MyDataHomepage: React.FC = () => {
             <div className="text-base font-bold text-purple-700 leading-tight">
               {formatLargeAmount(totalAssets)}
             </div>
-            <div className="text-[10px] text-gray-500 mt-0.5">Cash + Gold</div>
+            <div className="text-[10px] text-gray-500 mt-0.5">Liquid + Ice</div>
           </div>
         </div>
       </div>

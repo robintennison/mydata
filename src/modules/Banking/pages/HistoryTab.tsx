@@ -545,8 +545,8 @@ const HistoryTab: React.FC = () => {
             {/* Table Header */}
             <div className="flex items-center py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2">
               <div className="w-1/4 px-1">Month</div>
-              <div className="w-1/4 px-1 text-right">Savings</div>
-              <div className="w-1/4 px-1 text-right">Deposits</div>
+              <div className="w-1/4 px-1 text-right">Water</div>
+              <div className="w-1/4 px-1 text-right">Fog</div>
               <div className="w-1/4 px-1 text-right">Total</div>
               {settings?.showDelete && <div className="w-14 px-1"></div>}
             </div>

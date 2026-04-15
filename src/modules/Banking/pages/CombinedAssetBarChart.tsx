@@ -165,7 +165,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = () => {
       labels: displaySummaries.map((s) => s.label),
       datasets: [
         {
-          label: "Savings",
+          label: "Water",
           data: displaySummaries.map((s) => s.savings),
           backgroundColor: "rgba(52, 168, 83, 0.7)", // Green for savings
           borderColor: "#34a853",
@@ -175,7 +175,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = () => {
           stack: "Stack 0",
         },
         {
-          label: "Deposits",
+          label: "Fog",
           data: displaySummaries.map((s) => s.deposits),
           backgroundColor: displaySummaries.map(
             (s) =>
@@ -368,7 +368,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = () => {
       <div className="bg-white rounded-lg my-3 p-3 shadow-sm border border-gray-200 mb-3">
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm font-semibold text-gray-800">
-            <span>📊</span> Asset Distribution
+            <span>📊</span> Liquid Distribution
           </div>
         </div>
         <div
@@ -418,10 +418,10 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = () => {
     <div className="bg-white rounded-lg my-3 p-3 shadow-sm border border-gray-200 mb-3">
       <div className="flex justify-between items-center mb-3">
         <div className="text-sm font-semibold text-gray-800">
-          <span>📊</span> Asset Distribution - Current Month
+          <span>📊</span> Liquid Distribution
         </div>
         <div className="text-xs text-gray-600 font-normal hidden sm:block">
-          S=Savings | D=Deposits
+          S=Water | D=Fog
         </div>
         <div className="text-xs text-gray-600 font-normal sm:hidden">
           S=Sav D=Dep

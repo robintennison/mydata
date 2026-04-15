@@ -192,7 +192,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           {/* Total Deposits Card */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 mb-0.5"> Fog </div>
+            <div className="text-xs text-gray-500 mb-0.5"> Steam </div>
             <div className="text-base font-bold text-gray-900 leading-tight">
               {formatLakhs(totalDeposits)}
             </div>
@@ -200,7 +200,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           {/* Total Bank Balance Card */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 mb-0.5">Total</div>
+            <div className="text-xs text-gray-500 mb-0.5">Liquid</div>
             <div className="text-base font-bold text-gray-900 leading-tight">
               {formatLakhs(totalBankBalance)}
             </div>
@@ -228,9 +228,11 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
                 <div className="flex-1 px-0.5 text-right min-w-[40px]">
                   Water
                 </div>
-                <div className="flex-1 px-0.5 text-right min-w-[40px]">Fog</div>
                 <div className="flex-1 px-0.5 text-right min-w-[40px]">
-                  Total
+                  Steam
+                </div>
+                <div className="flex-1 px-0.5 text-right min-w-[40px]">
+                  Liquid
                 </div>
               </div>
 

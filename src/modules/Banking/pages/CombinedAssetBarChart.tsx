@@ -175,7 +175,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = () => {
           stack: "Stack 0",
         },
         {
-          label: "Fog",
+          label: "Steam",
           data: displaySummaries.map((s) => s.deposits),
           backgroundColor: displaySummaries.map(
             (s) =>
@@ -421,7 +421,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = () => {
           <span>📊</span> Liquid Distribution
         </div>
         <div className="text-xs text-gray-600 font-normal hidden sm:block">
-          S=Water | D=Fog
+          S=Water | D=Steam
         </div>
         <div className="text-xs text-gray-600 font-normal sm:hidden">
           S=Sav D=Dep

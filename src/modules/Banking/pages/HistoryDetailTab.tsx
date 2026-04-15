@@ -303,7 +303,7 @@ const HistoryDetailTab: React.FC = () => {
               <div className="w-1/4 px-1">Account </div>
               <div className="w-1/4 px-1">MPIN</div>
               <div className="w-1/4 px-1 text-right">Water </div>
-              <div className="w-1/4 px-1 text-right">Fog </div>
+              <div className="w-1/4 px-1 text-right">Steam </div>
               {settings?.showDelete && <div className="w-14 px-1"></div>}
             </div>
 

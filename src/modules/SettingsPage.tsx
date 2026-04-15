@@ -563,11 +563,10 @@ const SettingsPage: React.FC = () => {
             Financial Settings
           </h3>
           {renderEditableField(
-            "Gold Rate per gram",
+            "Ice Rate",
             "goldRate",
             financialSettings.goldRate,
             "",
-            "₹",
           )}
           {renderEditableField(
             "Making Tax",

@@ -210,6 +210,21 @@ const HistoryDetailTab: React.FC = () => {
     return (rupees / 100000).toFixed(2);
   };
 
+  // Calculate totals
+  const calculateTotals = () => {
+    let totalSavings = 0;
+    let totalDeposits = 0;
+
+    accounts.forEach((account) => {
+      totalSavings += getCurrentValue(account.acctCode, "savings");
+      totalDeposits += getCurrentValue(account.acctCode, "deposits");
+    });
+
+    return { totalSavings, totalDeposits };
+  };
+
+  const { totalSavings, totalDeposits } = calculateTotals();
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-5">
@@ -477,6 +492,27 @@ const HistoryDetailTab: React.FC = () => {
                 </div>
               );
             })}
+
+            {/* Totals Row */}
+            {(totalSavings > 0 || totalDeposits > 0) && (
+              <div className="flex items-center py-3 bg-gray-100 border-t-2 border-gray-300 font-semibold px-2">
+                <div className="w-1/4 px-1">
+                  <span className="text-xs font-bold text-gray-800">TOTAL</span>
+                </div>
+                <div className="w-1/4 px-1"></div>
+                <div className="w-1/4 px-1 text-right">
+                  <span className="text-sm font-bold text-green-700">
+                    {formatLakhs(totalSavings)}
+                  </span>
+                </div>
+                <div className="w-1/4 px-1 text-right">
+                  <span className="text-sm font-bold text-orange-700">
+                    {formatLakhs(totalDeposits)}
+                  </span>
+                </div>
+                {settings?.showDelete && <div className="w-14 px-1"></div>}
+              </div>
+            )}
           </div>
         )}
       </div>

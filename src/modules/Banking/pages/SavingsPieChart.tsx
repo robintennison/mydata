@@ -259,7 +259,7 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({
       <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
         <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
           <span>📊</span>
-          <span>Water Distribution </span>
+          <span>Savings Distribution </span>
         </div>
         <div className="h-[360px] relative">
           <Pie data={chartData} options={chartOptions} />

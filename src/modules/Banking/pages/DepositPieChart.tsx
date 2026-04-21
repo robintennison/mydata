@@ -301,7 +301,7 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
       <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
         <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
           <span>📊</span>
-          <span> Steam Distribution </span>
+          <span> Deposits Distribution </span>
         </div>
         <div className="h-[360px] relative">
           <Pie data={chartData} options={chartOptions} />

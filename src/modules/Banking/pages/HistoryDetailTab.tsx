@@ -532,8 +532,8 @@ const HistoryDetailTab: React.FC = () => {
             <div className="flex items-center py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2">
               <div className="w-1/4 px-1">Account</div>
               <div className="w-1/4 px-1">MPIN</div>
-              <div className="w-1/4 px-1 text-right">Water (Lakhs)</div>
-              <div className="w-1/4 px-1 text-right">Steam (Lakhs)</div>
+              <div className="w-1/4 px-1 text-right">Water </div>
+              <div className="w-1/4 px-1 text-right">Steam </div>
               {settings?.showDelete && <div className="w-14 px-1"></div>}
             </div>
 

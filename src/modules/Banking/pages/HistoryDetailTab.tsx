@@ -4,10 +4,10 @@ import {
   collection,
   getDocs,
   deleteDoc,
-  setDoc,
   query,
   where,
   doc,
+  writeBatch,
 } from "firebase/firestore";
 import { useSettings } from "../../../contexts/SettingsContext";
 
@@ -27,6 +27,13 @@ interface HistoryDetail {
   deposits: number;
 }
 
+interface EditedValues {
+  [acctCode: string]: {
+    savings: number;
+    deposits: number;
+  };
+}
+
 const HistoryDetailTab: React.FC = () => {
   const { settings } = useSettings();
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -38,17 +45,18 @@ const HistoryDetailTab: React.FC = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
-  const [editingCell, setEditingCell] = useState<{
-    acctCode: string;
-    field: "savings" | "deposits";
-  } | null>(null);
-  const [editValue, setEditValue] = useState<string>("");
+  const [editedValues, setEditedValues] = useState<EditedValues>({});
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [hasLoadedPreviousData, setHasLoadedPreviousData] = useState(false);
+  const [previousMonthAvailable, setPreviousMonthAvailable] = useState<
+    string | null
+  >(null);
 
   // Available months for dropdown (last 12 months + next 6 months)
   const availableMonths = React.useMemo(() => {
@@ -67,10 +75,39 @@ const HistoryDetailTab: React.FC = () => {
     loadData();
   }, [selectedMonth]);
 
+  // Reset loaded flag when month changes
+  useEffect(() => {
+    setHasLoadedPreviousData(false);
+    checkPreviousMonthData();
+  }, [selectedMonth]);
+
+  const checkPreviousMonthData = async () => {
+    try {
+      const [year, month] = selectedMonth.split("-");
+      const previousMonth = new Date(parseInt(year), parseInt(month) - 2, 1);
+      const previousMonthStr = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, "0")}`;
+
+      const historyRef = collection(firestore, "history_detail");
+      const q = query(historyRef, where("month", "==", previousMonthStr));
+      const historySnapshot = await getDocs(q);
+
+      if (!historySnapshot.empty) {
+        setPreviousMonthAvailable(previousMonthStr);
+      } else {
+        setPreviousMonthAvailable(null);
+      }
+    } catch (error) {
+      console.error("Error checking previous month data:", error);
+      setPreviousMonthAvailable(null);
+    }
+  };
+
   const loadData = async () => {
     try {
       setLoading(true);
       setStatusMessage(null);
+      setEditedValues({});
+      setHasChanges(false);
 
       // Load all accounts
       const accountsRef = collection(firestore, "accounts");
@@ -97,6 +134,22 @@ const HistoryDetailTab: React.FC = () => {
         historyMap.set(data.acctCode, data);
       });
       setHistoryData(historyMap);
+
+      // Initialize edited values with existing data if any
+      const initialEdits: EditedValues = {};
+      sortedAccounts.forEach((account) => {
+        const record = historyMap.get(account.acctCode);
+        initialEdits[account.acctCode] = {
+          savings: record?.savings || 0,
+          deposits: record?.deposits || 0,
+        };
+      });
+      setEditedValues(initialEdits);
+
+      // Check if there's any data for this month
+      if (historyMap.size > 0) {
+        setHasLoadedPreviousData(true);
+      }
     } catch (error: any) {
       console.error("Error loading data:", error);
       showStatus("error", `Failed to load data: ${error.message}`);
@@ -105,72 +158,179 @@ const HistoryDetailTab: React.FC = () => {
     }
   };
 
+  // Load previous month's data
+  const loadPreviousMonthData = async () => {
+    if (!accounts.length || hasLoadedPreviousData) return;
+
+    try {
+      setSaving(true);
+
+      const [year, month] = selectedMonth.split("-");
+      const previousMonth = new Date(parseInt(year), parseInt(month) - 2, 1);
+      const previousMonthStr = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, "0")}`;
+
+      const historyRef = collection(firestore, "history_detail");
+      const q = query(historyRef, where("month", "==", previousMonthStr));
+      const historySnapshot = await getDocs(q);
+
+      const previousDataMap = new Map<string, HistoryDetail>();
+      historySnapshot.docs.forEach((doc) => {
+        const data = doc.data() as HistoryDetail;
+        previousDataMap.set(data.acctCode, data);
+      });
+
+      // Initialize edited values with previous month's data
+      const newEdits: EditedValues = { ...editedValues };
+      accounts.forEach((account) => {
+        const previousRecord = previousDataMap.get(account.acctCode);
+        if (previousRecord) {
+          newEdits[account.acctCode] = {
+            savings: previousRecord.savings,
+            deposits: previousRecord.deposits,
+          };
+        }
+      });
+
+      setEditedValues(newEdits);
+      setHasChanges(true);
+      setHasLoadedPreviousData(true);
+      showStatus("success", `Loaded data from ${previousMonthStr}`);
+    } catch (error: any) {
+      console.error("Error loading previous month data:", error);
+      showStatus(
+        "error",
+        `Failed to load previous month data: ${error.message}`,
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const showStatus = (type: "success" | "error", text: string) => {
     setStatusMessage({ type, text });
     setTimeout(() => setStatusMessage(null), 3000);
   };
 
-  const startEditing = (
+  // Improved value change handler that doesn't reformat during editing
+  const handleValueChange = (
     acctCode: string,
     field: "savings" | "deposits",
-    currentValue: number,
+    rawValue: string,
   ) => {
-    const lakhsValue = (currentValue / 100000).toFixed(2);
-    setEditingCell({ acctCode, field });
-    setEditValue(lakhsValue);
+    // If empty string, treat as 0
+    if (rawValue === "") {
+      setEditedValues((prev) => ({
+        ...prev,
+        [acctCode]: {
+          ...prev[acctCode],
+          [field]: 0,
+        },
+      }));
+      setHasChanges(true);
+      return;
+    }
+
+    // Parse as float for lakhs value
+    const lakhValue = parseFloat(rawValue);
+    if (isNaN(lakhValue)) return;
+
+    // Convert to rupees (multiply by 100,000)
+    const rupeesValue = Math.round(lakhValue * 100000);
+
+    setEditedValues((prev) => ({
+      ...prev,
+      [acctCode]: {
+        ...prev[acctCode],
+        [field]: rupeesValue,
+      },
+    }));
+    setHasChanges(true);
   };
 
-  const cancelEditing = () => {
-    setEditingCell(null);
-    setEditValue("");
+  // Get raw display value for input (in lakhs)
+  const getInputDisplayValue = (
+    acctCode: string,
+    field: "savings" | "deposits",
+  ): string => {
+    // If there are unsaved changes, show edited value
+    if (editedValues[acctCode] && editedValues[acctCode][field] !== undefined) {
+      const rupeesValue = editedValues[acctCode][field];
+      // Convert to lakhs and format without forcing decimal places
+      const lakhs = rupeesValue / 100000;
+      // Return as string without forced decimal places to allow editing
+      return lakhs.toString();
+    }
+    // Otherwise show saved value
+    const record = historyData.get(acctCode);
+    const rupeesValue = record ? record[field] : 0;
+    const lakhs = rupeesValue / 100000;
+    return lakhs.toString();
   };
 
-  const saveEdit = async (acctCode: string, field: "savings" | "deposits") => {
+  // Format for display (non-input contexts)
+  const formatLakhs = (rupees: number): string => {
+    return (rupees / 100000).toFixed(2);
+  };
+
+  const saveAllChanges = async () => {
     try {
       setSaving(true);
-      const valueInLakhs = parseFloat(editValue);
 
-      if (isNaN(valueInLakhs)) {
-        showStatus("error", "Please enter a valid number");
-        return;
+      // Use batch write for better performance
+      const batch = writeBatch(firestore);
+      const historyCollectionRef = collection(firestore, "history_detail");
+
+      for (const [acctCode, values] of Object.entries(editedValues)) {
+        const docId = `${acctCode}_${selectedMonth}`;
+        const docRef = doc(historyCollectionRef, docId);
+
+        const record: HistoryDetail = {
+          acctCode,
+          month: selectedMonth,
+          savings: values.savings,
+          deposits: values.deposits,
+        };
+
+        batch.set(docRef, record);
       }
 
-      const valueInRupees = Math.round(valueInLakhs * 100000);
-
-      // Get existing record or create new one
-      const existingRecord = historyData.get(acctCode);
-      const updatedRecord: HistoryDetail = {
-        acctCode,
-        month: selectedMonth,
-        savings:
-          field === "savings" ? valueInRupees : existingRecord?.savings || 0,
-        deposits:
-          field === "deposits" ? valueInRupees : existingRecord?.deposits || 0,
-      };
-
-      // Save to Firestore
-      const docId = `${acctCode}_${selectedMonth}`;
-      const historyRef = doc(firestore, "history_detail", docId);
-      await setDoc(historyRef, updatedRecord, { merge: true });
+      await batch.commit();
 
       // Update local state
-      setHistoryData((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(acctCode, updatedRecord);
-        return newMap;
-      });
+      const newHistoryMap = new Map<string, HistoryDetail>();
+      for (const [acctCode, values] of Object.entries(editedValues)) {
+        newHistoryMap.set(acctCode, {
+          acctCode,
+          month: selectedMonth,
+          savings: values.savings,
+          deposits: values.deposits,
+        });
+      }
+      setHistoryData(newHistoryMap);
 
-      showStatus(
-        "success",
-        `${field === "savings" ? "Savings" : "Deposits"} updated successfully!`,
-      );
-      cancelEditing();
+      showStatus("success", "All records saved successfully!");
+      setHasChanges(false);
     } catch (error: any) {
-      console.error("Error saving:", error);
-      showStatus("error", `Failed to save: ${error.message}`);
+      console.error("Error saving records:", error);
+      showStatus("error", `Failed to save records: ${error.message}`);
     } finally {
       setSaving(false);
     }
+  };
+
+  const cancelAllChanges = () => {
+    // Reset to original saved data
+    const originalData: EditedValues = {};
+    accounts.forEach((account) => {
+      const record = historyData.get(account.acctCode);
+      originalData[account.acctCode] = {
+        savings: record?.savings || 0,
+        deposits: record?.deposits || 0,
+      };
+    });
+    setEditedValues(originalData);
+    setHasChanges(false);
+    showStatus("success", "Changes cancelled");
   };
 
   const deleteRecord = async (acctCode: string) => {
@@ -187,8 +347,19 @@ const HistoryDetailTab: React.FC = () => {
         return newMap;
       });
 
+      // Also clear from edited values
+      setEditedValues((prev) => {
+        const newEdits = { ...prev };
+        newEdits[acctCode] = {
+          savings: 0,
+          deposits: 0,
+        };
+        return newEdits;
+      });
+
       showStatus("success", "Record deleted successfully!");
       setDeleteConfirm(null);
+      setHasChanges(true);
     } catch (error: any) {
       console.error("Error deleting:", error);
       showStatus("error", `Failed to delete: ${error.message}`);
@@ -197,17 +368,15 @@ const HistoryDetailTab: React.FC = () => {
     }
   };
 
-  const getCurrentValue = (
+  const getDisplayValue = (
     acctCode: string,
     field: "savings" | "deposits",
   ): number => {
+    if (editedValues[acctCode] && editedValues[acctCode][field] !== undefined) {
+      return editedValues[acctCode][field];
+    }
     const record = historyData.get(acctCode);
-    if (!record) return 0;
-    return field === "savings" ? record.savings : record.deposits;
-  };
-
-  const formatLakhs = (rupees: number): string => {
-    return (rupees / 100000).toFixed(2);
+    return record ? record[field] : 0;
   };
 
   // Calculate totals
@@ -216,14 +385,22 @@ const HistoryDetailTab: React.FC = () => {
     let totalDeposits = 0;
 
     accounts.forEach((account) => {
-      totalSavings += getCurrentValue(account.acctCode, "savings");
-      totalDeposits += getCurrentValue(account.acctCode, "deposits");
+      totalSavings += getDisplayValue(account.acctCode, "savings");
+      totalDeposits += getDisplayValue(account.acctCode, "deposits");
     });
 
     return { totalSavings, totalDeposits };
   };
 
   const { totalSavings, totalDeposits } = calculateTotals();
+
+  // Get the month name for the previous month button
+  const getPreviousMonthName = () => {
+    if (!previousMonthAvailable) return "";
+    const [year, month] = previousMonthAvailable.split("-");
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+    return date.toLocaleString("default", { month: "long", year: "numeric" });
+  };
 
   if (loading) {
     return (
@@ -237,6 +414,10 @@ const HistoryDetailTab: React.FC = () => {
   // Get counts for display
   const accountsWithData = Array.from(historyData.keys()).length;
   const totalAccounts = accounts.length;
+
+  // Determine if we should show the load button
+  const showLoadButton =
+    previousMonthAvailable && !hasLoadedPreviousData && historyData.size === 0;
 
   return (
     <div className="flex flex-col h-full px-2 py-2">
@@ -274,18 +455,52 @@ const HistoryDetailTab: React.FC = () => {
             ))}
           </select>
         </div>
+
+        {/* Action Buttons */}
         <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
           <div className="text-[10px] text-gray-500">
             {accountsWithData} of {totalAccounts} accounts have data
           </div>
-          <button
-            onClick={loadData}
-            className="text-[10px] px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-          >
-            Refresh
-          </button>
+          <div className="flex gap-2">
+            {showLoadButton && (
+              <button
+                onClick={loadPreviousMonthData}
+                className="text-[10px] px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors"
+                disabled={saving}
+              >
+                📋 Load {getPreviousMonthName()} Data
+              </button>
+            )}
+            <button
+              onClick={loadData}
+              className="text-[10px] px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              disabled={saving}
+            >
+              Refresh
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Save/Cancel Buttons */}
+      {hasChanges && (
+        <div className="mb-3 flex gap-2 justify-end">
+          <button
+            onClick={cancelAllChanges}
+            className="px-4 py-2 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+            disabled={saving}
+          >
+            Cancel All
+          </button>
+          <button
+            onClick={saveAllChanges}
+            className="px-4 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save All Changes"}
+          </button>
+        </div>
+      )}
 
       {/* Accounts Table */}
       <div className="flex-1 overflow-y-auto">
@@ -315,31 +530,39 @@ const HistoryDetailTab: React.FC = () => {
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {/* Table Header */}
             <div className="flex items-center py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2">
-              <div className="w-1/4 px-1">Account </div>
+              <div className="w-1/4 px-1">Account</div>
               <div className="w-1/4 px-1">MPIN</div>
-              <div className="w-1/4 px-1 text-right">Water </div>
-              <div className="w-1/4 px-1 text-right">Steam </div>
+              <div className="w-1/4 px-1 text-right">Water (Lakhs)</div>
+              <div className="w-1/4 px-1 text-right">Steam (Lakhs)</div>
               {settings?.showDelete && <div className="w-14 px-1"></div>}
             </div>
 
             {/* Table Rows */}
             {accounts.map((account) => {
-              const savings = getCurrentValue(account.acctCode, "savings");
-              const deposits = getCurrentValue(account.acctCode, "deposits");
               const hasRecord = historyData.has(account.acctCode);
-              const isEditingSavings =
-                editingCell?.acctCode === account.acctCode &&
-                editingCell?.field === "savings";
-              const isEditingDeposits =
-                editingCell?.acctCode === account.acctCode &&
-                editingCell?.field === "deposits";
+              const hasUnsavedChanges =
+                editedValues[account.acctCode] &&
+                (editedValues[account.acctCode].savings !==
+                  (historyData.get(account.acctCode)?.savings || 0) ||
+                  editedValues[account.acctCode].deposits !==
+                    (historyData.get(account.acctCode)?.deposits || 0));
+
+              // Get current input values as strings to maintain editing state
+              const savingsInputValue = getInputDisplayValue(
+                account.acctCode,
+                "savings",
+              );
+              const depositsInputValue = getInputDisplayValue(
+                account.acctCode,
+                "deposits",
+              );
 
               return (
                 <div
                   key={account.id}
                   className={`flex items-center py-2 border-b border-gray-100 min-h-12 px-2 hover:bg-gray-50 last:border-b-0 ${
                     hasRecord ? "bg-green-50/30" : ""
-                  }`}
+                  } ${hasUnsavedChanges ? "bg-yellow-50/50" : ""}`}
                 >
                   {/* Account Code */}
                   <div className="w-1/4 px-1 text-xs text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -351,137 +574,60 @@ const HistoryDetailTab: React.FC = () => {
                     {account.mpin}
                   </div>
 
-                  {/* Savings */}
+                  {/* Savings Input */}
                   <div className="w-1/4 px-1">
-                    {isEditingSavings ? (
-                      <div className="flex items-center justify-end gap-1.5">
-                        <input
-                          type="number"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          className="w-20 p-1.5 border border-gray-300 rounded text-sm text-right"
-                          step="0.01"
-                          min="0"
-                          autoFocus
-                          disabled={saving}
-                        />
-                        <button
-                          onClick={() => saveEdit(account.acctCode, "savings")}
-                          className="min-w-[32px] h-8 bg-green-500 text-white text-sm rounded-md flex items-center justify-center px-2 hover:bg-green-600 active:bg-green-700 transition-colors touch-manipulation"
-                          disabled={saving}
-                        >
-                          ✓
-                        </button>
-                        <button
-                          onClick={cancelEditing}
-                          className="min-w-[32px] h-8 bg-gray-400 text-white text-sm rounded-md flex items-center justify-center px-2 hover:bg-gray-500 active:bg-gray-600 transition-colors touch-manipulation"
-                          disabled={saving}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-end gap-1 group">
-                        <span
-                          className={`text-xs font-semibold ${savings > 0 ? "text-green-600" : "text-gray-400"} text-right`}
-                        >
-                          {formatLakhs(savings)}
-                        </span>
-                        {settings?.showDelete && (
-                          <button
-                            onClick={() =>
-                              startEditing(account.acctCode, "savings", savings)
-                            }
-                            className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 min-w-[28px] touch-manipulation"
-                            disabled={editingCell !== null}
-                          >
-                            ✏️
-                          </button>
-                        )}
-                      </div>
-                    )}
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={savingsInputValue}
+                      onChange={(e) =>
+                        handleValueChange(
+                          account.acctCode,
+                          "savings",
+                          e.target.value,
+                        )
+                      }
+                      className={`w-full p-1.5 border rounded text-sm text-right focus:outline-none focus:ring-1 ${
+                        hasUnsavedChanges
+                          ? "border-yellow-400 focus:ring-yellow-400"
+                          : "border-gray-300 focus:ring-blue-500"
+                      }`}
+                      disabled={saving}
+                      placeholder="0"
+                    />
                   </div>
 
-                  {/* Deposits */}
+                  {/* Deposits Input */}
                   <div className="w-1/4 px-1">
-                    {isEditingDeposits ? (
-                      <div className="flex items-center justify-end gap-1.5">
-                        <input
-                          type="number"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          className="w-20 p-1.5 border border-gray-300 rounded text-sm text-right"
-                          step="0.01"
-                          min="0"
-                          autoFocus
-                          disabled={saving}
-                        />
-                        <button
-                          onClick={() => saveEdit(account.acctCode, "deposits")}
-                          className="min-w-[32px] h-8 bg-green-500 text-white text-sm rounded-md flex items-center justify-center px-2 hover:bg-green-600 active:bg-green-700 transition-colors touch-manipulation"
-                          disabled={saving}
-                        >
-                          ✓
-                        </button>
-                        <button
-                          onClick={cancelEditing}
-                          className="min-w-[32px] h-8 bg-gray-400 text-white text-sm rounded-md flex items-center justify-center px-2 hover:bg-gray-500 active:bg-gray-600 transition-colors touch-manipulation"
-                          disabled={saving}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-end gap-1 group">
-                        <span
-                          className={`text-xs font-semibold ${deposits > 0 ? "text-orange-500" : "text-gray-400"} text-right`}
-                        >
-                          {formatLakhs(deposits)}
-                        </span>
-                        {settings?.showDelete && (
-                          <button
-                            onClick={() =>
-                              startEditing(
-                                account.acctCode,
-                                "deposits",
-                                deposits,
-                              )
-                            }
-                            className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 min-w-[28px] touch-manipulation"
-                            disabled={editingCell !== null}
-                          >
-                            ✏️
-                          </button>
-                        )}
-                      </div>
-                    )}
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={depositsInputValue}
+                      onChange={(e) =>
+                        handleValueChange(
+                          account.acctCode,
+                          "deposits",
+                          e.target.value,
+                        )
+                      }
+                      className={`w-full p-1.5 border rounded text-sm text-right focus:outline-none focus:ring-1 ${
+                        hasUnsavedChanges
+                          ? "border-yellow-400 focus:ring-yellow-400"
+                          : "border-gray-300 focus:ring-blue-500"
+                      }`}
+                      disabled={saving}
+                      placeholder="0"
+                    />
                   </div>
 
-                  {/* Actions - Edit and Delete buttons */}
+                  {/* Delete button */}
                   {settings?.showDelete && (
-                    <div className="w-14 flex justify-end gap-1 px-1">
-                      {/* Edit button - only show if there's a record to edit */}
-                      {hasRecord && (
-                        <button
-                          onClick={() => {
-                            // You can add edit functionality here if needed
-                            // For now, we're just showing the edit button
-                            // The savings/deposits already have their own edit buttons
-                          }}
-                          className="text-blue-500 hover:text-blue-700 transition-colors text-base p-1 min-w-[28px] touch-manipulation"
-                          disabled={editingCell !== null || saving}
-                          title="Edit"
-                        >
-                          ✏️
-                        </button>
-                      )}
-
-                      {/* Delete button */}
+                    <div className="w-14 flex justify-end px-1">
                       {hasRecord && (
                         <button
                           onClick={() => setDeleteConfirm(account.acctCode)}
                           className="text-red-500 hover:text-red-700 transition-colors text-base p-1 min-w-[28px] touch-manipulation"
-                          disabled={editingCell !== null || saving}
+                          disabled={saving}
                           title="Delete"
                         >
                           🗑️
@@ -525,7 +671,11 @@ const HistoryDetailTab: React.FC = () => {
         <div className="flex gap-3">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-green-50 border border-green-200 rounded"></div>
-            <span>Has data</span>
+            <span>Has saved data</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-yellow-50 border border-yellow-200 rounded"></div>
+            <span>Unsaved changes</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-white border border-gray-200 rounded"></div>

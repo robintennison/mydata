@@ -34,6 +34,13 @@ interface EditedValues {
   };
 }
 
+interface InputValues {
+  [acctCode: string]: {
+    savings: string;
+    deposits: string;
+  };
+}
+
 const HistoryDetailTab: React.FC = () => {
   const { settings } = useSettings();
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -46,6 +53,7 @@ const HistoryDetailTab: React.FC = () => {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
   const [editedValues, setEditedValues] = useState<EditedValues>({});
+  const [inputValues, setInputValues] = useState<InputValues>({});
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<{
@@ -107,6 +115,7 @@ const HistoryDetailTab: React.FC = () => {
       setLoading(true);
       setStatusMessage(null);
       setEditedValues({});
+      setInputValues({});
       setHasChanges(false);
 
       // Load all accounts
@@ -135,16 +144,26 @@ const HistoryDetailTab: React.FC = () => {
       });
       setHistoryData(historyMap);
 
-      // Initialize edited values with existing data if any
+      // Initialize edited values and input values with existing data if any
       const initialEdits: EditedValues = {};
+      const initialInputs: InputValues = {};
       sortedAccounts.forEach((account) => {
         const record = historyMap.get(account.acctCode);
+        const savingsValue = record?.savings || 0;
+        const depositsValue = record?.deposits || 0;
+
         initialEdits[account.acctCode] = {
-          savings: record?.savings || 0,
-          deposits: record?.deposits || 0,
+          savings: savingsValue,
+          deposits: depositsValue,
+        };
+
+        initialInputs[account.acctCode] = {
+          savings: (savingsValue / 100000).toString(),
+          deposits: (depositsValue / 100000).toString(),
         };
       });
       setEditedValues(initialEdits);
+      setInputValues(initialInputs);
 
       // Check if there's any data for this month
       if (historyMap.size > 0) {
@@ -179,8 +198,10 @@ const HistoryDetailTab: React.FC = () => {
         previousDataMap.set(data.acctCode, data);
       });
 
-      // Initialize edited values with previous month's data
+      // Initialize edited values and input values with previous month's data
       const newEdits: EditedValues = { ...editedValues };
+      const newInputs: InputValues = { ...inputValues };
+
       accounts.forEach((account) => {
         const previousRecord = previousDataMap.get(account.acctCode);
         if (previousRecord) {
@@ -188,10 +209,15 @@ const HistoryDetailTab: React.FC = () => {
             savings: previousRecord.savings,
             deposits: previousRecord.deposits,
           };
+          newInputs[account.acctCode] = {
+            savings: (previousRecord.savings / 100000).toString(),
+            deposits: (previousRecord.deposits / 100000).toString(),
+          };
         }
       });
 
       setEditedValues(newEdits);
+      setInputValues(newInputs);
       setHasChanges(true);
       setHasLoadedPreviousData(true);
       showStatus("success", `Loaded data from ${previousMonthStr}`);
@@ -211,14 +237,22 @@ const HistoryDetailTab: React.FC = () => {
     setTimeout(() => setStatusMessage(null), 3000);
   };
 
-  // Improved value change handler that doesn't reformat during editing
+  // Handle value change with proper decimal support
   const handleValueChange = (
     acctCode: string,
     field: "savings" | "deposits",
     rawValue: string,
   ) => {
-    // If empty string, treat as 0
+    // Allow empty string, decimal point, and valid decimal numbers
     if (rawValue === "") {
+      setInputValues((prev) => ({
+        ...prev,
+        [acctCode]: {
+          ...prev[acctCode],
+          [field]: "",
+        },
+      }));
+
       setEditedValues((prev) => ({
         ...prev,
         [acctCode]: {
@@ -230,41 +264,45 @@ const HistoryDetailTab: React.FC = () => {
       return;
     }
 
-    // Parse as float for lakhs value
-    const lakhValue = parseFloat(rawValue);
-    if (isNaN(lakhValue)) return;
+    // Allow typing decimal point without converting immediately
+    // This regex allows valid decimal numbers including those being typed
+    const isValidPartialDecimal = /^\d*\.?\d*$/.test(rawValue);
+    if (!isValidPartialDecimal) return;
 
-    // Convert to rupees (multiply by 100,000)
-    const rupeesValue = Math.round(lakhValue * 100000);
+    // Update the raw input value immediately
+    setInputValues((prev) => ({
+      ...prev,
+      [acctCode]: {
+        ...prev[acctCode],
+        [field]: rawValue,
+      },
+    }));
+
+    // Parse and store the numeric value
+    let numericValue = 0;
+    if (rawValue !== "" && rawValue !== ".") {
+      const parsed = parseFloat(rawValue);
+      if (!isNaN(parsed)) {
+        numericValue = parsed;
+      }
+    }
 
     setEditedValues((prev) => ({
       ...prev,
       [acctCode]: {
         ...prev[acctCode],
-        [field]: rupeesValue,
+        [field]: Math.round(numericValue * 100000),
       },
     }));
     setHasChanges(true);
   };
 
-  // Get raw display value for input (in lakhs)
+  // Get display value for input
   const getInputDisplayValue = (
     acctCode: string,
     field: "savings" | "deposits",
   ): string => {
-    // If there are unsaved changes, show edited value
-    if (editedValues[acctCode] && editedValues[acctCode][field] !== undefined) {
-      const rupeesValue = editedValues[acctCode][field];
-      // Convert to lakhs and format without forcing decimal places
-      const lakhs = rupeesValue / 100000;
-      // Return as string without forced decimal places to allow editing
-      return lakhs.toString();
-    }
-    // Otherwise show saved value
-    const record = historyData.get(acctCode);
-    const rupeesValue = record ? record[field] : 0;
-    const lakhs = rupeesValue / 100000;
-    return lakhs.toString();
+    return inputValues[acctCode]?.[field] ?? "0";
   };
 
   // Format for display (non-input contexts)
@@ -321,14 +359,26 @@ const HistoryDetailTab: React.FC = () => {
   const cancelAllChanges = () => {
     // Reset to original saved data
     const originalData: EditedValues = {};
+    const originalInputs: InputValues = {};
+
     accounts.forEach((account) => {
       const record = historyData.get(account.acctCode);
+      const savingsValue = record?.savings || 0;
+      const depositsValue = record?.deposits || 0;
+
       originalData[account.acctCode] = {
-        savings: record?.savings || 0,
-        deposits: record?.deposits || 0,
+        savings: savingsValue,
+        deposits: depositsValue,
+      };
+
+      originalInputs[account.acctCode] = {
+        savings: (savingsValue / 100000).toString(),
+        deposits: (depositsValue / 100000).toString(),
       };
     });
+
     setEditedValues(originalData);
+    setInputValues(originalInputs);
     setHasChanges(false);
     showStatus("success", "Changes cancelled");
   };
@@ -347,7 +397,7 @@ const HistoryDetailTab: React.FC = () => {
         return newMap;
       });
 
-      // Also clear from edited values
+      // Also clear from edited values and input values
       setEditedValues((prev) => {
         const newEdits = { ...prev };
         newEdits[acctCode] = {
@@ -355,6 +405,15 @@ const HistoryDetailTab: React.FC = () => {
           deposits: 0,
         };
         return newEdits;
+      });
+
+      setInputValues((prev) => {
+        const newInputs = { ...prev };
+        newInputs[acctCode] = {
+          savings: "0",
+          deposits: "0",
+        };
+        return newInputs;
       });
 
       showStatus("success", "Record deleted successfully!");
@@ -532,8 +591,8 @@ const HistoryDetailTab: React.FC = () => {
             <div className="flex items-center py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2">
               <div className="w-1/4 px-1">Account</div>
               <div className="w-1/4 px-1">MPIN</div>
-              <div className="w-1/4 px-1 text-right">Water </div>
-              <div className="w-1/4 px-1 text-right">Steam </div>
+              <div className="w-1/4 px-1 text-right">Water</div>
+              <div className="w-1/4 px-1 text-right">Steam</div>
               {settings?.showDelete && <div className="w-14 px-1"></div>}
             </div>
 

@@ -9,7 +9,7 @@ import {
 } from "./modules/Banking/utils/bankingCalculations";
 import { calculateEMW, getEmwSettings } from "./utils/emwCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
 import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
 // Add OnlineItem interface
@@ -55,6 +55,14 @@ interface HistoryDetail {
   deposits: number;
 }
 
+// Add LiabilityHistory interface
+interface LiabilityHistory {
+  id: string;
+  month: string;
+  description: string;
+  amount: number;
+}
+
 const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
   const { settings: appSettings } = useSettings();
@@ -72,6 +80,11 @@ const MyDataHomepage: React.FC = () => {
   const [allHistoryData, setAllHistoryData] = useState<HistoryDetail[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
 
+  // State for liabilities data
+  const [currentMonthLiabilities, setCurrentMonthLiabilities] = useState<number>(0);
+  const [allLiabilitiesData, setAllLiabilitiesData] = useState<LiabilityHistory[]>([]);
+  const [liabilitiesLoading, setLiabilitiesLoading] = useState(true);
+
   // Get resale discount percentage from jewellery settings
   const resaleDiscountPercent = jewellerySettings?.resaleDiscountPercent || 0;
 
@@ -82,6 +95,64 @@ const MyDataHomepage: React.FC = () => {
     const month = String(now.getMonth() + 1).padStart(2, "0");
     return `${year}-${month}`;
   };
+
+  // Fetch liabilities for a specific month
+  const getLiabilitiesForMonth = async (month: string): Promise<number> => {
+    try {
+      const db = getFirestore();
+      const liabilityHistoryRef = collection(db, "liability_history");
+      const q = query(liabilityHistoryRef, where("month", "==", month));
+      const querySnapshot = await getDocs(q);
+      
+      let total = 0;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as LiabilityHistory;
+        total += data.amount || 0;
+      });
+      
+      return total;
+    } catch (error) {
+      console.error(`Error fetching liabilities for ${month}:`, error);
+      return 0;
+    }
+  };
+
+  // Fetch ALL liabilities data
+  useEffect(() => {
+    const fetchAllLiabilitiesData = async () => {
+      try {
+        setLiabilitiesLoading(true);
+        const db = getFirestore();
+        const liabilityHistoryRef = collection(db, "liability_history");
+        const querySnapshot = await getDocs(liabilityHistoryRef);
+
+        const allLiabilities: LiabilityHistory[] = [];
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          allLiabilities.push({
+            id: doc.id,
+            month: data.month || "",
+            description: data.description || "",
+            amount: data.amount || 0,
+          });
+        });
+
+        setAllLiabilitiesData(allLiabilities);
+
+        // Get current month liabilities
+        const currentMonth = getCurrentMonth();
+        const currentLiabilities = await getLiabilitiesForMonth(currentMonth);
+        setCurrentMonthLiabilities(currentLiabilities);
+      } catch (error) {
+        console.error("Error fetching liabilities data:", error);
+      } finally {
+        setLiabilitiesLoading(false);
+      }
+    };
+
+    fetchAllLiabilitiesData();
+  }, []);
 
   // Fetch ALL history_detail data
   useEffect(() => {
@@ -220,10 +291,11 @@ const MyDataHomepage: React.FC = () => {
     fetchJewelleryItems();
   }, []);
 
-  // Memoize calculations using all history_detail data
+  // Memoize calculations using all history_detail data and liabilities
   const {
     totalSavings,
     totalDeposits,
+    totalLiabilities,
     totalBankBalance,
     emwAmount,
     actualWithdrawalData,
@@ -234,6 +306,7 @@ const MyDataHomepage: React.FC = () => {
       return {
         totalSavings: 0,
         totalDeposits: 0,
+        totalLiabilities: 0,
         totalBankBalance: 0,
         emwAmount: 0,
         actualWithdrawalData: { monthlyRate: 0, totalDrop: 0, monthsCount: 0 },
@@ -250,9 +323,11 @@ const MyDataHomepage: React.FC = () => {
       totalDeposits += record.deposits;
     });
 
-    const totalBankBalance = totalSavings + totalDeposits;
+    // Use current month liabilities
+    const totalLiabilities = currentMonthLiabilities;
+    const totalBankBalance = totalSavings + totalDeposits - totalLiabilities;
 
-    // Calculate EMW using settings
+    // Calculate EMW using settings (based on total bank balance after liabilities)
     const emwSettings = getEmwSettings(appSettings);
     const emwAmount = calculateEMW(
       totalBankBalance,
@@ -260,7 +335,7 @@ const MyDataHomepage: React.FC = () => {
       emwSettings.interestRate,
     );
 
-    // Calculate monthly balances from all history data
+    // Calculate monthly balances from all history data and liabilities
     const monthlyBalancesMap = new Map<string, number>();
 
     allHistoryData.forEach((record) => {
@@ -272,6 +347,17 @@ const MyDataHomepage: React.FC = () => {
         monthlyBalancesMap.set(month, existing + totalBalance);
       } else {
         monthlyBalancesMap.set(month, totalBalance);
+      }
+    });
+
+    // Subtract liabilities for each month
+    allLiabilitiesData.forEach((liability) => {
+      const month = liability.month;
+      if (monthlyBalancesMap.has(month)) {
+        const currentBalance = monthlyBalancesMap.get(month)!;
+        monthlyBalancesMap.set(month, currentBalance - liability.amount);
+      } else {
+        monthlyBalancesMap.set(month, -liability.amount);
       }
     });
 
@@ -318,12 +404,13 @@ const MyDataHomepage: React.FC = () => {
     return {
       totalSavings,
       totalDeposits,
+      totalLiabilities,
       totalBankBalance,
       emwAmount,
       actualWithdrawalData: calculateActualWithdrawalRate(),
       lastMonthWithdrawal: calculateLastMonthWithdrawal(),
     };
-  }, [currentMonthHistory, allHistoryData, appSettings]);
+  }, [currentMonthHistory, allHistoryData, allLiabilitiesData, currentMonthLiabilities, appSettings]);
 
   // Memoize jewellery calculations separately
   const { totalJewelleryWeight, totalJewellerySellValue, totalAssets } =
@@ -408,8 +495,8 @@ const MyDataHomepage: React.FC = () => {
   // Get EMW settings for display
   const emwSettings = getEmwSettings(appSettings);
 
-  // Combined loading state
-  const isLoading = historyLoading || bankingLoading || jewelleryLoading;
+  // Combined loading state (including liabilities loading)
+  const isLoading = historyLoading || bankingLoading || jewelleryLoading || liabilitiesLoading;
 
   if (isLoading) {
     return (
@@ -499,17 +586,17 @@ const MyDataHomepage: React.FC = () => {
         </div>
       </div>
 
-      {/* Second Row - Asset Cards - Based on history_detail data */}
+      {/* Second Row - Asset Cards - Based on history_detail data with liabilities */}
       <div className="px-2 py-1">
         <div className="grid grid-cols-3 gap-1.5 mb-1">
-          {/* Total Bank Balance Card - From history_detail current month */}
+          {/* Total Bank Balance Card - From history_detail current month minus liabilities */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs text-gray-500 mb-0.5">Liquid</div>
             <div className="text-base font-bold text-blue-600 leading-tight">
               {formatLargeAmount(totalBankBalance)}
             </div>
             <div className="text-[10px] text-gray-400 mt-0.5">
-              {formatLakhs(totalSavings)} + {formatLakhs(totalDeposits)}
+              {formatLakhs(totalSavings)} + {formatLakhs(totalDeposits)} - {formatLakhs(totalLiabilities)}
             </div>
           </div>
 

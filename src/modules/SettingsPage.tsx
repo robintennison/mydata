@@ -33,7 +33,6 @@ const SettingsPage: React.FC = () => {
     goldRate: 0,
     makingTax: 0,
     resaleDiscount: 0,
-    liabilities: 0,
     emwInterest: 0,
   });
 
@@ -62,7 +61,6 @@ const SettingsPage: React.FC = () => {
         goldRate: settings.goldRatePerGram ?? 0,
         makingTax: settings.makingTaxPercent ?? 0,
         resaleDiscount: settings.resaleDiscountPercent ?? 0,
-        liabilities: settings.liabilities ?? 0,
         emwInterest: settings.EMW_interest ?? 0,
       });
 
@@ -192,9 +190,6 @@ const SettingsPage: React.FC = () => {
         break;
       case "resaleDiscount":
         settingsField = "resaleDiscountPercent";
-        break;
-      case "liabilities":
-        settingsField = "liabilities";
         break;
       case "emwInterest":
         settingsField = "EMW_interest";
@@ -579,13 +574,6 @@ const SettingsPage: React.FC = () => {
             "resaleDiscount",
             financialSettings.resaleDiscount,
             "%",
-          )}
-          {renderEditableField(
-            "Liabilities",
-            "liabilities",
-            financialSettings.liabilities,
-            "",
-            "₹",
           )}
         </div>
 

@@ -595,7 +595,7 @@ const HistoryTab: React.FC = () => {
         />
       </div>
 
-      {/* Table section */}
+      {/* Table section - Mobile Optimized with larger fonts */}
       <div>
         <div className="flex justify-between items-center py-2 bg-white rounded-t-lg px-2 mb-1">
           <div className="flex items-center gap-1">
@@ -618,18 +618,18 @@ const HistoryTab: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden overflow-x-auto">
-            {/* Table Header */}
-            <div className="flex items-center py-1.5 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2 min-w-[500px]">
-              <div className="flex-1 px-0.5">Month</div>
-              <div className="w-16 px-0.5 text-right">Wtr</div>
-              <div className="w-16 px-0.5 text-right">Stm</div>
-              <div className="w-16 px-0.5 text-right">Lbl</div>
-              <div className="w-16 px-0.5 text-right">Liq</div>
-              {settings?.showDelete && <div className="w-16 text-center">Act</div>}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            {/* Table Header - Mobile optimized with grid */}
+            <div className="grid grid-cols-5 gap-1 py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[11px] text-gray-700 px-2">
+              <div className="col-span-1 text-left">Month</div>
+              <div className="col-span-1 text-right">Wtr</div>
+              <div className="col-span-1 text-right">Stm</div>
+              <div className="col-span-1 text-right">Lbl</div>
+              <div className="col-span-1 text-right">Liq</div>
+              {settings?.showDelete && <div className="col-span-1 text-center w-12">Act</div>}
             </div>
 
-            {/* Table Rows */}
+            {/* Table Rows - Mobile optimized with grid */}
             {filteredHistory.map((record) => {
               const isEditing = editingMonth === record.month;
               const savingsValue = rupeesToLakhs(record.savings);
@@ -640,80 +640,80 @@ const HistoryTab: React.FC = () => {
               return (
                 <div
                   key={record.month}
-                  className={`flex items-center py-1.5 border-b border-gray-100 px-2 hover:bg-gray-50 last:border-b-0 min-w-[500px] ${
+                  className={`grid grid-cols-5 gap-1 py-2 border-b border-gray-100 px-2 hover:bg-gray-50 last:border-b-0 ${
                     isEditing ? "bg-yellow-50" : ""
                   } ${!record.hasStoredLiabilities && !isEditing ? "bg-purple-50/30" : ""}`}
                 >
                   {/* Month */}
-                  <div className="flex-1 px-0.5 text-[10px] text-gray-800">
+                  <div className="col-span-1 text-[11px] text-gray-800 truncate font-medium">
                     {record.month}
                     {!record.hasStoredLiabilities && !isEditing && (
-                      <span className="ml-1 text-[8px] text-purple-500" title="No liability records for this month">*</span>
+                      <span className="ml-0.5 text-[9px] text-purple-500" title="No liability records">*</span>
                     )}
                   </div>
 
-                  {/* Savings */}
-                  <div className="w-16 px-0.5">
+                  {/* Savings - Water */}
+                  <div className="col-span-1">
                     {isEditing ? (
                       <input
                         type="number"
                         value={editedSavings}
                         onChange={(e) => setEditedSavings(e.target.value)}
-                        className="w-full p-0.5 text-[10px] border border-gray-300 rounded text-right"
+                        className="w-full p-1 text-[11px] border border-gray-300 rounded text-right"
                         step="0.01"
                         min="0"
                         placeholder="0"
                         disabled={isSaving}
                       />
                     ) : (
-                      <div className="text-[10px] font-semibold text-green-600 text-right">
+                      <div className="text-[11px] font-semibold text-green-600 text-right">
                         {formatLakhs(savingsValue)}
                       </div>
                     )}
                   </div>
 
-                  {/* Deposits */}
-                  <div className="w-16 px-0.5">
+                  {/* Deposits - Steam */}
+                  <div className="col-span-1">
                     {isEditing ? (
                       <input
                         type="number"
                         value={editedDeposits}
                         onChange={(e) => setEditedDeposits(e.target.value)}
-                        className="w-full p-0.5 text-[10px] border border-gray-300 rounded text-right"
+                        className="w-full p-1 text-[11px] border border-gray-300 rounded text-right"
                         step="0.01"
                         min="0"
                         placeholder="0"
                         disabled={isSaving}
                       />
                     ) : (
-                      <div className="text-[10px] font-semibold text-orange-500 text-right">
+                      <div className="text-[11px] font-semibold text-orange-500 text-right">
                         {formatLakhs(depositsValue)}
                       </div>
                     )}
                   </div>
 
                   {/* Liabilities */}
-                  <div className="w-16 px-0.5">
-                    <div className="text-[10px] font-semibold text-purple-600 text-right">
+                  <div className="col-span-1">
+                    <div className="text-[11px] font-semibold text-purple-600 text-right">
                       {formatLakhs(liabilitiesValue)}
                     </div>
                   </div>
 
-                  {/* Total Assets */}
-                  <div className="w-16 px-0.5">
-                    <div className="text-[10px] font-semibold text-blue-600 text-right">
+                  {/* Total Assets - Liquid */}
+                  <div className="col-span-1">
+                    <div className="text-[11px] font-semibold text-blue-600 text-right">
                       {formatLakhs(totalAssetsValue)}
                     </div>
                   </div>
 
                   {/* Actions */}
                   {settings?.showDelete && (
-                    <div className="w-16 flex gap-0.5 justify-end">
+                    <div className="col-span-1 flex gap-1 justify-end">
                       {isEditing ? (
                         <>
                           <button
                             onClick={() => saveEdits(record.month)}
-                            className="w-5 h-5 p-0 bg-green-500 text-white text-[9px] rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 transition-colors"
+                            className="w-6 h-6 p-0 bg-green-500 text-white text-[10px] rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 transition-colors"
                             disabled={isSaving}
                             title="Save"
                           >
@@ -721,7 +721,7 @@ const HistoryTab: React.FC = () => {
                           </button>
                           <button
                             onClick={cancelEditing}
-                            className="w-5 h-5 p-0 bg-gray-400 text-white text-[9px] rounded flex items-center justify-center hover:bg-gray-500 transition-colors"
+                            className="w-6 h-6 p-0 bg-gray-400 text-white text-[10px] rounded flex items-center justify-center hover:bg-gray-500 transition-colors"
                             title="Cancel"
                           >
                             ✕
@@ -737,7 +737,7 @@ const HistoryTab: React.FC = () => {
                                 record.deposits,
                               )
                             }
-                            className="w-5 h-5 p-0 bg-blue-500 text-white text-[9px] rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                            className="w-6 h-6 p-0 bg-blue-500 text-white text-[10px] rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 transition-colors"
                             disabled={editingMonth !== null}
                             title="Edit"
                           >
@@ -745,7 +745,7 @@ const HistoryTab: React.FC = () => {
                           </button>
                           <button
                             onClick={() => setDeleteConfirmMonth(record.month)}
-                            className="w-5 h-5 p-0 bg-red-500 text-white text-[9px] rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50 transition-colors"
+                            className="w-6 h-6 p-0 bg-red-500 text-white text-[10px] rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50 transition-colors"
                             disabled={editingMonth !== null}
                             title="Delete"
                           >

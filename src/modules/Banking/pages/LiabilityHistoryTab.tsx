@@ -386,7 +386,7 @@ const LiabilityHistoryTab: React.FC = () => {
 
       {/* Month Selector Header */}
       <div className="bg-white mb-3 border border-gray-200 rounded-lg p-2">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div className="flex items-center gap-2">
             <span className="text-sm">📅</span>
             <span className="text-xs font-semibold text-gray-800">
@@ -396,7 +396,7 @@ const LiabilityHistoryTab: React.FC = () => {
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full sm:w-auto px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             {availableMonths.map((month) => (
               <option key={month} value={month}>
@@ -407,11 +407,11 @@ const LiabilityHistoryTab: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-2 pt-2 border-t border-gray-100">
           <div className="text-[10px] text-gray-500">
             {totalAccounts} liability record(s) for {selectedMonth}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {showLoadButton && (
               <button
                 onClick={loadPreviousMonthData}
@@ -524,9 +524,9 @@ const LiabilityHistoryTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Liabilities Table */}
+      {/* Liabilities Table - Mobile Optimized */}
       <div className="flex-1 overflow-y-auto">
-        <div className="flex justify-between items-center py-2 bg-white rounded-t-lg px-1 mb-1">
+        <div className="flex justify-between items-center py-2 bg-white rounded-t-lg px-2 mb-1">
           <div className="flex items-center gap-1">
             <span>📋</span>
             <span className="text-xs font-semibold text-gray-800">
@@ -541,35 +541,35 @@ const LiabilityHistoryTab: React.FC = () => {
         {liabilities.length === 0 ? (
           <div className="text-center py-12 px-5 text-gray-500">
             <div className="text-4xl mb-4 opacity-50">💰</div>
-            <div className="text-base font-medium text-gray-600 mb-2">
+            <div className="text-sm font-medium text-gray-600 mb-2">
               No liabilities for {selectedMonth}
             </div>
-            <div className="text-sm text-gray-400">
+            <div className="text-xs text-gray-400">
               Click "Add Liability" to create records for this month
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden overflow-x-auto">
-            {/* Table Header - Responsive with min-width */}
-            <div className="flex items-center py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2 min-w-[500px]">
-              <div className="flex-1 px-1">Description</div>
-              <div className="w-36 px-1 text-right">Amount (₹)</div>
-              {settings?.showDelete && <div className="w-24 px-1 text-center">Actions</div>}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            {/* Table Header - Grid layout for mobile */}
+            <div className="grid grid-cols-12 gap-1 py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2">
+              <div className="col-span-7 px-1">Description</div>
+              <div className="col-span-3 px-1 text-right">Amount</div>
+              {settings?.showDelete && <div className="col-span-2 px-1 text-center">Actions</div>}
             </div>
 
-            {/* Table Rows */}
+            {/* Table Rows - Grid layout for mobile */}
             {liabilities.map((liability) => {
               const isEditing = editingId === liability.id;
 
               return (
                 <div
                   key={liability.id}
-                  className={`flex items-center py-2 border-b border-gray-100 min-h-12 px-2 hover:bg-gray-50 last:border-b-0 min-w-[500px] ${
+                  className={`grid grid-cols-12 gap-1 py-2 border-b border-gray-100 px-2 hover:bg-gray-50 last:border-b-0 ${
                     isEditing ? "bg-yellow-50" : ""
                   }`}
                 >
-                  {/* Description - Takes remaining space */}
-                  <div className="flex-1 px-1">
+                  {/* Description */}
+                  <div className="col-span-7 px-1">
                     {isEditing ? (
                       <input
                         type="text"
@@ -579,74 +579,74 @@ const LiabilityHistoryTab: React.FC = () => {
                             prev ? { ...prev, description: e.target.value } : null
                           )
                         }
-                        className="w-full p-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={saving}
                         autoFocus
                       />
                     ) : (
-                      <span className="text-sm text-gray-800 break-words">
+                      <span className="text-xs text-gray-800 break-words block">
                         {liability.description}
                       </span>
                     )}
                   </div>
 
-                  {/* Amount - Fixed width, right aligned */}
-                  <div className="w-36 px-1">
+                  {/* Amount */}
+                  <div className="col-span-3 px-1">
                     {isEditing ? (
                       <input
                         type="text"
                         inputMode="decimal"
                         value={editingData?.amount.toString() || "0"}
                         onChange={(e) => handleAmountChange(e.target.value, true)}
-                        className="w-full p-1.5 border border-gray-300 rounded text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-1 text-xs border border-gray-300 rounded text-right focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={saving}
                       />
                     ) : (
-                      <div className="text-sm font-semibold text-gray-900 text-right">
+                      <div className="text-xs font-semibold text-gray-900 text-right">
                         ₹{formatAmount(liability.amount)}
                       </div>
                     )}
                   </div>
 
-                  {/* Actions - Fixed width buttons */}
+                  {/* Actions */}
                   {settings?.showDelete && (
-                    <div className="w-24 px-1 flex justify-end gap-1">
+                    <div className="col-span-2 px-1 flex justify-end gap-1">
                       {isEditing ? (
                         <>
                           <button
                             onClick={handleSaveEdit}
-                            className="px-2 py-1 bg-emerald-500 text-white text-xs rounded hover:bg-emerald-600 transition-colors disabled:opacity-50 whitespace-nowrap"
+                            className="w-6 h-6 bg-emerald-500 text-white text-[10px] rounded flex items-center justify-center hover:bg-emerald-600 transition-colors disabled:opacity-50"
                             disabled={saving || !editingData?.description.trim()}
                             title="Save"
                           >
-                            Save
+                            ✓
                           </button>
                           <button
                             onClick={handleCancelEdit}
-                            className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 transition-colors whitespace-nowrap"
+                            className="w-6 h-6 bg-gray-400 text-white text-[10px] rounded flex items-center justify-center hover:bg-gray-500 transition-colors"
                             disabled={saving}
                             title="Cancel"
                           >
-                            Cancel
+                            ✕
                           </button>
                         </>
                       ) : (
                         <>
                           <button
                             onClick={() => handleStartEdit(liability)}
-                            className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors whitespace-nowrap"
+                            className="w-6 h-6 bg-blue-500 text-white text-[10px] rounded flex items-center justify-center hover:bg-blue-600 transition-colors"
                             disabled={saving}
                             title="Edit"
                           >
-                            Edit
+                            ✏️
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(liability.id)}
-                            className="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors whitespace-nowrap"
+                            className="w-6 h-6 bg-red-500 text-white text-[10px] rounded flex items-center justify-center hover:bg-red-600 transition-colors"
                             disabled={saving}
                             title="Delete"
                           >
-                            Delete
+                            🗑️
                           </button>
                         </>
                       )}
@@ -658,16 +658,16 @@ const LiabilityHistoryTab: React.FC = () => {
 
             {/* Totals Row */}
             {totalLiabilities > 0 && (
-              <div className="flex items-center py-3 bg-gray-100 border-t-2 border-gray-300 font-semibold px-2 min-w-[500px]">
-                <div className="flex-1 px-1">
+              <div className="grid grid-cols-12 gap-1 py-3 bg-gray-100 border-t-2 border-gray-300 font-semibold px-2">
+                <div className="col-span-7 px-1">
                   <span className="text-xs font-bold text-gray-800">TOTAL</span>
                 </div>
-                <div className="w-36 px-1 text-right">
+                <div className="col-span-3 px-1 text-right">
                   <span className="text-sm font-bold text-red-700">
                     ₹{formatAmount(totalLiabilities)}
                   </span>
                 </div>
-                {settings?.showDelete && <div className="w-24 px-1"></div>}
+                {settings?.showDelete && <div className="col-span-2 px-1"></div>}
               </div>
             )}
           </div>

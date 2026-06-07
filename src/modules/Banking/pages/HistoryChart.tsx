@@ -31,7 +31,8 @@ ChartJS.register(
 interface History {
   month: string;
   savings: number;
-  totalDeposits: number; // Keep using totalDeposits to match your existing data structure
+  totalDeposits: number;
+  totalAssets?: number; // Add totalAssets field
 }
 
 interface HistoryChartProps {
@@ -44,24 +45,15 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
   compact = false,
 }) => {
   const [chartData, setChartData] = useState<ChartData<"line"> | null>(null);
+  const [yAxisMin, setYAxisMin] = useState<number | undefined>(undefined);
 
   // Format month for chart display
   const formatMonthForChart = (month: string): string => {
     try {
       const [year, monthNum] = month.split("-");
       const monthNames = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
       ];
       const monthName = monthNames[parseInt(monthNum) - 1] || monthNum;
       const shortYear = year.slice(2);
@@ -83,37 +75,37 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
     const labels = chartHistory.map((record) =>
       formatMonthForChart(record.month),
     );
-    const depositsData = chartHistory.map((record) =>
-      parseFloat((record.totalDeposits / 100000).toFixed(2)),
-    );
-    const totalData = chartHistory.map((record) =>
-      parseFloat(((record.savings + record.totalDeposits) / 100000).toFixed(2)),
-    );
+    
+    // Calculate Total Assets (Savings + Deposits - Liabilities)
+    // If totalAssets is provided, use it; otherwise calculate from savings and deposits
+    const totalAssetsData = chartHistory.map((record) => {
+      if (record.totalAssets !== undefined) {
+        return parseFloat((record.totalAssets / 100000).toFixed(2));
+      }
+      // Fallback for backward compatibility
+      return parseFloat(((record.savings + record.totalDeposits) / 100000).toFixed(2));
+    });
+
+    // Calculate y-axis min to show variations (start from 80% of minimum value)
+    const minValue = Math.min(...totalAssetsData);
+    const maxValue = Math.max(...totalAssetsData);
+    const range = maxValue - minValue;
+    // Start from 10% below the minimum value to show variation, but not below 0
+    const calculatedMin = Math.max(0, minValue - (range * 0.15));
+    setYAxisMin(calculatedMin);
 
     const data: ChartData<"line"> = {
       labels,
       datasets: [
         {
-          label: "Deposits",
-          data: depositsData,
-          borderColor: "#2196F3",
-          backgroundColor: "rgba(33, 150, 243, 0.1)",
-          fill: true,
-          tension: 0.3,
-          pointRadius: compact ? 2 : 3,
-          pointHoverRadius: 5,
-          borderWidth: 2,
-          pointBackgroundColor: "#2196F3",
-        },
-        {
-          label: "Total (Deposits + Savings)",
-          data: totalData,
+          label: "Total Assets",
+          data: totalAssetsData,
           borderColor: "#4CAF50",
           backgroundColor: "rgba(76, 175, 80, 0.1)",
           fill: true,
           tension: 0.3,
-          pointRadius: compact ? 3 : 5,
-          pointHoverRadius: 7,
+          pointRadius: compact ? 4 : 5,
+          pointHoverRadius: compact ? 6 : 7,
           borderWidth: 2,
           pointBackgroundColor: "#4CAF50",
           pointBorderColor: "#ffffff",
@@ -125,7 +117,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
     setChartData(data);
   }, [history, compact]);
 
-  // Chart options - optimized for mobile viewing
+  // Chart options - optimized for mobile viewing with better variation display
   const chartOptions: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -158,21 +150,26 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
         },
       },
       datalabels: {
-        display: (context) => context.datasetIndex === 1,
+        display: true, // Show on all data points
         color: "#4CAF50",
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
         borderRadius: 4,
         padding: { top: 2, bottom: 2, left: 4, right: 4 },
-        font: { size: 9, weight: "bold" },
+        font: { size: compact ? 9 : 10, weight: "bold" },
         formatter: (value) => `${value.toFixed(2)}`,
         align: "top",
-        offset: 4,
+        offset: 6,
+        clip: false,
       },
     },
     scales: {
       x: {
         grid: { color: "rgba(0, 0, 0, 0.05)", drawTicks: !compact },
-        ticks: { font: { size: 9 }, maxRotation: 0, padding: 2 },
+        ticks: { 
+          font: { size: compact ? 9 : 10 }, 
+          maxRotation: compact ? 45 : 0, 
+          padding: 2 
+        },
         title: {
           display: !compact,
           text: "Months",
@@ -181,28 +178,30 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
         },
       },
       y: {
-        beginAtZero: false,
+        beginAtZero: false, // Don't force zero to show variations
+        min: yAxisMin, // Start from calculated minimum to show variations
         grid: { color: "rgba(0, 0, 0, 0.05)" },
         ticks: {
-          font: { size: 9 },
+          font: { size: compact ? 9 : 10 },
           padding: 2,
-          display: !compact,
           callback: (value) => {
             if (value === null || value === undefined) return "";
-            if (typeof value === "number") return `${value}`;
+            if (typeof value === "number") return `${value.toFixed(1)}`;
             return value;
           },
         },
         title: {
           display: !compact,
-          text: "Amount (Lakhs)",
+          text: "Amount",
           font: { size: 10, weight: 500 },
           padding: { top: 2, bottom: 4 },
         },
       },
     },
     interaction: { intersect: false, mode: "index" },
-    layout: { padding: compact ? 0 : undefined },
+    layout: { 
+      padding: compact ? { top: 20, bottom: 5, left: 5, right: 5 } : { top: 30, bottom: 10, left: 10, right: 10 }
+    },
   };
 
   if (history.length < 2) {
@@ -218,7 +217,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
               <span>📈</span>
-              Last 6 Months Trend
+              Total Assets Trend
             </div>
           </div>
         )}
@@ -249,7 +248,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
         <div className="flex items-center justify-between mb-4">
           <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
             <span>📈</span>
-            Last 6 Months Trend
+            Total Assets Trend (Last 6 Months)
           </div>
         </div>
       )}

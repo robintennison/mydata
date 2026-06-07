@@ -40,6 +40,11 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({
     return `${year}-${month}`;
   };
 
+  // Format numbers in lakhs
+  const formatLakhs = (amount: number): string => {
+    return (amount / 100000).toFixed(2);
+  };
+
   // Fetch data from history_detail for current month
   useEffect(() => {
     const fetchCurrentMonthData = async () => {
@@ -89,6 +94,14 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({
 
     fetchCurrentMonthData();
   }, []);
+
+  // Calculate total savings
+  const totalSavings = useMemo(() => {
+    const dataSource =
+      currentMonthData.length > 0 ? currentMonthData : propAccounts || [];
+    
+    return dataSource.reduce((total, account) => total + (account.savingsAmount || 0), 0);
+  }, [currentMonthData, propAccounts]);
 
   // Prepare data for pie chart using current month data from history_detail
   const chartData = useMemo(() => {
@@ -257,9 +270,17 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({
   return (
     <div className="pb-2">
       <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
-        <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
-          <span>📊</span>
-          <span>Savings Distribution </span>
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-base font-semibold text-gray-700 flex items-center gap-2">
+            <span>📊</span>
+            <span>Savings Distribution</span>
+          </div>
+          <div className="text-right">
+            <div className="text-xs text-gray-500">Total Savings</div>
+            <div className="text-lg font-bold text-green-600">
+              {formatLakhs(totalSavings)}
+            </div>
+          </div>
         </div>
         <div className="h-[360px] relative">
           <Pie data={chartData} options={chartOptions} />

@@ -46,6 +46,11 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
     return `${year}-${month}`;
   };
 
+  // Format numbers in lakhs
+  const formatLakhs = (amount: number): string => {
+    return (amount / 100000).toFixed(2);
+  };
+
   // Fetch deposit data from history_detail for current month
   useEffect(() => {
     const fetchCurrentMonthDeposits = async () => {
@@ -98,6 +103,34 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
 
     fetchCurrentMonthDeposits();
   }, []);
+
+  // Calculate total deposits
+  const totalDeposits = useMemo(() => {
+    // If we have data from history_detail, use it; otherwise fall back to props
+    if (currentMonthData.length > 0) {
+      return currentMonthData.reduce((total, account) => total + account.deposits, 0);
+    } else if (propAccounts && propAccounts.length > 0) {
+      // Calculate from props for backward compatibility
+      const filteredDeposits = showInactive
+        ? propDeposits || []
+        : (propDeposits || []).filter((d) => d.active !== false);
+      
+      let total = 0;
+      propAccounts.forEach((account) => {
+        const baseDeposits = filteredDeposits
+          .filter((deposit) => deposit.accountId === account.id)
+          .reduce((sum, deposit) => sum + deposit.amount, 0);
+        
+        const adjustmentsTotal = (propAdjustments || [])
+          .filter((adj) => adj.accountId === account.id)
+          .reduce((sum, adj) => sum + (adj.adjustmentAmount || 0), 0);
+        
+        total += baseDeposits + adjustmentsTotal;
+      });
+      return total;
+    }
+    return 0;
+  }, [currentMonthData, propAccounts, propDeposits, propAdjustments, showInactive]);
 
   // Prepare data for pie chart using current month data from history_detail
   const chartData = useMemo(() => {
@@ -299,9 +332,17 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
   return (
     <div className="pb-2">
       <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
-        <div className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
-          <span>📊</span>
-          <span> Deposits Distribution </span>
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-base font-semibold text-gray-700 flex items-center gap-2">
+            <span>📊</span>
+            <span>Deposits Distribution</span>
+          </div>
+          <div className="text-right">
+            <div className="text-xs text-gray-500">Total Deposits</div>
+            <div className="text-lg font-bold text-blue-600">
+              {formatLakhs(totalDeposits)}
+            </div>
+          </div>
         </div>
         <div className="h-[360px] relative">
           <Pie data={chartData} options={chartOptions} />

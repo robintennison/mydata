@@ -15,8 +15,29 @@ import LiabilityHistoryTab from "./LiabilityHistoryTab";
 import DepositPieChart from "./DepositPieChart";
 import SavingsPieChart from "./SavingsPieChart";
 
+// Import Firestore functions
+import { collection, query, getDocs, where } from "firebase/firestore";
+import { firestore } from "../../../lib/firebase";
+
 // Define the tab type
 type TabType = "dashboard" | "accounts" | "deposits" | "history" | "historydetail" | "liabilities";
+
+// Interface for liability history
+interface LiabilityHistory {
+  id: string;
+  month: string;
+  description: string;
+  amount: number;
+}
+
+// Interface for monthly data with liabilities
+interface MonthlyDataWithLiabilities {
+  month: string;
+  savings: number;
+  deposits: number;
+  liabilities: number;
+  total: number;
+}
 
 interface BankingHomePageProps {
   // Add any props if needed
@@ -38,6 +59,86 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
   // State for active tab
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  
+  // State for monthly data with liabilities
+  const [monthlyDataWithLiabilities, setMonthlyDataWithLiabilities] = useState<MonthlyDataWithLiabilities[]>([]);
+  const [currentMonthLiabilities, setCurrentMonthLiabilities] = useState<number>(0);
+
+  // Get liabilities for a specific month
+  const getLiabilitiesForMonth = async (month: string): Promise<number> => {
+    try {
+      const liabilityHistoryRef = collection(firestore, "liability_history");
+      const q = query(liabilityHistoryRef, where("month", "==", month));
+      const querySnapshot = await getDocs(q);
+      
+      let total = 0;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as LiabilityHistory;
+        total += data.amount || 0;
+      });
+      
+      return total;
+    } catch (error) {
+      console.error(`Error fetching liabilities for ${month}:`, error);
+      return 0;
+    }
+  };
+
+  // Fetch aggregated data with liabilities
+  useEffect(() => {
+    const fetchDataWithLiabilities = async () => {
+      if (!historyDetail || historyDetail.length === 0) {
+        // If no history detail, still try to get current month liabilities
+        const currentMonth = getCurrentMonth();
+        const liabilities = await getLiabilitiesForMonth(currentMonth);
+        setCurrentMonthLiabilities(liabilities);
+        setMonthlyDataWithLiabilities([]);
+        return;
+      }
+
+      // Group by month and aggregate savings and deposits
+      const monthMap = new Map();
+
+      historyDetail.forEach((record) => {
+        const month = record.month;
+        if (!monthMap.has(month)) {
+          monthMap.set(month, {
+            month: month,
+            savings: 0,
+            deposits: 0,
+          });
+        }
+        const monthData = monthMap.get(month);
+        monthData.savings += record.savings || 0;
+        monthData.deposits += record.deposits || 0;
+      });
+
+      // Get liabilities for each month
+      const monthlyDataArray: MonthlyDataWithLiabilities[] = [];
+      for (const [month, data] of monthMap) {
+        const liabilities = await getLiabilitiesForMonth(month);
+        monthlyDataArray.push({
+          month: month,
+          savings: data.savings,
+          deposits: data.deposits,
+          liabilities: liabilities,
+          total: data.savings + data.deposits - liabilities,
+        });
+      }
+
+      // Sort by month (newest first)
+      monthlyDataArray.sort((a, b) => b.month.localeCompare(a.month));
+      
+      setMonthlyDataWithLiabilities(monthlyDataArray);
+      
+      // Get current month liabilities
+      const currentMonth = getCurrentMonth();
+      const currentLiabilities = await getLiabilitiesForMonth(currentMonth);
+      setCurrentMonthLiabilities(currentLiabilities);
+    };
+
+    fetchDataWithLiabilities();
+  }, [historyDetail]);
 
   // Handle navigation state to set active tab
   useEffect(() => {
@@ -135,59 +236,40 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
       0,
     );
 
-    const totalBankBalance = totalSavings + totalDeposits;
+    const totalBankBalance = totalSavings + totalDeposits - currentMonthLiabilities;
 
     return {
       totalSavings,
       totalDeposits,
       totalBankBalance,
+      totalLiabilities: currentMonthLiabilities,
     };
   };
 
-  // Get last 6 months history from history_detail (sorted by date - newest first)
-  const getLast6MonthsFromHistoryDetail = () => {
-    if (!historyDetail || historyDetail.length === 0) return [];
-
-    // Group by month and aggregate savings and deposits
-    const monthMap = new Map();
-
-    historyDetail.forEach((record) => {
-      const month = record.month;
-      if (!monthMap.has(month)) {
-        monthMap.set(month, {
-          month: month,
-          savings: 0,
-          deposits: 0,
-        });
-      }
-      const monthData = monthMap.get(month);
-      monthData.savings += record.savings || 0;
-      monthData.deposits += record.deposits || 0;
-    });
-
-    // Convert map to array and sort by month (newest first)
-    const sortedMonths = Array.from(monthMap.values())
-      .sort((a, b) => b.month.localeCompare(a.month))
-      .slice(0, 6);
-
-    return sortedMonths;
+  // Get last 6 months history from history_detail with liabilities (sorted by date - newest first)
+  const getLast6MonthsWithLiabilities = () => {
+    if (!monthlyDataWithLiabilities || monthlyDataWithLiabilities.length === 0) return [];
+    
+    // Return the first 6 items (already sorted newest first)
+    return monthlyDataWithLiabilities.slice(0, 6);
   };
 
   // Get current month data for top cards
   const currentMonthData = getCurrentMonthData();
   const totalSavings = currentMonthData.totalSavings;
   const totalDeposits = currentMonthData.totalDeposits;
+  const totalLiabilities = currentMonthData.totalLiabilities;
   const totalBankBalance = currentMonthData.totalBankBalance;
 
-  // Get last 6 months from history_detail for recent history section
-  const last6MonthsFromHistoryDetail = getLast6MonthsFromHistoryDetail();
+  // Get last 6 months with liabilities for recent history section
+  const last6MonthsWithLiabilities = getLast6MonthsWithLiabilities();
 
   // Dashboard content component
   const DashboardContent = () => (
     <>
-      {/* Top 3 Cards in Single Row - Compact */}
+      {/* Top 4 Cards in Grid - Mobile optimized */}
       <div className="px-2 py-2">
-        <div className="grid grid-cols-3 gap-1.5 mb-3">
+        <div className="grid grid-cols-2 gap-1.5 mb-3">
           {/* Total Savings Card */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs text-gray-500 mb-0.5">Water</div>
@@ -198,9 +280,17 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
 
           {/* Total Deposits Card */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 mb-0.5"> Steam </div>
+            <div className="text-xs text-gray-500 mb-0.5">Steam</div>
             <div className="text-base font-bold text-gray-900 leading-tight">
               {formatLakhs(totalDeposits)}
+            </div>
+          </div>
+
+          {/* Total Liabilities Card */}
+          <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
+            <div className="text-xs text-gray-500 mb-0.5">Liabilities</div>
+            <div className="text-base font-bold text-red-600 leading-tight">
+              {formatLakhs(totalLiabilities)}
             </div>
           </div>
 
@@ -214,7 +304,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         </div>
       </div>
 
-      {/* Recent History - Compact */}
+      {/* Recent History with Liabilities - Mobile Friendly */}
       <div className="px-2 pb-2">
         <div className="bg-white rounded-lg p-2 shadow-sm border border-gray-100">
           <div className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-1">
@@ -222,33 +312,27 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
             <span>Recent History (6 Months)</span>
           </div>
 
-          {last6MonthsFromHistoryDetail.length === 0 ? (
+          {last6MonthsWithLiabilities.length === 0 ? (
             <div className="text-center py-2 text-gray-500 text-xs">
               No history data available
             </div>
           ) : (
             <div>
-              {/* Table Header */}
-              <div className="flex items-center py-1 px-0 bg-gray-50 border-b border-gray-200 font-semibold text-xs text-gray-700">
-                <div className="flex-1 px-0.5 min-w-[45px]">Month</div>
-                <div className="flex-1 px-0.5 text-right min-w-[40px]">
-                  Water
-                </div>
-                <div className="flex-1 px-0.5 text-right min-w-[40px]">
-                  Steam
-                </div>
-                <div className="flex-1 px-0.5 text-right min-w-[40px]">
-                  Liquid
-                </div>
+              {/* Mobile-friendly header */}
+              <div className="flex flex-wrap items-center py-1 px-0 bg-gray-50 border-b border-gray-200 font-semibold text-xs text-gray-700">
+                <div className="w-1/5 min-w-[45px]">Month</div>
+                <div className="w-1/5 text-right">Wtr</div>
+                <div className="w-1/5 text-right">Stm</div>
+                <div className="w-1/5 text-right">Lbl</div>
+                <div className="w-1/5 text-right">Liq</div>
               </div>
 
-              {/* Table Rows */}
-              {last6MonthsFromHistoryDetail.map((record) => {
+              {/* Table Rows - Mobile-friendly layout */}
+              {last6MonthsWithLiabilities.map((record) => {
                 const savingsDisplay = formatLakhs(record.savings);
                 const depositsDisplay = formatLakhs(record.deposits);
-                const totalDisplay = formatLakhs(
-                  record.savings + record.deposits,
-                );
+                const liabilitiesDisplay = formatLakhs(record.liabilities);
+                const totalDisplay = formatLakhs(record.total);
 
                 const [year, month] = record.month.split("-");
                 const date = new Date(parseInt(year), parseInt(month) - 1, 1);
@@ -260,18 +344,21 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
                 return (
                   <div
                     key={record.month}
-                    className="flex items-center py-1 px-0 border-b border-gray-100 min-h-6 last:border-b-0"
+                    className="flex flex-wrap items-center py-1 px-0 border-b border-gray-100 min-h-6 last:border-b-0 hover:bg-gray-50"
                   >
-                    <div className="flex-1 px-0.5 text-xs text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap min-w-[45px]">
+                    <div className="w-1/5 text-xs text-gray-900 font-medium overflow-hidden text-ellipsis whitespace-nowrap min-w-[45px]">
                       {monthName}
                     </div>
-                    <div className="flex-1 px-0.5 text-xs font-semibold text-green-600 text-right min-w-[40px]">
+                    <div className="w-1/5 text-xs font-semibold text-green-600 text-right">
                       {savingsDisplay}
                     </div>
-                    <div className="flex-1 px-0.5 text-xs font-semibold text-orange-500 text-right min-w-[40px]">
+                    <div className="w-1/5 text-xs font-semibold text-orange-500 text-right">
                       {depositsDisplay}
                     </div>
-                    <div className="flex-1 px-0.5 text-xs font-semibold text-blue-600 text-right min-w-[40px]">
+                    <div className="w-1/5 text-xs font-semibold text-red-600 text-right">
+                      {liabilitiesDisplay}
+                    </div>
+                    <div className="w-1/5 text-xs font-semibold text-blue-600 text-right">
                       {totalDisplay}
                     </div>
                   </div>
@@ -279,8 +366,8 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
               })}
 
               <div className="text-xs text-gray-400 text-center py-1 border-t border-gray-100 bg-gray-50">
-                {Math.min(last6MonthsFromHistoryDetail.length, 6)} of{" "}
-                {historyDetail?.length || 0} records
+                {Math.min(last6MonthsWithLiabilities.length, 6)} of{" "}
+                {monthlyDataWithLiabilities.length || 0} records
               </div>
             </div>
           )}

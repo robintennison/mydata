@@ -25,6 +25,13 @@ interface HistoryDetail {
   month: string;
   savings: number;
   deposits: number;
+  totalLiabilities?: number; // Add liability snapshot field
+}
+
+interface Liability {
+  id: string;
+  description: string;
+  amount: number;
 }
 
 interface EditedValues {
@@ -65,6 +72,8 @@ const HistoryDetailTab: React.FC = () => {
   const [previousMonthAvailable, setPreviousMonthAvailable] = useState<
     string | null
   >(null);
+  const [currentLiabilitiesTotal, setCurrentLiabilitiesTotal] = useState<number>(0);
+  const [storedLiabilitiesForMonth, setStoredLiabilitiesForMonth] = useState<number | null>(null);
 
   // Available months for dropdown (last 12 months + next 6 months)
   const availableMonths = React.useMemo(() => {
@@ -78,6 +87,47 @@ const HistoryDetailTab: React.FC = () => {
     return months;
   }, []);
 
+  // Fetch current liabilities total
+  const fetchCurrentLiabilities = async () => {
+    try {
+      const liabilitiesRef = collection(firestore, "liabilities");
+      const liabilitiesSnapshot = await getDocs(liabilitiesRef);
+      const liabilitiesList = liabilitiesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Liability[];
+      
+      const total = liabilitiesList.reduce((sum, liability) => sum + liability.amount, 0);
+      setCurrentLiabilitiesTotal(total);
+      return total;
+    } catch (error) {
+      console.error("Error fetching liabilities:", error);
+      return 0;
+    }
+  };
+
+  // Get stored liabilities for a specific month
+  const getStoredLiabilitiesForMonthFromDB = async (month: string): Promise<number | null> => {
+    try {
+      const historyRef = collection(firestore, "history_detail");
+      const q = query(historyRef, where("month", "==", month));
+      const historySnapshot = await getDocs(q);
+      
+      let storedLiabilities: number | null = null;
+      historySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.totalLiabilities !== undefined && storedLiabilities === null) {
+          storedLiabilities = data.totalLiabilities;
+        }
+      });
+      
+      return storedLiabilities;
+    } catch (error) {
+      console.error("Error fetching stored liabilities:", error);
+      return null;
+    }
+  };
+
   // Load accounts and history data
   useEffect(() => {
     loadData();
@@ -87,7 +137,13 @@ const HistoryDetailTab: React.FC = () => {
   useEffect(() => {
     setHasLoadedPreviousData(false);
     checkPreviousMonthData();
+    loadStoredLiabilitiesForMonth();
   }, [selectedMonth]);
+
+  const loadStoredLiabilitiesForMonth = async () => {
+    const stored = await getStoredLiabilitiesForMonthFromDB(selectedMonth);
+    setStoredLiabilitiesForMonth(stored);
+  };
 
   const checkPreviousMonthData = async () => {
     try {
@@ -117,6 +173,10 @@ const HistoryDetailTab: React.FC = () => {
       setEditedValues({});
       setInputValues({});
       setHasChanges(false);
+
+      // Fetch current liabilities
+      await fetchCurrentLiabilities();
+      await loadStoredLiabilitiesForMonth();
 
       // Load all accounts
       const accountsRef = collection(firestore, "accounts");
@@ -193,9 +253,14 @@ const HistoryDetailTab: React.FC = () => {
       const historySnapshot = await getDocs(q);
 
       const previousDataMap = new Map<string, HistoryDetail>();
+      let previousLiabilities: number | null = null;
+      
       historySnapshot.docs.forEach((doc) => {
         const data = doc.data() as HistoryDetail;
         previousDataMap.set(data.acctCode, data);
+        if (data.totalLiabilities !== undefined && previousLiabilities === null) {
+          previousLiabilities = data.totalLiabilities;
+        }
       });
 
       // Initialize edited values and input values with previous month's data
@@ -220,6 +285,12 @@ const HistoryDetailTab: React.FC = () => {
       setInputValues(newInputs);
       setHasChanges(true);
       setHasLoadedPreviousData(true);
+      
+      // Store the previous month's liabilities for reference
+      if (previousLiabilities !== null) {
+        setStoredLiabilitiesForMonth(previousLiabilities);
+      }
+      
       showStatus("success", `Loaded data from ${previousMonthStr}`);
     } catch (error: any) {
       console.error("Error loading previous month data:", error);
@@ -314,6 +385,15 @@ const HistoryDetailTab: React.FC = () => {
     try {
       setSaving(true);
 
+      // Get the liability snapshot to store with this month's data
+      // Use stored liabilities if they exist for this month, otherwise use current
+      let liabilitiesToStore = storedLiabilitiesForMonth;
+      
+      if (liabilitiesToStore === null) {
+        // No stored liabilities for this month yet, use current and store them
+        liabilitiesToStore = currentLiabilitiesTotal;
+      }
+
       // Use batch write for better performance
       const batch = writeBatch(firestore);
       const historyCollectionRef = collection(firestore, "history_detail");
@@ -327,6 +407,7 @@ const HistoryDetailTab: React.FC = () => {
           month: selectedMonth,
           savings: values.savings,
           deposits: values.deposits,
+          totalLiabilities: liabilitiesToStore, // Store the liability snapshot
         };
 
         batch.set(docRef, record);
@@ -342,9 +423,11 @@ const HistoryDetailTab: React.FC = () => {
           month: selectedMonth,
           savings: values.savings,
           deposits: values.deposits,
+          totalLiabilities: liabilitiesToStore,
         });
       }
       setHistoryData(newHistoryMap);
+      setStoredLiabilitiesForMonth(liabilitiesToStore);
 
       showStatus("success", "All records saved successfully!");
       setHasChanges(false);
@@ -419,6 +502,13 @@ const HistoryDetailTab: React.FC = () => {
       showStatus("success", "Record deleted successfully!");
       setDeleteConfirm(null);
       setHasChanges(true);
+      
+      // Check if we need to update stored liabilities reference
+      const remainingRecords = Array.from(historyData.keys()).filter(key => key !== acctCode);
+      if (remainingRecords.length === 0) {
+        // No records left for this month, clear stored liabilities
+        setStoredLiabilitiesForMonth(null);
+      }
     } catch (error: any) {
       console.error("Error deleting:", error);
       showStatus("error", `Failed to delete: ${error.message}`);
@@ -490,6 +580,44 @@ const HistoryDetailTab: React.FC = () => {
           }`}
         >
           {statusMessage.text}
+        </div>
+      )}
+
+      {/* Liability Snapshot Info */}
+      {storedLiabilitiesForMonth !== null && (
+        <div className="mb-3 p-2 bg-purple-50 border border-purple-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">💰</span>
+              <div>
+                <div className="text-[10px] font-medium text-purple-700 uppercase tracking-wide">
+                  Liabilities Snapshot
+                </div>
+                <div className="text-xs font-semibold text-purple-900">
+                  ₹{(storedLiabilitiesForMonth / 100000).toFixed(2)}L
+                </div>
+              </div>
+            </div>
+            <div className="text-[10px] text-purple-600">
+              Saved with this month's data
+            </div>
+          </div>
+        </div>
+      )}
+
+      {storedLiabilitiesForMonth === null && historyData.size > 0 && (
+        <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">⚠️</span>
+            <div className="flex-1">
+              <div className="text-[10px] font-medium text-yellow-800">
+                No liability snapshot for this month
+              </div>
+              <div className="text-[10px] text-yellow-700">
+                Current liabilities will be used. Save this month to store a snapshot.
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

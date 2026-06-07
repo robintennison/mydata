@@ -8,6 +8,7 @@ import {
   collection,
   query,
   getDocs,
+  where,
 } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import { useSettings } from "../../../contexts/SettingsContext";
@@ -20,6 +21,17 @@ interface MonthlySummary {
   month: string;
   savings: number;
   deposits: number;
+  liabilities: number;
+  totalAssets: number;
+  hasStoredLiabilities: boolean;
+}
+
+// Interface for liability history
+interface LiabilityHistory {
+  id: string;
+  month: string;
+  description: string;
+  amount: number;
 }
 
 const HistoryTab: React.FC = () => {
@@ -29,6 +41,7 @@ const HistoryTab: React.FC = () => {
   // State for aggregated monthly data
   const [monthlyData, setMonthlyData] = useState<MonthlySummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showWarning, setShowWarning] = useState(false);
 
   const [editingMonth, setEditingMonth] = useState<string | null>(null);
   const [editedSavings, setEditedSavings] = useState("");
@@ -44,11 +57,45 @@ const HistoryTab: React.FC = () => {
     null,
   );
 
+  // Get total liabilities for a specific month from liability_history
+  const getLiabilitiesForMonth = async (month: string): Promise<number> => {
+    try {
+      const liabilityHistoryRef = collection(firestore, "liability_history");
+      const q = query(liabilityHistoryRef, where("month", "==", month));
+      const querySnapshot = await getDocs(q);
+      
+      let total = 0;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as LiabilityHistory;
+        total += data.amount || 0;
+      });
+      
+      return total;
+    } catch (error) {
+      console.error(`Error fetching liabilities for ${month}:`, error);
+      return 0;
+    }
+  };
+
+  // Check if a month has liability records
+  const hasLiabilityRecords = async (month: string): Promise<boolean> => {
+    try {
+      const liabilityHistoryRef = collection(firestore, "liability_history");
+      const q = query(liabilityHistoryRef, where("month", "==", month));
+      const querySnapshot = await getDocs(q);
+      return !querySnapshot.empty;
+    } catch (error) {
+      console.error(`Error checking liability records for ${month}:`, error);
+      return false;
+    }
+  };
+
   // Fetch and aggregate data from history_detail table
   useEffect(() => {
     const fetchAndAggregateHistoryDetail = async () => {
       try {
         setLoading(true);
+        
         const historyDetailRef = collection(firestore, "history_detail");
         const q = query(historyDetailRef);
         const querySnapshot = await getDocs(q);
@@ -56,17 +103,16 @@ const HistoryTab: React.FC = () => {
         // Map to store aggregated data by month
         const aggregatedData = new Map<
           string,
-          { savings: number; deposits: number }
+          { savings: number; deposits: number; hasStoredLiabilities: boolean }
         >();
 
-        querySnapshot.forEach((doc) => {
+        // First pass: collect all months and aggregate savings/deposits
+        for (const doc of querySnapshot.docs) {
           const data = doc.data();
           const month = data.month;
 
-          // Skip records with null, undefined, or empty month
           if (!month || month.trim() === "") {
-            console.log("Skipping record with empty month:", doc.id);
-            return;
+            continue;
           }
 
           const savings = data.savings || 0;
@@ -77,26 +123,45 @@ const HistoryTab: React.FC = () => {
             aggregatedData.set(month, {
               savings: existing.savings + savings,
               deposits: existing.deposits + deposits,
+              hasStoredLiabilities: existing.hasStoredLiabilities,
             });
           } else {
+            // Check if this month has liability records
+            const hasLiabilities = await hasLiabilityRecords(month);
+            
             aggregatedData.set(month, {
               savings: savings,
               deposits: deposits,
+              hasStoredLiabilities: hasLiabilities,
             });
           }
-        });
+        }
 
         // Convert map to array of MonthlySummary
         const monthlySummaries: MonthlySummary[] = [];
-        aggregatedData.forEach((value, month) => {
+        let hasMissingLiabilities = false;
+        
+        for (const [month, value] of aggregatedData) {
+          const liabilities = await getLiabilitiesForMonth(month);
+          if (!value.hasStoredLiabilities) {
+            hasMissingLiabilities = true;
+          }
+          
+          const totalSavingsDeposits = value.savings + value.deposits;
+          const totalAssets = totalSavingsDeposits - liabilities;
+          
           monthlySummaries.push({
             month: month,
             savings: value.savings,
             deposits: value.deposits,
+            liabilities: liabilities,
+            totalAssets: totalAssets,
+            hasStoredLiabilities: value.hasStoredLiabilities,
           });
-        });
+        }
 
         setMonthlyData(monthlySummaries);
+        setShowWarning(hasMissingLiabilities);
       } catch (error) {
         console.error("Error fetching history_detail:", error);
       } finally {
@@ -107,19 +172,17 @@ const HistoryTab: React.FC = () => {
     fetchAndAggregateHistoryDetail();
   }, []);
 
-  // Calculate target age from EMW_Date in settings - EXACT SAME LOGIC as SettingsPage
+  // Calculate target age from EMW_Date in settings
   const getTargetAgeFromSettings = (): number | null => {
     if (!settings?.EMW_Date) return null;
 
     try {
       const [year, month] = settings.EMW_Date.split("-").map(Number);
-      // Use the first day of the month (matching SettingsPage logic)
       const targetDate = new Date(year, month - 1, 1);
 
       let age = targetDate.getFullYear() - DOB.getFullYear();
       const monthDiff = targetDate.getMonth() - DOB.getMonth();
 
-      // Adjust age if birthday hasn't occurred yet in the target month
       if (monthDiff < 0) {
         age--;
       }
@@ -138,46 +201,29 @@ const HistoryTab: React.FC = () => {
       return;
     }
 
-    // Get last 6 months, sorted chronologically
     const sortedHistory = [...monthlyData]
       .sort((a, b) => a.month.localeCompare(b.month))
       .slice(-6);
 
     if (sortedHistory.length < 2) return;
 
-    // Calculate total balance for each month (savings + deposits)
-    const balances = sortedHistory.map(
-      (record) => record.savings + record.deposits,
-    );
-
-    // Get first and last month balances
-    const firstBalance = balances[0];
-    const lastBalance = balances[balances.length - 1];
-
-    // Calculate monthly consumption rate
+    const assets = sortedHistory.map((record) => record.totalAssets);
+    const firstAsset = assets[0];
+    const lastAsset = assets[assets.length - 1];
     const monthsDiff = sortedHistory.length - 1;
-    const totalReduction = firstBalance - lastBalance;
+    const totalReduction = firstAsset - lastAsset;
     const monthlyRate = totalReduction / monthsDiff;
 
-    // Store monthly consumption for display
     setMonthlyConsumption(monthlyRate / 100000);
 
     if (monthlyRate > 0) {
-      // Calculate months until zero
-      const monthsUntilZero = lastBalance / monthlyRate;
-
-      // Calculate date when balance becomes zero
+      const monthsUntilZero = lastAsset / monthlyRate;
       const lastMonthStr = sortedHistory[sortedHistory.length - 1].month;
       const [year, month] = lastMonthStr.split("-").map(Number);
-
-      // Create date object for last record (first day of that month)
       const lastRecordDate = new Date(year, month - 1, 1);
-
-      // Add months until zero
       const zeroDate = new Date(lastRecordDate);
       zeroDate.setMonth(zeroDate.getMonth() + Math.ceil(monthsUntilZero));
 
-      // Calculate age at that date (rounded)
       let age = zeroDate.getFullYear() - DOB.getFullYear();
       const m = zeroDate.getMonth() - DOB.getMonth();
       if (m < 0 || (m === 0 && zeroDate.getDate() < DOB.getDate())) {
@@ -186,7 +232,6 @@ const HistoryTab: React.FC = () => {
 
       setZeroBalanceAge(age);
     } else {
-      // If balance is increasing or not decreasing
       setZeroBalanceAge(null);
     }
   }, [monthlyData]);
@@ -221,7 +266,6 @@ const HistoryTab: React.FC = () => {
       const newSavingsRupees = savingsLakhs * 100000;
       const newDepositsRupees = depositsLakhs * 100000;
 
-      // Get all records for this month from history_detail
       const historyDetailRef = collection(firestore, "history_detail");
       const q = query(historyDetailRef);
       const querySnapshot = await getDocs(q);
@@ -234,7 +278,7 @@ const HistoryTab: React.FC = () => {
       let currentTotalSavings = 0;
       let currentTotalDeposits = 0;
 
-      querySnapshot.forEach((doc) => {
+      for (const doc of querySnapshot.docs) {
         const data = doc.data();
         if (data.month === month) {
           const savings = data.savings || 0;
@@ -247,7 +291,7 @@ const HistoryTab: React.FC = () => {
           currentTotalSavings += savings;
           currentTotalDeposits += deposits;
         }
-      });
+      }
 
       if (recordsToUpdate.length === 0) {
         alert("No records found for this month");
@@ -255,13 +299,8 @@ const HistoryTab: React.FC = () => {
         return;
       }
 
-      // Calculate the difference to distribute
       const savingsDiff = newSavingsRupees - currentTotalSavings;
       const depositsDiff = newDepositsRupees - currentTotalDeposits;
-
-      // Distribute the difference proportionally across records
-      // For simplicity, we'll update the first record with the total difference
-      // Alternatively, you could distribute proportionally based on current values
 
       const updatePromises = recordsToUpdate.map(async (record, index) => {
         const recordRef = doc(firestore, "history_detail", record.id);
@@ -269,11 +308,8 @@ const HistoryTab: React.FC = () => {
         let updatedDeposits = record.currentDeposits;
 
         if (index === 0) {
-          // Apply all differences to the first record
           updatedSavings = record.currentSavings + savingsDiff;
           updatedDeposits = record.currentDeposits + depositsDiff;
-
-          // Ensure no negative values
           updatedSavings = Math.max(0, updatedSavings);
           updatedDeposits = Math.max(0, updatedDeposits);
         }
@@ -287,49 +323,64 @@ const HistoryTab: React.FC = () => {
 
       await Promise.all(updatePromises);
 
-      // Refresh the aggregated data
+      // Refresh the data
       const refreshSnapshot = await getDocs(q);
       const aggregatedData = new Map<
         string,
-        { savings: number; deposits: number }
+        { savings: number; deposits: number; hasStoredLiabilities: boolean }
       >();
 
-      refreshSnapshot.forEach((doc) => {
+      for (const doc of refreshSnapshot.docs) {
         const data = doc.data();
         const monthKey = data.month;
-
-        // Skip records with null, undefined, or empty month
-        if (!monthKey || monthKey.trim() === "") {
-          return;
-        }
+        if (!monthKey || monthKey.trim() === "") continue;
 
         const savings = data.savings || 0;
         const deposits = data.deposits || 0;
+
+        const hasLiabilities = await hasLiabilityRecords(monthKey);
 
         if (aggregatedData.has(monthKey)) {
           const existing = aggregatedData.get(monthKey)!;
           aggregatedData.set(monthKey, {
             savings: existing.savings + savings,
             deposits: existing.deposits + deposits,
+            hasStoredLiabilities: existing.hasStoredLiabilities && hasLiabilities,
           });
         } else {
           aggregatedData.set(monthKey, {
             savings: savings,
             deposits: deposits,
+            hasStoredLiabilities: hasLiabilities,
           });
         }
-      });
+      }
 
+      // Get liabilities for each month
       const updatedMonthlyData: MonthlySummary[] = [];
-      aggregatedData.forEach((value, monthKey) => {
+      let hasMissingLiabilities = false;
+      
+      for (const [monthKey, value] of aggregatedData) {
+        const liabilities = await getLiabilitiesForMonth(monthKey);
+        if (!value.hasStoredLiabilities) {
+          hasMissingLiabilities = true;
+        }
+        
+        const totalSavingsDeposits = value.savings + value.deposits;
+        const totalAssets = totalSavingsDeposits - liabilities;
+        
         updatedMonthlyData.push({
           month: monthKey,
           savings: value.savings,
           deposits: value.deposits,
+          liabilities: liabilities,
+          totalAssets: totalAssets,
+          hasStoredLiabilities: value.hasStoredLiabilities,
         });
-      });
+      }
 
       setMonthlyData(updatedMonthlyData);
+      setShowWarning(hasMissingLiabilities);
       cancelEditing();
       alert("✓ History updated successfully!");
     } catch (error: any) {
@@ -353,66 +404,78 @@ const HistoryTab: React.FC = () => {
     }
 
     try {
-      // Get all records for this month from history_detail
       const historyDetailRef = collection(firestore, "history_detail");
       const q = query(historyDetailRef);
       const querySnapshot = await getDocs(q);
 
       const deletePromises: Promise<void>[] = [];
 
-      querySnapshot.forEach((doc) => {
+      for (const doc of querySnapshot.docs) {
         const data = doc.data();
         if (data.month === deleteConfirmMonth) {
-          const recordRef = doc.ref;
-          deletePromises.push(deleteDoc(recordRef));
+          deletePromises.push(deleteDoc(doc.ref));
         }
-      });
+      }
 
       await Promise.all(deletePromises);
 
-      // Refresh the aggregated data
+      // Refresh the data
       const refreshSnapshot = await getDocs(q);
       const aggregatedData = new Map<
         string,
-        { savings: number; deposits: number }
+        { savings: number; deposits: number; hasStoredLiabilities: boolean }
       >();
 
-      refreshSnapshot.forEach((doc) => {
+      for (const doc of refreshSnapshot.docs) {
         const data = doc.data();
         const monthKey = data.month;
-
-        // Skip records with null, undefined, or empty month
-        if (!monthKey || monthKey.trim() === "") {
-          return;
-        }
+        if (!monthKey || monthKey.trim() === "") continue;
 
         const savings = data.savings || 0;
         const deposits = data.deposits || 0;
+
+        const hasLiabilities = await hasLiabilityRecords(monthKey);
 
         if (aggregatedData.has(monthKey)) {
           const existing = aggregatedData.get(monthKey)!;
           aggregatedData.set(monthKey, {
             savings: existing.savings + savings,
             deposits: existing.deposits + deposits,
+            hasStoredLiabilities: existing.hasStoredLiabilities && hasLiabilities,
           });
         } else {
           aggregatedData.set(monthKey, {
             savings: savings,
             deposits: deposits,
+            hasStoredLiabilities: hasLiabilities,
           });
         }
-      });
+      }
 
       const updatedMonthlyData: MonthlySummary[] = [];
-      aggregatedData.forEach((value, monthKey) => {
+      let hasMissingLiabilities = false;
+      
+      for (const [monthKey, value] of aggregatedData) {
+        const liabilities = await getLiabilitiesForMonth(monthKey);
+        if (!value.hasStoredLiabilities) {
+          hasMissingLiabilities = true;
+        }
+        
+        const totalSavingsDeposits = value.savings + value.deposits;
+        const totalAssets = totalSavingsDeposits - liabilities;
+        
         updatedMonthlyData.push({
           month: monthKey,
           savings: value.savings,
           deposits: value.deposits,
+          liabilities: liabilities,
+          totalAssets: totalAssets,
+          hasStoredLiabilities: value.hasStoredLiabilities,
         });
-      });
+      }
 
       setMonthlyData(updatedMonthlyData);
+      setShowWarning(hasMissingLiabilities);
       setDeleteConfirmMonth(null);
       alert("✓ History records deleted!");
     } catch (error: any) {
@@ -421,7 +484,6 @@ const HistoryTab: React.FC = () => {
     }
   };
 
-  // Filter out any entries with empty month before sorting and displaying
   const filteredHistory = [...monthlyData]
     .filter((record) => record.month && record.month.trim() !== "")
     .sort((a, b) => b.month.localeCompare(a.month));
@@ -438,43 +500,59 @@ const HistoryTab: React.FC = () => {
   const targetAge = getTargetAgeFromSettings();
 
   return (
-    <div className="flex flex-col h-full px-2 py-2">
-      {/* Age Prediction Card - Positioned at the top */}
+    <div className="px-2 py-2">
+      {/* Warning for missing historical liabilities */}
+      {showWarning && (
+        <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-start gap-2">
+            <div className="text-sm">⚠️</div>
+            <div className="flex-1">
+              <div className="text-xs font-medium text-yellow-800">
+                Note: Some months have no liability records
+              </div>
+              <div className="text-[10px] text-yellow-700 mt-0.5">
+                Use the Liability History tab to add liability records for each month.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Age Prediction Card */}
       {monthlyData.length >= 2 && targetAge !== null && (
         <div className="mb-3">
           {zeroBalanceAge !== null && monthlyConsumption !== null ? (
-            <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl">🔮</div>
+            <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm">
+              <div className="flex items-start gap-2">
+                <div className="text-xl">🔮</div>
                 <div className="flex-1">
                   <div className="text-xs font-medium text-amber-700 uppercase tracking-wide mb-1">
                     Balance Zero Forecast
                   </div>
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-xl font-bold text-gray-800">
+                    <span className="text-lg font-bold text-gray-800">
                       Age {zeroBalanceAge}
                     </span>
                     <span className="text-xs text-gray-500">
                       (Target: age {targetAge})
                     </span>
                   </div>
-                  <div className="text-xs text-gray-600 mt-1.5">
-                    Consumption Rate - 6 months:{" "}
-                    <span className="font-semibold text-amber-700">
-                      {monthlyConsumption.toFixed(2)}
+                  <div className="text-xs text-gray-600 mt-1">
+                    Consumption: <span className="font-semibold text-amber-700">
+                      {monthlyConsumption.toFixed(2)}L
                     </span>
                     {zeroBalanceAge < targetAge && (
-                      <span className="block text-green-600 mt-0.5">
+                      <span className="block text-green-600 mt-0.5 text-xs">
                         ✓ Will reach zero before target age
                       </span>
                     )}
                     {zeroBalanceAge > targetAge && (
-                      <span className="block text-orange-600 mt-0.5">
+                      <span className="block text-orange-600 mt-0.5 text-xs">
                         ⚠ Will reach zero after target age
                       </span>
                     )}
                     {zeroBalanceAge === targetAge && (
-                      <span className="block text-blue-600 mt-0.5">
+                      <span className="block text-blue-600 mt-0.5 text-xs">
                         ✓ Will reach zero exactly at target age
                       </span>
                     )}
@@ -483,14 +561,14 @@ const HistoryTab: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl">📈</div>
+            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-start gap-2">
+                <div className="text-xl">📈</div>
                 <div className="flex-1">
                   <div className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                     Balance Trend
                   </div>
-                  <div className="text-sm text-gray-700">
+                  <div className="text-xs text-gray-700">
                     {monthlyConsumption !== null && monthlyConsumption <= 0
                       ? "Your balance is increasing or stable. No zero balance predicted."
                       : "Your balance is not decreasing. No zero balance predicted."}
@@ -502,7 +580,7 @@ const HistoryTab: React.FC = () => {
         </div>
       )}
 
-      {/* Chart with margin - Use aggregated data */}
+      {/* Chart */}
       <div className="bg-white mb-3 border border-gray-200 rounded-lg p-2">
         <HistoryChart
           history={monthlyData
@@ -511,126 +589,139 @@ const HistoryTab: React.FC = () => {
               month: item.month,
               savings: item.savings,
               totalDeposits: item.deposits,
+              totalAssets: item.totalAssets,
             }))}
           compact={true}
         />
       </div>
 
-      {/* Table with proper margins */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Header */}
+      {/* Table section */}
+      <div>
         <div className="flex justify-between items-center py-2 bg-white rounded-t-lg px-2 mb-1">
           <div className="flex items-center gap-1">
             <span>📊</span>
             <span className="text-xs font-semibold text-gray-800">History</span>
           </div>
           <div className="text-[10px] text-gray-600">
-            {filteredHistory.length} month
-            {filteredHistory.length !== 1 ? "s" : ""}
+            {filteredHistory.length} month(s)
           </div>
         </div>
 
         {filteredHistory.length === 0 ? (
           <div className="text-center py-12 px-5 text-gray-500">
             <div className="text-4xl mb-4 opacity-50">📄</div>
-            <div className="text-base font-medium text-gray-600 mb-2">
+            <div className="text-sm font-medium text-gray-600 mb-2">
               No history records
             </div>
-            <div className="text-sm text-gray-400">
+            <div className="text-xs text-gray-400">
               Add history records to see them here
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden overflow-x-auto">
             {/* Table Header */}
-            <div className="flex items-center py-2 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2">
-              <div className="w-1/4 px-1">Month</div>
-              <div className="w-1/4 px-1 text-right">Water</div>
-              <div className="w-1/4 px-1 text-right">Steam</div>
-              <div className="w-1/4 px-1 text-right">Liquid</div>
-              {settings?.showDelete && <div className="w-14 px-1"></div>}
+            <div className="flex items-center py-1.5 bg-gray-50 border-b border-gray-200 font-semibold text-[10px] text-gray-700 px-2 min-w-[500px]">
+              <div className="flex-1 px-0.5">Month</div>
+              <div className="w-16 px-0.5 text-right">Wtr</div>
+              <div className="w-16 px-0.5 text-right">Stm</div>
+              <div className="w-16 px-0.5 text-right">Lbl</div>
+              <div className="w-16 px-0.5 text-right">Liq</div>
+              {settings?.showDelete && <div className="w-16 text-center">Act</div>}
             </div>
 
-            {/* Table Rows - Showing aggregated data */}
+            {/* Table Rows */}
             {filteredHistory.map((record) => {
               const isEditing = editingMonth === record.month;
               const savingsValue = rupeesToLakhs(record.savings);
               const depositsValue = rupeesToLakhs(record.deposits);
-              const totalValue = savingsValue + depositsValue;
+              const liabilitiesValue = rupeesToLakhs(record.liabilities);
+              const totalAssetsValue = rupeesToLakhs(record.totalAssets);
 
               return (
                 <div
                   key={record.month}
-                  className="flex items-center py-2 border-b border-gray-100 min-h-8 px-2 hover:bg-gray-50 last:border-b-0"
+                  className={`flex items-center py-1.5 border-b border-gray-100 px-2 hover:bg-gray-50 last:border-b-0 min-w-[500px] ${
+                    isEditing ? "bg-yellow-50" : ""
+                  } ${!record.hasStoredLiabilities && !isEditing ? "bg-purple-50/30" : ""}`}
                 >
                   {/* Month */}
-                  <div className="w-1/4 px-1 text-xs text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
+                  <div className="flex-1 px-0.5 text-[10px] text-gray-800">
                     {record.month}
+                    {!record.hasStoredLiabilities && !isEditing && (
+                      <span className="ml-1 text-[8px] text-purple-500" title="No liability records for this month">*</span>
+                    )}
                   </div>
 
                   {/* Savings */}
-                  <div className="w-1/4 px-1">
+                  <div className="w-16 px-0.5">
                     {isEditing ? (
                       <input
                         type="number"
                         value={editedSavings}
                         onChange={(e) => setEditedSavings(e.target.value)}
-                        className="w-full max-w-20 p-1 border border-gray-300 rounded text-xs"
+                        className="w-full p-0.5 text-[10px] border border-gray-300 rounded text-right"
                         step="0.01"
                         min="0"
-                        placeholder="0.00"
+                        placeholder="0"
                         disabled={isSaving}
                       />
                     ) : (
-                      <div className="text-xs font-semibold text-green-600 text-right">
+                      <div className="text-[10px] font-semibold text-green-600 text-right">
                         {formatLakhs(savingsValue)}
                       </div>
                     )}
                   </div>
 
                   {/* Deposits */}
-                  <div className="w-1/4 px-1">
+                  <div className="w-16 px-0.5">
                     {isEditing ? (
                       <input
                         type="number"
                         value={editedDeposits}
                         onChange={(e) => setEditedDeposits(e.target.value)}
-                        className="w-full max-w-20 p-1 border border-gray-300 rounded text-xs"
+                        className="w-full p-0.5 text-[10px] border border-gray-300 rounded text-right"
                         step="0.01"
                         min="0"
-                        placeholder="0.00"
+                        placeholder="0"
                         disabled={isSaving}
                       />
                     ) : (
-                      <div className="text-xs font-semibold text-orange-500 text-right">
+                      <div className="text-[10px] font-semibold text-orange-500 text-right">
                         {formatLakhs(depositsValue)}
                       </div>
                     )}
                   </div>
 
-                  {/* Total */}
-                  <div className="w-1/4 px-1">
-                    <div className="text-xs font-semibold text-blue-600 text-right">
-                      {formatLakhs(totalValue)}
+                  {/* Liabilities */}
+                  <div className="w-16 px-0.5">
+                    <div className="text-[10px] font-semibold text-purple-600 text-right">
+                      {formatLakhs(liabilitiesValue)}
+                    </div>
+                  </div>
+
+                  {/* Total Assets */}
+                  <div className="w-16 px-0.5">
+                    <div className="text-[10px] font-semibold text-blue-600 text-right">
+                      {formatLakhs(totalAssetsValue)}
                     </div>
                   </div>
 
                   {/* Actions */}
                   {settings?.showDelete && (
-                    <div className="w-14 flex gap-1 px-1">
+                    <div className="w-16 flex gap-0.5 justify-end">
                       {isEditing ? (
                         <>
                           <button
                             onClick={() => saveEdits(record.month)}
-                            className="w-7 h-7 p-0 bg-green-500 text-white text-xs rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 transition-colors"
+                            className="w-5 h-5 p-0 bg-green-500 text-white text-[9px] rounded flex items-center justify-center hover:bg-green-600 disabled:opacity-50 transition-colors"
                             disabled={isSaving}
                             title="Save"
                           >
-                            {isSaving ? "⏳" : "✓"}
+                            ✓
                           </button>
                           <button
                             onClick={cancelEditing}
-                            className="w-7 h-7 p-0 bg-gray-400 text-white text-xs rounded flex items-center justify-center hover:bg-gray-500 transition-colors"
+                            className="w-5 h-5 p-0 bg-gray-400 text-white text-[9px] rounded flex items-center justify-center hover:bg-gray-500 transition-colors"
                             title="Cancel"
                           >
                             ✕
@@ -646,7 +737,7 @@ const HistoryTab: React.FC = () => {
                                 record.deposits,
                               )
                             }
-                            className="w-7 h-7 p-0 bg-blue-500 text-white text-xs rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                            className="w-5 h-5 p-0 bg-blue-500 text-white text-[9px] rounded flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 transition-colors"
                             disabled={editingMonth !== null}
                             title="Edit"
                           >
@@ -654,7 +745,7 @@ const HistoryTab: React.FC = () => {
                           </button>
                           <button
                             onClick={() => setDeleteConfirmMonth(record.month)}
-                            className="w-7 h-7 p-0 bg-red-500 text-white text-xs rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50 transition-colors"
+                            className="w-5 h-5 p-0 bg-red-500 text-white text-[9px] rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50 transition-colors"
                             disabled={editingMonth !== null}
                             title="Delete"
                           >
@@ -674,26 +765,25 @@ const HistoryTab: React.FC = () => {
       {/* Delete Confirmation */}
       {deleteConfirmMonth && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-50">
-          <div className="bg-white rounded-xl p-5 max-w-md w-full shadow-2xl mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          <div className="bg-white rounded-xl p-4 max-w-sm w-full shadow-2xl mx-4">
+            <h3 className="text-base font-semibold text-gray-900 mb-2">
               Confirm Delete
             </h3>
-            <p className="text-gray-600 mb-5 leading-relaxed">
-              Are you sure you want to delete ALL history records for{" "}
-              <strong>{deleteConfirmMonth}</strong>?
+            <p className="text-xs text-gray-600 mb-4 leading-relaxed">
+              Delete ALL records for <strong>{deleteConfirmMonth}</strong>?
             </p>
-            <div className="flex gap-2.5">
+            <div className="flex gap-2">
               <button
                 onClick={() => setDeleteConfirmMonth(null)}
-                className="flex-1 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition-colors"
+                className="flex-1 py-2 text-xs bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={executeDelete}
-                className="flex-1 py-2.5 bg-red-500 border-none rounded-lg text-white font-medium cursor-pointer hover:bg-red-600 transition-colors"
+                className="flex-1 py-2 text-xs bg-red-500 border-none rounded-lg text-white font-medium cursor-pointer hover:bg-red-600 transition-colors"
               >
-                Delete All
+                Delete
               </button>
             </div>
           </div>

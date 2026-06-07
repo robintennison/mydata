@@ -8,12 +8,15 @@ import Header from "../../../components/Layout/Header";
 import AccountsTab from "./AccountsTab";
 import DepositsTab from "./DepositsTab";
 import HistoryTab from "./HistoryTab";
-import HistoryDetailTab from "./HistoryDetailTab"; // Import History Detail Tab
-import LiabilityTab from "./LiabilityTab"; // Import Liability Tab
+import HistoryDetailTab from "./HistoryDetailTab";
+import LiabilityHistoryTab from "./LiabilityHistoryTab";
 
 // Import the pie chart components
 import DepositPieChart from "./DepositPieChart";
 import SavingsPieChart from "./SavingsPieChart";
+
+// Define the tab type
+type TabType = "dashboard" | "accounts" | "deposits" | "history" | "historydetail" | "liabilities";
 
 interface BankingHomePageProps {
   // Add any props if needed
@@ -34,9 +37,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
   const { settings: appSettings, loading: settingsLoading } = useSettings();
 
   // State for active tab
-  const [activeTab, setActiveTab] = useState<
-    "dashboard" | "accounts" | "deposits" | "history" | "historydetail" | "liabilities"
-  >("dashboard");
+  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
 
   // Handle navigation state to set active tab
   useEffect(() => {
@@ -52,7 +53,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
           "liabilities",
         ].includes(tabFromState)
       ) {
-        setActiveTab(tabFromState as any);
+        setActiveTab(tabFromState as TabType);
         window.history.replaceState({}, document.title);
       }
     }
@@ -312,6 +313,9 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     );
   }
 
+  // Debug log to check active tab
+  console.log("Active tab:", activeTab);
+
   return (
     <div className="flex flex-col h-screen">
       {/* Header with Add button */}
@@ -325,7 +329,10 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
       <div className="w-full bg-white border-b border-gray-200 sticky top-14 z-10">
         <div className="flex overflow-x-auto px-1 py-0 gap-0.5">
           <button
-            onClick={() => setActiveTab("dashboard")}
+            onClick={() => {
+              console.log("Setting active tab to dashboard");
+              setActiveTab("dashboard");
+            }}
             className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "dashboard"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
@@ -338,7 +345,10 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab("accounts")}
+            onClick={() => {
+              console.log("Setting active tab to accounts");
+              setActiveTab("accounts");
+            }}
             className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "accounts"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
@@ -351,7 +361,10 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab("deposits")}
+            onClick={() => {
+              console.log("Setting active tab to deposits");
+              setActiveTab("deposits");
+            }}
             className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "deposits"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
@@ -364,7 +377,10 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab("history")}
+            onClick={() => {
+              console.log("Setting active tab to history");
+              setActiveTab("history");
+            }}
             className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "history"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
@@ -377,7 +393,10 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab("historydetail")}
+            onClick={() => {
+              console.log("Setting active tab to historydetail");
+              setActiveTab("historydetail");
+            }}
             className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "historydetail"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
@@ -390,13 +409,16 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab("liabilities")}
+            onClick={() => {
+              console.log("Setting active tab to liabilities");
+              setActiveTab("liabilities");
+            }}
             className={`flex-1 min-w-0 px-0.5 py-2 border-none text-xs font-medium cursor-pointer whitespace-nowrap flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               activeTab === "liabilities"
                 ? "bg-blue-50 text-blue-600 border-b-2 border-blue-500"
                 : "bg-transparent text-gray-500 border-b-2 border-transparent"
             }`}
-            title="Liabilities"
+            title="Liability History"
           >
             <span className="text-base">💰</span>
             <span className="hidden xs:block text-[10px] mt-0.5">Liab</span>
@@ -420,7 +442,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         {activeTab === "deposits" && <DepositsTab />}
         {activeTab === "history" && <HistoryTab />}
         {activeTab === "historydetail" && <HistoryDetailTab />}
-        {activeTab === "liabilities" && <LiabilityTab />}
+        {activeTab === "liabilities" && <LiabilityHistoryTab />}
       </div>
     </div>
   );

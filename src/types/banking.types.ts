@@ -176,6 +176,7 @@ export interface HistoryDetail {
   acctCode: string; // Account code
   savings: number; // Savings amount for this account in this month
   deposits: number; // Deposits amount for this account in this month
+  totalLiabilities?: number;
 }
 
 export interface Liability {

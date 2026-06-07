@@ -33,6 +33,9 @@ import OnlineHomepage from "../modules/Online/pages/OnlineHomepage";
 // Import ViewDepositPage
 import ViewDepositPage from "../modules/Banking/pages/ViewDepositPage";
 
+// Import LiabilityTab
+import LiabilityTab from "../modules/Banking/pages/LiabilityTab";
+
 // ==================== TYPES ====================
 export interface RouteConfig {
   path: string;
@@ -136,6 +139,15 @@ const allRoutes: RouteConfig[] = [
     icon: "👁️",
     requiresAuth: true,
     needsUserData: true,
+  },
+  {
+    path: "/banking/liabilities",
+    element: <LiabilityTab />,
+    title: "Liabilities",
+    icon: "💰",
+    requiresAuth: true,
+    needsUserData: true,
+    noLayoutPadding: true,
   },
 
   // Jewellery Module Routes

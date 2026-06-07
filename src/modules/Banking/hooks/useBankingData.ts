@@ -7,7 +7,8 @@ import type {
   Deposit,
   History,
   DepositAdjustment,
-  HistoryDetail, // Add this import
+  HistoryDetail,
+  Liability, // Add this import
 } from "../../../types/banking.types";
 
 export interface BankingData {
@@ -16,7 +17,8 @@ export interface BankingData {
   deposits: Deposit[];
   history: History[];
   adjustments: DepositAdjustment[];
-  historyDetail: HistoryDetail[]; // Add this property
+  historyDetail: HistoryDetail[];
+  liabilities: Liability[]; // Add this property
   settings: { showInactive: boolean };
 }
 
@@ -26,7 +28,8 @@ export const useBankingData = (): BankingData => {
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [history, setHistory] = useState<History[]>([]);
   const [adjustments, setAdjustments] = useState<DepositAdjustment[]>([]);
-  const [historyDetail, setHistoryDetail] = useState<HistoryDetail[]>([]); // Add this state
+  const [historyDetail, setHistoryDetail] = useState<HistoryDetail[]>([]);
+  const [liabilities, setLiabilities] = useState<Liability[]>([]); // Add this state
   const { setError } = useError();
   const [settings, setSettings] = useState<{ showInactive: boolean }>({
     showInactive: false, // Default value
@@ -99,6 +102,19 @@ export const useBankingData = (): BankingData => {
         );
         setHistoryDetail(historyDetailData);
 
+        // Load liabilities
+        const liabilitiesSnapshot = await getDocs(
+          collection(firestore, "liabilities")
+        );
+        const liabilitiesData = liabilitiesSnapshot.docs.map(
+          (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Liability)
+        );
+        setLiabilities(liabilitiesData);
+
         // Load settings
         try {
           const settingsSnapshot = await getDocs(
@@ -130,7 +146,8 @@ export const useBankingData = (): BankingData => {
     deposits,
     history,
     adjustments,
-    historyDetail, // Add this to the return object
+    historyDetail,
+    liabilities, // Add this to the return object
     settings,
   };
 };

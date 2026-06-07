@@ -177,3 +177,9 @@ export interface HistoryDetail {
   savings: number; // Savings amount for this account in this month
   deposits: number; // Deposits amount for this account in this month
 }
+
+export interface Liability {
+  id: string;
+  description: string;
+  amount: number;
+}

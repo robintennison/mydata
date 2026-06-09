@@ -11,6 +11,7 @@ import { Pie } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { collection, query, getDocs } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
+import { getCurrentMonth, formatLakhs } from "../../../utils/formatters";
 
 // Register Chart.js components for Pie chart
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
@@ -38,18 +39,8 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
   >([]);
   const [loading, setLoading] = useState(true);
 
-  // Get current month in YYYY-MM format
-  const getCurrentMonth = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-  };
-
-  // Format numbers in lakhs
-  const formatLakhs = (amount: number): string => {
-    return (amount / 100000).toFixed(2);
-  };
+  // REMOVED: Local getCurrentMonth function (now imported from formatters)
+  // REMOVED: Local formatLakhs function (now imported from formatters)
 
   // Fetch deposit data from history_detail for current month
   useEffect(() => {

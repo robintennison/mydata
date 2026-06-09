@@ -208,6 +208,14 @@ export const getCurrentMonth = (): string => {
   return `${year}-${month}`;
 };
 
+/**
+ * Formats a number in Lakhs (divides by 100,000) with 2 decimal places.
+ * Used for financial displays where privacy or space is a concern.
+ */
+export const formatLakhs = (amount: number): string => {
+  return (amount / 100000).toFixed(2);
+};
+
 // Export all formatters
 export default {
   formatCurrency,
@@ -223,4 +231,5 @@ export default {
   formatPhoneNumber,
   formatRelativeTime,
   getCurrentMonth,
+  formatLakhs,
 };

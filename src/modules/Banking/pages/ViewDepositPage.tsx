@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { Deposit } from "../../../types/banking.types";
-import { formatDate } from "../../../utils/formatters";
+import { formatDate, formatLakhs } from "../../../utils/formatters";
 
 const ViewDepositPage: React.FC = () => {
   const { depositId } = useParams();
@@ -15,10 +15,7 @@ const ViewDepositPage: React.FC = () => {
   const [deposit, setDeposit] = useState<Deposit | null>(null);
   const [accountCode, setAccountCode] = useState("");
 
-  // Format amount in lakhs without "L" suffix
-  const formatInLakhs = (amount: number): string => {
-    return (amount / 100000).toFixed(2);
-  };
+  // REMOVED: Local formatInLakhs function (now imported as formatLakhs from formatters)
 
   // Load deposit data
   useEffect(() => {
@@ -102,7 +99,7 @@ const ViewDepositPage: React.FC = () => {
           <div className="mb-5">
             <div className="text-sm text-gray-600 mb-1 font-medium">Amount</div>
             <div className="text-2xl text-blue-600 font-bold flex items-baseline">
-              <span>₹{formatInLakhs(deposit.amount)}</span>
+              <span>₹{formatLakhs(deposit.amount)}</span>
               <span className="text-sm text-gray-600 ml-2 font-normal">
                 ({deposit.amount.toLocaleString("en-IN")})
               </span>

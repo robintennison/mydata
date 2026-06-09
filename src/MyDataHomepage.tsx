@@ -11,7 +11,7 @@ import { calculateEMW, getEmwSettings } from "./utils/emwCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
 import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
-import { getCurrentMonth } from "./utils/formatters";
+import { getCurrentMonth, formatLakhs } from "./utils/formatters";
 
 // Add OnlineItem interface
 interface OnlineItem {
@@ -449,16 +449,8 @@ const MyDataHomepage: React.FC = () => {
     };
   }, [deposits, bankingLoading]);
 
-  // Format lakhs for display (without L suffix)
-  const formatLakhs = (amount: number): string => {
-    return (amount / 100000).toFixed(2);
-  };
-
-  // Format in lakhs without any suffix (for privacy)
-  const formatLargeAmount = (amount: number): string => {
-    // Always convert to lakhs (divide by 100,000) and show with 2 decimal places
-    return (amount / 100000).toFixed(2);
-  };
+  // REMOVED: formatLakhs function (now imported from formatters)
+  // REMOVED: formatLargeAmount function (identical duplicate, use formatLakhs instead)
 
   // Format weight in grams
   const formatWeight = (weight: number): string => {
@@ -586,7 +578,7 @@ const MyDataHomepage: React.FC = () => {
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs text-gray-500 mb-0.5">Liquid</div>
             <div className="text-base font-bold text-blue-600 leading-tight">
-              {formatLargeAmount(totalBankBalance)}
+              {formatLakhs(totalBankBalance)}
             </div>
             <div className="text-[10px] text-gray-400 mt-0.5">
               {formatLakhs(totalSavings)} + {formatLakhs(totalDeposits)} - {formatLakhs(totalLiabilities)}
@@ -597,7 +589,7 @@ const MyDataHomepage: React.FC = () => {
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs text-gray-500 mb-0.5">Ice</div>
             <div className="text-base font-bold text-amber-600 leading-tight">
-              {formatLargeAmount(totalJewellerySellValue)}
+              {formatLakhs(totalJewellerySellValue)}
             </div>
             <div className="text-[10px] text-gray-400 mt-0.5">
               {formatWeight(totalJewelleryWeight)} | -{resaleDiscountPercent}%
@@ -610,7 +602,7 @@ const MyDataHomepage: React.FC = () => {
               Total
             </div>
             <div className="text-base font-bold text-purple-700 leading-tight">
-              {formatLargeAmount(totalAssets)}
+              {formatLakhs(totalAssets)}
             </div>
             <div className="text-[10px] text-gray-500 mt-0.5">Liquid + Ice</div>
           </div>

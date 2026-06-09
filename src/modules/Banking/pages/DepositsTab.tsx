@@ -4,11 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { Deposit, BankAccount } from "../../../types/banking.types";
-
-// Custom formatter for Lakhs - REMOVED "L" suffix
-const formatInLakhs = (amount: number): string => {
-  return (amount / 100000).toFixed(2); // Just the number with 2 decimals
-};
+import { formatLakhs } from "../../../utils/formatters";
 
 // Date formatter function for dd-mm-yy format
 const formatDate = (timestamp: number): string => {
@@ -326,7 +322,7 @@ const DepositsTab: React.FC = () => {
                             isInactive ? "text-gray-500" : "text-blue-600"
                           }`}
                         >
-                          {formatInLakhs(deposit.amount)}
+                          {formatLakhs(deposit.amount)}
                         </div>
                       </div>
                       {/* Edit button */}
@@ -362,7 +358,7 @@ const DepositsTab: React.FC = () => {
                     Total
                   </div>
                   <div className="text-sm font-bold text-blue-600">
-                    {formatInLakhs(totalAmount)}
+                    {formatLakhs(totalAmount)}
                   </div>
                 </div>
               </div>

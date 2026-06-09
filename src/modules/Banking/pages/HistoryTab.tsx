@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { formatLakhs } from "../../../utils/formatters";
 
 // Date of birth: 17th October 1959
 const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
@@ -237,7 +238,7 @@ const HistoryTab: React.FC = () => {
   }, [monthlyData]);
 
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
-  const formatLakhs = (lakhs: number): string => lakhs.toFixed(2);
+  // REMOVED: Local formatLakhs function (now imported from formatters)
 
   const startEditing = (month: string, savings: number, deposits: number) => {
     setEditingMonth(month);

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import Header from "../../../components/Layout/Header";
-import { getCurrentMonth } from "../../../utils/formatters";
+import { getCurrentMonth, formatLakhs } from "../../../utils/formatters";
 
 // Import the tab components
 import AccountsTab from "./AccountsTab";
@@ -207,10 +207,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     }
   };
 
-  // Format numbers in lakhs with 2 decimals
-  const formatLakhs = (amount: number): string => {
-    return (amount / 100000).toFixed(2);
-  };
+  // REMOVED: Local formatLakhs function (now imported from formatters)
 
   // REMOVED: Local getCurrentMonth function definition (now imported from formatters)
 

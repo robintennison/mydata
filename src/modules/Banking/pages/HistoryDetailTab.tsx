@@ -10,7 +10,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { getCurrentMonth } from "../../../utils/formatters";
+import { getCurrentMonth, formatLakhs } from "../../../utils/formatters";
 
 interface Account {
   id: string;
@@ -376,10 +376,7 @@ const HistoryDetailTab: React.FC = () => {
     return inputValues[acctCode]?.[field] ?? "0";
   };
 
-  // Format for display (non-input contexts)
-  const formatLakhs = (rupees: number): string => {
-    return (rupees / 100000).toFixed(2);
-  };
+  // REMOVED: Local formatLakhs function (now imported from formatters)
 
   const saveAllChanges = async () => {
     try {
@@ -594,7 +591,7 @@ const HistoryDetailTab: React.FC = () => {
                   Liabilities Snapshot
                 </div>
                 <div className="text-xs font-semibold text-purple-900">
-                  ₹{(storedLiabilitiesForMonth / 100000).toFixed(2)}L
+                  ₹{formatLakhs(storedLiabilitiesForMonth)}L
                 </div>
               </div>
             </div>

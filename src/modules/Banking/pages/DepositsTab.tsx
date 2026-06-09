@@ -4,16 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { Deposit, BankAccount } from "../../../types/banking.types";
-import { formatLakhs } from "../../../utils/formatters";
-
-// Date formatter function for dd-mm-yy format
-const formatDate = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear().toString().slice(-2);
-  return `${day}-${month}-${year}`;
-};
+import { formatLakhs, formatDate } from "../../../utils/formatters";
 
 type SortOption = "account" | "date";
 
@@ -312,7 +303,11 @@ const DepositsTab: React.FC = () => {
                             isInactive ? "text-gray-500" : "text-gray-600"
                           }`}
                         >
-                          {formatDate(deposit.endDate)}
+                          {formatDate(deposit.endDate, "en-IN", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "2-digit",
+                          })}
                         </div>
                       </div>
                       {/* Amount - Fixed minimum width */}

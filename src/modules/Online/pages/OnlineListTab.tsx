@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { OnlineItem, FILE_TYPES } from "../types/online.types";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { formatDateDisplay } from "../../../utils/formatters";
 
 const OnlineListTab: React.FC = () => {
   const navigate = useNavigate();
@@ -75,17 +76,6 @@ const OnlineListTab: React.FC = () => {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const formatDate = (timestamp?: number | null): string => {
-    if (!timestamp) return "N/A";
-    try {
-      const date = new Date(timestamp);
-      if (isNaN(date.getTime())) return "Invalid date";
-      return date.toLocaleDateString();
-    } catch (error) {
-      return "Invalid date";
     }
   };
 
@@ -356,11 +346,11 @@ const OnlineListTab: React.FC = () => {
                                 <span className="text-gray-400">📅</span>
                                 {item.startDate ? (
                                   <>
-                                    {formatDate(item.startDate)} -{" "}
-                                    {formatDate(item.endDate)}
+                                    {formatDateDisplay(item.startDate)} -{" "}
+                                    {formatDateDisplay(item.endDate)}
                                   </>
                                 ) : (
-                                  <>Ends: {formatDate(item.endDate)}</>
+                                  <>Ends: {formatDateDisplay(item.endDate)}</>
                                 )}
                               </span>
                             </div>

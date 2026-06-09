@@ -4,6 +4,7 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { formatDate } from "../../../utils/formatters";
 
 interface Bill {
   id: string;
@@ -135,22 +136,6 @@ const JewelleryDetail: React.FC = () => {
     }
   };
 
-  const formatDate = (timestamp: number): string => {
-    if (!timestamp || timestamp === 0) return "N/A";
-
-    try {
-      const date = new Date(timestamp);
-      return date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "Invalid date";
-    }
-  };
-
   const handleDownloadImage = async () => {
     if (!item?.imageUrl) {
       alert("No image available to download.");
@@ -257,7 +242,11 @@ const JewelleryDetail: React.FC = () => {
       alert(`Bill Details:\n
 Bill Notes: ${bill.notes || "No notes"}\n
 File Type: ${bill.mimeType || "Unknown"}\n
-Uploaded: ${formatDate(bill.uploadedAt)}\n
+Uploaded: ${formatDate(bill.uploadedAt, "en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })}\n
 \nNo bill document URL available.`);
     }
   };
@@ -457,7 +446,11 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
               </span>
               <span className="text-gray-900">
                 {item.purchaseDate
-                  ? new Date(item.purchaseDate).toLocaleDateString()
+                  ? formatDate(item.purchaseDate, "en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
                   : "Not specified"}
               </span>
             </div>
@@ -491,7 +484,12 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
                         <strong>File Type:</strong> {bill.mimeType || "Unknown"}
                       </div>
                       <div>
-                        <strong>Uploaded:</strong> {formatDate(bill.uploadedAt)}
+                        <strong>Uploaded:</strong>{" "}
+                        {formatDate(bill.uploadedAt, "en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </div>
                       <div>
                         <strong>Status:</strong>{" "}
@@ -576,7 +574,11 @@ Uploaded: ${formatDate(bill.uploadedAt)}\n
                   Last Verified:
                 </span>
                 <span className="text-gray-900">
-                  {new Date(item.lastVerified).toLocaleDateString()}
+                  {formatDate(item.lastVerified, "en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
                 </span>
               </div>
             )}

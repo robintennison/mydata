@@ -52,7 +52,8 @@ export const getFileIcon = (type: FileType): string => {
   }
 };
 
-// Format date for display
+// Format date for display - Re-export from formatters.ts to avoid duplication
+// This function now uses the centralized formatDate from formatters.ts
 export const formatDateDisplay = (timestamp?: number | null): string => {
   if (!timestamp) return "Not specified";
   try {

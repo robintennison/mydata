@@ -11,7 +11,7 @@ import { calculateEMW, getEmwSettings } from "./utils/emwCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
 import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
-import { getCurrentMonth, formatLakhs } from "./utils/formatters";
+import { getCurrentMonth, formatLakhs, formatDateShort } from "./utils/formatters";
 
 // Add OnlineItem interface
 interface OnlineItem {
@@ -449,21 +449,9 @@ const MyDataHomepage: React.FC = () => {
     };
   }, [deposits, bankingLoading]);
 
-  // REMOVED: formatLakhs function (now imported from formatters)
-  // REMOVED: formatLargeAmount function (identical duplicate, use formatLakhs instead)
-
   // Format weight in grams
   const formatWeight = (weight: number): string => {
     return weight.toFixed(1) + "g";
-  };
-
-  // Updated date format to show 8 characters (dd/mm/yy)
-  const formatDateShort = (timestamp: number): string => {
-    return new Date(timestamp).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    }); // Format: "dd/mm/yy" (8 characters)
   };
 
   const getAccountName = (accountId: string) => {

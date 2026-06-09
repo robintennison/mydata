@@ -10,7 +10,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { getCurrentMonth, formatLakhs } from "../../../utils/formatters";
+import { getCurrentMonth, formatLakhs, getPreviousMonthName } from "../../../utils/formatters";
 
 interface Account {
   id: string;
@@ -540,13 +540,7 @@ const HistoryDetailTab: React.FC = () => {
 
   const { totalSavings, totalDeposits } = calculateTotals();
 
-  // Get the month name for the previous month button
-  const getPreviousMonthName = () => {
-    if (!previousMonthAvailable) return "";
-    const [year, month] = previousMonthAvailable.split("-");
-    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-    return date.toLocaleString("default", { month: "long", year: "numeric" });
-  };
+  // REMOVED: Local getPreviousMonthName function (now imported from formatters)
 
   if (loading) {
     return (
@@ -652,7 +646,7 @@ const HistoryDetailTab: React.FC = () => {
                 className="text-[10px] px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors"
                 disabled={saving}
               >
-                📋 Load {getPreviousMonthName()} Data
+                📋 Load {getPreviousMonthName(previousMonthAvailable || "", "en-IN")} Data
               </button>
             )}
             <button

@@ -12,7 +12,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { useSettings } from "../../../contexts/SettingsContext";
-import { getCurrentMonth } from "../../../utils/formatters";
+import { getCurrentMonth, getPreviousMonthName } from "../../../utils/formatters";
 
 interface LiabilityHistory {
   id: string;
@@ -362,12 +362,7 @@ const LiabilityHistoryTab: React.FC = () => {
   const totalAccounts = liabilities.length;
   const showLoadButton = previousMonthAvailable && !hasLoadedPreviousData && liabilities.length === 0;
 
-  const getPreviousMonthName = () => {
-    if (!previousMonthAvailable) return "";
-    const [year, month] = previousMonthAvailable.split("-");
-    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-    return date.toLocaleString("default", { month: "long", year: "numeric" });
-  };
+  // REMOVED: Local getPreviousMonthName function (now imported from formatters)
 
   return (
     <div className="flex flex-col h-full px-2 py-2">
@@ -418,7 +413,7 @@ const LiabilityHistoryTab: React.FC = () => {
                 className="text-[10px] px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors"
                 disabled={saving}
               >
-                📋 Load {getPreviousMonthName()} Data
+                📋 Load {getPreviousMonthName(previousMonthAvailable || "", "en-IN")} Data
               </button>
             )}
             {settings?.showDelete && (

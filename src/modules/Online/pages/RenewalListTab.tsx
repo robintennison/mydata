@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { OnlineItem, FILE_TYPES } from "../types/online.types";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { formatDateDisplay } from "../../../utils/formatters";
 
 // Helper function for conditional classes
 const cls = (...classes: (string | boolean | undefined)[]) =>
@@ -75,21 +76,6 @@ const RenewalListTab: React.FC = () => {
       console.error("Error fetching online items:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const formatDate = (timestamp?: number | null): string => {
-    if (!timestamp) return "-";
-    try {
-      const date = new Date(timestamp);
-      if (isNaN(date.getTime())) return "-";
-      return date.toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-    } catch (error) {
-      return "-";
     }
   };
 
@@ -273,7 +259,11 @@ const RenewalListTab: React.FC = () => {
                         <div className="flex items-center gap-1 min-w-[100px] justify-end">
                           <span className="text-xs text-gray-500">
                             {item.endDate
-                              ? formatDate(item.endDate)
+                              ? formatDateDisplay(item.endDate, "en-IN", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })
                               : "No end date"}
                           </span>
                         </div>

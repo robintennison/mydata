@@ -1,3 +1,5 @@
+// src/utils/formatters.ts
+
 /**
  * Format currency amounts
  * @param amount - The amount to format
@@ -19,27 +21,86 @@ export const formatCurrency = (
 };
 
 /**
- * Format date from timestamp
- * @param timestamp - Timestamp in milliseconds
+ * Core date formatter using Intl
+ * @param timestamp - Timestamp in milliseconds or Date object
  * @param locale - Locale string (default: 'en-IN')
  * @param options - Intl.DateTimeFormat options
  * @returns Formatted date string
  */
 export const formatDate = (
-  timestamp: number, 
+  timestamp: number | Date, 
   locale: string = "en-IN",
   options?: Intl.DateTimeFormatOptions
 ): string => {
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
   const defaultOptions: Intl.DateTimeFormatOptions = {
     day: "2-digit",
     month: "short",
     year: "numeric",
   };
   
-  return new Date(timestamp).toLocaleDateString(
-    locale, 
-    options || defaultOptions
-  );
+  return date.toLocaleDateString(locale, options || defaultOptions);
+};
+
+/**
+ * Specifically for "dd/mm/yy" format used in MyDataHomepage
+ * @param timestamp - Timestamp in milliseconds
+ * @returns Formatted date in dd/mm/yy format
+ */
+export const formatDateShort = (timestamp: number): string => {
+  return formatDate(timestamp, "en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  });
+};
+
+/**
+ * Safe date formatter with error handling for Firestore timestamps
+ * Handles null, undefined, invalid, or Firestore timestamp objects
+ * @param timestamp - Timestamp (milliseconds, Date object, Firestore Timestamp, or null)
+ * @param locale - Locale string (default: 'en-IN')
+ * @param options - Intl.DateTimeFormat options
+ * @returns Formatted date string or fallback value
+ */
+export const formatDateDisplay = (
+  timestamp: any,
+  locale: string = "en-IN",
+  options?: Intl.DateTimeFormatOptions
+): string => {
+  try {
+    if (!timestamp) return "N/A";
+    
+    let date: Date;
+    
+    // Handle Firestore Timestamp object
+    if (typeof timestamp === "object" && timestamp !== null && "toDate" in timestamp) {
+      date = timestamp.toDate();
+    } 
+    // Handle numeric timestamp
+    else if (typeof timestamp === "number") {
+      date = new Date(timestamp);
+    }
+    // Handle string timestamp
+    else if (typeof timestamp === "string") {
+      date = new Date(timestamp);
+    }
+    // Handle Date object
+    else if (timestamp instanceof Date) {
+      date = timestamp;
+    }
+    else {
+      return "Invalid date";
+    }
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) return "Invalid date";
+    
+    return formatDate(date, locale, options);
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Error";
+  }
 };
 
 /**
@@ -79,6 +140,19 @@ export const formatMonthName = (
     year: "numeric",
     month: "long",
   });
+};
+
+/**
+ * Format month name from previous month string (YYYY-MM)
+ * @param previousMonth - Previous month string in YYYY-MM format
+ * @param locale - Locale string (default: 'en-IN')
+ * @returns Formatted month name
+ */
+export const getPreviousMonthName = (
+  previousMonth: string,
+  locale: string = "en-IN"
+): string => {
+  return formatMonthName(previousMonth, locale);
 };
 
 /**
@@ -220,8 +294,11 @@ export const formatLakhs = (amount: number): string => {
 export default {
   formatCurrency,
   formatDate,
+  formatDateShort,
+  formatDateDisplay,
   formatDateTime,
   formatMonthName,
+  getPreviousMonthName,
   formatFileSize,
   formatPercentage,
   formatNumber,

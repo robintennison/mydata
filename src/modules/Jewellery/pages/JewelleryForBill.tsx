@@ -12,6 +12,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { Jewellery } from "../models/types";
+import { formatDate } from "../../../utils/formatters";
 
 // Interface for Bill data
 interface Bill {
@@ -106,23 +107,6 @@ const JewelleryForBill: React.FC = () => {
     fetchData();
   }, [billId]);
 
-  // Format date for display
-  const formatDate = (timestamp: number): string => {
-    if (!timestamp || timestamp === 0) return "";
-
-    try {
-      const date = new Date(timestamp);
-      return date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "";
-    }
-  };
-
   const handleRefresh = () => {
     window.location.reload();
   };
@@ -198,7 +182,12 @@ const JewelleryForBill: React.FC = () => {
                     : "Bill Document"}
               </div>
               <div className="text-xs text-gray-600">
-                Uploaded: {formatDate(bill.uploadedAt)}
+                Uploaded:{" "}
+                {formatDate(bill.uploadedAt, "en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
               </div>
             </div>
             <button
@@ -287,7 +276,11 @@ const JewelleryForBill: React.FC = () => {
           ) : (
             <div className="flex flex-col">
               {jewelleryItems.map((item) => {
-                const formattedDate = formatDate(item.purchaseDate);
+                const formattedDate = formatDate(item.purchaseDate, "en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                });
 
                 return (
                   <div

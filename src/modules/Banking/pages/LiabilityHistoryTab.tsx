@@ -12,6 +12,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { getCurrentMonth } from "../../../utils/formatters";
 
 interface LiabilityHistory {
   id: string;
@@ -33,8 +34,7 @@ const LiabilityHistoryTab: React.FC = () => {
   const [liabilities, setLiabilities] = useState<LiabilityHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    return getCurrentMonth();
   });
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);

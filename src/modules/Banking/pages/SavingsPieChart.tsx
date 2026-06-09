@@ -11,6 +11,7 @@ import { Pie } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { collection, query, getDocs } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
+import { getCurrentMonth } from "../../../utils/formatters";
 
 // Register Chart.js components for Pie chart
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
@@ -32,13 +33,7 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({
   );
   const [loading, setLoading] = useState(true);
 
-  // Get current month in YYYY-MM format
-  const getCurrentMonth = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-  };
+  // REMOVED: Local getCurrentMonth function definition (now imported from formatters)
 
   // Format numbers in lakhs
   const formatLakhs = (amount: number): string => {

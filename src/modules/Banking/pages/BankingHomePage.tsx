@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import Header from "../../../components/Layout/Header";
+import { getCurrentMonth } from "../../../utils/formatters";
 
 // Import the tab components
 import AccountsTab from "./AccountsTab";
@@ -211,13 +212,7 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
     return (amount / 100000).toFixed(2);
   };
 
-  // Get current month in YYYY-MM format
-  const getCurrentMonth = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-  };
+  // REMOVED: Local getCurrentMonth function definition (now imported from formatters)
 
   // Get data for current month from history_detail
   const getCurrentMonthData = () => {

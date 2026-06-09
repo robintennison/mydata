@@ -18,7 +18,6 @@ export const formatCurrency = (
   }).format(amount);
 };
 
-
 /**
  * Format date from timestamp
  * @param timestamp - Timestamp in milliseconds
@@ -198,6 +197,17 @@ export const formatRelativeTime = (timestamp: number): string => {
   return `${Math.floor(diff / year)}y ago`;
 };
 
+/**
+ * Returns the current month in YYYY-MM format.
+ * Used for database queries and month selectors.
+ */
+export const getCurrentMonth = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+};
+
 // Export all formatters
 export default {
   formatCurrency,
@@ -212,4 +222,5 @@ export default {
   capitalizeWords,
   formatPhoneNumber,
   formatRelativeTime,
+  getCurrentMonth,
 };

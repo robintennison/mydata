@@ -11,6 +11,7 @@ import { calculateEMW, getEmwSettings } from "./utils/emwCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
 import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+import { getCurrentMonth } from "./utils/formatters";
 
 // Add OnlineItem interface
 interface OnlineItem {
@@ -87,14 +88,6 @@ const MyDataHomepage: React.FC = () => {
 
   // Get resale discount percentage from jewellery settings
   const resaleDiscountPercent = jewellerySettings?.resaleDiscountPercent || 0;
-
-  // Get current month in YYYY-MM format
-  const getCurrentMonth = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-  };
 
   // Fetch liabilities for a specific month
   const getLiabilitiesForMonth = async (month: string): Promise<number> => {

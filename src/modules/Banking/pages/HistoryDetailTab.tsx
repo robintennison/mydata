@@ -10,6 +10,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { getCurrentMonth } from "../../../utils/formatters";
 
 interface Account {
   id: string;
@@ -56,8 +57,7 @@ const HistoryDetailTab: React.FC = () => {
   );
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    return getCurrentMonth();
   });
   const [editedValues, setEditedValues] = useState<EditedValues>({});
   const [inputValues, setInputValues] = useState<InputValues>({});

@@ -15,6 +15,7 @@ import { Bar } from "react-chartjs-2";
 import ChartDataLabels, { Context } from "chartjs-plugin-datalabels";
 import { collection, query, getDocs } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
+import { getCurrentMonth } from "../../../utils/formatters";
 
 // Register Chart.js components for Bar chart
 ChartJS.register(
@@ -41,13 +42,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = () => {
   const [accountData, setAccountData] = useState<AccountData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Get current month in YYYY-MM format
-  const getCurrentMonth = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-  };
+  // REMOVED: Local getCurrentMonth function definition (now imported from formatters)
 
   // Fetch data from history_detail for current month
   useEffect(() => {

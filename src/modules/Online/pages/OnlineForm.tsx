@@ -6,13 +6,10 @@ import { ImageSizeBadge } from "../../../utils/imageSizeUtils";
 import {
   formatDateDisplay,
   getFileIcon,
-  getDaysInMonth,
-  getFirstDayOfMonth,
-  isToday,
-  isSelectedDate,
 } from "../../../utils/onlineFormHelpers";
 import { FILE_TYPES } from "../types/online.types";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import CustomCalendar from "../../../components/UI/CustomCalendar";
 
 const OnlineForm: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -36,15 +33,8 @@ const OnlineForm: React.FC = () => {
     isViewMode,
     id,
     showCalendar,
-    currentMonth,
-    showYearSelector,
-    openCalendar,
     selectDate,
-    navigateMonth,
-    navigateYear,
-    selectYear,
     setShowCalendar,
-    setShowYearSelector,
     handleSubmit,
     handleDelete,
     handleFileChange,
@@ -193,75 +183,6 @@ const OnlineForm: React.FC = () => {
         setDownloadingFile2(false);
       }
     }
-  };
-
-  const renderCalendarDays = () => {
-    if (!showCalendar) return null;
-
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const daysInMonth = getDaysInMonth(year, month);
-    const firstDay = getFirstDayOfMonth(year, month);
-
-    const days = [];
-
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="py-2.5"></div>);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const isTodayDate = isToday(date);
-      const selectedDate =
-        showCalendar === "start" ? formData.startDate : formData.endDate;
-      const isSelected = isSelectedDate(date, selectedDate);
-
-      days.push(
-        <button
-          key={day}
-          onClick={() => selectDate(date, showCalendar)}
-          className={`py-2.5 bg-transparent border-none rounded text-sm transition-all ${
-            isSelected
-              ? "bg-blue-500 text-white font-semibold"
-              : "text-gray-800 hover:bg-gray-100"
-          } ${isTodayDate && !isSelected ? "border-2 border-blue-500" : ""}`}
-          type="button"
-        >
-          {day}
-        </button>,
-      );
-    }
-
-    return days;
-  };
-
-  const renderYearSelector = () => {
-    const currentYear = currentMonth.getFullYear();
-    const startYear = currentYear - 6;
-    const years = [];
-
-    for (let year = startYear; year <= startYear + 12; year++) {
-      years.push(
-        <button
-          key={year}
-          onClick={() => selectYear(year)}
-          className={`py-2.5 border-none rounded text-sm transition-all ${
-            year === currentYear
-              ? "bg-blue-500 text-white font-semibold"
-              : "bg-transparent text-gray-800 hover:bg-gray-100"
-          }`}
-          type="button"
-        >
-          {year}
-        </button>,
-      );
-    }
-
-    return (
-      <div className="max-h-72 overflow-y-auto p-2.5 grid grid-cols-4 gap-2">
-        {years}
-      </div>
-    );
   };
 
   const renderFileSection = (fileNumber: 1 | 2) => {
@@ -646,12 +567,12 @@ const OnlineForm: React.FC = () => {
                       type="text"
                       value={formatDateDisplay(formData.startDate)}
                       readOnly
-                      onClick={() => openCalendar("start")}
+                      onClick={() => setShowCalendar("start")}
                       className="date-input w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition cursor-pointer pr-10"
                       placeholder="Select start date"
                     />
                     <button
-                      onClick={() => openCalendar("start")}
+                      onClick={() => setShowCalendar("start")}
                       className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 p-1"
                       title="Pick start date"
                       type="button"
@@ -676,12 +597,12 @@ const OnlineForm: React.FC = () => {
                       type="text"
                       value={formatDateDisplay(formData.endDate)}
                       readOnly
-                      onClick={() => openCalendar("end")}
+                      onClick={() => setShowCalendar("end")}
                       className="date-input w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition cursor-pointer pr-10"
                       placeholder="Select end date"
                     />
                     <button
-                      onClick={() => openCalendar("end")}
+                      onClick={() => setShowCalendar("end")}
                       className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 p-1"
                       title="Pick end date"
                       type="button"
@@ -695,121 +616,11 @@ const OnlineForm: React.FC = () => {
 
             {/* Calendar Popup */}
             {showCalendar && !isViewMode && (
-              <div
-                id="calendar-popup"
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 rounded-xl shadow-2xl z-[10001] p-5 w-[90%] max-w-sm max-h-[80vh] overflow-hidden"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => navigateYear("prev")}
-                      className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
-                      title="Previous Year"
-                      type="button"
-                    >
-                      &lt;&lt;
-                    </button>
-                    <button
-                      onClick={() => navigateMonth("prev")}
-                      className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
-                      title="Previous Month"
-                      type="button"
-                    >
-                      &lt;
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => setShowYearSelector(!showYearSelector)}
-                    className="px-2 py-1 text-sm font-semibold text-gray-800 hover:bg-gray-100 rounded"
-                    title="Select Year"
-                    type="button"
-                  >
-                    {currentMonth.toLocaleDateString("en-US", {
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </button>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => navigateMonth("next")}
-                      className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
-                      title="Next Month"
-                      type="button"
-                    >
-                      &gt;
-                    </button>
-                    <button
-                      onClick={() => navigateYear("next")}
-                      className="px-2.5 py-1.5 border border-gray-300 rounded text-sm text-gray-700 min-w-10 hover:bg-gray-50"
-                      title="Next Year"
-                      type="button"
-                    >
-                      &gt;&gt;
-                    </button>
-                  </div>
-                </div>
-
-                {showYearSelector ? (
-                  renderYearSelector()
-                ) : (
-                  <>
-                    <div className="grid grid-cols-7 mb-2">
-                      {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
-                        <div
-                          key={day}
-                          className="text-center text-xs text-gray-500 font-medium py-1"
-                        >
-                          {day}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="grid grid-cols-7 gap-1">
-                      {renderCalendarDays()}
-                    </div>
-                  </>
-                )}
-
-                <div className="flex justify-center gap-2.5 mt-4">
-                  <button
-                    onClick={() => {
-                      const today = new Date();
-                      selectDate(today, showCalendar);
-                    }}
-                    className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600"
-                    type="button"
-                  >
-                    Today
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowCalendar(null);
-                      setShowYearSelector(false);
-                    }}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300"
-                    type="button"
-                  >
-                    Close
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        [showCalendar === "start" ? "startDate" : "endDate"]:
-                          null,
-                      }));
-                      setShowCalendar(null);
-                      setShowYearSelector(false);
-                    }}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200"
-                    type="button"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
+              <CustomCalendar
+                selectedDate={showCalendar === "start" ? (formData.startDate ?? null) : (formData.endDate ?? null)}
+                onSelectDate={(timestamp) => selectDate(timestamp, showCalendar)}
+                onClose={() => setShowCalendar(null)}
+              />
             )}
 
             {/* DETAILS FIELD */}

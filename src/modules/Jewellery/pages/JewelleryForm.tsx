@@ -9,13 +9,14 @@ import {
 import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
-import { useNavigate, useLocation } from "react-router-dom"; // ADD useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   optimizeFile,
   validateFile,
   formatFileSize,
 } from "../../../utils/fileOptimizer";
 import { useImageSize, ImageSizeBadge } from "../../../utils/imageSizeUtils";
+import CustomCalendar from "../../../components/UI/CustomCalendar";
 
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
@@ -44,7 +45,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   showDelete = false,
 }) => {
   const navigate = useNavigate();
-  const location = useLocation(); // ADD this
+  const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [storage] = useState(getStorage());
 
@@ -88,13 +89,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     formData.imageUrl || null,
   );
 
-  // Calendar states
+  // Calendar states - simplified
   const [showCalendar, setShowCalendar] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState<Date>(
-    new Date(formData.purchaseDate || Date.now()),
-  );
-  const [showYearSelector, setShowYearSelector] = useState(false);
-  const calendarRef = useRef<HTMLDivElement>(null);
 
   // Get settings data
   const {
@@ -216,25 +212,6 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     fetchBills();
   }, []);
 
-  // Close calendar when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        calendarRef.current &&
-        !calendarRef.current.contains(event.target as Node) &&
-        !(event.target as HTMLElement).closest(".date-input")
-      ) {
-        setShowCalendar(false);
-        setShowYearSelector(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -254,136 +231,12 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     }
   };
 
-  const openCalendar = () => {
-    setShowCalendar(true);
-    setShowYearSelector(false);
-    setCurrentMonth(new Date(formData.purchaseDate || Date.now()));
-  };
-
-  const selectDate = (date: Date) => {
+  const selectDate = (timestamp: number) => {
     setFormData((prev) => ({
       ...prev,
-      purchaseDate: date.getTime(),
+      purchaseDate: timestamp,
     }));
     setShowCalendar(false);
-    setShowYearSelector(false);
-  };
-
-  const navigateMonth = (direction: "prev" | "next") => {
-    const newMonth = new Date(currentMonth);
-    if (direction === "prev") {
-      newMonth.setMonth(newMonth.getMonth() - 1);
-    } else {
-      newMonth.setMonth(newMonth.getMonth() + 1);
-    }
-    setCurrentMonth(newMonth);
-  };
-
-  const navigateYear = (direction: "prev" | "next") => {
-    const newMonth = new Date(currentMonth);
-    if (direction === "prev") {
-      newMonth.setFullYear(newMonth.getFullYear() - 1);
-    } else {
-      newMonth.setFullYear(newMonth.getFullYear() + 1);
-    }
-    setCurrentMonth(newMonth);
-  };
-
-  const selectYear = (year: number) => {
-    const newMonth = new Date(currentMonth);
-    newMonth.setFullYear(year);
-    setCurrentMonth(newMonth);
-    setShowYearSelector(false);
-  };
-
-  const getDaysInMonth = (year: number, month: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (year: number, month: number) => {
-    return new Date(year, month, 1).getDay();
-  };
-
-  const isToday = (date: Date) => {
-    const today = new Date();
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    );
-  };
-
-  const isSelectedDate = (date: Date) => {
-    const selectedDate = new Date(formData.purchaseDate || Date.now());
-    return (
-      date.getDate() === selectedDate.getDate() &&
-      date.getMonth() === selectedDate.getMonth() &&
-      date.getFullYear() === selectedDate.getFullYear()
-    );
-  };
-
-  const renderCalendar = () => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const daysInMonth = getDaysInMonth(year, month);
-    const firstDay = getFirstDayOfMonth(year, month);
-
-    const days = [];
-
-    // Empty cells for days before the first day of the month
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="py-2.5"></div>);
-    }
-
-    // Days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const isTodayDate = isToday(date);
-      const isSelected = isSelectedDate(date);
-
-      days.push(
-        <button
-          key={day}
-          onClick={() => selectDate(date)}
-          className={`
-            p-2 bg-none border-none rounded cursor-pointer text-sm transition-colors hover:bg-gray-100
-            ${isSelected ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
-            ${isTodayDate ? "border border-blue-500" : ""}
-          `}
-        >
-          {day}
-        </button>,
-      );
-    }
-
-    return days;
-  };
-
-  const renderYearSelector = () => {
-    const currentYear = currentMonth.getFullYear();
-    const startYear = currentYear - 6;
-    const years = [];
-
-    for (let year = startYear; year <= startYear + 12; year++) {
-      years.push(
-        <button
-          key={year}
-          onClick={() => selectYear(year)}
-          className={`
-            p-2 bg-none border-none rounded cursor-pointer text-sm
-            ${year === currentYear ? "bg-blue-500 text-white font-semibold" : "text-gray-700"}
-          `}
-        >
-          {year}
-        </button>,
-      );
-    }
-
-    return (
-      <div className="max-h-[300px] overflow-y-auto p-2 grid grid-cols-4 gap-2">
-        {years}
-      </div>
-    );
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -624,7 +477,6 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
     setShowBillDropdown(true);
   };
 
-  // FIX: Update handleCancel to read navigation state
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
@@ -935,12 +787,12 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               type="text"
               value={formatDate(formData.purchaseDate || Date.now())}
               readOnly
-              onClick={openCalendar}
+              onClick={() => setShowCalendar(true)}
               className="w-full p-2 pr-10 border border-gray-300 rounded text-sm bg-white cursor-pointer date-input"
             />
             <button
               type="button"
-              onClick={openCalendar}
+              onClick={() => setShowCalendar(true)}
               className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-none border-none cursor-pointer text-gray-500 p-1"
               title="Pick purchase date"
             >
@@ -965,106 +817,11 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
 
       {/* Calendar Popup */}
       {showCalendar && (
-        <div
-          ref={calendarRef}
-          className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 p-5 min-w-[300px] max-w-[400px] w-[90%] max-h-[80vh] overflow-hidden ${showYearSelector ? "min-w-[350px] max-w-[400px]" : ""}`}
-        >
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigateYear("prev")}
-                className="bg-white border border-gray-200 rounded p-1.5 cursor-pointer text-sm text-gray-700 min-w-10 hover:bg-gray-50"
-                title="Previous Year"
-                type="button"
-              >
-                &lt;&lt;
-              </button>
-              <button
-                onClick={() => navigateMonth("prev")}
-                className="bg-white border border-gray-200 rounded p-1.5 cursor-pointer text-sm text-gray-700 min-w-10 hover:bg-gray-50"
-                title="Previous Month"
-                type="button"
-              >
-                &lt;
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowYearSelector(!showYearSelector)}
-                className="text-base font-semibold text-gray-900 cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
-                title="Select Year"
-                type="button"
-              >
-                {currentMonth.toLocaleDateString("en-US", {
-                  month: "short",
-                  year: "numeric",
-                })}
-              </button>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigateMonth("next")}
-                className="bg-white border border-gray-200 rounded p-1.5 cursor-pointer text-sm text-gray-700 min-w-10 hover:bg-gray-50"
-                title="Next Month"
-                type="button"
-              >
-                &gt;
-              </button>
-              <button
-                onClick={() => navigateYear("next")}
-                className="bg-white border border-gray-200 rounded p-1.5 cursor-pointer text-sm text-gray-700 min-w-10 hover:bg-gray-50"
-                title="Next Year"
-                type="button"
-              >
-                &gt;&gt;
-              </button>
-            </div>
-          </div>
-
-          {showYearSelector ? (
-            renderYearSelector()
-          ) : (
-            <>
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
-                  <div
-                    key={day}
-                    className="text-center text-sm text-gray-600 font-medium py-1"
-                  >
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-7 gap-1">{renderCalendar()}</div>
-            </>
-          )}
-
-          <div className="mt-3 text-center flex justify-center gap-2">
-            <button
-              onClick={() => {
-                const today = new Date();
-                selectDate(today);
-              }}
-              className="px-3 py-1.5 bg-blue-500 text-white border-none rounded cursor-pointer text-sm"
-              type="button"
-            >
-              Today
-            </button>
-            <button
-              onClick={() => {
-                setShowCalendar(false);
-                setShowYearSelector(false);
-              }}
-              className="px-3 py-1.5 bg-gray-100 border-none rounded cursor-pointer text-sm"
-              type="button"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <CustomCalendar
+          selectedDate={formData.purchaseDate || Date.now()}
+          onSelectDate={selectDate}
+          onClose={() => setShowCalendar(false)}
+        />
       )}
 
       {/* Bill Section */}

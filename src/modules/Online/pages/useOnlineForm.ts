@@ -33,10 +33,8 @@ export const useOnlineForm = () => {
   const showDelete = settings?.showDelete || false;
   const [storage] = useState(() => getStorage());
 
-  // Calendar state
+  // Calendar state - simplified
   const [showCalendar, setShowCalendar] = useState<"start" | "end" | null>(null);
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  const [showYearSelector, setShowYearSelector] = useState(false);
 
   const getModeFromPath = (): "add" | "edit" | "view" => {
     const path = location.pathname;
@@ -90,26 +88,6 @@ export const useOnlineForm = () => {
     url: "",
     name: "",
   });
-
-  // Close calendar when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const calendar = document.getElementById("calendar-popup");
-      if (
-        calendar &&
-        !calendar.contains(event.target as Node) &&
-        !(event.target as HTMLElement).closest(".date-input")
-      ) {
-        setShowCalendar(null);
-        setShowYearSelector(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   useEffect(() => {
     fetchCategories();
@@ -253,48 +231,13 @@ export const useOnlineForm = () => {
     }
   };
 
-  // Calendar functions
-  const openCalendar = (field: "start" | "end") => {
-    setShowCalendar(field);
-    setShowYearSelector(false);
-    const dateValue = field === "start" ? formData.startDate : formData.endDate;
-    setCurrentMonth(dateValue ? new Date(dateValue) : new Date());
-  };
-
-  const selectDate = (date: Date, field: "start" | "end") => {
+  // Simplified calendar functions
+  const selectDate = (timestamp: number, field: "start" | "end") => {
     setFormData((prev) => ({
       ...prev,
-      [field === "start" ? "startDate" : "endDate"]: date.getTime(),
+      [field === "start" ? "startDate" : "endDate"]: timestamp,
     }));
     setShowCalendar(null);
-    setShowYearSelector(false);
-  };
-
-  const navigateMonth = (direction: "prev" | "next") => {
-    const newMonth = new Date(currentMonth);
-    if (direction === "prev") {
-      newMonth.setMonth(newMonth.getMonth() - 1);
-    } else {
-      newMonth.setMonth(newMonth.getMonth() + 1);
-    }
-    setCurrentMonth(newMonth);
-  };
-
-  const navigateYear = (direction: "prev" | "next") => {
-    const newMonth = new Date(currentMonth);
-    if (direction === "prev") {
-      newMonth.setFullYear(newMonth.getFullYear() - 1);
-    } else {
-      newMonth.setFullYear(newMonth.getFullYear() + 1);
-    }
-    setCurrentMonth(newMonth);
-  };
-
-  const selectYear = (year: number) => {
-    const newMonth = new Date(currentMonth);
-    newMonth.setFullYear(year);
-    setCurrentMonth(newMonth);
-    setShowYearSelector(false);
   };
 
   // File functions
@@ -671,17 +614,10 @@ export const useOnlineForm = () => {
     isViewMode,
     id,
     
-    // Calendar state
+    // Calendar state - simplified
     showCalendar,
-    currentMonth,
-    showYearSelector,
-    openCalendar,
     selectDate,
-    navigateMonth,
-    navigateYear,
-    selectYear,
     setShowCalendar,
-    setShowYearSelector,
     
     // Actions
     handleSubmit,

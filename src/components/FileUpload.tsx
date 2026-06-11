@@ -40,7 +40,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
     const selectedFile = e.target.files[0];
 
-    // Validate file
     const validation = validateFile(selectedFile, allowedTypes, maxSizeMB);
     if (!validation.valid) {
       setError(validation.error || "Invalid file");
@@ -54,16 +53,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
     setError("");
 
     try {
-      // Optimize the file
       setOptimizationInfo(null);
       const optimized = await optimizeFile(selectedFile);
       setOptimizedFile(optimized);
 
-      // Calculate savings
       const originalSize = selectedFile.size;
       const optimizedSize = optimized.size;
-      const savedPercentage =
-        ((originalSize - optimizedSize) / originalSize) * 100;
+      const savedPercentage = ((originalSize - optimizedSize) / originalSize) * 100;
 
       setOptimizationInfo({
         originalSize,
@@ -76,7 +72,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       );
     } catch (err: any) {
       console.error("Error optimizing file:", err);
-      setOptimizedFile(selectedFile); // Fallback to original
+      setOptimizedFile(selectedFile);
       setOptimizationInfo(null);
     }
   };
@@ -93,23 +89,18 @@ const FileUpload: React.FC<FileUploadProps> = ({
     setError("");
 
     try {
-      // Create a storage reference
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substring(2, 9);
       const fileExtension = fileToUpload.name.split(".").pop();
       const fileName = `${timestamp}_${randomId}.${fileExtension}`;
 
       const storageRef = ref(storage, `${pathPrefix}/${userId}/${fileName}`);
-
-      // Create upload task
       const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
 
-      // Monitor upload progress
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setProgress(progress);
         },
         (error) => {
@@ -117,10 +108,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           setUploading(false);
         },
         async () => {
-          // Upload completed successfully
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
-          // Save file info to Realtime Database
           const filesRef = dbRef(database, `${pathPrefix}/${userId}/files`);
           const newFileRef = push(filesRef);
 
@@ -146,15 +135,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
           setProgress(0);
           setUploading(false);
 
-          // Call callback if provided
           if (onUploadComplete) {
             onUploadComplete(fileInfo);
           }
 
-          // Reset file input
-          const fileInput = document.getElementById(
-            "file-input",
-          ) as HTMLInputElement;
+          const fileInput = document.getElementById("file-input") as HTMLInputElement;
           if (fileInput) fileInput.value = "";
         },
       );
@@ -166,7 +151,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-lg mb-8">
-      <h3 className="text-2xl font-semibold text-gray-800 mt-0">
+      <h3 className="text-2xl font-semibold text-gray-800 mt-0 mb-2">
         📁 Upload Files to Firebase Storage
       </h3>
       <p className="text-gray-600 mb-6">
@@ -217,7 +202,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <div className="my-5">
             <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden mb-1">
               <div
-                className="h-full bg-green-600 transition-all duration-300"
+                className="h-full bg-green-600 transition-all duration-300 rounded-full"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
@@ -236,7 +221,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         <button
           onClick={handleUpload}
           disabled={!file || uploading}
-          className="bg-blue-500 text-white border-none px-8 py-3 rounded-md text-base font-semibold cursor-pointer mt-2.5 transition-all hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
+          className="bg-blue-500 text-white px-8 py-3 rounded-md text-base font-semibold cursor-pointer mt-2.5 transition-all hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {uploading ? "Uploading..." : "Upload Optimized File"}
         </button>
@@ -247,7 +232,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <h4 className="font-semibold text-gray-800 mb-2">
             ✅ Recently Uploaded:
           </h4>
-          <ul className="list-none p-0 m-2.5">
+          <ul className="list-none p-0 m-0">
             {uploadedFiles.map((filename, index) => (
               <li
                 key={index}

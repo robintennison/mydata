@@ -4,6 +4,7 @@ import { useBankingData } from "../hooks/useBankingData";
 import { useSettings } from "../../../contexts/SettingsContext";
 import Header from "../../../components/Layout/Header";
 import { getCurrentMonth, formatLakhs } from "../../../utils/formatters";
+import { LiabilityHistory, MonthlyDataWithLiabilities } from "../../../types/banking.types";
 
 // Import the tab components
 import AccountsTab from "./AccountsTab";
@@ -23,22 +24,8 @@ import { firestore } from "../../../lib/firebase";
 // Define the tab type
 type TabType = "dashboard" | "accounts" | "deposits" | "history" | "historydetail" | "liabilities";
 
-// Interface for liability history
-interface LiabilityHistory {
-  id: string;
-  month: string;
-  description: string;
-  amount: number;
-}
-
-// Interface for monthly data with liabilities
-interface MonthlyDataWithLiabilities {
-  month: string;
-  savings: number;
-  deposits: number;
-  liabilities: number;
-  total: number;
-}
+// Interface for monthly data with liabilities (now imported from types)
+// This interface is now defined in banking.types.ts as MonthlyDataWithLiabilities
 
 interface BankingHomePageProps {
   // Add any props if needed
@@ -206,10 +193,6 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
         return "Add";
     }
   };
-
-  // REMOVED: Local formatLakhs function (now imported from formatters)
-
-  // REMOVED: Local getCurrentMonth function definition (now imported from formatters)
 
   // Get data for current month from history_detail
   const getCurrentMonthData = () => {

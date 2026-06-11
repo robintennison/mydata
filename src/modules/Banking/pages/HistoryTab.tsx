@@ -13,27 +13,14 @@ import {
 import { firestore } from "../../../lib/firebase";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { formatLakhs } from "../../../utils/formatters";
+import { LiabilityHistory, MonthlySummary } from "../../../types/banking.types";
 
 // Date of birth: 17th October 1959
 const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
 
-// Define the aggregated monthly data
-interface MonthlySummary {
-  month: string;
-  savings: number;
-  deposits: number;
-  liabilities: number;
-  totalAssets: number;
-  hasStoredLiabilities: boolean;
-}
-
-// Interface for liability history
-interface LiabilityHistory {
-  id: string;
-  month: string;
-  description: string;
-  amount: number;
-}
+// These interfaces are now imported from banking.types.ts
+// interface MonthlySummary { ... } - REMOVED
+// interface LiabilityHistory { ... } - REMOVED
 
 const HistoryTab: React.FC = () => {
   const { settings } = useSettings();
@@ -238,7 +225,6 @@ const HistoryTab: React.FC = () => {
   }, [monthlyData]);
 
   const rupeesToLakhs = (rupees: number): number => rupees / 100000;
-  // REMOVED: Local formatLakhs function (now imported from formatters)
 
   const startEditing = (month: string, savings: number, deposits: number) => {
     setEditingMonth(month);

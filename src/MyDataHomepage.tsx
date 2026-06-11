@@ -13,8 +13,9 @@ import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart
 import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
 import { DocumentData } from "firebase/firestore";
 import { getCurrentMonth, formatLakhs, formatDateShort } from "./utils/formatters";
+import { LiabilityHistory } from "./types/banking.types";
 
-// Add OnlineItem interface (keep as is)
+// Keep OnlineItem interface (consider moving to online.types.ts later)
 interface OnlineItem {
   id: string;
   name: string;
@@ -30,14 +31,6 @@ interface OnlineItem {
   file2Name: string;
   createdAt: number;
   updatedAt: number;
-}
-
-// Add LiabilityHistory interface (keep as is)
-interface LiabilityHistory {
-  id: string;
-  month: string;
-  description: string;
-  amount: number;
 }
 
 const MyDataHomepage: React.FC = () => {

@@ -184,3 +184,32 @@ export interface Liability {
   description: string;
   amount: number;
 }
+
+// Liability History for monthly liability tracking
+export interface LiabilityHistory {
+  id: string;
+  month: string; // Format: YYYY-MM
+  description: string;
+  amount: number;
+  createdAt?: Timestamp | number;
+  updatedAt?: Timestamp | number;
+}
+
+// Monthly summary for history tab
+export interface MonthlySummary {
+  month: string;
+  savings: number;
+  deposits: number;
+  liabilities: number;
+  totalAssets: number;
+  hasStoredLiabilities: boolean;
+}
+
+// Monthly data with liabilities for BankingHomePage dashboard
+export interface MonthlyDataWithLiabilities {
+  month: string;
+  savings: number;
+  deposits: number;
+  liabilities: number;
+  total: number;
+}

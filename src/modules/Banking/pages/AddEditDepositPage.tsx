@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+// AddEditDepositPage.tsx (updated)
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
 import { useBankingOperations } from "../hooks/useBankingOperations";
 import { Deposit, DepositFormData } from "../../../types/banking.types";
 import { formatDate } from "../../../utils/formatters";
 import CustomCalendar from "../../../components/UI/CustomCalendar";
+import AccountSelector from "./AccountSelector"; // Import the new component
 
 interface AddEditDepositPageProps {
   isEdit?: boolean;
@@ -28,27 +30,13 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
     active: true,
   });
   const [selectedAccountCode, setSelectedAccountCode] = useState("");
-  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [localAccounts, setLocalAccounts] = useState<any[]>([]);
   const [error, setError] = useState<string>("");
   const [showCalendar, setShowCalendar] = useState<"start" | "end" | null>(
     null,
   );
-
-  // Refs for dropdown positioning
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Sync accounts when they load
-  useEffect(() => {
-    if (accounts.length > 0) {
-      setLocalAccounts(accounts);
-    }
-  }, [accounts]);
 
   // Load deposit data if editing
   useEffect(() => {
@@ -70,26 +58,6 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
     }
   }, [isEdit, depositId, deposits, accounts]);
 
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // Close account dropdown
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setShowAccountDropdown(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   const handleInputChange = (field: keyof DepositFormData, value: any) => {
     setFormData((prev) => ({
       ...prev,
@@ -105,7 +73,6 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
       accountId,
     }));
     setSelectedAccountCode(accountCode);
-    setShowAccountDropdown(false);
     // Clear error when account is selected
     if (error) setError("");
   };
@@ -228,7 +195,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   }
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Top Navigation - Simplified with only back button */}
       <div className="flex justify-between items-center px-4 py-3 bg-white border-b border-gray-200">
         <button
@@ -256,116 +223,17 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         )}
 
         <div className="flex flex-col gap-4">
-          {/* Account Dropdown */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Account *
-            </label>
-            <div className="relative">
-              <input
-                ref={inputRef}
-                type="text"
-                value={selectedAccountCode}
-                readOnly
-                onClick={() => {
-                  if (localAccounts.length > 0) {
-                    setShowAccountDropdown(!showAccountDropdown);
-                  } else {
-                    alert("Accounts are still loading. Please wait a moment.");
-                  }
-                }}
-                placeholder={
-                  dataLoading
-                    ? "Loading accounts..."
-                    : localAccounts.length > 0
-                      ? "Select account"
-                      : "No accounts available"
-                }
-                className={`w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed pr-10 ${
-                  localAccounts.length > 0
-                    ? "cursor-pointer"
-                    : "cursor-not-allowed opacity-70"
-                }`}
-                style={{
-                  borderColor:
-                    error && !formData.accountId ? "#dc2626" : undefined,
-                }}
-                disabled={localAccounts.length === 0}
-              />
-              {localAccounts.length > 0 && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                  ▼
-                </div>
-              )}
-            </div>
-
-            {/* Account Dropdown */}
-            {showAccountDropdown && localAccounts.length > 0 && (
-              <div
-                ref={dropdownRef}
-                className="fixed left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-xl z-50 w-[calc(100%-30px)] max-w-2xl max-h-[60vh] overflow-hidden mt-1"
-                style={{
-                  top: inputRef.current
-                    ? `${
-                        inputRef.current.getBoundingClientRect().bottom +
-                        window.scrollY +
-                        4
-                      }px`
-                    : "200px",
-                }}
-              >
-                <div className="p-3 bg-gray-50 border-b border-gray-100 text-sm font-medium text-gray-700 sticky top-0 z-10 flex justify-between items-center">
-                  <span>Select Account ({localAccounts.length} available)</span>
-                  <button
-                    onClick={() => setShowAccountDropdown(false)}
-                    className="text-gray-500 text-lg hover:text-gray-700 p-1"
-                    title="Close"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <div className="max-h-[calc(60vh-60px)] overflow-y-auto py-1">
-                  {localAccounts
-                    .sort((a, b) => a.acctCode.localeCompare(b.acctCode))
-                    .map((account) => (
-                      <button
-                        key={account.id}
-                        onClick={() =>
-                          handleAccountSelect(account.id, account.acctCode)
-                        }
-                        className={`w-full px-4 py-3 text-left text-sm border-b border-gray-100 flex justify-between items-start transition-colors ${
-                          formData.accountId === account.id
-                            ? "bg-blue-50"
-                            : "bg-transparent hover:bg-gray-50"
-                        }`}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">
-                            {account.acctCode}
-                          </div>
-                          {account.acctDetails && (
-                            <div className="text-xs text-gray-500 mt-0.5 truncate">
-                              {account.acctDetails.split("\n")[0]}
-                            </div>
-                          )}
-                        </div>
-                        <div
-                          className={`text-xs font-semibold whitespace-nowrap ml-3 text-right min-w-20 ${
-                            account.savingsAmount >= 0
-                              ? "text-green-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          ₹
-                          {(account.savingsAmount || 0).toLocaleString("en-IN")}
-                        </div>
-                      </button>
-                    ))}
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Account Selector Component */}
+          <AccountSelector
+            accounts={accounts}
+            selectedAccountId={formData.accountId}
+            selectedAccountCode={selectedAccountCode}
+            onAccountSelect={handleAccountSelect}
+            error={!!(error && !formData.accountId)} 
+            disabled={saving || deleting}
+            loading={dataLoading}
+            placeholder="Select account"
+          />
 
           {/* Amount */}
           <div>
@@ -379,11 +247,12 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 handleInputChange("amount", parseFloat(e.target.value) || 0)
               }
               placeholder="Enter amount"
-              className={`w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                error && formData.amount <= 0 ? "border-red-300" : ""
+              className={`w-full p-3 border rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                error && formData.amount <= 0 ? "border-red-300" : "border-gray-300"
               }`}
               min="0"
               step="1000"
+              disabled={saving || deleting}
             />
           </div>
 
@@ -403,12 +272,14 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 readOnly
                 onClick={() => setShowCalendar("start")}
                 className="date-input w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition cursor-pointer pr-10"
+                disabled={saving || deleting}
               />
               <button
                 onClick={() => setShowCalendar("start")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 p-1"
                 title="Pick start date"
                 type="button"
+                disabled={saving || deleting}
               >
                 📅
               </button>
@@ -431,12 +302,14 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
                 readOnly
                 onClick={() => setShowCalendar("end")}
                 className="date-input w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition cursor-pointer pr-10"
+                disabled={saving || deleting}
               />
               <button
                 onClick={() => setShowCalendar("end")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 p-1"
                 title="Pick end date"
                 type="button"
+                disabled={saving || deleting}
               >
                 📅
               </button>
@@ -463,6 +336,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
               placeholder="Enter comments (optional)"
               className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white resize-y min-h-20 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
               maxLength={500}
+              disabled={saving || deleting}
             />
             <div className="text-xs text-gray-500 text-right mt-1">
               {formData.comments.length}/500
@@ -477,6 +351,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
               onChange={(e) => handleInputChange("active", e.target.checked)}
               id="active-checkbox"
               className="w-5 h-5 cursor-pointer"
+              disabled={saving || deleting}
             />
             <label
               htmlFor="active-checkbox"

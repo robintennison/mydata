@@ -15,7 +15,21 @@ import type {
   DepositAdjustment,
 } from "../../../types/banking.types";
 
-export const useBankingOperations = () => {
+// Type for delete confirmation state
+export interface DeleteConfirmationState {
+  isOpen: boolean;
+  type: 'account' | 'deposit' | 'history' | null;
+  id: string;
+  itemName?: string;
+  onConfirm: () => Promise<void>;
+}
+
+export const useBankingOperations = (
+  // Callback to open the delete confirmation dialog
+  setDeleteDialog: (state: DeleteConfirmationState) => void,
+  // Callback to close the dialog
+  closeDeleteDialog: () => void
+) => {
   // Account CRUD operations
   const handleSaveAccount = async (account: BankAccount) => {
     try {
@@ -33,21 +47,28 @@ export const useBankingOperations = () => {
     }
   };
 
-  const handleDeleteAccount = async (accountId: string) => {
-    if (!window.confirm("Delete this account? This will also delete related deposits."))
-      return false;
-
-    try {
-      await deleteDoc(doc(firestore, "accounts", accountId));
-      console.log("DEBUG: Deleted account:", accountId);
-      return true;
-    } catch (error) {
-      console.error("Error deleting account:", error);
-      throw error;
-    }
+  const handleDeleteAccount = async (accountId: string, accountName?: string) => {
+    // Set up the confirmation dialog instead of using window.confirm
+    setDeleteDialog({
+      isOpen: true,
+      type: 'account',
+      id: accountId,
+      itemName: accountName,
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(firestore, "accounts", accountId));
+          console.log("DEBUG: Deleted account:", accountId);
+          closeDeleteDialog();
+          return Promise.resolve();
+        } catch (error) {
+          console.error("Error deleting account:", error);
+          throw error;
+        }
+      },
+    });
   };
 
-  // Deposit CRUD operations - FIXED VERSION
+  // Deposit CRUD operations
   const handleSaveDeposit = async (deposit: Deposit) => {
     try {
       console.log("DEBUG: handleSaveDeposit called with:", {
@@ -88,17 +109,25 @@ export const useBankingOperations = () => {
     }
   };
   
-  const handleDeleteDeposit = async (depositId: string) => {
-    if (!window.confirm("Delete this deposit?")) return false;
-
-    try {
-      await deleteDoc(doc(firestore, "deposits", depositId));
-      console.log("DEBUG: Deleted deposit:", depositId);
-      return true;
-    } catch (error) {
-      console.error("Error deleting deposit:", error);
-      throw error;
-    }
+  const handleDeleteDeposit = async (depositId: string, depositDescription?: string) => {
+    // Set up the confirmation dialog instead of using window.confirm
+    setDeleteDialog({
+      isOpen: true,
+      type: 'deposit',
+      id: depositId,
+      itemName: depositDescription,
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(firestore, "deposits", depositId));
+          console.log("DEBUG: Deleted deposit:", depositId);
+          closeDeleteDialog();
+          return Promise.resolve();
+        } catch (error) {
+          console.error("Error deleting deposit:", error);
+          throw error;
+        }
+      },
+    });
   };
 
   // History CRUD operations
@@ -114,16 +143,24 @@ export const useBankingOperations = () => {
   };
 
   const handleDeleteHistory = async (month: string) => {
-    if (!window.confirm("Delete this history record?")) return false;
-
-    try {
-      await deleteDoc(doc(firestore, "history", month));
-      console.log("DEBUG: Deleted history for month:", month);
-      return true;
-    } catch (error) {
-      console.error("Error deleting history:", error);
-      throw error;
-    }
+    // Set up the confirmation dialog instead of using window.confirm
+    setDeleteDialog({
+      isOpen: true,
+      type: 'history',
+      id: month,
+      itemName: month,
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(firestore, "history", month));
+          console.log("DEBUG: Deleted history for month:", month);
+          closeDeleteDialog();
+          return Promise.resolve();
+        } catch (error) {
+          console.error("Error deleting history:", error);
+          throw error;
+        }
+      },
+    });
   };
 
   // Handle summary adjustment

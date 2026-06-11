@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { getCurrentMonth, getPreviousMonthName } from "../../../utils/formatters";
+import DeleteConfirmationDialog from "../../../components/DeleteConfirmationDialog";
 
 interface LiabilityHistory {
   id: string;
@@ -38,6 +39,7 @@ const LiabilityHistoryTab: React.FC = () => {
   });
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -316,9 +318,8 @@ const LiabilityHistoryTab: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
+    setIsDeleting(true);
     try {
-      setSaving(true);
-
       const liabilityRef = doc(firestore, "liability_history", id);
       await deleteDoc(liabilityRef);
 
@@ -330,6 +331,7 @@ const LiabilityHistoryTab: React.FC = () => {
       console.error("Error deleting liability:", error);
       showStatus("error", `Failed to delete: ${error.message}`);
     } finally {
+      setIsDeleting(false);
       setSaving(false);
     }
   };
@@ -349,6 +351,12 @@ const LiabilityHistoryTab: React.FC = () => {
     return liabilities.reduce((sum, liability) => sum + liability.amount, 0);
   };
 
+  // Get the selected liability description for the delete dialog
+  const getSelectedLiabilityDescription = (): string => {
+    const liability = liabilities.find(l => l.id === deleteConfirm);
+    return liability?.description || "";
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-5">
@@ -361,8 +369,6 @@ const LiabilityHistoryTab: React.FC = () => {
   const totalLiabilities = getTotalLiabilities();
   const totalAccounts = liabilities.length;
   const showLoadButton = previousMonthAvailable && !hasLoadedPreviousData && liabilities.length === 0;
-
-  // REMOVED: Local getPreviousMonthName function (now imported from formatters)
 
   return (
     <div className="flex flex-col h-full px-2 py-2">
@@ -638,7 +644,7 @@ const LiabilityHistoryTab: React.FC = () => {
                           <button
                             onClick={() => setDeleteConfirm(liability.id)}
                             className="w-6 h-6 bg-red-500 text-white text-[10px] rounded flex items-center justify-center hover:bg-red-600 transition-colors"
-                            disabled={saving}
+                            disabled={saving || isDeleting}
                             title="Delete"
                           >
                             🗑️
@@ -676,38 +682,19 @@ const LiabilityHistoryTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-50">
-          <div className="bg-white rounded-xl p-5 max-w-md w-full shadow-2xl mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Confirm Delete
-            </h3>
-            <p className="text-gray-600 mb-5 leading-relaxed">
-              Are you sure you want to delete this liability record for{" "}
-              <strong>{selectedMonth}</strong>?
-              <br />
-              <span className="text-sm text-gray-500 mt-2 block">
-                This action cannot be undone.
-              </span>
-            </p>
-            <div className="flex gap-2.5">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 py-2.5 bg-red-500 border-none rounded-lg text-white font-medium cursor-pointer hover:bg-red-600 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog - Using reusable component */}
+      <DeleteConfirmationDialog
+        isOpen={deleteConfirm !== null}
+        onClose={() => {
+          setDeleteConfirm(null);
+          setIsDeleting(false);
+        }}
+        onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
+        title="Delete Liability"
+        message={`Are you sure you want to delete the liability record "${getSelectedLiabilityDescription()}" for ${selectedMonth}?`}
+        itemName={`${getSelectedLiabilityDescription()} - ${selectedMonth}`}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { getCurrentMonth, formatLakhs, getPreviousMonthName } from "../../../utils/formatters";
+import DeleteConfirmationDialog from "../../../components/DeleteConfirmationDialog";
 
 interface Account {
   id: string;
@@ -26,7 +27,7 @@ interface HistoryDetail {
   month: string;
   savings: number;
   deposits: number;
-  totalLiabilities?: number; // Add liability snapshot field
+  totalLiabilities?: number;
 }
 
 interface Liability {
@@ -63,6 +64,7 @@ const HistoryDetailTab: React.FC = () => {
   const [inputValues, setInputValues] = useState<InputValues>({});
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -376,8 +378,6 @@ const HistoryDetailTab: React.FC = () => {
     return inputValues[acctCode]?.[field] ?? "0";
   };
 
-  // REMOVED: Local formatLakhs function (now imported from formatters)
-
   const saveAllChanges = async () => {
     try {
       setSaving(true);
@@ -404,7 +404,7 @@ const HistoryDetailTab: React.FC = () => {
           month: selectedMonth,
           savings: values.savings,
           deposits: values.deposits,
-          totalLiabilities: liabilitiesToStore, // Store the liability snapshot
+          totalLiabilities: liabilitiesToStore,
         };
 
         batch.set(docRef, record);
@@ -464,8 +464,8 @@ const HistoryDetailTab: React.FC = () => {
   };
 
   const deleteRecord = async (acctCode: string) => {
+    setIsDeleting(true);
     try {
-      setSaving(true);
       const docId = `${acctCode}_${selectedMonth}`;
       const historyRef = doc(firestore, "history_detail", docId);
       await deleteDoc(historyRef);
@@ -510,7 +510,7 @@ const HistoryDetailTab: React.FC = () => {
       console.error("Error deleting:", error);
       showStatus("error", `Failed to delete: ${error.message}`);
     } finally {
-      setSaving(false);
+      setIsDeleting(false);
     }
   };
 
@@ -539,8 +539,6 @@ const HistoryDetailTab: React.FC = () => {
   };
 
   const { totalSavings, totalDeposits } = calculateTotals();
-
-  // REMOVED: Local getPreviousMonthName function (now imported from formatters)
 
   if (loading) {
     return (
@@ -805,7 +803,7 @@ const HistoryDetailTab: React.FC = () => {
                         <button
                           onClick={() => setDeleteConfirm(account.acctCode)}
                           className="text-red-500 hover:text-red-700 transition-colors text-base p-1 min-w-[28px] touch-manipulation"
-                          disabled={saving}
+                          disabled={saving || isDeleting}
                           title="Delete"
                         >
                           🗑️
@@ -862,35 +860,19 @@ const HistoryDetailTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-50">
-          <div className="bg-white rounded-xl p-5 max-w-md w-full shadow-2xl mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Confirm Delete
-            </h3>
-            <p className="text-gray-600 mb-5 leading-relaxed">
-              Are you sure you want to delete the history record for{" "}
-              <strong>{deleteConfirm}</strong> for month{" "}
-              <strong>{selectedMonth}</strong>?
-            </p>
-            <div className="flex gap-2.5">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => deleteRecord(deleteConfirm)}
-                className="flex-1 py-2.5 bg-red-500 border-none rounded-lg text-white font-medium cursor-pointer hover:bg-red-600 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog - Using reusable component */}
+      <DeleteConfirmationDialog
+        isOpen={deleteConfirm !== null}
+        onClose={() => {
+          setDeleteConfirm(null);
+          setIsDeleting(false);
+        }}
+        onConfirm={() => deleteConfirm && deleteRecord(deleteConfirm)}
+        title="Delete History Record"
+        message={`Are you sure you want to delete the history record for "${deleteConfirm}" for month ${selectedMonth}?`}
+        itemName={`${deleteConfirm} - ${selectedMonth}`}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

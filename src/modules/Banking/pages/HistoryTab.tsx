@@ -14,13 +14,10 @@ import { firestore } from "../../../lib/firebase";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { formatLakhs } from "../../../utils/formatters";
 import { LiabilityHistory, MonthlySummary } from "../../../types/banking.types";
+import DeleteConfirmationDialog from "../../../components/DeleteConfirmationDialog";
 
 // Date of birth: 17th October 1959
 const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
-
-// These interfaces are now imported from banking.types.ts
-// interface MonthlySummary { ... } - REMOVED
-// interface LiabilityHistory { ... } - REMOVED
 
 const HistoryTab: React.FC = () => {
   const { settings } = useSettings();
@@ -38,6 +35,7 @@ const HistoryTab: React.FC = () => {
     null,
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // State for age prediction
   const [zeroBalanceAge, setZeroBalanceAge] = useState<number | null>(null);
@@ -381,15 +379,7 @@ const HistoryTab: React.FC = () => {
   const executeDelete = async () => {
     if (!deleteConfirmMonth) return;
 
-    if (
-      !confirm(
-        `Are you sure you want to delete ALL records for ${deleteConfirmMonth}?`,
-      )
-    ) {
-      setDeleteConfirmMonth(null);
-      return;
-    }
-
+    setIsDeleting(true);
     try {
       const historyDetailRef = collection(firestore, "history_detail");
       const q = query(historyDetailRef);
@@ -468,6 +458,8 @@ const HistoryTab: React.FC = () => {
     } catch (error: any) {
       console.error("Error deleting history:", error);
       alert(`Failed to delete: ${error.message || "Unknown error"}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -733,7 +725,7 @@ const HistoryTab: React.FC = () => {
                           <button
                             onClick={() => setDeleteConfirmMonth(record.month)}
                             className="w-6 h-6 p-0 bg-red-500 text-white text-[10px] rounded flex items-center justify-center hover:bg-red-600 disabled:opacity-50 transition-colors"
-                            disabled={editingMonth !== null}
+                            disabled={editingMonth !== null || isDeleting}
                             title="Delete"
                           >
                             🗑️
@@ -749,33 +741,19 @@ const HistoryTab: React.FC = () => {
         )}
       </div>
 
-      {/* Delete Confirmation */}
-      {deleteConfirmMonth && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-50">
-          <div className="bg-white rounded-xl p-4 max-w-sm w-full shadow-2xl mx-4">
-            <h3 className="text-base font-semibold text-gray-900 mb-2">
-              Confirm Delete
-            </h3>
-            <p className="text-xs text-gray-600 mb-4 leading-relaxed">
-              Delete ALL records for <strong>{deleteConfirmMonth}</strong>?
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setDeleteConfirmMonth(null)}
-                className="flex-1 py-2 text-xs bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={executeDelete}
-                className="flex-1 py-2 text-xs bg-red-500 border-none rounded-lg text-white font-medium cursor-pointer hover:bg-red-600 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog - Using reusable component */}
+      <DeleteConfirmationDialog
+        isOpen={deleteConfirmMonth !== null}
+        onClose={() => {
+          setDeleteConfirmMonth(null);
+          setIsDeleting(false);
+        }}
+        onConfirm={executeDelete}
+        title="Delete History Records"
+        message={`Are you sure you want to delete ALL records for "${deleteConfirmMonth}"? This action cannot be undone.`}
+        itemName={`${deleteConfirmMonth} history records`}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

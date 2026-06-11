@@ -2,7 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
-import { useBankingOperations } from "../hooks/useBankingOperations";
+import { firestore } from "../../../lib/firebase";
+import { updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { toFirestoreData } from "../../../utils/firestoreHelpers";
+import DeleteConfirmationDialog from "../../../components/DeleteConfirmationDialog";
 import type { BankAccount } from "../../../types/banking.types";
 import HistoryChart from "./HistoryChart";
 
@@ -16,13 +19,13 @@ const EditAccountPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { settings } = useSettings();
-  const { accounts, loading: dataLoading, historyDetail } = useBankingData(); // Changed from 'history' to 'historyDetail'
-  const { handleSaveAccount, handleDeleteAccount } = useBankingOperations();
+  const { accounts, loading: dataLoading, historyDetail } = useBankingData();
 
   const isViewMode = !settings?.showDelete;
 
   const [submitting, setSubmitting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [account, setAccount] = useState<BankAccount | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [textareaHeight, setTextareaHeight] = useState<number>(150);
@@ -38,10 +41,9 @@ const EditAccountPage: React.FC = () => {
 
   // Filter history data for the current account from historyDetail
   useEffect(() => {
-    console.log("HistoryDetail data:", historyDetail); // Debug log
+    console.log("HistoryDetail data:", historyDetail);
 
     if (isViewMode && account && historyDetail && historyDetail.length > 0) {
-      // Filter historyDetail by acctCode
       const filteredHistory = historyDetail.filter(
         (item: any) => item.acctCode === account.acctCode,
       );
@@ -52,7 +54,6 @@ const EditAccountPage: React.FC = () => {
         filteredHistory,
       );
 
-      // Transform to the format expected by HistoryChart
       const transformedHistory: History[] = filteredHistory.map(
         (item: any) => ({
           month: item.month,
@@ -61,7 +62,6 @@ const EditAccountPage: React.FC = () => {
         }),
       );
 
-      // Sort by month (oldest first)
       const sortedHistory = [...transformedHistory].sort((a, b) =>
         a.month.localeCompare(b.month),
       );
@@ -153,7 +153,9 @@ const EditAccountPage: React.FC = () => {
         mpin: formData.mpin,
       };
 
-      await handleSaveAccount(accountData);
+      // Directly update Firebase
+      await updateDoc(doc(firestore, "accounts", id), toFirestoreData(accountData));
+      console.log("DEBUG: Updated account:", id);
 
       navigate("/banking", {
         state: { activeTab: "accounts" },
@@ -168,15 +170,19 @@ const EditAccountPage: React.FC = () => {
   const handleDelete = async () => {
     if (!id) return;
 
+    setIsDeleting(true);
     try {
-      await handleDeleteAccount(id);
+      // Directly delete from Firebase
+      await deleteDoc(doc(firestore, "accounts", id));
+      console.log("DEBUG: Deleted account:", id);
+
       navigate("/banking", {
         state: { activeTab: "accounts" },
       });
     } catch (err) {
       console.error("Delete error:", err);
       setError("Failed to delete account. Please try again.");
-    } finally {
+      setIsDeleting(false);
       setShowDeleteDialog(false);
     }
   };
@@ -413,34 +419,19 @@ const EditAccountPage: React.FC = () => {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      {showDeleteDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Delete Account?
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete account "{account?.acctCode}"?
-              This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowDeleteDialog(false)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white border-none rounded-lg font-medium hover:bg-red-700 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog - Using reusable component */}
+      <DeleteConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={() => {
+          setShowDeleteDialog(false);
+          setIsDeleting(false);
+        }}
+        onConfirm={handleDelete}
+        title="Delete Account"
+        message={`Deleting account "${account?.acctCode}" will also delete all associated deposits and history records. This action cannot be undone.`}
+        itemName={account?.acctCode}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

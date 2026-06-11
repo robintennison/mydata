@@ -2,15 +2,17 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
-import { useBankingOperations } from "../hooks/useBankingOperations";
+import { firestore } from "../../../lib/firebase";
+import { deleteDoc, doc } from "firebase/firestore";
+import DeleteConfirmationDialog from "../../../components/DeleteConfirmationDialog";
 
 const AccountsTab: React.FC = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
   const { accounts, loading } = useBankingData();
-  const { handleDeleteAccount } = useBankingOperations();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Helper function to check if account is active
   const isAccountActive = (account: any): boolean => {
@@ -43,11 +45,30 @@ const AccountsTab: React.FC = () => {
     return `${code.substring(0, 12)}...`;
   };
 
-  const confirmDelete = () => {
-    if (accountToDelete) {
-      handleDeleteAccount(accountToDelete.id);
+  const handleDeleteClick = (account: any, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click from triggering
+    setAccountToDelete(account);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!accountToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      // Directly delete from Firebase
+      await deleteDoc(doc(firestore, "accounts", accountToDelete.id));
+      console.log("DEBUG: Deleted account:", accountToDelete.id);
+      
+      // Close dialog and clear state
       setShowDeleteDialog(false);
       setAccountToDelete(null);
+      
+      // The accounts list will automatically update when Firebase realtime listener picks up the change
+    } catch (error) {
+      console.error("Error deleting account:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -57,14 +78,6 @@ const AccountsTab: React.FC = () => {
       navigate(`/banking/accounts/edit/${accountId}`);
     } else {
       navigate(`/banking/accounts/view/${accountId}`);
-    }
-  };
-
-  // Handle edit button click - only available when showDelete is true
-  const handleEditClick = (accountId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (settings?.showDelete) {
-      navigate(`/banking/accounts/edit/${accountId}`);
     }
   };
 
@@ -101,10 +114,8 @@ const AccountsTab: React.FC = () => {
               <div className="w-[38%] px-0.5 text-left">Account</div>
               {/* MPIN Column - More space */}
               <div className="w-[28%] px-0.5 text-left">MPIN</div>
-              {/* Edit Button Column - Minimal space */}
-              {settings?.showDelete && (
-                <div className="w-[7%] flex justify-end pr-0.5"></div>
-              )}
+              {/* Delete Button Column - Minimal space */}
+              <div className="w-[7%] flex justify-end pr-0.5"></div>
             </div>
 
             {/* Accounts Rows - COMPACT */}
@@ -147,18 +158,16 @@ const AccountsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Edit Button Column - Minimal space */}
-                      {settings?.showDelete && (
-                        <div className="w-[7%] flex justify-end items-center pr-0.5">
-                          <button
-                            onClick={(e) => handleEditClick(account.id, e)}
-                            className="p-0 bg-transparent border-none cursor-pointer text-gray-500 text-[10px] flex items-center justify-center w-5 h-5 hover:text-blue-600"
-                            title="Edit Account"
-                          >
-                            ✏️
-                          </button>
-                        </div>
-                      )}
+                      {/* Delete Button Column - Minimal space */}
+                      <div className="w-[7%] flex justify-end items-center pr-0.5">
+                        <button
+                          onClick={(e) => handleDeleteClick(account, e)}
+                          className="p-0 bg-transparent border-none cursor-pointer text-gray-500 text-[10px] flex items-center justify-center w-5 h-5 hover:text-red-600"
+                          title="Delete Account"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -168,38 +177,19 @@ const AccountsTab: React.FC = () => {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      {showDeleteDialog && accountToDelete && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-50">
-          <div className="bg-white rounded-xl p-5 max-w-md w-full shadow-2xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Delete Account?
-            </h3>
-            <p className="text-gray-600 mb-5 leading-relaxed">
-              Are you sure you want to delete account{" "}
-              <span className="font-semibold">{accountToDelete.acctCode}</span>?
-              This action cannot be undone.
-            </p>
-            <div className="flex gap-2.5">
-              <button
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setAccountToDelete(null);
-                }}
-                className="flex-1 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 py-2.5 bg-red-500 border-none rounded-lg text-white font-medium cursor-pointer hover:bg-red-600 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog - Using reusable component */}
+      <DeleteConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={() => {
+          setShowDeleteDialog(false);
+          setAccountToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Account"
+        message={`Deleting account "${accountToDelete?.acctCode}" will also delete all associated deposits and history records. This action cannot be undone.`}
+        itemName={accountToDelete?.acctCode}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

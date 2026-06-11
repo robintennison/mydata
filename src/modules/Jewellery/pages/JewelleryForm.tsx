@@ -1,4 +1,3 @@
-// JewelleryForm.tsx (updated)
 import React, { useState, useEffect, useRef } from "react";
 import {
   getFirestore,
@@ -16,7 +15,8 @@ import {
 } from "../../../utils/fileOptimizer";
 import { useImageSize, ImageSizeBadge } from "../../../utils/imageSizeUtils";
 import CustomCalendar from "../../../components/UI/CustomCalendar";
-import BillAssignment from "./BillAssignment"; // Import the new component
+import BillAssignment from "./BillAssignment";
+import DeleteConfirmationDialog from "../../../components/DeleteConfirmationDialog";
 
 interface JewelleryFormProps {
   initialData?: Partial<Jewellery>;
@@ -287,10 +287,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
   };
 
   const handleDeleteImage = async () => {
-    if (!formData.imageUrl) {
-      setShowDeleteConfirm(false);
-      return;
-    }
+    if (!formData.imageUrl) return;
 
     try {
       setDeletingImage(true);
@@ -705,7 +702,7 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
               className="px-4 py-2.5 sm:px-6 bg-red-600 text-white border-none rounded cursor-pointer text-base font-medium flex items-center justify-center gap-1.5 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <span>🗑️</span>
-              <span>Delete</span>
+              <span>Delete Item</span>
             </button>
           )}
 
@@ -719,36 +716,18 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         </div>
       </div>
 
-      {/* Delete Image Confirmation Dialog */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-[400px] w-full shadow-2xl">
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              Delete Image
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this image? This action cannot be
-              undone.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-end">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={deletingImage}
-                className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteImage}
-                disabled={deletingImage}
-                className="px-4 py-2 bg-red-600 text-white border-none rounded-lg cursor-pointer hover:bg-red-700"
-              >
-                {deletingImage ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Image Confirmation Dialog - Using reusable component */}
+      <DeleteConfirmationDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+        }}
+        onConfirm={handleDeleteImage}
+        title="Delete Image"
+        message="Are you sure you want to delete this image? This action cannot be undone."
+        itemName="jewellery image"
+        isDeleting={deletingImage}
+      />
     </form>
   );
 };

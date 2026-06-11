@@ -1,12 +1,12 @@
-// AddEditDepositPage.tsx (updated)
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
-import { useBankingOperations } from "../hooks/useBankingOperations";
+import { useBankingOperations, DeleteConfirmationState } from "../hooks/useBankingOperations";
 import { Deposit, DepositFormData } from "../../../types/banking.types";
 import { formatDate } from "../../../utils/formatters";
 import CustomCalendar from "../../../components/UI/CustomCalendar";
-import AccountSelector from "./AccountSelector"; // Import the new component
+import AccountSelector from "./AccountSelector";
+import DeleteConfirmationDialog from "../../../components/DeleteConfirmationDialog"; // Import the dialog
 
 interface AddEditDepositPageProps {
   isEdit?: boolean;
@@ -18,7 +18,29 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   const { depositId } = useParams();
   const navigate = useNavigate();
   const { accounts, deposits, loading: dataLoading } = useBankingData();
-  const { handleSaveDeposit, handleDeleteDeposit } = useBankingOperations();
+  
+  // State for delete confirmation dialog
+  const [deleteDialog, setDeleteDialog] = useState<DeleteConfirmationState>({
+    isOpen: false,
+    type: null,
+    id: '',
+    onConfirm: async () => {},
+  });
+
+  const closeDeleteDialog = () => {
+    setDeleteDialog({
+      isOpen: false,
+      type: null,
+      id: '',
+      onConfirm: async () => {},
+    });
+  };
+
+  // Pass the dialog state setters to useBankingOperations
+  const { handleSaveDeposit, handleDeleteDeposit } = useBankingOperations(
+    setDeleteDialog,
+    closeDeleteDialog
+  );
 
   const [formData, setFormData] = useState<DepositFormData>({
     id: "",
@@ -31,7 +53,6 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
   });
   const [selectedAccountCode, setSelectedAccountCode] = useState("");
   const [saving, setSaving] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string>("");
   const [showCalendar, setShowCalendar] = useState<"start" | "end" | null>(
@@ -152,20 +173,14 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
     setDeleting(true);
     try {
-      // Call delete function and wait for it to complete
-      const success = await handleDeleteDeposit(depositId);
-
-      if (success) {
-        console.log("DEBUG: Delete completed successfully, navigating...");
-        navigate("/banking?tab=deposits", { replace: true });
-      } else {
-        // If handleDeleteDeposit returns false (e.g., user cancelled confirmation)
-        console.log("DEBUG: Delete operation was cancelled");
-        setDeleting(false);
-        setShowDeleteConfirm(false);
-      }
+      // Call delete function - it will open the dialog and handle the actual deletion
+      await handleDeleteDeposit(depositId, `deposit of ₹${formData.amount}`);
+      
+      // Note: The actual navigation will happen after the dialog confirms deletion
+      // For now, just set deleting to false as the dialog will handle the rest
+      setDeleting(false);
     } catch (error: any) {
-      console.error("DEBUG: Error deleting deposit:", error);
+      console.error("DEBUG: Error in delete flow:", error);
       let errorMessage = "Failed to delete deposit. Please try again.";
 
       if (error.code === "permission-denied") {
@@ -176,7 +191,6 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
 
       setError(errorMessage);
       setDeleting(false);
-      setShowDeleteConfirm(false);
     }
   };
 
@@ -380,7 +394,7 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
           {/* Delete Button - Only show in edit mode */}
           {isEdit && (
             <button
-              onClick={() => setShowDeleteConfirm(true)}
+              onClick={() => handleDelete()} // This will open the dialog
               disabled={saving || deleting}
               className={`flex-1 py-3.5 text-white font-semibold text-sm rounded-lg transition-colors ${
                 saving || deleting
@@ -416,40 +430,19 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-5 z-[10000]">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Delete Deposit
-            </h3>
-            <p className="text-gray-600 mb-6 leading-relaxed text-sm">
-              Are you sure you want to delete this deposit? This action cannot
-              be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={deleting}
-                className="px-4 py-2 border border-gray-300 text-gray-600 font-medium text-sm rounded-lg hover:bg-gray-50 disabled:opacity-70"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className={`px-4 py-2 text-white font-medium text-sm rounded-lg ${
-                  deleting
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-red-500 hover:bg-red-600"
-                }`}
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog - Using the reusable component */}
+      <DeleteConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={closeDeleteDialog}
+        onConfirm={async () => {
+          await deleteDialog.onConfirm();
+          // Navigate after successful deletion
+          navigate("/banking?tab=deposits", { replace: true });
+        }}
+        title="Delete Deposit"
+        itemName={deleteDialog.itemName}
+        isDeleting={deleting}
+      />
     </div>
   );
 };

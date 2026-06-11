@@ -165,34 +165,40 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   return (
-    <div style={styles.container}>
-      <h3 style={styles.title}>📁 Upload Files to Firebase Storage</h3>
-      <p style={styles.subtitle}>
+    <div className="bg-white rounded-xl p-6 shadow-lg mb-8">
+      <h3 className="text-2xl font-semibold text-gray-800 mt-0">
+        📁 Upload Files to Firebase Storage
+      </h3>
+      <p className="text-gray-600 mb-6">
         Files will be automatically optimized to save space
       </p>
 
-      <div style={styles.uploadArea}>
+      <div className="border-2 border-dashed border-blue-500 rounded-lg p-8 text-center bg-gray-50 mb-5">
         <input
           id="file-input"
           type="file"
           onChange={handleFileSelect}
           disabled={uploading}
-          style={styles.fileInput}
+          className="block mx-auto mb-5 p-2.5 border border-gray-300 rounded-md cursor-pointer w-full max-w-md disabled:opacity-50 disabled:cursor-not-allowed"
         />
 
         {file && (
-          <div style={styles.fileInfo}>
-            <div style={styles.fileRow}>
-              <span style={styles.fileName}>📄 {file.name}</span>
-              <span style={styles.fileSize}>{formatFileSize(file.size)}</span>
+          <div className="mb-5 p-4 bg-white rounded-lg border border-gray-200">
+            <div className="flex justify-between items-center mb-2.5">
+              <span className="font-semibold text-sm">
+                📄 {file.name}
+              </span>
+              <span className="text-gray-600 text-xs bg-gray-100 px-2 py-0.5 rounded">
+                {formatFileSize(file.size)}
+              </span>
             </div>
 
             {optimizationInfo && optimizationInfo.savedPercentage > 0 && (
-              <div style={styles.optimizationInfo}>
-                <div style={styles.savingsBadge}>
+              <div className="flex flex-col gap-2 mt-2.5 pt-2.5 border-t border-dashed border-gray-300">
+                <div className="bg-green-500 text-white px-3 py-1 rounded-xl text-xs font-bold inline-block w-fit">
                   🎯 {optimizationInfo.savedPercentage.toFixed(1)}% saved
                 </div>
-                <div style={styles.sizeComparison}>
+                <div className="text-xs text-gray-600 font-mono">
                   {formatFileSize(optimizationInfo.originalSize)} →{" "}
                   {formatFileSize(optimizationInfo.optimizedSize)}
                 </div>
@@ -200,46 +206,53 @@ const FileUpload: React.FC<FileUploadProps> = ({
             )}
 
             {optimizationInfo && optimizationInfo.savedPercentage === 0 && (
-              <div style={styles.noSavings}>File is already optimized</div>
+              <div className="text-xs text-gray-500 italic mt-1">
+                File is already optimized
+              </div>
             )}
           </div>
         )}
 
         {uploading && (
-          <div style={styles.progressContainer}>
-            <div style={styles.progressBar}>
+          <div className="my-5">
+            <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden mb-1">
               <div
-                style={{
-                  ...styles.progressFill,
-                  width: `${progress}%`,
-                }}
+                className="h-full bg-green-600 transition-all duration-300"
+                style={{ width: `${progress}%` }}
               ></div>
             </div>
-            <span style={styles.progressText}>{progress.toFixed(1)}%</span>
+            <span className="text-sm text-gray-600">
+              {progress.toFixed(1)}%
+            </span>
           </div>
         )}
 
-        {error && <div style={styles.error}>⚠️ {error}</div>}
+        {error && (
+          <div className="bg-red-50 text-red-700 p-3 rounded-md my-4 text-center">
+            ⚠️ {error}
+          </div>
+        )}
 
         <button
           onClick={handleUpload}
           disabled={!file || uploading}
-          style={{
-            ...styles.uploadButton,
-            opacity: !file || uploading ? 0.6 : 1,
-            cursor: !file || uploading ? "not-allowed" : "pointer",
-          }}
+          className="bg-blue-500 text-white border-none px-8 py-3 rounded-md text-base font-semibold cursor-pointer mt-2.5 transition-all hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
         >
           {uploading ? "Uploading..." : "Upload Optimized File"}
         </button>
       </div>
 
       {uploadedFiles.length > 0 && (
-        <div style={styles.uploadedFiles}>
-          <h4>✅ Recently Uploaded:</h4>
-          <ul style={styles.fileList}>
+        <div className="bg-green-50 p-5 rounded-lg mt-6">
+          <h4 className="font-semibold text-gray-800 mb-2">
+            ✅ Recently Uploaded:
+          </h4>
+          <ul className="list-none p-0 m-2.5">
             {uploadedFiles.map((filename, index) => (
-              <li key={index} style={styles.fileItem}>
+              <li
+                key={index}
+                className="py-2 border-b border-dashed border-green-200 last:border-b-0"
+              >
                 📄 {filename}
               </li>
             ))}
@@ -247,174 +260,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
         </div>
       )}
 
-      <div style={styles.infoBox}>
-        <p>
+      <div className="bg-blue-50 p-4 rounded-lg mt-5 text-sm">
+        <p className="mb-2">
           <strong>Storage Path:</strong> {pathPrefix}/{userId}/
         </p>
-        <p>
+        <p className="mb-2">
           <strong>File Optimization:</strong> Automatic size reduction
         </p>
-        <p style={styles.note}>
+        <p className="text-blue-700 italic mt-2.5">
           Images are compressed, HEIC files are converted to JPEG
         </p>
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: "25px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-    marginBottom: "30px",
-  },
-  title: {
-    marginTop: 0,
-    color: "#333",
-  },
-  subtitle: {
-    color: "#666",
-    marginBottom: "25px",
-  },
-  uploadArea: {
-    border: "2px dashed #4285f4",
-    borderRadius: "10px",
-    padding: "30px",
-    textAlign: "center" as const,
-    backgroundColor: "#f8f9fa",
-    marginBottom: "20px",
-  },
-  fileInput: {
-    display: "block",
-    margin: "0 auto 20px",
-    padding: "10px",
-    border: "1px solid #ddd",
-    borderRadius: "6px",
-    cursor: "pointer",
-    width: "100%",
-    maxWidth: "400px",
-  },
-  fileInfo: {
-    marginBottom: "20px",
-    padding: "15px",
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    border: "1px solid #e0e0e0",
-  },
-  fileRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "10px",
-  },
-  fileName: {
-    fontWeight: "bold" as const,
-    fontSize: "0.95rem",
-  },
-  fileSize: {
-    color: "#666",
-    fontSize: "0.85rem",
-    backgroundColor: "#f5f5f5",
-    padding: "2px 8px",
-    borderRadius: "4px",
-  },
-  optimizationInfo: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "8px",
-    marginTop: "10px",
-    paddingTop: "10px",
-    borderTop: "1px dashed #ddd",
-  },
-  savingsBadge: {
-    backgroundColor: "#4caf50",
-    color: "white",
-    padding: "4px 12px",
-    borderRadius: "12px",
-    fontSize: "0.8rem",
-    fontWeight: "bold" as const,
-    display: "inline-block",
-    width: "fit-content",
-  },
-  sizeComparison: {
-    fontSize: "0.85rem",
-    color: "#666",
-    fontFamily: "monospace",
-  },
-  noSavings: {
-    fontSize: "0.85rem",
-    color: "#757575",
-    fontStyle: "italic" as const,
-    marginTop: "5px",
-  },
-  progressContainer: {
-    margin: "20px 0",
-  },
-  progressBar: {
-    width: "100%",
-    height: "10px",
-    backgroundColor: "#e0e0e0",
-    borderRadius: "5px",
-    overflow: "hidden",
-    marginBottom: "5px",
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#34a853",
-    transition: "width 0.3s",
-  },
-  progressText: {
-    fontSize: "0.9rem",
-    color: "#666",
-  },
-  error: {
-    backgroundColor: "#ffebee",
-    color: "#c62828",
-    padding: "12px",
-    borderRadius: "6px",
-    margin: "15px 0",
-    textAlign: "center" as const,
-  },
-  uploadButton: {
-    backgroundColor: "#4285f4",
-    color: "white",
-    border: "none",
-    padding: "12px 30px",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    fontWeight: "600" as const,
-    cursor: "pointer",
-    marginTop: "10px",
-  },
-  uploadedFiles: {
-    backgroundColor: "#e8f5e9",
-    padding: "20px",
-    borderRadius: "10px",
-    marginTop: "25px",
-  },
-  fileList: {
-    listStyleType: "none",
-    padding: 0,
-    margin: "10px 0 0 0",
-  },
-  fileItem: {
-    padding: "8px 0",
-    borderBottom: "1px dashed #c8e6c9",
-  },
-  infoBox: {
-    backgroundColor: "#e3f2fd",
-    padding: "15px",
-    borderRadius: "8px",
-    marginTop: "20px",
-    fontSize: "0.9rem",
-  },
-  note: {
-    fontStyle: "italic" as const,
-    color: "#1976d2",
-    marginTop: "10px",
-  },
 };
 
 export default FileUpload;

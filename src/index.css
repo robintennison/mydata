@@ -1,28 +1,44 @@
-
-/* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Custom base styles that extend Tailwind */
+@layer base {
+  /* Ensure proper box sizing */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* HTML and body setup */
+  html {
+    height: 100%;
+  }
+  
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #root {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
 }
 
-/* Keep your existing styles for now */
-html {
-  height: 100%;
-}
-
-body {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-#root {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+/* Custom utilities that aren't available in Tailwind by default */
+@layer utilities {
+  /* Custom animation delays if needed */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+  
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
 }

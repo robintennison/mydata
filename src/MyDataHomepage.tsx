@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useBankingData } from "./modules/Banking/hooks/useBankingData";
 import { useSettings } from "./contexts/SettingsContext";
 import { useJewellerySettings } from "./modules/Jewellery/hooks/useSettingsData";
+import { useJewelleryData } from "./modules/Jewellery/hooks/useJewelleryData";
 import {
   getNextMaturities,
   getExpiredMaturities,
@@ -10,10 +11,10 @@ import {
 import { calculateEMW, getEmwSettings } from "./utils/emwCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
-import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+import { DocumentData } from "firebase/firestore";
 import { getCurrentMonth, formatLakhs, formatDateShort } from "./utils/formatters";
 
-// Add OnlineItem interface
+// Add OnlineItem interface (keep as is)
 interface OnlineItem {
   id: string;
   name: string;
@@ -31,32 +32,7 @@ interface OnlineItem {
   updatedAt: number;
 }
 
-// Add JewelleryItem interface (matching the structure from Firestore)
-interface JewelleryItem {
-  id: string;
-  code: string;
-  description: string;
-  weight: number;
-  location: string;
-  boughtFor: string;
-  purchaseDate: number;
-  imageUrl: string;
-  active: boolean;
-  billId?: string;
-  lastVerified?: number;
-  verificationStatus?: string;
-  verificationNotes?: string;
-}
-
-// Add HistoryDetail interface
-interface HistoryDetail {
-  acctCode: string;
-  month: string;
-  savings: number;
-  deposits: number;
-}
-
-// Add LiabilityHistory interface
+// Add LiabilityHistory interface (keep as is)
 interface LiabilityHistory {
   id: string;
   month: string;
@@ -68,28 +44,26 @@ const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();
   const { settings: appSettings } = useSettings();
   const { goldRate, settings: jewellerySettings } = useJewellerySettings();
-  const { accounts, deposits, loading: bankingLoading } = useBankingData();
+  
+  // Use the existing banking hook - this already gives us accounts, deposits, historyDetail, and liabilities!
+  const { accounts, deposits, loading: bankingLoading, historyDetail } = useBankingData();
+  
+  // Use the jewellery hook instead of manual fetch
+  const { items: jewelleryItems, loading: jewelleryLoading } = useJewelleryData();
+  
+  // State for online items (no hook exists yet - keeping manual fetch)
   const [onlineItems, setOnlineItems] = useState<OnlineItem[]>([]);
   const [onlineItemsLoading, setOnlineItemsLoading] = useState(true);
-  const [jewelleryItems, setJewelleryItems] = useState<JewelleryItem[]>([]);
-  const [jewelleryLoading, setJewelleryLoading] = useState(true);
-
-  // State for history_detail data
-  const [currentMonthHistory, setCurrentMonthHistory] = useState<
-    HistoryDetail[]
-  >([]);
-  const [allHistoryData, setAllHistoryData] = useState<HistoryDetail[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(true);
-
-  // State for liabilities data
+  
+  // State for liability_history data (different from liabilities collection)
   const [currentMonthLiabilities, setCurrentMonthLiabilities] = useState<number>(0);
   const [allLiabilitiesData, setAllLiabilitiesData] = useState<LiabilityHistory[]>([]);
-  const [liabilitiesLoading, setLiabilitiesLoading] = useState(true);
+  const [liabilitiesHistoryLoading, setLiabilitiesHistoryLoading] = useState(true);
 
   // Get resale discount percentage from jewellery settings
   const resaleDiscountPercent = jewellerySettings?.resaleDiscountPercent || 0;
 
-  // Fetch liabilities for a specific month
+  // Fetch liability_history for a specific month
   const getLiabilitiesForMonth = async (month: string): Promise<number> => {
     try {
       const db = getFirestore();
@@ -110,11 +84,11 @@ const MyDataHomepage: React.FC = () => {
     }
   };
 
-  // Fetch ALL liabilities data
+  // Fetch ALL liability_history data (separate collection from liabilities)
   useEffect(() => {
-    const fetchAllLiabilitiesData = async () => {
+    const fetchAllLiabilitiesHistoryData = async () => {
       try {
-        setLiabilitiesLoading(true);
+        setLiabilitiesHistoryLoading(true);
         const db = getFirestore();
         const liabilityHistoryRef = collection(db, "liability_history");
         const querySnapshot = await getDocs(liabilityHistoryRef);
@@ -138,54 +112,16 @@ const MyDataHomepage: React.FC = () => {
         const currentLiabilities = await getLiabilitiesForMonth(currentMonth);
         setCurrentMonthLiabilities(currentLiabilities);
       } catch (error) {
-        console.error("Error fetching liabilities data:", error);
+        console.error("Error fetching liability_history data:", error);
       } finally {
-        setLiabilitiesLoading(false);
+        setLiabilitiesHistoryLoading(false);
       }
     };
 
-    fetchAllLiabilitiesData();
+    fetchAllLiabilitiesHistoryData();
   }, []);
 
-  // Fetch ALL history_detail data
-  useEffect(() => {
-    const fetchAllHistoryData = async () => {
-      try {
-        setHistoryLoading(true);
-        const historyDetailRef = collection(getFirestore(), "history_detail");
-        const querySnapshot = await getDocs(historyDetailRef);
-
-        const allRecords: HistoryDetail[] = [];
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          allRecords.push({
-            acctCode: data.acctCode || "",
-            month: data.month || "",
-            savings: data.savings || 0,
-            deposits: data.deposits || 0,
-          });
-        });
-
-        setAllHistoryData(allRecords);
-
-        // Also filter for current month separately
-        const currentMonth = getCurrentMonth();
-        const currentMonthRecords = allRecords.filter(
-          (record) => record.month === currentMonth,
-        );
-        setCurrentMonthHistory(currentMonthRecords);
-      } catch (error) {
-        console.error("Error fetching history_detail data:", error);
-      } finally {
-        setHistoryLoading(false);
-      }
-    };
-
-    fetchAllHistoryData();
-  }, []);
-
-  // Fetch online items
+  // Fetch online items (keeping as is since no hook exists)
   useEffect(() => {
     const fetchOnlineItems = async () => {
       try {
@@ -207,21 +143,14 @@ const MyDataHomepage: React.FC = () => {
             name: data.name || "",
             detail: data.detail || "",
             category: data.category || "",
-            // Handle nullable dates - if field doesn't exist or is null, set to null
             startDate: data.startDate !== undefined ? data.startDate : null,
             endDate: data.endDate !== undefined ? data.endDate : null,
-            // Handle both old and new field names
             file1: data.file1 || data.image1 || "",
             file2: data.file2 || data.image2 || "",
-            // Determine file types based on what's available
             file1Type: data.file1Type || (data.image1 ? "image" : "none"),
             file2Type: data.file2Type || (data.image2 ? "image" : "none"),
-            file1Name:
-              data.file1Name ||
-              (hasOldImageFields && data.image1 ? "Legacy Image" : ""),
-            file2Name:
-              data.file2Name ||
-              (hasOldImageFields && data.image2 ? "Legacy Image" : ""),
+            file1Name: data.file1Name || (hasOldImageFields && data.image1 ? "Legacy Image" : ""),
+            file2Name: data.file2Name || (hasOldImageFields && data.image2 ? "Legacy Image" : ""),
             createdAt: data.createdAt || Date.now(),
             updatedAt: data.updatedAt || Date.now(),
           });
@@ -231,7 +160,7 @@ const MyDataHomepage: React.FC = () => {
         const itemsWithEndDates = itemsList
           .filter((item) => item.endDate != null)
           .sort((a, b) => (a.endDate || 0) - (b.endDate || 0))
-          .slice(0, 5); // Get first 5 items
+          .slice(0, 5);
 
         setOnlineItems(itemsWithEndDates);
       } catch (error) {
@@ -244,47 +173,7 @@ const MyDataHomepage: React.FC = () => {
     fetchOnlineItems();
   }, []);
 
-  // Fetch jewellery items
-  useEffect(() => {
-    const fetchJewelleryItems = async () => {
-      try {
-        setJewelleryLoading(true);
-        const db = getFirestore();
-        const itemsRef = collection(db, "jewellery");
-        const itemsSnapshot = await getDocs(itemsRef);
-
-        const itemsList: JewelleryItem[] = [];
-        itemsSnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-          const data = doc.data();
-          itemsList.push({
-            id: doc.id,
-            code: data.code || "",
-            description: data.description || "",
-            weight: data.weight || 0,
-            location: data.location || "",
-            boughtFor: data.boughtFor || "",
-            purchaseDate: data.purchaseDate || 0,
-            imageUrl: data.imageUrl || "",
-            active: data.active !== false,
-            billId: data.billId,
-            lastVerified: data.lastVerified || 0,
-            verificationStatus: data.verificationStatus,
-            verificationNotes: data.verificationNotes || "",
-          });
-        });
-
-        setJewelleryItems(itemsList);
-      } catch (error) {
-        console.error("Error fetching jewellery items:", error);
-      } finally {
-        setJewelleryLoading(false);
-      }
-    };
-
-    fetchJewelleryItems();
-  }, []);
-
-  // Memoize calculations using all history_detail data and liabilities
+  // Memoize calculations using historyDetail from banking hook and liability_history data
   const {
     totalSavings,
     totalDeposits,
@@ -294,7 +183,12 @@ const MyDataHomepage: React.FC = () => {
     actualWithdrawalData,
     lastMonthWithdrawal,
   } = useMemo(() => {
-    // Use current month history data
+    // Filter historyDetail for current month (using banking hook data)
+    const currentMonth = getCurrentMonth();
+    const currentMonthHistory = historyDetail.filter(
+      (record) => record.month === currentMonth
+    );
+    
     if (currentMonthHistory.length === 0) {
       return {
         totalSavings: 0,
@@ -316,7 +210,7 @@ const MyDataHomepage: React.FC = () => {
       totalDeposits += record.deposits;
     });
 
-    // Use current month liabilities
+    // Use current month liabilities from liability_history collection
     const totalLiabilities = currentMonthLiabilities;
     const totalBankBalance = totalSavings + totalDeposits - totalLiabilities;
 
@@ -328,10 +222,10 @@ const MyDataHomepage: React.FC = () => {
       emwSettings.interestRate,
     );
 
-    // Calculate monthly balances from all history data and liabilities
+    // Calculate monthly balances from historyDetail (banking hook) and liability_history data
     const monthlyBalancesMap = new Map<string, number>();
 
-    allHistoryData.forEach((record) => {
+    historyDetail.forEach((record) => {
       const month = record.month;
       const totalBalance = record.savings + record.deposits;
 
@@ -343,7 +237,7 @@ const MyDataHomepage: React.FC = () => {
       }
     });
 
-    // Subtract liabilities for each month
+    // Subtract liability_history amounts for each month
     allLiabilitiesData.forEach((liability) => {
       const month = liability.month;
       if (monthlyBalancesMap.has(month)) {
@@ -403,9 +297,9 @@ const MyDataHomepage: React.FC = () => {
       actualWithdrawalData: calculateActualWithdrawalRate(),
       lastMonthWithdrawal: calculateLastMonthWithdrawal(),
     };
-  }, [currentMonthHistory, allHistoryData, allLiabilitiesData, currentMonthLiabilities, appSettings]);
+  }, [historyDetail, allLiabilitiesData, currentMonthLiabilities, appSettings]);
 
-  // Memoize jewellery calculations separately
+  // Memoize jewellery calculations using jewellery items from the hook
   const { totalJewelleryWeight, totalJewellerySellValue, totalAssets } =
     useMemo(() => {
       // Calculate jewellery stats (only active items)
@@ -417,9 +311,7 @@ const MyDataHomepage: React.FC = () => {
         0,
       );
 
-      // Calculate sell value exactly as in JewelleryHome component:
-      // goldValue = totalWeight * goldRate
-      // sellValue = goldValue * (1 - resaleDiscountPercent / 100)
+      // Calculate sell value exactly as in JewelleryHome component
       const goldValue = totalJewelleryWeight * goldRate;
       const totalJewellerySellValue =
         goldValue * (1 - resaleDiscountPercent / 100);
@@ -434,7 +326,7 @@ const MyDataHomepage: React.FC = () => {
       };
     }, [jewelleryItems, goldRate, resaleDiscountPercent, totalBankBalance]);
 
-  // Memoize maturities calculations (still need deposits for this)
+  // Memoize maturities calculations (deposits already from banking hook)
   const { upcomingMaturities, expiredMaturities } = useMemo(() => {
     if (bankingLoading || deposits.length === 0) {
       return {
@@ -468,8 +360,8 @@ const MyDataHomepage: React.FC = () => {
   // Get EMW settings for display
   const emwSettings = getEmwSettings(appSettings);
 
-  // Combined loading state (including liabilities loading)
-  const isLoading = historyLoading || bankingLoading || jewelleryLoading || liabilitiesLoading;
+  // Combined loading state
+  const isLoading = bankingLoading || jewelleryLoading || onlineItemsLoading || liabilitiesHistoryLoading;
 
   if (isLoading) {
     return (
@@ -573,7 +465,7 @@ const MyDataHomepage: React.FC = () => {
             </div>
           </div>
 
-          {/* Jewellery Sell Value Card - Still from jewellery table */}
+          {/* Jewellery Sell Value Card - From jewellery hook */}
           <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-gray-100 min-h-[60px] flex flex-col justify-center">
             <div className="text-xs text-gray-500 mb-0.5">Ice</div>
             <div className="text-base font-bold text-amber-600 leading-tight">
@@ -704,7 +596,7 @@ const MyDataHomepage: React.FC = () => {
         )}
       </div>
 
-      {/* Maturities Section - Compact (still uses deposits table) */}
+      {/* Maturities Section - Compact (still uses deposits from banking hook) */}
       <div
         className="bg-white rounded-lg my-3 p-3 sm:p-4 shadow-sm border border-gray-200 shrink-0"
         style={{

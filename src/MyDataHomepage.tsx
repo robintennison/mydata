@@ -4,6 +4,7 @@ import { useBankingData } from "./modules/Banking/hooks/useBankingData";
 import { useSettings } from "./contexts/SettingsContext";
 import { useJewellerySettings } from "./modules/Jewellery/hooks/useSettingsData";
 import { useJewelleryData } from "./modules/Jewellery/hooks/useJewelleryData";
+import { useOnlineDataContext } from "./contexts/OnlineDataContext";
 import {
   getNextMaturities,
   getExpiredMaturities,
@@ -44,9 +45,15 @@ const MyDataHomepage: React.FC = () => {
   // Use the jewellery hook instead of manual fetch
   const { items: jewelleryItems, loading: jewelleryLoading } = useJewelleryData();
   
-  // State for online items (no hook exists yet - keeping manual fetch)
-  const [onlineItems, setOnlineItems] = useState<OnlineItem[]>([]);
-  const [onlineItemsLoading, setOnlineItemsLoading] = useState(true);
+  // Online items from shared context
+  const { items: allOnlineItems, loading: onlineItemsLoading } = useOnlineDataContext();
+
+  const onlineItems = useMemo(() => {
+    return allOnlineItems
+      .filter((item) => item.endDate != null)
+      .sort((a, b) => (a.endDate || 0) - (b.endDate || 0))
+      .slice(0, 5);
+  }, [allOnlineItems]);
   
   // State for liability_history data (different from liabilities collection)
   const [currentMonthLiabilities, setCurrentMonthLiabilities] = useState<number>(0);
@@ -114,57 +121,7 @@ const MyDataHomepage: React.FC = () => {
     fetchAllLiabilitiesHistoryData();
   }, []);
 
-  // Fetch online items (keeping as is since no hook exists)
-  useEffect(() => {
-    const fetchOnlineItems = async () => {
-      try {
-        setOnlineItemsLoading(true);
-        const db = getFirestore();
-        const itemsRef = collection(db, "online");
-        const itemsSnapshot = await getDocs(itemsRef);
 
-        const itemsList: OnlineItem[] = [];
-        itemsSnapshot.forEach((doc) => {
-          const data: DocumentData = doc.data();
-
-          // Check if this is old data (has image fields) or new data (has file fields)
-          const hasOldImageFields =
-            data.image1 !== undefined || data.image2 !== undefined;
-
-          itemsList.push({
-            id: doc.id,
-            name: data.name || "",
-            detail: data.detail || "",
-            category: data.category || "",
-            startDate: data.startDate !== undefined ? data.startDate : null,
-            endDate: data.endDate !== undefined ? data.endDate : null,
-            file1: data.file1 || data.image1 || "",
-            file2: data.file2 || data.image2 || "",
-            file1Type: data.file1Type || (data.image1 ? "image" : "none"),
-            file2Type: data.file2Type || (data.image2 ? "image" : "none"),
-            file1Name: data.file1Name || (hasOldImageFields && data.image1 ? "Legacy Image" : ""),
-            file2Name: data.file2Name || (hasOldImageFields && data.image2 ? "Legacy Image" : ""),
-            createdAt: data.createdAt || Date.now(),
-            updatedAt: data.updatedAt || Date.now(),
-          });
-        });
-
-        // Filter items with end dates and sort by end date ascending
-        const itemsWithEndDates = itemsList
-          .filter((item) => item.endDate != null)
-          .sort((a, b) => (a.endDate || 0) - (b.endDate || 0))
-          .slice(0, 5);
-
-        setOnlineItems(itemsWithEndDates);
-      } catch (error) {
-        console.error("Error fetching online items:", error);
-      } finally {
-        setOnlineItemsLoading(false);
-      }
-    };
-
-    fetchOnlineItems();
-  }, []);
 
   // Memoize calculations using historyDetail from banking hook and liability_history data
   const {
@@ -749,7 +706,7 @@ const MyDataHomepage: React.FC = () => {
 
       {/* Asset Distribution Chart */}
       <div className="mt-4 mb-2">
-        <CombinedAssetBarChart />
+        <CombinedAssetBarChart historyDetail={historyDetail} />
       </div>
     </>
   );

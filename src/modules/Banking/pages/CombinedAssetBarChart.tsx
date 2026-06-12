@@ -16,6 +16,7 @@ import ChartDataLabels, { Context } from "chartjs-plugin-datalabels";
 import { collection, query, getDocs } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import { getCurrentMonth } from "../../../utils/formatters";
+import type { HistoryDetail } from "../../../types/banking.types";
 
 // Register Chart.js components for Bar chart
 ChartJS.register(
@@ -29,7 +30,7 @@ ChartJS.register(
 );
 
 interface CombinedAssetBarChartProps {
-  // No props needed - will fetch data directly
+  historyDetail?: HistoryDetail[];
 }
 
 interface AccountData {
@@ -38,14 +39,53 @@ interface AccountData {
   deposits: number;
 }
 
-const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = () => {
+const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({ historyDetail }) => {
   const [accountData, setAccountData] = useState<AccountData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // REMOVED: Local getCurrentMonth function definition (now imported from formatters)
-
   // Fetch data from history_detail for current month
   useEffect(() => {
+    if (historyDetail && historyDetail.length > 0) {
+      const currentMonth = getCurrentMonth();
+      const accountMap = new Map<string, AccountData>();
+
+      historyDetail.forEach((record) => {
+        const month = record.month;
+        const acctCode = record.acctCode;
+        const savings = record.savings || 0;
+        const deposits = record.deposits || 0;
+
+        // Only include records from current month
+        if (month === currentMonth && acctCode) {
+          if (accountMap.has(acctCode)) {
+            const existing = accountMap.get(acctCode)!;
+            accountMap.set(acctCode, {
+              acctCode: acctCode,
+              savings: existing.savings + savings,
+              deposits: existing.deposits + deposits,
+            });
+          } else {
+            accountMap.set(acctCode, {
+              acctCode: acctCode,
+              savings: savings,
+              deposits: deposits,
+            });
+          }
+        }
+      });
+
+      const accountSummaries: AccountData[] = [];
+      accountMap.forEach((data) => {
+        if (data.savings > 0 || data.deposits > 0) {
+          accountSummaries.push(data);
+        }
+      });
+
+      setAccountData(accountSummaries);
+      setLoading(false);
+      return;
+    }
+
     const fetchCurrentMonthData = async () => {
       try {
         setLoading(true);
@@ -105,7 +145,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = () => {
     };
 
     fetchCurrentMonthData();
-  }, []);
+  }, [historyDetail]);
 
   // Prepare data for bar chart
   const chartData = useMemo(() => {

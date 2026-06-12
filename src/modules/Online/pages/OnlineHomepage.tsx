@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { useOnlineDataContext } from "../../../contexts/OnlineDataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import OnlineListTab from "./OnlineListTab";
 import RenewalListTab from "./RenewalListTab";
@@ -35,6 +35,7 @@ const OnlineHomepage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+  const { items, renewals, categories, loading } = useOnlineDataContext();
 
   // State for active tab - initialize from location state if available
   const [activeTab, setActiveTab] = useState<
@@ -55,76 +56,38 @@ const OnlineHomepage: React.FC = () => {
     }
   }, [location]);
 
-  const [loading, setLoading] = useState(true);
-  const [counts, setCounts] = useState({
-    items: 0,
-    renewals: 0,
-    categories: 0,
-    expiringSoon: 0,
-  });
+  const counts = useMemo(() => {
+    const now = Date.now();
+    const thirtyDaysFromNow = now + 30 * 24 * 60 * 60 * 1000;
+    
+    let expiringSoonCount = 0;
+    renewals.forEach((renewal: any) => {
+      let endDate = 0;
+      if (renewal.endDate && typeof renewal.endDate === "number") {
+        endDate = renewal.endDate;
+      } else if (
+        renewal.endDate &&
+        typeof renewal.endDate === "object" &&
+        (renewal.endDate as any).toDate
+      ) {
+        endDate = (renewal.endDate as any).toDate().getTime();
+      } else if (renewal.endDate && typeof renewal.endDate === "string") {
+        const parsed = Date.parse(renewal.endDate);
+        endDate = isNaN(parsed) ? 0 : parsed;
+      }
 
-  useEffect(() => {
-    fetchCounts();
-  }, []);
+      if (endDate && endDate <= thirtyDaysFromNow && endDate > now) {
+        expiringSoonCount++;
+      }
+    });
 
-  const fetchCounts = async () => {
-    try {
-      setLoading(true);
-      const db = getFirestore();
-      const now = Date.now();
-      const thirtyDaysFromNow = now + 30 * 24 * 60 * 60 * 1000;
-
-      // Fetch categories count
-      const categoriesSnapshot = await getDocs(
-        collection(db, "online_categories"),
-      );
-      const categoriesCount = categoriesSnapshot.size;
-
-      // Fetch online items count
-      const itemsSnapshot = await getDocs(collection(db, "online"));
-      const itemsCount = itemsSnapshot.size;
-
-      // Fetch renewals count and expiring soon count
-      const renewalsSnapshot = await getDocs(collection(db, "renewals"));
-      let renewalsCount = 0;
-      let expiringSoonCount = 0;
-
-      renewalsSnapshot.forEach((doc) => {
-        const data = doc.data();
-        renewalsCount++;
-
-        // Handle different date formats
-        let endDate = 0;
-        if (data.endDate && typeof data.endDate === "number") {
-          endDate = data.endDate;
-        } else if (
-          data.endDate &&
-          typeof data.endDate === "object" &&
-          data.endDate.toDate
-        ) {
-          endDate = data.endDate.toDate().getTime();
-        } else if (data.endDate && typeof data.endDate === "string") {
-          const parsed = Date.parse(data.endDate);
-          endDate = isNaN(parsed) ? 0 : parsed;
-        }
-
-        if (endDate && endDate <= thirtyDaysFromNow && endDate > now) {
-          expiringSoonCount++;
-        }
-      });
-
-      setCounts({
-        categories: categoriesCount,
-        items: itemsCount,
-        renewals: renewalsCount,
-        expiringSoon: expiringSoonCount,
-      });
-    } catch (error) {
-      console.error("Error fetching counts:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    return {
+      items: items.length,
+      renewals: renewals.length,
+      categories: categories.length,
+      expiringSoon: expiringSoonCount,
+    };
+  }, [items, renewals, categories]);
 
   const handleAddClick = () => {
     switch (activeTab) {

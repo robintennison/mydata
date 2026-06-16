@@ -1,37 +1,39 @@
 // routes/index.tsx
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "../components/Auth/ProtectedRoute";
 import PublicRoute from "../components/Auth/PublicRoute";
 
-// Import all page components
-import AddEditDepositPage from "../modules/Banking/pages/AddEditDepositPage";
-import BankingHomePage from "../modules/Banking/pages/BankingHomePage";
-import AddAccountPage from "../modules/Banking/pages/AddAccountPage";
-import EditAccountPage from "../modules/Banking/pages/EditAccountPage";
-import SettingsPage from "../modules/SettingsPage";
+// Static layout shell
 import Layout from "../components/Layout/Layout";
-import LoginForm from "../components/Auth/Login";
-import MyDataHomepage from "../MyDataHomepage";
 
-// Import Jewellery pages
-import JewelleryHome from "../modules/Jewellery/index";
-import JewelleryList from "../modules/Jewellery/pages/ListTab";
-import BillsList from "../modules/Jewellery/pages/BillsTab";
-import BillForm from "../modules/Jewellery/pages/BillForm";
-import JewelleryDetail from "../modules/Jewellery/pages/JewelleryDetail";
-import JewelleryFormWrapper from "../modules/Jewellery/pages/JewelleryFormWrapper";
-import JewelleryForBill from "../modules/Jewellery/pages/JewelleryForBill";
-import BatchEditPage from "../modules/Jewellery/pages/BatchEditPage";
-import VerificationTab from "../modules/Jewellery/pages/VerificationTab";
+// Lazy-loaded page components
+const AddEditDepositPage = lazy(() => import("../modules/Banking/pages/AddEditDepositPage"));
+const BankingHomePage = lazy(() => import("../modules/Banking/pages/BankingHomePage"));
+const AddAccountPage = lazy(() => import("../modules/Banking/pages/AddAccountPage"));
+const EditAccountPage = lazy(() => import("../modules/Banking/pages/EditAccountPage"));
+const SettingsPage = lazy(() => import("../modules/SettingsPage"));
+const LoginForm = lazy(() => import("../components/Auth/Login"));
+const MyDataHomepage = lazy(() => import("../MyDataHomepage"));
+
+// Jewellery pages
+const JewelleryHome = lazy(() => import("../modules/Jewellery/index"));
+const JewelleryList = lazy(() => import("../modules/Jewellery/pages/ListTab"));
+const BillsList = lazy(() => import("../modules/Jewellery/pages/BillsTab"));
+const BillForm = lazy(() => import("../modules/Jewellery/pages/BillForm"));
+const JewelleryDetail = lazy(() => import("../modules/Jewellery/pages/JewelleryDetail"));
+const JewelleryFormWrapper = lazy(() => import("../modules/Jewellery/pages/JewelleryFormWrapper"));
+const JewelleryForBill = lazy(() => import("../modules/Jewellery/pages/JewelleryForBill"));
+const BatchEditPage = lazy(() => import("../modules/Jewellery/pages/BatchEditPage"));
+const VerificationTab = lazy(() => import("../modules/Jewellery/pages/VerificationTab"));
 
 // Import Online pages
-import CategoryForm from "../modules/Online/pages/CategoryForm";
-import OnlineForm from "../modules/Online/pages/OnlineForm";
-import OnlineHomepage from "../modules/Online/pages/OnlineHomepage";
+const CategoryForm = lazy(() => import("../modules/Online/pages/CategoryForm"));
+const OnlineForm = lazy(() => import("../modules/Online/pages/OnlineForm"));
+const OnlineHomepage = lazy(() => import("../modules/Online/pages/OnlineHomepage"));
 
 // Import ViewDepositPage
-import ViewDepositPage from "../modules/Banking/pages/ViewDepositPage";
+const ViewDepositPage = lazy(() => import("../modules/Banking/pages/ViewDepositPage"));
 
 // ==================== TYPES ====================
 export interface RouteConfig {
@@ -419,39 +421,50 @@ const AppRoutes: React.FC<AppRoutesProps> = () => {
     return <Route key={route.path} path={route.path} element={routeElement} />;
   };
 
-  return (
-    <Routes>
-      {allRoutes.map(renderRoute)}
+  const SleekLoadingShimmer: React.FC = () => (
+    <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-4 px-2 sm:px-4 box-border overflow-x-hidden flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-gray-50 text-gray-700">
+        <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+        <p className="text-sm font-medium text-gray-500">Loading module...</p>
+      </div>
+    </div>
+  );
 
-      {/* 404 Route - Show layout for authenticated users */}
-      <Route
-        path="*"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <div style={{ padding: "40px", textAlign: "center" }}>
-                <h1>404 - Page Not Found</h1>
-                <p>The page you're looking for doesn't exist.</p>
-                <button
-                  onClick={() => (window.location.href = "/")}
-                  style={{
-                    marginTop: "20px",
-                    padding: "10px 20px",
-                    backgroundColor: "#667eea",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Go Home
-                </button>
-              </div>
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+  return (
+    <Suspense fallback={<SleekLoadingShimmer />}>
+      <Routes>
+        {allRoutes.map(renderRoute)}
+
+        {/* 404 Route - Show layout for authenticated users */}
+        <Route
+          path="*"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <div style={{ padding: "40px", textAlign: "center" }}>
+                  <h1>404 - Page Not Found</h1>
+                  <p>The page you're looking for doesn't exist.</p>
+                  <button
+                    onClick={() => (window.location.href = "/")}
+                    style={{
+                      marginTop: "20px",
+                      padding: "10px 20px",
+                      backgroundColor: "#667eea",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Go Home
+                  </button>
+                </div>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Suspense>
   );
 };
 

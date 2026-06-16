@@ -1,4 +1,4 @@
-import { PDFDocument } from 'pdf-lib';
+
 
 // Helper function for file size formatting
 const formatFileSize = (bytes: number): string => {
@@ -18,8 +18,8 @@ export const simplePDFCompress = async (pdfFile: File): Promise<File> => {
   try {
     console.log(`Simple PDF compression: ${pdfFile.name} (${formatFileSize(pdfFile.size)})`);
     
-    // Load the PDF
     const arrayBuffer = await pdfFile.arrayBuffer();
+    const { PDFDocument } = await import('pdf-lib');
     const pdfDoc = await PDFDocument.load(arrayBuffer);
     
     // Set metadata
@@ -66,6 +66,7 @@ export const aggressivePDFCompress = async (pdfFile: File): Promise<File> => {
     
     // Load the PDF
     const arrayBuffer = await pdfFile.arrayBuffer();
+    const { PDFDocument } = await import('pdf-lib');
     const pdfDoc = await PDFDocument.load(arrayBuffer);
     
     // Get pages to potentially reduce quality

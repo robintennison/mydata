@@ -1,47 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { Category } from "../types/online.types";
 import { useSettings } from "../../../contexts/SettingsContext";
+import { useOnlineDataContext } from "../../../contexts/OnlineDataContext";
 
 const CategoryListTab: React.FC = () => {
   const navigate = useNavigate();
+  const { categories: allCategories, loading } = useOnlineDataContext();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const { settings } = useSettings();
   const showDelete = settings?.showDelete || false;
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      const db = getFirestore();
-      const categoriesRef = collection(db, "online_categories");
-      const snapshot = await getDocs(categoriesRef);
-
-      const categoriesList: Category[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        categoriesList.push({
-          id: doc.id,
-          name: data.name || "",
-          createdAt: data.createdAt || Date.now(),
-          updatedAt: data.updatedAt || Date.now(),
-        });
-      });
-
-      categoriesList.sort((a, b) => a.name.localeCompare(b.name));
-      setCategories(categoriesList);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const categoriesList = [...allCategories].sort((a, b) => a.name.localeCompare(b.name));
+    setCategories(categoriesList);
+  }, [allCategories]);
 
   // Clear search term
   const clearSearch = () => {

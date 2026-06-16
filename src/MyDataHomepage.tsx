@@ -12,27 +12,8 @@ import {
 import { calculateEMW, getEmwSettings } from "./utils/emwCalculations";
 import CombinedAssetBarChart from "./modules/Banking/pages/CombinedAssetBarChart";
 import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
-import { DocumentData } from "firebase/firestore";
 import { getCurrentMonth, formatLakhs, formatDateShort } from "./utils/formatters";
 import { LiabilityHistory } from "./types/banking.types";
-
-// Keep OnlineItem interface (consider moving to online.types.ts later)
-interface OnlineItem {
-  id: string;
-  name: string;
-  detail: string;
-  category: string;
-  startDate: number | null;
-  endDate: number | null;
-  file1: string;
-  file2: string;
-  file1Type: string;
-  file2Type: string;
-  file1Name: string;
-  file2Name: string;
-  createdAt: number;
-  updatedAt: number;
-}
 
 const MyDataHomepage: React.FC = () => {
   const navigate = useNavigate();

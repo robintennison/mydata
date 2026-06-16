@@ -44,24 +44,23 @@ export const formatFileSize = (bytes: number): string => {
  */
 const convertHeicToJpeg = async (file: File): Promise<File> => {
   try {
-    // Check if heic2any is available
-    if (typeof window !== 'undefined' && (window as any).heic2any) {
-      const heic2any = (window as any).heic2any;
-      const blob = await heic2any({
-        blob: file,
-        toType: 'image/jpeg',
-        quality: 0.8,
-      });
-      
-      return new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
-        type: 'image/jpeg',
-        lastModified: Date.now(),
-      });
-    }
+    console.log('Loading HEIC converter library dynamically...');
+    const heic2anyModule = await import('heic2any');
+    const heic2any = heic2anyModule.default || heic2anyModule;
     
-    // If heic2any is not available, return original file
-    console.warn('HEIC conversion library not loaded');
-    return file;
+    console.log('Converting HEIC to JPEG...');
+    const blob = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.8,
+    });
+    
+    const singleBlob = Array.isArray(blob) ? blob[0] : blob;
+    
+    return new File([singleBlob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
   } catch (error) {
     console.error('Error converting HEIC to JPEG:', error);
     return file;

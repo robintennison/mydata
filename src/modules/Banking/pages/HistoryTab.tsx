@@ -611,10 +611,6 @@ const HistoryTab: React.FC = () => {
             {/* Table Rows - Mobile optimized with grid */}
             {filteredHistory.map((record) => {
               const isEditing = editingMonth === record.month;
-              const savingsValue = rupeesToLakhs(record.savings);
-              const depositsValue = rupeesToLakhs(record.deposits);
-              const liabilitiesValue = rupeesToLakhs(record.liabilities);
-              const totalAssetsValue = rupeesToLakhs(record.totalAssets);
 
               return (
                 <div
@@ -646,7 +642,7 @@ const HistoryTab: React.FC = () => {
                       />
                     ) : (
                       <div className="text-[11px] font-semibold text-green-600 text-right">
-                        {formatLakhs(savingsValue)}
+                        {formatLakhs(record.savings)}
                       </div>
                     )}
                   </div>
@@ -666,7 +662,7 @@ const HistoryTab: React.FC = () => {
                       />
                     ) : (
                       <div className="text-[11px] font-semibold text-orange-500 text-right">
-                        {formatLakhs(depositsValue)}
+                        {formatLakhs(record.deposits)}
                       </div>
                     )}
                   </div>
@@ -674,14 +670,14 @@ const HistoryTab: React.FC = () => {
                   {/* Liabilities */}
                   <div className="col-span-1">
                     <div className="text-[11px] font-semibold text-purple-600 text-right">
-                      {formatLakhs(liabilitiesValue)}
+                      {formatLakhs(record.liabilities)}
                     </div>
                   </div>
 
                   {/* Total Assets - Liquid */}
                   <div className="col-span-1">
                     <div className="text-[11px] font-semibold text-blue-600 text-right">
-                      {formatLakhs(totalAssetsValue)}
+                      {formatLakhs(record.totalAssets)}
                     </div>
                   </div>
 

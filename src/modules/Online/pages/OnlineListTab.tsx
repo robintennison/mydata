@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { OnlineItem, FILE_TYPES } from "../types/online.types";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { formatDateDisplay } from "../../../utils/formatters";
+import { useOnlineDataContext } from "../../../contexts/OnlineDataContext";
 
 const OnlineListTab: React.FC = () => {
   const navigate = useNavigate();
-  const [items, setItems] = useState<OnlineItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { items, loading } = useOnlineDataContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [categories, setCategories] = useState<string[]>(["All"]);
@@ -16,68 +15,11 @@ const OnlineListTab: React.FC = () => {
   const showDelete = settings?.showDelete || false;
 
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
     const uniqueCategories = Array.from(
       new Set(items.map((item) => item.category).filter(Boolean)),
     ).sort();
     setCategories(["All", ...uniqueCategories]);
   }, [items]);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const db = getFirestore();
-      const itemsRef = collection(db, "online");
-      const itemsSnapshot = await getDocs(itemsRef);
-
-      const itemsList: OnlineItem[] = [];
-      itemsSnapshot.forEach((doc) => {
-        const data = doc.data();
-
-        // Check if this is old data (has image fields) or new data (has file fields)
-        const hasOldImageFields =
-          data.image1 !== undefined || data.image2 !== undefined;
-
-        itemsList.push({
-          id: doc.id,
-          name: data.name || "",
-          detail: data.detail || "",
-          category: data.category || "",
-          // Handle nullable dates - if field doesn't exist or is null, set to null
-          startDate: data.startDate !== undefined ? data.startDate : null,
-          endDate: data.endDate !== undefined ? data.endDate : null,
-          // Handle both old and new field names
-          file1: data.file1 || data.image1 || "",
-          file2: data.file2 || data.image2 || "",
-          // Determine file types based on what's available
-          file1Type:
-            data.file1Type ||
-            (data.image1 ? FILE_TYPES.IMAGE : FILE_TYPES.NONE),
-          file2Type:
-            data.file2Type ||
-            (data.image2 ? FILE_TYPES.IMAGE : FILE_TYPES.NONE),
-          file1Name:
-            data.file1Name ||
-            (hasOldImageFields && data.image1 ? "Legacy Image" : ""),
-          file2Name:
-            data.file2Name ||
-            (hasOldImageFields && data.image2 ? "Legacy Image" : ""),
-          createdAt: data.createdAt || Date.now(),
-          updatedAt: data.updatedAt || Date.now(),
-        });
-      });
-
-      itemsList.sort((a, b) => a.name.localeCompare(b.name));
-      setItems(itemsList);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Check if item has renewal dates and get status
   const getItemStatus = (

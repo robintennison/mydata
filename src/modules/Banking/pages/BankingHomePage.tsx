@@ -482,7 +482,8 @@ const BankingHomePage: React.FC<BankingHomePageProps> = () => {
             }`}
             title="Liability History"
           >
-            <span className="text-base">💰</span>
+    
+            <span className="text-base">💳</span>
             <span className="hidden xs:block text-[10px] mt-0.5">Liab</span>
           </button>
         </div>

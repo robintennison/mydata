@@ -17,8 +17,10 @@ export interface BankingData {
   historyDetail: HistoryDetail[];
   liabilities: Liability[];
   settings: { showInactive: boolean };
+  /** Triggers a re-fetch of all banking data from Firestore */
+  refresh: () => Promise<void>; 
 }
 
 export const useBankingData = (): BankingData => {
-  return useBankingDataContext();
+  return useBankingDataContext() as BankingData;
 };

@@ -1,11 +1,11 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { useBankingData } from "../hooks/useBankingData";
 import { firestore } from "../../../lib/firebase";
-import { updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { updateDoc, doc } from "firebase/firestore";
 import { toFirestoreData } from "../../../utils/firestoreHelpers";
-import DeleteConfirmationDialog from "../../../components/DeleteConfirmationDialog";
 import type { BankAccount } from "../../../types/banking.types";
 import HistoryChart from "./HistoryChart";
 
@@ -19,13 +19,13 @@ const EditAccountPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { settings } = useSettings();
-  const { accounts, loading: dataLoading, historyDetail } = useBankingData();
+  
+  // Destructure 'refresh' along with data from the banking hook
+  const { accounts, loading: dataLoading, historyDetail, refresh } = useBankingData();
 
   const isViewMode = !settings?.showDelete;
 
   const [submitting, setSubmitting] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [account, setAccount] = useState<BankAccount | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [textareaHeight, setTextareaHeight] = useState<number>(150);
@@ -41,64 +41,37 @@ const EditAccountPage: React.FC = () => {
 
   // Filter history data for the current account from historyDetail
   useEffect(() => {
-    console.log("HistoryDetail data:", historyDetail);
-
-    if (isViewMode && account && historyDetail && historyDetail.length > 0) {
-      const filteredHistory = historyDetail.filter(
-        (item: any) => item.acctCode === account.acctCode,
-      );
-
-      console.log(
-        "Filtered history for account:",
-        account.acctCode,
-        filteredHistory,
-      );
-
-      const transformedHistory: History[] = filteredHistory.map(
-        (item: any) => ({
-          month: item.month,
-          savings: item.savings || 0,
-          totalDeposits: item.deposits || 0,
-        }),
-      );
-
-      const sortedHistory = [...transformedHistory].sort((a, b) =>
-        a.month.localeCompare(b.month),
-      );
-
-      setAccountHistory(sortedHistory);
-    } else if (isViewMode && account) {
-      console.log("No history data available for account:", account.acctCode);
-      setAccountHistory([]);
+    if (account && historyDetail) {
+      const filtered = historyDetail
+        .filter((h) => h.acctCode === account.acctCode)
+        .map((h) => ({
+          month: h.month,
+          savings: h.savings,
+          totalDeposits: h.deposits,
+        }))
+        .sort((a, b) => a.month.localeCompare(b.month));
+      setAccountHistory(filtered);
     }
-  }, [isViewMode, account, historyDetail]);
+  }, [account, historyDetail]);
 
+  // Load account data into the form
   useEffect(() => {
     if (!id) {
       setError("Account ID is missing");
       return;
     }
-
-    if (!dataLoading && accounts.length > 0) {
-      const foundAccount = accounts.find((acc) => acc.id === id);
-
-      if (!foundAccount) {
-        setError("Account not found");
-        return;
-      }
-
-      setAccount(foundAccount);
-
+    const found = accounts.find((a) => a.id === id);
+    if (found) {
+      setAccount(found);
       setFormData({
-        acctCode: foundAccount.acctCode || "",
-        acctDetails: foundAccount.acctDetails || "",
-        mpin: foundAccount.mpin || "",
+        acctCode: found.acctCode,
+        acctDetails: found.acctDetails,
+        mpin: found.mpin,
       });
-      setError(null);
     }
-  }, [id, accounts, dataLoading]);
+  }, [id, accounts]);
 
-  // Calculate textarea height based on content
+  // Adjust textarea height based on content
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -109,10 +82,7 @@ const EditAccountPage: React.FC = () => {
   }, [formData.acctDetails, isViewMode]);
 
   const handleChange = (field: keyof typeof formData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const validateForm = (): boolean => {
@@ -124,93 +94,41 @@ const EditAccountPage: React.FC = () => {
       setError("Account Details are required");
       return false;
     }
-    if (formData.mpin.length === 0) {
-      setError("MPIN is required");
-      return false;
-    }
     setError(null);
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (isViewMode) {
-      return;
-    }
-
-    if (!id || !account) return;
-
-    if (!validateForm()) return;
+    if (isViewMode || !validateForm() || !id) return;
 
     try {
       setSubmitting(true);
+      const accountRef = doc(firestore, "accounts", id);
+      
+      // Update the document in Firestore
+      await updateDoc(accountRef, toFirestoreData({
+        ...formData,
+        id: id
+      }));
 
-      const accountData: BankAccount = {
-        id: id,
-        acctCode: formData.acctCode.trim(),
-        acctDetails: formData.acctDetails.trim(),
-        mpin: formData.mpin,
-      };
+      // FIX: Trigger the global context refresh so the UI updates immediately
+      if (refresh) {
+        await refresh();
+      }
 
-      // Directly update Firebase
-      await updateDoc(doc(firestore, "accounts", id), toFirestoreData(accountData));
-      console.log("DEBUG: Updated account:", id);
-
-      navigate("/banking", {
-        state: { activeTab: "accounts" },
-      });
-    } catch (err) {
-      console.error("Update error:", err);
+      // Navigate back to the Banking Home Accounts tab
+      navigate("/banking", { state: { activeTab: "accounts" } });
+    } catch (err: any) {
+      console.error("Error updating account:", err);
       setError("Failed to update account. Please try again.");
+    } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (!id) return;
-
-    setIsDeleting(true);
-    try {
-      // Directly delete from Firebase
-      await deleteDoc(doc(firestore, "accounts", id));
-      console.log("DEBUG: Deleted account:", id);
-
-      navigate("/banking", {
-        state: { activeTab: "accounts" },
-      });
-    } catch (err) {
-      console.error("Delete error:", err);
-      setError("Failed to delete account. Please try again.");
-      setIsDeleting(false);
-      setShowDeleteDialog(false);
-    }
-  };
-
   const handleCancel = () => {
-    if (isViewMode) {
-      navigate("/banking", {
-        state: { activeTab: "accounts" },
-      });
-      return;
-    }
-
-    const hasChanges =
-      account &&
-      (formData.acctCode !== account.acctCode ||
-        formData.acctDetails !== (account.acctDetails || "") ||
-        formData.mpin !== account.mpin);
-
-    if (hasChanges) {
-      const confirmLeave = window.confirm(
-        "You have unsaved changes. Are you sure you want to leave?",
-      );
-      if (!confirmLeave) return;
-    }
-
-    navigate("/banking", {
-      state: { activeTab: "accounts" },
-    });
+    navigate("/banking", { state: { activeTab: "accounts" } });
   };
 
   const getPageTitle = () => {
@@ -229,23 +147,9 @@ const EditAccountPage: React.FC = () => {
 
   if (!account && !dataLoading) {
     return (
-      <div className="w-full max-w-2xl mx-auto bg-gray-50 min-h-screen pb-20 px-2 box-border overflow-x-hidden">
-        <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200 mb-4">
-          <h1 className="text-xl font-bold text-gray-900">Account Not Found</h1>
-        </div>
-        <div className="p-4">
-          <p className="mb-4 text-gray-700">
-            The account you're looking for doesn't exist.
-          </p>
-          <button
-            onClick={() =>
-              navigate("/banking", { state: { activeTab: "accounts" } })
-            }
-            className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:shadow-lg transition-all"
-          >
-            Back to Accounts
-          </button>
-        </div>
+      <div className="p-10 text-center">
+        <h1 className="text-xl font-bold mb-4">Account Not Found</h1>
+        <button onClick={handleCancel} className="text-blue-500 underline">Back to Banking</button>
       </div>
     );
   }
@@ -268,170 +172,68 @@ const EditAccountPage: React.FC = () => {
         <div className="w-10"></div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="m-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
-          <span>⚠️</span>
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Form */}
-      <div className="p-4">
-        {isViewMode ? (
-          // View mode - just display data
+      <div className="p-4 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm space-y-4">
           <div>
-            {/* Account Code */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Account Code *
-              </label>
-              <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900">
-                {formData.acctCode || "Not specified"}
-              </div>
-            </div>
-
-            {/* Account Details */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Account Details *
-              </label>
-              <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 min-h-[150px] whitespace-pre-wrap">
-                {formData.acctDetails || "No details provided"}
-              </div>
-            </div>
-
-            {/* MPIN - Show as plain text in view mode */}
-            <div className="mb-8">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                MPIN
-              </label>
-              <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-mono">
-                {formData.mpin || "Not set"}
-              </div>
-            </div>
-
-            {/* 6-Month Trend Chart - Only show when showDelete is false */}
-            {!settings?.showDelete && (
-              <div className="mt-6">
-                <HistoryChart history={accountHistory} compact={false} />
-              </div>
-            )}
-
-            {/* Back Button only in view mode */}
-            <div className="pt-4 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="w-full px-4 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer font-medium hover:bg-gray-200 transition-colors"
-              >
-                Back to Accounts
-              </button>
-            </div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+              Account Code
+            </label>
+            <input
+              type="text"
+              value={formData.acctCode}
+              onChange={(e) => handleChange("acctCode", e.target.value)}
+              disabled={isViewMode || submitting}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+            />
           </div>
-        ) : (
-          // Edit mode - form for editing
-          <form onSubmit={handleSubmit}>
-            {/* Account Code */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Account Code *
-              </label>
-              <input
-                type="text"
-                placeholder="e.g., SBI1234"
-                value={formData.acctCode}
-                onChange={(e) => handleChange("acctCode", e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100"
-                required
-                disabled={submitting}
-                maxLength={50}
-              />
-            </div>
 
-            {/* Account Details */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Account Details *
-              </label>
-              <textarea
-                ref={textareaRef}
-                placeholder="Bank name, branch, account type, etc."
-                value={formData.acctDetails}
-                onChange={(e) => handleChange("acctDetails", e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100 resize-y"
-                style={{ height: `${textareaHeight}px` }}
-                required
-                disabled={submitting}
-                maxLength={1000}
-              />
-              <div className="text-xs text-gray-500 mt-1">
-                Characters: {formData.acctDetails.length}/1000
-              </div>
-            </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+              Account Details
+            </label>
+            <textarea
+              ref={textareaRef}
+              value={formData.acctDetails}
+              onChange={(e) => handleChange("acctDetails", e.target.value)}
+              disabled={isViewMode || submitting}
+              style={{ height: textareaHeight }}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none disabled:bg-gray-50"
+            />
+          </div>
 
-            {/* MPIN */}
-            <div className="mb-8">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                MPIN
-              </label>
-              <input
-                type="text"
-                placeholder="Enter MPIN or any access code"
-                value={formData.mpin}
-                onChange={(e) => handleChange("mpin", e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition disabled:bg-gray-100"
-                disabled={submitting}
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+              MPIN
+            </label>
+            <input
+              type="text"
+              value={formData.mpin}
+              onChange={(e) => handleChange("mpin", e.target.value)}
+              disabled={isViewMode || submitting}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+            />
+          </div>
 
-            {/* Buttons - Edit mode only */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
-                disabled={submitting}
-              >
-                Cancel
-              </button>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
-              <button
-                type="button"
-                onClick={() => setShowDeleteDialog(true)}
-                className="flex-1 px-4 py-3 bg-red-50 text-red-700 border border-red-200 rounded-lg font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
-                disabled={submitting}
-              >
-                Delete
-              </button>
+          {!isViewMode && (
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {submitting ? "Saving..." : "Save Changes"}
+            </button>
+          )}
+        </form>
 
-              <button
-                type="submit"
-                className={`flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-lg font-medium hover:shadow-lg transition-all ${
-                  submitting ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-                disabled={submitting}
-              >
-                {submitting ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </form>
+        {/* History Chart */}
+        {accountHistory.length >= 2 && (
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <HistoryChart history={accountHistory} />
+          </div>
         )}
       </div>
-
-      {/* Delete Confirmation Dialog - Using reusable component */}
-      <DeleteConfirmationDialog
-        isOpen={showDeleteDialog}
-        onClose={() => {
-          setShowDeleteDialog(false);
-          setIsDeleting(false);
-        }}
-        onConfirm={handleDelete}
-        title="Delete Account"
-        message={`Deleting account "${account?.acctCode}" will also delete all associated deposits and history records. This action cannot be undone.`}
-        itemName={account?.acctCode}
-        isDeleting={isDeleting}
-      />
     </div>
   );
 };

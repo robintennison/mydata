@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
@@ -67,10 +68,10 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
   useEffect(() => {
     if (history.length < 2) return;
 
-    // Get last 6 months, sorted chronologically
+    // Get last 12 months, sorted chronologically
     const chartHistory = [...history]
       .sort((a, b) => a.month.localeCompare(b.month))
-      .slice(-6);
+      .slice(-12); // 🔁 changed from -6 to -12
 
     const labels = chartHistory.map((record) =>
       formatMonthForChart(record.month),
@@ -248,7 +249,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({
         <div className="flex items-center justify-between mb-4">
           <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
             <span>📈</span>
-            Total Assets Trend (Last 6 Months)
+            Total Assets Trend (Last 12 Months) {/* 🔁 updated text */}
           </div>
         </div>
       )}

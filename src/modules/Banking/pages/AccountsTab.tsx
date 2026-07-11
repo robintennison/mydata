@@ -13,28 +13,34 @@ const AccountsTab: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // ✅ New state for search
 
   // Helper function to check if account is active
   const isAccountActive = (account: any): boolean => {
-    // If isActive property exists, use it
     if (account.isActive !== undefined) {
       return account.isActive === true;
     }
-    // Default to true if property doesn't exist (for backward compatibility)
     return true;
   };
 
   // Filter accounts based on showInactive setting
   const filteredAccounts = accounts.filter((account) => {
-    if (settings?.showInactive) {
-      return true; // Show all accounts
-    }
-    // If showInactive is false or undefined, show only active accounts
+    if (settings?.showInactive) return true;
     return isAccountActive(account);
   });
 
+  // 🔍 Apply search filter (case-insensitive)
+  const searchedAccounts = filteredAccounts.filter((account) => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase().trim();
+    const code = (account.acctCode || "").toLowerCase();
+    const mpin = (account.mpin || "").toLowerCase();
+    const description = (account.acctDetails || "").toLowerCase();
+    return code.includes(term) || mpin.includes(term) || description.includes(term);
+  });
+
   // Sort accounts by acctCode in ascending order
-  const sortedAccounts = [...filteredAccounts].sort((a, b) => {
+  const sortedAccounts = [...searchedAccounts].sort((a, b) => {
     return a.acctCode.localeCompare(b.acctCode);
   });
 
@@ -46,25 +52,18 @@ const AccountsTab: React.FC = () => {
   };
 
   const handleDeleteClick = (account: any, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click from triggering
+    e.stopPropagation();
     setAccountToDelete(account);
     setShowDeleteDialog(true);
   };
 
   const confirmDelete = async () => {
     if (!accountToDelete) return;
-    
     setIsDeleting(true);
     try {
-      // Directly delete from Firebase
       await deleteDoc(doc(firestore, "accounts", accountToDelete.id));
-      console.log("DEBUG: Deleted account:", accountToDelete.id);
-      
-      // Close dialog and clear state
       setShowDeleteDialog(false);
       setAccountToDelete(null);
-      
-      // The accounts list will automatically update when Firebase realtime listener picks up the change
     } catch (error) {
       console.error("Error deleting account:", error);
     } finally {
@@ -72,7 +71,6 @@ const AccountsTab: React.FC = () => {
     }
   };
 
-  // Handle row click - view mode when showDelete is false, edit mode when showDelete is true
   const handleRowClick = (accountId: string) => {
     if (settings?.showDelete) {
       navigate(`/banking/accounts/edit/${accountId}`);
@@ -92,33 +90,58 @@ const AccountsTab: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      {/* 🔍 Search Bar */}
+      <div className="flex items-center px-2 py-2 border-b border-gray-200 bg-white">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Search by account code, MPIN, or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <span className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+            🔍
+          </span>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Accounts List */}
       <div className="flex-1 overflow-y-auto">
         {sortedAccounts.length === 0 ? (
           <div className="text-center py-12 px-5 text-gray-500">
             <div className="text-4xl mb-4 opacity-50">🏦</div>
             <div className="text-base font-medium text-gray-600 mb-2">
-              {settings?.showInactive
+              {searchTerm.trim()
+                ? "No accounts match your search"
+                : settings?.showInactive
                 ? "No accounts found"
                 : "No active accounts found"}
             </div>
             <div className="text-sm text-gray-400">
-              Add your first account to get started
+              {searchTerm.trim()
+                ? "Try adjusting your search terms"
+                : "Add your first account to get started"}
             </div>
           </div>
         ) : (
           <div>
-            {/* Table Header - COMPACT */}
+            {/* Table Header */}
             <div className="flex items-center py-1.5 px-2 bg-gray-50 border-b border-gray-300 font-semibold text-xs text-gray-700">
-              {/* Account Column */}
               <div className="w-[38%] px-0.5 text-left">Account</div>
-              {/* MPIN Column - More space */}
               <div className="w-[28%] px-0.5 text-left">MPIN</div>
-              {/* Delete Button Column - Minimal space */}
               <div className="w-[7%] flex justify-end pr-0.5"></div>
             </div>
 
-            {/* Accounts Rows - COMPACT */}
+            {/* Table Rows */}
             <div>
               {sortedAccounts.map((account) => {
                 const isActive = isAccountActive(account);
@@ -132,15 +155,12 @@ const AccountsTab: React.FC = () => {
                     onClick={() => handleRowClick(account.id)}
                   >
                     <div className="flex items-center py-1.5 px-2 min-h-9">
-                      {/* Account Column */}
                       <div className="w-[38%] min-w-0 text-left px-0.5">
                         <div
                           className={`text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap ${
                             isActive ? "text-gray-800" : "text-gray-500"
                           } ${!isActive ? "line-through" : ""}`}
-                          title={
-                            accountCode.length > 12 ? accountCode : undefined
-                          }
+                          title={accountCode.length > 12 ? accountCode : undefined}
                         >
                           {truncatedAccountCode}
                           {!isActive && (
@@ -151,14 +171,12 @@ const AccountsTab: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* MPIN Column - More space now */}
                       <div className="w-[28%] text-left px-0.5">
                         <div className="font-mono text-xs text-black overflow-hidden text-ellipsis whitespace-nowrap font-medium">
                           {account.mpin || "••••"}
                         </div>
                       </div>
 
-                      {/* Delete Button Column - Minimal space */}
                       <div className="w-[7%] flex justify-end items-center pr-0.5">
                         <button
                           onClick={(e) => handleDeleteClick(account, e)}
@@ -177,7 +195,7 @@ const AccountsTab: React.FC = () => {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog - Using reusable component */}
+      {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         isOpen={showDeleteDialog}
         onClose={() => {

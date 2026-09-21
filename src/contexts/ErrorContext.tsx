@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 interface ErrorContextType {
   error: string | null;
@@ -23,7 +23,7 @@ interface ErrorProviderProps {
 export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
   const [error, setErrorState] = useState<string | null>(null);
 
-  const setError = (message: string | null) => {
+  const setError = useCallback((message: string | null) => {
     setErrorState(message);
     if (message) {
       console.error('App Error:', message);
@@ -32,7 +32,7 @@ export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
         setErrorState(null);
       }, 5000);
     }
-  };
+  }, []);
 
   const clearError = () => setErrorState(null);
 

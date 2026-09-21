@@ -1,329 +1,105 @@
-// src/contexts/SettingsContext.tsx
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-  useRef,
-} from "react";
-import {
-  doc,
-  onSnapshot,
-  updateDoc,
-  setDoc,
-  arrayUnion,
-  arrayRemove,
-} from "firebase/firestore";
-import { firestore } from "../lib/firebase";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove, runTransaction } from "firebase/firestore";
+import { auth, firestore } from "../lib/firebase";
+import { useAuth } from "./AuthContext";
 import { useError } from "./ErrorContext";
+import { readSettings, validateSettings, renameSettingItem } from "../utils/settings";
+import type { Settings } from "../utils/settings";
+export type { Settings } from "../utils/settings";
 
-export interface Settings {
-  locations: string[];
-  boughtFor: string[];
-  goldRatePerGram: number;
-  makingTaxPercent: number;
-  resaleDiscountPercent: number;
-  liabilities: number;
-  showInactive: boolean;
-  showDelete: boolean;
-  EMW_interest: number;
-  EMW_Date: string;
-}
-
+type ListField = "locations" | "boughtFor";
 interface SettingsContextType {
   settings: Settings | null;
   loading: boolean;
-  updateSettings: (updates: Partial<Settings>) => Promise<void>;
-  addLocation: (location: string) => Promise<void>;
-  removeLocation: (location: string) => Promise<void>;
-  addBoughtFor: (purpose: string) => Promise<void>;
-  removeBoughtFor: (purpose: string) => Promise<void>;
+  error: string | null;
+  updateSettings: (updates: Partial<Settings>) => Promise<boolean>;
+  addLocation: (value: string) => Promise<boolean>;
+  removeLocation: (value: string) => Promise<boolean>;
+  addBoughtFor: (value: string) => Promise<boolean>;
+  removeBoughtFor: (value: string) => Promise<boolean>;
+  renameItem: (field: ListField, oldValue: string, newValue: string) => Promise<boolean>;
 }
-
-const defaultSettings: Settings = {
-  locations: [],
-  boughtFor: [],
-  goldRatePerGram: 15000,
-  makingTaxPercent: 14,
-  resaleDiscountPercent: 5,
-  liabilities: 0,
-  showInactive: false,
-  showDelete: false,
-  EMW_interest: 0,
-  EMW_Date: "2039-10",
-};
-
-const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined,
-);
-
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 export const useSettings = (): SettingsContextType => {
   const context = useContext(SettingsContext);
-  if (!context) {
-    throw new Error("useSettings must be used within a SettingsProvider");
-  }
+  if (!context) throw new Error("useSettings must be used within a SettingsProvider");
   return context;
 };
 
-interface SettingsProviderProps {
-  children: ReactNode;
-}
-
-export const SettingsProvider: React.FC<SettingsProviderProps> = ({
-  children,
-}) => {
-  const [settings, setSettings] = useState<Settings | null>(null);
-  const [loading, setLoading] = useState(true);
+export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { user, isLoading } = useAuth();
   const { setError } = useError();
-  const [hasPermissionError, setHasPermissionError] = useState(false);
-
-  // Store last known good settings to prevent data loss
-  const lastKnownSettings = useRef<Settings | null>(null);
+  const [state, setState] = useState<{
+    uid: string; settings: Settings | null; loading: boolean; error: string | null;
+  }>({ uid: "", settings: null, loading: true, error: null });
+  const uid = user?.uid;
 
   useEffect(() => {
-    const settingsRef = doc(firestore, "settings", "app");
+    if (!uid || isLoading) return;
+    let active = true;
+    const fail = (message: string) => {
+      if (active) setState(prev => ({ uid, settings: prev.uid === uid ? prev.settings : null, loading: false, error: message }));
+    };
+    const unsubscribe = onSnapshot(doc(firestore, "settings", "app"), { includeMetadataChanges: true }, snapshot => {
+      if (!active) return;
+      if (!snapshot.exists()) {
+        fail(snapshot.metadata.fromCache
+          ? "Settings are not available in the cache. Connect to load settings."
+          : "The settings/app document is missing. Restore it in Firestore; defaults have not been saved.");
+        return;
+      }
+      // Only display confirmed values; failed writes must not look like saved settings.
+      if (snapshot.metadata.hasPendingWrites) return;
+      try {
+        const settings = readSettings(snapshot.data());
+        setState({ uid, settings, loading: false, error: null });
+      } catch (error) {
+        fail(`Invalid settings data: ${error instanceof Error ? error.message : "Check Firestore values."}`);
+      }
+    }, () => fail("Unable to load settings. Check your connection and Firestore permissions, then reload."));
+    return () => { active = false; unsubscribe(); };
+  }, [uid, isLoading]);
 
-    const unsubscribe = onSnapshot(
-      settingsRef,
-      (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const data = docSnapshot.data();
-
-          // Create settings from Firebase data
-          const firebaseSettings: Settings = {
-            locations: data.locations ?? [],
-            boughtFor: data.boughtFor ?? [],
-            goldRatePerGram: data.goldRatePerGram ?? 0,
-            makingTaxPercent: data.makingTaxPercent ?? 0,
-            resaleDiscountPercent: data.resaleDiscountPercent ?? 0,
-            liabilities: data.liabilities ?? 0,
-            showInactive: data.showInactive ?? false,
-            showDelete: data.showDelete ?? false,
-            EMW_interest: data.EMW_interest ?? 5,
-            EMW_Date: data.EMW_Date ?? "2044-10",
-          };
-
-          // Store as last known good settings
-          lastKnownSettings.current = firebaseSettings;
-          setSettings(firebaseSettings);
-          setHasPermissionError(false); // Reset if we succeed
-        } else {
-          // Document doesn't exist - create it
-          setDoc(settingsRef, defaultSettings).catch(console.error);
-          setSettings(defaultSettings);
-          lastKnownSettings.current = defaultSettings;
-        }
-        setLoading(false);
-      },
-      (error) => {
-        console.error("Firebase onSnapshot error:", error);
-
-        // Check if it's a permission error
-        if (error.code === "permission-denied") {
-          console.log(
-            "Permission denied for settings - using last known settings if available",
-          );
-          setHasPermissionError(true);
-
-          // IMPORTANT: Use last known settings instead of defaults if available
-          if (lastKnownSettings.current) {
-            console.log(
-              "Using last known settings:",
-              lastKnownSettings.current,
-            );
-            setSettings(lastKnownSettings.current);
-          } else {
-            console.log("No last known settings, using defaults");
-            setSettings(defaultSettings);
-          }
-          // DON'T set error for permission-denied - it's expected before login
-        } else if (
-          error.code === "unavailable" ||
-          error.message.includes("network")
-        ) {
-          console.log(
-            "Firebase unavailable - using last known settings if available",
-          );
-
-          // Use last known settings during network issues
-          if (lastKnownSettings.current) {
-            setSettings(lastKnownSettings.current);
-          } else {
-            setSettings(defaultSettings);
-          }
-          setError("Firebase connection error.");
-        } else {
-          // Only show error for unexpected errors
-          setError("Firebase connection error.");
-          // Still try to use last known settings
-          if (lastKnownSettings.current) {
-            setSettings(lastKnownSettings.current);
-          }
-        }
-        setLoading(false);
-      },
-    );
-
-    return () => unsubscribe();
-  }, [setError]); // Remove hasPermissionError from dependencies
-
-  const updateSettings = async (updates: Partial<Settings>) => {
-    // Optimistically update local state
-    setSettings((prev) => {
-      if (!prev) return null;
-      const updated = { ...prev, ...updates };
-      // Update last known settings
-      lastKnownSettings.current = updated;
-      return updated;
-    });
-
-    // If we had permission errors, don't try to update Firestore
-    if (hasPermissionError) {
-      console.log("Cannot update settings: No Firestore permission");
-      return;
-    }
-
+  const settings = uid && state.uid === uid ? state.settings : null;
+  const error = uid && state.uid === uid ? state.error : null;
+  const loading = isLoading || Boolean(uid && (state.uid !== uid || state.loading));
+  const save = async (operation: () => Promise<unknown>): Promise<boolean> => {
     try {
-      const settingsRef = doc(firestore, "settings", "app");
-      await updateDoc(settingsRef, updates);
+      if (!uid || auth.currentUser?.uid !== uid || loading || error || !settings) {
+        throw new Error("Settings are not ready to save. Reload after signing in and check your connection.");
+      }
+      await operation();
+      return true;
     } catch (error) {
-      console.error("Error updating settings:", error);
-      setError("Failed to save settings.");
+      setError(error instanceof Error ? `Failed to save settings: ${error.message}` : "Failed to save settings.");
+      return false;
     }
   };
-
-  const addLocation = async (location: string) => {
-    const trimmed = location.trim();
-    if (!trimmed) return;
-
-    // Optimistically update local state
-    setSettings((prev) => {
-      if (!prev) return null;
-      const updated = {
-        ...prev,
-        locations: [...prev.locations, trimmed],
-      };
-      lastKnownSettings.current = updated;
-      return updated;
+  const updateSettings = (updates: Partial<Settings>) => save(async () => {
+    validateSettings(updates);
+    // updateDoc changes only supplied fields and cannot recreate a missing document.
+    await updateDoc(doc(firestore, "settings", "app"), updates);
+  });
+  const changeList = (field: ListField, value: string, add: boolean) => save(async () => {
+    const item = add ? value.trim() : value;
+    validateSettings({ [field]: [item] });
+    await updateDoc(doc(firestore, "settings", "app"), { [field]: add ? arrayUnion(item) : arrayRemove(item) });
+  });
+  const renameItem = (field: ListField, oldValue: string, newValue: string) => save(async () => {
+    const item = newValue.trim();
+    validateSettings({ [field]: [item] });
+    const ref = doc(firestore, "settings", "app");
+    await runTransaction(firestore, async transaction => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists()) throw new Error("Settings document is missing.");
+      const current = readSettings(snapshot.data());
+      transaction.update(ref, { [field]: renameSettingItem(current[field], oldValue, item) });
     });
-
-    if (hasPermissionError) {
-      console.log("Cannot add location: No Firestore permission");
-      return;
-    }
-
-    try {
-      const settingsRef = doc(firestore, "settings", "app");
-      await updateDoc(settingsRef, {
-        locations: arrayUnion(trimmed),
-      });
-    } catch (error) {
-      console.error("Error adding location:", error);
-      setError("Failed to add location.");
-    }
-  };
-
-  const removeLocation = async (location: string) => {
-    // Optimistically update local state
-    setSettings((prev) => {
-      if (!prev) return null;
-      const updated = {
-        ...prev,
-        locations: prev.locations.filter((l) => l !== location),
-      };
-      lastKnownSettings.current = updated;
-      return updated;
-    });
-
-    if (hasPermissionError) {
-      console.log("Cannot remove location: No Firestore permission");
-      return;
-    }
-
-    try {
-      const settingsRef = doc(firestore, "settings", "app");
-      await updateDoc(settingsRef, {
-        locations: arrayRemove(location),
-      });
-    } catch (error) {
-      console.error("Error removing location:", error);
-      setError("Failed to remove location.");
-    }
-  };
-
-  const addBoughtFor = async (purpose: string) => {
-    const trimmed = purpose.trim();
-    if (!trimmed) return;
-
-    // Optimistically update local state
-    setSettings((prev) => {
-      if (!prev) return null;
-      const updated = {
-        ...prev,
-        boughtFor: [...prev.boughtFor, trimmed],
-      };
-      lastKnownSettings.current = updated;
-      return updated;
-    });
-
-    if (hasPermissionError) {
-      console.log("Cannot add boughtFor: No Firestore permission");
-      return;
-    }
-
-    try {
-      const settingsRef = doc(firestore, "settings", "app");
-      await updateDoc(settingsRef, {
-        boughtFor: arrayUnion(trimmed),
-      });
-    } catch (error) {
-      console.error("Error adding boughtFor:", error);
-      setError("Failed to update preferences.");
-    }
-  };
-
-  const removeBoughtFor = async (purpose: string) => {
-    // Optimistically update local state
-    setSettings((prev) => {
-      if (!prev) return null;
-      const updated = {
-        ...prev,
-        boughtFor: prev.boughtFor.filter((p) => p !== purpose),
-      };
-      lastKnownSettings.current = updated;
-      return updated;
-    });
-
-    if (hasPermissionError) {
-      console.log("Cannot remove boughtFor: No Firestore permission");
-      return;
-    }
-
-    try {
-      const settingsRef = doc(firestore, "settings", "app");
-      await updateDoc(settingsRef, {
-        boughtFor: arrayRemove(purpose),
-      });
-    } catch (error) {
-      console.error("Error removing boughtFor:", error);
-      setError("Failed to update preferences.");
-    }
-  };
-
-  return (
-    <SettingsContext.Provider
-      value={{
-        settings, // Don't fallback to defaultSettings here
-        loading,
-        updateSettings,
-        addLocation,
-        removeLocation,
-        addBoughtFor,
-        removeBoughtFor,
-      }}
-    >
-      {children}
-    </SettingsContext.Provider>
-  );
+  });
+  return <SettingsContext.Provider value={{ settings, loading, error, updateSettings,
+    addLocation: value => changeList("locations", value, true),
+    removeLocation: value => changeList("locations", value, false),
+    addBoughtFor: value => changeList("boughtFor", value, true),
+    removeBoughtFor: value => changeList("boughtFor", value, false), renameItem,
+  }}>{children}</SettingsContext.Provider>;
 };

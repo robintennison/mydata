@@ -8,6 +8,8 @@ const SettingsPage: React.FC = () => {
   const {
     settings,
     loading,
+    error,
+    renameItem,
     updateSettings,
     addLocation,
     removeLocation,
@@ -55,8 +57,6 @@ const SettingsPage: React.FC = () => {
   useEffect(() => {
     // Update local state whenever settings change from context
     if (settings) {
-      console.log("Settings updated:", settings);
-
       setFinancialSettings({
         goldRate: settings.goldRatePerGram ?? 0,
         makingTax: settings.makingTaxPercent ?? 0,
@@ -123,7 +123,7 @@ const SettingsPage: React.FC = () => {
     setTargetAgeValue(targetAge?.toString() || "");
   };
 
-  const handleSaveTargetDateEdit = () => {
+  const handleSaveTargetDateEdit = async () => {
     if (!targetDateValue.trim()) return;
 
     const dateRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -132,14 +132,14 @@ const SettingsPage: React.FC = () => {
       return;
     }
 
+    if (!await updateSettings({ EMW_Date: targetDateValue })) return;
     setEmwDate(targetDateValue);
     const newAge = calculateAgeFromDate(targetDateValue);
     setTargetAge(newAge);
-    updateSettings({ EMW_Date: targetDateValue } as any);
     setEditingTargetDate(false);
   };
 
-  const handleSaveTargetAgeEdit = () => {
+  const handleSaveTargetAgeEdit = async () => {
     if (!targetAgeValue.trim()) return;
 
     const age = parseInt(targetAgeValue);
@@ -149,9 +149,9 @@ const SettingsPage: React.FC = () => {
     }
 
     const newDate = calculateDateFromAge(age);
+    if (!await updateSettings({ EMW_Date: newDate })) return;
     setEmwDate(newDate);
     setTargetAge(age);
-    updateSettings({ EMW_Date: newDate } as any);
     setEditingTargetAge(false);
   };
 
@@ -170,15 +170,14 @@ const SettingsPage: React.FC = () => {
     setEditValue(value.toString());
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingField) return;
 
-    const numValue = parseFloat(editValue) || 0;
-
-    setFinancialSettings((prev) => ({
-      ...prev,
-      [editingField]: numValue,
-    }));
+    const numValue = Number(editValue);
+    if (!editValue.trim() || !Number.isFinite(numValue) || numValue < 0) {
+      alert("Please enter a valid non-negative number.");
+      return;
+    }
 
     let settingsField = "";
     switch (editingField) {
@@ -197,7 +196,7 @@ const SettingsPage: React.FC = () => {
     }
 
     if (settingsField) {
-      updateSettings({ [settingsField]: numValue } as any);
+      if (!await updateSettings({ [settingsField]: numValue })) return;
     }
 
     setEditingField(null);
@@ -219,20 +218,20 @@ const SettingsPage: React.FC = () => {
     field: "showInactive" | "showDelete",
     value: boolean,
   ) => {
-    updateSettings({ [field]: value } as any);
+    void updateSettings({ [field]: value });
   };
 
-  const handleAddLocation = () => {
+  const handleAddLocation = async () => {
     if (newLocation.trim()) {
-      addLocation(newLocation.trim());
+      if (!await addLocation(newLocation.trim())) return;
       setNewLocation("");
       setShowAddLoc(false);
     }
   };
 
-  const handleAddBoughtFor = () => {
+  const handleAddBoughtFor = async () => {
     if (newBoughtFor.trim()) {
-      addBoughtFor(newBoughtFor.trim());
+      if (!await addBoughtFor(newBoughtFor.trim())) return;
       setNewBoughtFor("");
       setShowAddBf(false);
     }
@@ -246,16 +245,11 @@ const SettingsPage: React.FC = () => {
     setRenameValue(oldValue);
   };
 
-  const handleSaveListItemEdit = () => {
+  const handleSaveListItemEdit = async () => {
     if (!renameDialog || !renameValue.trim()) return;
 
-    if (renameDialog.type === "location") {
-      removeLocation(renameDialog.oldValue);
-      addLocation(renameValue.trim());
-    } else {
-      removeBoughtFor(renameDialog.oldValue);
-      addBoughtFor(renameValue.trim());
-    }
+    const field = renameDialog.type === "location" ? "locations" : "boughtFor";
+    if (!await renameItem(field, renameDialog.oldValue, renameValue)) return;
 
     setRenameDialog(null);
     setRenameValue("");
@@ -507,6 +501,13 @@ const SettingsPage: React.FC = () => {
         <p className="text-gray-500 text-sm font-medium">Loading settings...</p>
       </div>
     );
+  }
+
+  if (error || !settings) {
+    return <div className="p-6" role="alert">
+      <p>{error || "Settings are unavailable. Sign in and reload to try again."}</p>
+      <button className="mt-4 text-blue-600" onClick={() => window.location.reload()}>Reload settings</button>
+    </div>;
   }
 
   return (

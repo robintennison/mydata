@@ -30,6 +30,20 @@ interface EditedLiability {
   originalAmount: number;
 }
 
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : "An unexpected error occurred";
+
+const fetchLiabilities = async (month: string): Promise<LiabilityHistory[]> => {
+  const historyQuery = query(
+    collection(firestore, "liability_history"),
+    where("month", "==", month),
+  );
+  const snapshot = await getDocs(historyQuery);
+  return snapshot.docs
+    .map((record) => ({ ...record.data(), id: record.id }) as LiabilityHistory)
+    .sort((a, b) => a.description.localeCompare(b.description));
+};
+
 const LiabilityHistoryTab: React.FC = () => {
   const { settings } = useSettings();
   const [liabilities, setLiabilities] = useState<LiabilityHistory[]>([]);
@@ -66,36 +80,49 @@ const LiabilityHistoryTab: React.FC = () => {
     return months;
   }, []);
 
-  // Load liabilities for selected month
+  // Ignore responses belonging to a month that is no longer selected.
   useEffect(() => {
-    loadData();
-  }, [selectedMonth]);
-
-  // Reset loaded flag when month changes
-  useEffect(() => {
-    setHasLoadedPreviousData(false);
-    checkPreviousMonthData();
-  }, [selectedMonth]);
-
-  const checkPreviousMonthData = async () => {
-    try {
-      const [year, month] = selectedMonth.split("-");
-      const previousMonth = new Date(parseInt(year), parseInt(month) - 2, 1);
+    let active = true;
+    const loadMonth = async () => {
+      const [year, month] = selectedMonth.split("-").map(Number);
+      const previousMonth = new Date(year, month - 2, 1);
       const previousMonthStr = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, "0")}`;
-
-      const liabilityHistoryRef = collection(firestore, "liability_history");
-      const q = query(liabilityHistoryRef, where("month", "==", previousMonthStr));
-      const historySnapshot = await getDocs(q);
-
-      if (!historySnapshot.empty) {
-        setPreviousMonthAvailable(previousMonthStr);
-      } else {
-        setPreviousMonthAvailable(null);
+      try {
+        const [current, previous] = await Promise.all([
+          fetchLiabilities(selectedMonth),
+          fetchLiabilities(previousMonthStr).catch((error: unknown) => {
+            console.error("Error checking previous month data:", error);
+            return [];
+          }),
+        ]);
+        if (!active) return;
+        setLiabilities(current);
+        setHasLoadedPreviousData(current.length > 0);
+        setPreviousMonthAvailable(previous.length > 0 ? previousMonthStr : null);
+      } catch (error: unknown) {
+        if (!active) return;
+        console.error("Error loading data:", error);
+        setStatusMessage({ type: "error", text: `Failed to load data: ${getErrorMessage(error)}` });
+      } finally {
+        if (active) setLoading(false);
       }
-    } catch (error) {
-      console.error("Error checking previous month data:", error);
-      setPreviousMonthAvailable(null);
-    }
+    };
+    void loadMonth();
+    return () => { active = false; };
+  }, [selectedMonth]);
+
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month);
+    setLoading(true);
+    setLiabilities([]);
+    setStatusMessage(null);
+    setEditingId(null);
+    setEditingData(null);
+    setDeleteConfirm(null);
+    setShowAddForm(false);
+    setNewLiability({ description: "", amount: "" });
+    setHasLoadedPreviousData(false);
+    setPreviousMonthAvailable(null);
   };
 
   const loadData = async () => {
@@ -105,29 +132,16 @@ const LiabilityHistoryTab: React.FC = () => {
       setEditingId(null);
       setEditingData(null);
 
-      // Load liability history for selected month
-      const liabilityHistoryRef = collection(firestore, "liability_history");
-      const q = query(liabilityHistoryRef, where("month", "==", selectedMonth));
-      const historySnapshot = await getDocs(q);
-
-      const liabilitiesList = historySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as LiabilityHistory[];
-
-      // Sort by description
-      const sortedLiabilities = [...liabilitiesList].sort((a, b) =>
-        a.description.localeCompare(b.description)
-      );
+      const sortedLiabilities = await fetchLiabilities(selectedMonth);
       setLiabilities(sortedLiabilities);
 
       // Check if there's any data for this month
       if (sortedLiabilities.length > 0) {
         setHasLoadedPreviousData(true);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading data:", error);
-      showStatus("error", `Failed to load data: ${error.message}`);
+      showStatus("error", `Failed to load data: ${getErrorMessage(error)}`);
     } finally {
       setLoading(false);
     }
@@ -179,9 +193,9 @@ const LiabilityHistoryTab: React.FC = () => {
       await loadData();
       setHasLoadedPreviousData(true);
       showStatus("success", `Loaded data from ${previousMonthStr}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading previous month data:", error);
-      showStatus("error", `Failed to load previous month data: ${error.message}`);
+      showStatus("error", `Failed to load previous month data: ${getErrorMessage(error)}`);
     } finally {
       setSaving(false);
     }
@@ -259,9 +273,9 @@ const LiabilityHistoryTab: React.FC = () => {
       showStatus("success", "Liability updated successfully!");
       setEditingId(null);
       setEditingData(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating liability:", error);
-      showStatus("error", `Failed to update: ${error.message}`);
+      showStatus("error", `Failed to update: ${getErrorMessage(error)}`);
     } finally {
       setSaving(false);
     }
@@ -304,9 +318,9 @@ const LiabilityHistoryTab: React.FC = () => {
       showStatus("success", "Liability added successfully!");
       setShowAddForm(false);
       setNewLiability({ description: "", amount: "" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error adding liability:", error);
-      showStatus("error", `Failed to add: ${error.message}`);
+      showStatus("error", `Failed to add: ${getErrorMessage(error)}`);
     } finally {
       setSaving(false);
     }
@@ -327,9 +341,9 @@ const LiabilityHistoryTab: React.FC = () => {
 
       showStatus("success", "Liability deleted successfully!");
       setDeleteConfirm(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting liability:", error);
-      showStatus("error", `Failed to delete: ${error.message}`);
+      showStatus("error", `Failed to delete: ${getErrorMessage(error)}`);
     } finally {
       setIsDeleting(false);
       setSaving(false);
@@ -396,7 +410,8 @@ const LiabilityHistoryTab: React.FC = () => {
           </div>
           <select
             value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
+            onChange={(e) => handleMonthChange(e.target.value)}
+            disabled={saving || isDeleting}
             className="w-full sm:w-auto px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             {availableMonths.map((month) => (

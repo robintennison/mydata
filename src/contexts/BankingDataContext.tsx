@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { firestore } from "../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useError } from "./ErrorContext";
+import { useSettings } from "./SettingsContext";
 import { useAuth } from "./AuthContext";
 import type {
   BankAccount,
@@ -46,9 +47,8 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
   const [adjustments, setAdjustments] = useState<DepositAdjustment[]>([]);
   const [historyDetail, setHistoryDetail] = useState<HistoryDetail[]>([]);
   const [liabilities, setLiabilities] = useState<Liability[]>([]);
-  const [settings, setSettings] = useState<{ showInactive: boolean }>({
-    showInactive: false,
-  });
+  const { settings: appSettings } = useSettings();
+  const settings = { showInactive: appSettings?.showInactive ?? false };
   const { setError } = useError();
   const { isAuthenticated } = useAuth();
 
@@ -66,7 +66,6 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
         adjustmentsSnap,
         historyDetailSnap,
         liabilitiesSnap,
-        settingsSnap,
       ] = await Promise.all([
         getDocs(collection(firestore, "accounts")),
         getDocs(collection(firestore, "deposits")),
@@ -74,7 +73,6 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
         getDocs(collection(firestore, "deposit_adjustments")),
         getDocs(collection(firestore, "history_detail")),
         getDocs(collection(firestore, "liabilities")),
-        getDocs(collection(firestore, "settings")),
       ]);
 
       setAccounts(
@@ -100,12 +98,6 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
         liabilitiesSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Liability))
       );
 
-      if (!settingsSnap.empty) {
-        const settingsData = settingsSnap.docs[0].data();
-        setSettings({
-          showInactive: settingsData.showInactive || false,
-        });
-      }
     } catch (error) {
       console.error("Error loading banking data:", error);
       setError("Failed to load banking data. Please check your connection.");

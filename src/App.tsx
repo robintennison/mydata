@@ -10,9 +10,9 @@ import { OnlineDataProvider } from "./contexts/OnlineDataContext";
 function App() {
   return (
     <ErrorProvider>
-      <SettingsProvider>
+      <AuthProvider>
         <BrowserRouter>
-          <AuthProvider>
+          <SettingsProvider>
             <BankingDataProvider>
               <JewelleryDataProvider>
                 <OnlineDataProvider>
@@ -28,9 +28,9 @@ function App() {
                 </OnlineDataProvider>
               </JewelleryDataProvider>
             </BankingDataProvider>
-          </AuthProvider>
+          </SettingsProvider>
         </BrowserRouter>
-      </SettingsProvider>
+      </AuthProvider>
     </ErrorProvider>
   );
 }

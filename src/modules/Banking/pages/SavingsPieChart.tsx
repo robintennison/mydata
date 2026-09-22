@@ -114,7 +114,7 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({
     const majorSummaries = activeSummaries.filter((s) => s.value >= threshold);
     const minorSummaries = activeSummaries.filter((s) => s.value < threshold);
 
-    let finalSummaries = [...majorSummaries];
+    const finalSummaries = [...majorSummaries];
 
     if (minorSummaries.length > 0) {
       const othersValue = minorSummaries.reduce((sum, s) => sum + s.value, 0);

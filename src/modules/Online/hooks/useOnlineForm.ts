@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
@@ -340,7 +341,8 @@ export const useOnlineForm = () => {
         } else {
           setFile2Info((prev) => ({ ...prev, ...optimizationUpdate }));
         }
-      } catch (err: any) {
+      } catch (caught: unknown) {
+      const err = toError(caught);
         console.error(`Error optimizing file ${fileNumber}:`, err);
       }
     }
@@ -397,7 +399,8 @@ export const useOnlineForm = () => {
         type: fileInfo.type,
         name: fileInfo.file.name,
       };
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error(`Error uploading file ${fileNumber}:`, error);
       throw error;
     }
@@ -447,7 +450,8 @@ export const useOnlineForm = () => {
       }
 
       alert(`${fileTypeDisplay} ${fileNumber} deleted successfully!`);
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error(`Error deleting file ${fileNumber}:`, error);
       alert(`Failed to delete file: ${error.message}`);
     }
@@ -520,7 +524,8 @@ export const useOnlineForm = () => {
       }
 
       navigate("/online", { state: { activeTab: "items" } });
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error saving item:", error);
       let errorMessage = "Failed to save item";
       if (error.message?.includes("quota")) {

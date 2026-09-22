@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -144,7 +145,8 @@ const ListTab: React.FC = () => {
         const sortedItems = sortItems(items, currentSort);
         setFilteredItems(sortedItems);
         setBills(billItems);
-      } catch (error: any) {
+      } catch (caught: unknown) {
+      const error = toError(caught);
         console.error("Error fetching data:", error);
 
         if (
@@ -348,7 +350,8 @@ const ListTab: React.FC = () => {
       setFilteredItems(sortedItems);
       setBills(billItems);
       setError(null);
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Refresh error:", error);
       setError(`Refresh failed: ${error.message}`);
     } finally {

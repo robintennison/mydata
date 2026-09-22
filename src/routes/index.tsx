@@ -362,11 +362,7 @@ const routeExists = (path: string) =>
   allRoutes.some((route) => route.path === path);
 
 // ==================== APP ROUTES COMPONENT ====================
-interface AppRoutesProps {
-  // Remove isAuthenticated and user props since we use AuthContext
-}
-
-const AppRoutes: React.FC<AppRoutesProps> = () => {
+const AppRoutes: React.FC = () => {
   // Helper function to render routes with children
   const renderRoute = (route: RouteConfig) => {
     if (route.path === "/login") {

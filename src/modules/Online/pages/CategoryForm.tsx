@@ -171,7 +171,7 @@ const CategoryForm: React.FC = () => {
       const date = new Date(timestamp);
       if (isNaN(date.getTime())) return "Invalid date";
       return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-    } catch (error) {
+    } catch {
       return "Error formatting date";
     }
   };

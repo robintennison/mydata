@@ -1,3 +1,4 @@
+import type { BankAccount } from "../../../types/banking.types";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../../contexts/SettingsContext";
@@ -11,12 +12,12 @@ const AccountsTab: React.FC = () => {
   const { settings } = useSettings();
   const { accounts, loading } = useBankingData();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [accountToDelete, setAccountToDelete] = useState<any>(null);
+  const [accountToDelete, setAccountToDelete] = useState<BankAccount | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchTerm, setSearchTerm] = useState(""); // ✅ New state for search
 
   // Helper function to check if account is active
-  const isAccountActive = (account: any): boolean => {
+  const isAccountActive = (account: BankAccount): boolean => {
     if (account.isActive !== undefined) {
       return account.isActive === true;
     }
@@ -51,7 +52,7 @@ const AccountsTab: React.FC = () => {
     return `${code.substring(0, 12)}...`;
   };
 
-  const handleDeleteClick = (account: any, e: React.MouseEvent) => {
+  const handleDeleteClick = (account: BankAccount, e: React.MouseEvent) => {
     e.stopPropagation();
     setAccountToDelete(account);
     setShowDeleteDialog(true);

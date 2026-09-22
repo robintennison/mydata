@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect } from "react";
 import { firestore } from "../../../lib/firebase";
 import {
@@ -231,7 +232,8 @@ const HistoryDetailTab: React.FC = () => {
       if (historyMap.size > 0) {
         setHasLoadedPreviousData(true);
       }
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error loading data:", error);
       showStatus("error", `Failed to load data: ${error.message}`);
     } finally {
@@ -294,7 +296,8 @@ const HistoryDetailTab: React.FC = () => {
       }
       
       showStatus("success", `Loaded data from ${previousMonthStr}`);
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error loading previous month data:", error);
       showStatus(
         "error",
@@ -428,7 +431,8 @@ const HistoryDetailTab: React.FC = () => {
 
       showStatus("success", "All records saved successfully!");
       setHasChanges(false);
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error saving records:", error);
       showStatus("error", `Failed to save records: ${error.message}`);
     } finally {
@@ -506,7 +510,8 @@ const HistoryDetailTab: React.FC = () => {
         // No records left for this month, clear stored liabilities
         setStoredLiabilitiesForMonth(null);
       }
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error deleting:", error);
       showStatus("error", `Failed to delete: ${error.message}`);
     } finally {

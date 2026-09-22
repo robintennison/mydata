@@ -1,3 +1,4 @@
+import { toError } from "../utils/errors";
 import { useState } from "react";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage, database } from "../lib/firebase";
@@ -70,7 +71,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
       console.log(
         `File optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
       );
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = toError(caught);
       console.error("Error optimizing file:", err);
       setOptimizedFile(selectedFile);
       setOptimizationInfo(null);
@@ -143,7 +145,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           if (fileInput) fileInput.value = "";
         },
       );
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = toError(caught);
       setError(`Upload error: ${err.message}`);
       setUploading(false);
     }

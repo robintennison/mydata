@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
 
 interface ErrorContextType {
   error: string | null;
@@ -23,18 +23,24 @@ interface ErrorProviderProps {
 export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
   const [error, setErrorState] = useState<string | null>(null);
 
+  const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (clearTimer.current !== null) clearTimeout(clearTimer.current);
+  }, []);
+
   const setError = useCallback((message: string | null) => {
+    if (clearTimer.current !== null) clearTimeout(clearTimer.current);
     setErrorState(message);
     if (message) {
       console.error('App Error:', message);
       // Automatically clear error after 5 seconds
-      setTimeout(() => {
+      clearTimer.current = setTimeout(() => {
         setErrorState(null);
       }, 5000);
     }
   }, []);
 
-  const clearError = () => setErrorState(null);
+  const clearError = () => setError(null);
 
   return (
     <ErrorContext.Provider value={{ error, setError, clearError }}>

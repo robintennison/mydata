@@ -90,14 +90,12 @@ export const useBankingOperations = (
         } else {
           // Document doesn't exist - this is a new deposit with client-generated ID
           // We should use addDoc instead and let Firebase handle the ID
-          const { id, ...depositData } = deposit;
-          const newDocRef = await addDoc(collection(firestore, "deposits"), toFirestoreData(depositData));
+          const newDocRef = await addDoc(collection(firestore, "deposits"), toFirestoreData(deposit));
           console.log("DEBUG: Created new deposit with Firebase ID:", newDocRef.id);
         }
       } else {
         // No ID provided, create new deposit
-        const { id, ...depositData } = deposit;
-        const newDocRef = await addDoc(collection(firestore, "deposits"), toFirestoreData(depositData));
+        const newDocRef = await addDoc(collection(firestore, "deposits"), toFirestoreData(deposit));
         console.log("DEBUG: Created new deposit with Firebase ID:", newDocRef.id);
       }
       

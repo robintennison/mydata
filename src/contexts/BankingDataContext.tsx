@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { firestore } from "../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useError } from "./ErrorContext";
@@ -52,28 +52,23 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
   const { setError } = useError();
   const { isAuthenticated } = useAuth();
 
-  const loadAllData = async () => {
-    if (!isAuthenticated) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const [
-        accountsSnap,
-        depositsSnap,
-        historySnap,
-        adjustmentsSnap,
-        historyDetailSnap,
-        liabilitiesSnap,
-      ] = await Promise.all([
-        getDocs(collection(firestore, "accounts")),
-        getDocs(collection(firestore, "deposits")),
-        getDocs(collection(firestore, "history")),
-        getDocs(collection(firestore, "deposit_adjustments")),
-        getDocs(collection(firestore, "history_detail")),
-        getDocs(collection(firestore, "liabilities")),
-      ]);
+  const loadAllData = useCallback(() => {
+    if (!isAuthenticated) return Promise.resolve();
+    return Promise.all([
+      getDocs(collection(firestore, "accounts")),
+      getDocs(collection(firestore, "deposits")),
+      getDocs(collection(firestore, "history")),
+      getDocs(collection(firestore, "deposit_adjustments")),
+      getDocs(collection(firestore, "history_detail")),
+      getDocs(collection(firestore, "liabilities")),
+    ]).then(([
+      accountsSnap,
+      depositsSnap,
+      historySnap,
+      adjustmentsSnap,
+      historyDetailSnap,
+      liabilitiesSnap,
+    ]) => {
 
       setAccounts(
         accountsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as BankAccount))
@@ -98,22 +93,22 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
         liabilitiesSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Liability))
       );
 
-    } catch (error) {
+    }).catch((error: unknown) => {
       console.error("Error loading banking data:", error);
       setError("Failed to load banking data. Please check your connection.");
-    } finally {
+    }).finally(() => {
       setLoading(false);
-    }
-  };
+    });
+  }, [isAuthenticated, setError]);
 
   useEffect(() => {
     loadAllData();
-  }, [isAuthenticated, setError]);
+  }, [loadAllData]);
 
   return (
     <BankingDataContext.Provider
       value={{
-        loading,
+        loading: isAuthenticated && loading,
         accounts,
         deposits,
         history,
@@ -121,7 +116,10 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
         historyDetail,
         liabilities,
         settings,
-        refresh: loadAllData,
+        refresh: async () => {
+          setLoading(true);
+          await loadAllData();
+        },
       }}
     >
       {children}

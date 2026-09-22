@@ -6,7 +6,7 @@ interface Account {
   acctCode: string;
   acctDetails?: string;
   savingsAmount?: number;
-  [key: string]: any;
+
 }
 
 interface AccountSelectorProps {

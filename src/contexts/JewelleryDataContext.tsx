@@ -1,23 +1,23 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { 
-  collection, 
-  addDoc, 
-  updateDoc, 
-  doc, 
-  deleteDoc, 
-  getDocs, 
-  query, 
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  deleteDoc,
+  getDocs,
+  query,
   orderBy,
-  Timestamp 
+  Timestamp
 } from "firebase/firestore";
 import { firestore } from "../lib/firebase";
 import { Jewellery } from "../modules/Jewellery/models/types";
 import { useAuth } from "./AuthContext";
-import { 
-  uploadImage, 
-  getBill, 
-  uploadBillAndCreateDoc, 
-  updateBillNotes 
+import {
+  uploadImage,
+  getBill,
+  uploadBillAndCreateDoc,
+  updateBillNotes
 } from "../modules/Jewellery/hooks/firebaseUtils";
 
 interface JewelleryDataContextType {
@@ -50,23 +50,16 @@ interface JewelleryDataProviderProps {
 
 export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ children }) => {
   const [items, setItems] = useState<Jewellery[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
 
-  const loadItems = async () => {
-    if (!isAuthenticated) {
-      setItems([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const jewelleryRef = collection(firestore, "jewellery");
-      const q = query(jewelleryRef, orderBy("code"));
-      const querySnapshot = await getDocs(q);
-      
+  const loadItems = useCallback(() => {
+    if (!isAuthenticated) return Promise.resolve();
+    const jewelleryRef = collection(firestore, "jewellery");
+    const q = query(jewelleryRef, orderBy("code"));
+    return getDocs(q).then((querySnapshot) => {
+
       const jewelleryItems: Jewellery[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
@@ -86,15 +79,15 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
           verificationNotes: data.verificationNotes || "",
         });
       });
-      
+
       setItems(jewelleryItems);
-    } catch (err) {
+    }).catch((err: unknown) => {
       console.error("Error loading jewellery items:", err);
       setError("Failed to load jewellery items");
-    } finally {
+    }).finally(() => {
       setLoading(false);
-    }
-  };
+    });
+  }, [isAuthenticated]);
 
   const getPurchaseTimestamp = (purchaseDate: number | Date): number => {
     if (purchaseDate instanceof Date) {
@@ -107,7 +100,7 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
     setLoading(true);
     try {
       const purchaseTimestamp = getPurchaseTimestamp(item.purchaseDate);
-      
+
       const jewelleryData = {
         code: item.code,
         description: item.description,
@@ -124,15 +117,15 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
-      
+
       const docRef = await addDoc(collection(firestore, "jewellery"), jewelleryData);
-      
+
       // Update the document with its own ID
       await updateDoc(docRef, { id: docRef.id });
-      
+
       // Refresh the list
       await loadItems();
-      
+
       return docRef.id;
     } catch (err) {
       console.error("Error adding jewellery item:", err);
@@ -147,9 +140,9 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
     setLoading(true);
     try {
       const jewelleryRef = doc(firestore, "jewellery", id);
-      
+
       const purchaseTimestamp = getPurchaseTimestamp(item.purchaseDate);
-      
+
       const updateData = {
         code: item.code,
         description: item.description,
@@ -165,7 +158,7 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
         verificationNotes: item.verificationNotes || "",
         updatedAt: Timestamp.now(),
       };
-      
+
       await updateDoc(jewelleryRef, updateData);
       await loadItems();
     } catch (err) {
@@ -193,13 +186,13 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
 
   useEffect(() => {
     loadItems();
-  }, [isAuthenticated]);
+  }, [loadItems]);
 
   return (
     <JewelleryDataContext.Provider
       value={{
         items,
-        loading,
+        loading: isAuthenticated && loading,
         error,
         addItem,
         updateItem,
@@ -208,7 +201,11 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
         getBill,
         uploadBillAndCreateDoc,
         updateBillNotes,
-        refresh: loadItems,
+        refresh: async () => {
+          setLoading(true);
+          setError(null);
+          await loadItems();
+        },
       }}
     >
       {children}

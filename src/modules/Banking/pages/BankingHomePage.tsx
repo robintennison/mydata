@@ -27,11 +27,7 @@ type TabType = "dashboard" | "accounts" | "deposits" | "history" | "historydetai
 // Interface for monthly data with liabilities (now imported from types)
 // This interface is now defined in banking.types.ts as MonthlyDataWithLiabilities
 
-interface BankingHomePageProps {
-  // Add any props if needed
-}
-
-const BankingHomePage: React.FC<BankingHomePageProps> = () => {
+const BankingHomePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 

@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -119,7 +120,8 @@ const EditAccountPage: React.FC = () => {
 
       // Navigate back to the Banking Home Accounts tab
       navigate("/banking", { state: { activeTab: "accounts" } });
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = toError(caught);
       console.error("Error updating account:", err);
       setError("Failed to update account. Please try again.");
     } finally {

@@ -1,5 +1,5 @@
 // src/modules/SettingsPage.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../contexts/SettingsContext";
 
@@ -31,16 +31,6 @@ const SettingsPage: React.FC = () => {
   const [newBoughtFor, setNewBoughtFor] = useState("");
   const [renameValue, setRenameValue] = useState("");
 
-  const [financialSettings, setFinancialSettings] = useState({
-    goldRate: 0,
-    makingTax: 0,
-    resaleDiscount: 0,
-    emwInterest: 0,
-  });
-
-  // EMW state - start with empty values
-  const [emwDate, setEmwDate] = useState<string>("");
-  const [targetAge, setTargetAge] = useState<number | null>(null);
   const [useAgeMode, setUseAgeMode] = useState(false); // Toggle between Age and Date mode
 
   // Editing states
@@ -53,29 +43,6 @@ const SettingsPage: React.FC = () => {
 
   // Date of birth (Oct 17, 1959)
   const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
-
-  useEffect(() => {
-    // Update local state whenever settings change from context
-    if (settings) {
-      setFinancialSettings({
-        goldRate: settings.goldRatePerGram ?? 0,
-        makingTax: settings.makingTaxPercent ?? 0,
-        resaleDiscount: settings.resaleDiscountPercent ?? 0,
-        emwInterest: settings.EMW_interest ?? 0,
-      });
-
-      // Only set EMW date and calculate age if we have a valid date
-      if (settings.EMW_Date) {
-        setEmwDate(settings.EMW_Date);
-        const calculatedAge = calculateAgeFromDate(settings.EMW_Date);
-        setTargetAge(calculatedAge);
-      } else {
-        // If no date in settings, use default
-        setEmwDate("2044-10");
-        setTargetAge(85);
-      }
-    }
-  }, [settings]);
 
   // Calculate age from date string (YYYY-MM)
   const calculateAgeFromDate = (dateStr: string): number => {
@@ -94,7 +61,7 @@ const SettingsPage: React.FC = () => {
       }
 
       return age;
-    } catch (e) {
+    } catch {
       return 85; // Return default age on error
     }
   };
@@ -105,6 +72,15 @@ const SettingsPage: React.FC = () => {
     // Use the same month as DOB (October)
     return `${targetYear}-10`; // October
   };
+
+  const financialSettings = {
+    goldRate: settings?.goldRatePerGram ?? 0,
+    makingTax: settings?.makingTaxPercent ?? 0,
+    resaleDiscount: settings?.resaleDiscountPercent ?? 0,
+    emwInterest: settings?.EMW_interest ?? 0,
+  };
+  const emwDate = settings?.EMW_Date ?? "";
+  const targetAge = emwDate ? calculateAgeFromDate(emwDate) : null;
 
   const toggleMode = () => {
     setUseAgeMode(!useAgeMode);
@@ -133,9 +109,6 @@ const SettingsPage: React.FC = () => {
     }
 
     if (!await updateSettings({ EMW_Date: targetDateValue })) return;
-    setEmwDate(targetDateValue);
-    const newAge = calculateAgeFromDate(targetDateValue);
-    setTargetAge(newAge);
     setEditingTargetDate(false);
   };
 
@@ -150,8 +123,6 @@ const SettingsPage: React.FC = () => {
 
     const newDate = calculateDateFromAge(age);
     if (!await updateSettings({ EMW_Date: newDate })) return;
-    setEmwDate(newDate);
-    setTargetAge(age);
     setEditingTargetAge(false);
   };
 
@@ -280,7 +251,7 @@ const SettingsPage: React.FC = () => {
         year: "numeric",
         month: "long",
       });
-    } catch (e) {
+    } catch {
       return dateStr;
     }
   };

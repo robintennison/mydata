@@ -1,3 +1,4 @@
+import type { Settings } from "./settings";
 // utils/emwCalculations.ts
 
 /**
@@ -46,10 +47,10 @@ export const calculateEMW = (
  * @param appSettings - Application settings object
  * @returns Object containing interest rate, target date, and target date string
  */
-export const getEmwSettings = (appSettings: any) => {
+export const getEmwSettings = (appSettings: Partial<Settings> | null | undefined) => {
   // Default values
   let interestRate = 0; // 0% default
-  let targetDateStr = "2039-10"; // November 2039 default
+  let targetDateStr = "2039-10"; // October 2039 default
 
   if (appSettings) {
     // Use EMW_Interest from settings or default
@@ -68,7 +69,7 @@ export const getEmwSettings = (appSettings: any) => {
   } catch (error) {
     // Fallback to default date if parsing fails
     console.error("Error parsing EMW date:", error);
-    targetDate = new Date(2039, 10, 1); // November 2039
+    targetDate = new Date(2039, 9, 1); // October 2039
     targetDateStr = "2039-10";
   }
 

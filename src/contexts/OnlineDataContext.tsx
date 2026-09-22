@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { firestore } from "../lib/firebase";
 import { useAuth } from "./AuthContext";
 import { useError } from "./ErrorContext";
 import { OnlineItem, Category, Renewal, FILE_TYPES } from "../modules/Online/types/online.types";
@@ -34,23 +35,15 @@ export const OnlineDataProvider: React.FC<OnlineDataProviderProps> = ({ children
   const { setError } = useError();
   const { isAuthenticated } = useAuth();
 
-  const loadAllData = async () => {
-    if (!isAuthenticated) {
-      setItems([]);
-      setCategories([]);
-      setRenewals([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const db = getFirestore();
-      
-      const [categoriesSnap, itemsSnap, renewalsSnap] = await Promise.all([
-        getDocs(collection(db, "online_categories")),
-        getDocs(collection(db, "online")),
-        getDocs(collection(db, "renewals")),
-      ]);
+  const loadAllData = useCallback(() => {
+    if (!isAuthenticated) return Promise.resolve();
+    const db = firestore;
+
+    return Promise.all([
+      getDocs(collection(db, "online_categories")),
+      getDocs(collection(db, "online")),
+      getDocs(collection(db, "renewals")),
+    ]).then(([categoriesSnap, itemsSnap, renewalsSnap]) => {
 
       // Parse categories
       const categoriesList: Category[] = categoriesSnap.docs.map((doc) => ({
@@ -102,26 +95,29 @@ export const OnlineDataProvider: React.FC<OnlineDataProviderProps> = ({ children
       setCategories(categoriesList);
       setItems(itemsList);
       setRenewals(renewalsList);
-    } catch (error) {
+    }).catch((error: unknown) => {
       console.error("Error loading online data:", error);
       setError("Failed to load online data.");
-    } finally {
+    }).finally(() => {
       setLoading(false);
-    }
-  };
+    });
+  }, [isAuthenticated, setError]);
 
   useEffect(() => {
     loadAllData();
-  }, [isAuthenticated, setError]);
+  }, [loadAllData]);
 
   return (
     <OnlineDataContext.Provider
       value={{
-        loading,
+        loading: isAuthenticated && loading,
         items,
         categories,
         renewals,
-        refresh: loadAllData,
+        refresh: async () => {
+          setLoading(true);
+          await loadAllData();
+        },
       }}
     >
       {children}

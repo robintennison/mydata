@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -158,7 +159,8 @@ const JewelleryStats: React.FC = () => {
           topLocations,
           topPeople,
         });
-      } catch (error: any) {
+      } catch (caught: unknown) {
+      const error = toError(caught);
         console.error("Error fetching statistics:", error);
         setError(`Failed to load statistics: ${error.message}`);
       } finally {
@@ -276,7 +278,8 @@ const JewelleryStats: React.FC = () => {
             topPeople,
           });
           setError(null);
-        } catch (error: any) {
+        } catch (caught: unknown) {
+      const error = toError(caught);
           console.error("Error refreshing statistics:", error);
           setError(`Refresh failed: ${error.message}`);
         } finally {

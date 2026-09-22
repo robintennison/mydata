@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 // src/modules/banking/AddAccountPage.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -86,7 +87,8 @@ const AddAccountPage: React.FC = () => {
         state: { activeTab: "accounts" },
         replace: true,
       });
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = toError(caught);
       console.error("Error adding account:", err);
       setError(`Failed to add account: ${err.message || "Unknown error"}`);
     } finally {

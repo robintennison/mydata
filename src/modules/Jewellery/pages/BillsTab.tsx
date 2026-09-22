@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -110,7 +111,8 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
 
         setBills(billsWithLinkStatus);
         setFilteredBills(billsWithLinkStatus);
-      } catch (error: any) {
+      } catch (caught: unknown) {
+      const error = toError(caught);
         console.error("❌ Error fetching bills:", error);
       } finally {
         setLoading(false);

@@ -132,7 +132,7 @@ export interface UseOnlineFormReturn {
   handleRemoveFile: (fileNumber: 1 | 2) => void;
   handleDeleteExistingFile: (fileNumber: 1 | 2) => Promise<void>;
   getPageTitle: () => string;
-  navigate: (to: string, options?: { state?: any }) => void;
+  navigate: (to: string, options?: { state?: unknown }) => void;
 }
 
 /**
@@ -165,7 +165,7 @@ export interface CalendarUtils {
   formatDateDisplay: (timestamp?: number | null) => string;
   getFileTypeFromName: (filename: string) => FileType;
   getFileIcon: (type: FileType) => string;
-  parseTimestamp: (timestamp: any) => number | null;
+  parseTimestamp: (timestamp: unknown) => number | null;
 }
 
 // Constants for file types (optional, for convenience)

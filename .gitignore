@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Firebase state and environment configuration
+.firebase/
+.env
+.env.*
+!.env.example
+
+# Local audit output
+lint-report*.json
+dependency-audit.json

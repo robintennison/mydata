@@ -1,3 +1,4 @@
+import { toError } from "../../utils/errors";
 // components/Auth/Login.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -49,7 +50,8 @@ const Login: React.FC = () => {
     try {
       await login(email, password);
       // No need to navigate here - the useEffect will handle redirection
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       // Error is already handled in AuthContext, but we can add additional handling here
       if (!error.code) {
         setFormError("Network error. Please check your connection.");

@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBankingData } from "../hooks/useBankingData";
@@ -150,7 +151,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
         console.log("DEBUG: Save operation was cancelled");
         setSaving(false);
       }
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("DEBUG: Error saving deposit:", error);
       // Provide more specific error messages
       let errorMessage = "Failed to save deposit. Please try again.";
@@ -179,7 +181,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
       // Note: The actual navigation will happen after the dialog confirms deletion
       // For now, just set deleting to false as the dialog will handle the rest
       setDeleting(false);
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("DEBUG: Error in delete flow:", error);
       let errorMessage = "Failed to delete deposit. Please try again.";
 

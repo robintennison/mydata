@@ -11,22 +11,7 @@ export const FILE_TYPES = {
 } as const;
 
 // Helper function to safely parse timestamps
-export const parseTimestamp = (timestamp: any): number | null => {
-  if (timestamp === null || timestamp === undefined) return null;
-  if (typeof timestamp === "number") {
-    return timestamp;
-  }
-  if (timestamp && typeof timestamp.toDate === "function") {
-    return timestamp.toDate().getTime();
-  }
-  if (typeof timestamp === "string") {
-    const parsed = Date.parse(timestamp);
-    if (!isNaN(parsed)) {
-      return parsed;
-    }
-  }
-  return null;
-};
+export { parseTimestamp } from "./timestamps";
 
 // Helper to determine file type from name
 export const getFileTypeFromName = (filename: string): FileType => {
@@ -64,7 +49,7 @@ export const formatDateDisplay = (timestamp?: number | null): string => {
       month: "short",
       year: "numeric",
     });
-  } catch (error) {
+  } catch {
     return "Error formatting date";
   }
 };

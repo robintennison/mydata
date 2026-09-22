@@ -170,7 +170,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({ historyDe
     const majorSummaries = summaries.filter((s) => s.total >= threshold);
     const minorSummaries = summaries.filter((s) => s.total < threshold);
 
-    let finalSummaries = [...majorSummaries];
+    const finalSummaries = [...majorSummaries];
 
     if (minorSummaries.length > 0) {
       const othersSavings = minorSummaries.reduce(

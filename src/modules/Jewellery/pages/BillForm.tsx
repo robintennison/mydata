@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom"; // ADD useLocation
 import { Bill } from "../models/types";
@@ -149,7 +150,8 @@ const BillForm: React.FC = () => {
       console.log(
         `Bill file optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
       );
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = toError(caught);
       console.error("Error optimizing bill file:", err);
       setOptimizationInfo(null);
     }
@@ -192,7 +194,8 @@ const BillForm: React.FC = () => {
           setFileName("");
 
           alert("Document deleted successfully!");
-        } catch (error: any) {
+        } catch (caught: unknown) {
+      const error = toError(caught);
           if (error.code === "storage/object-not-found") {
             console.log("File already deleted from storage");
             // Still update the form data even if file doesn't exist
@@ -210,7 +213,8 @@ const BillForm: React.FC = () => {
       } else {
         throw new Error("Could not extract file path from URL");
       }
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error deleting document:", error);
       alert(`Failed to delete document: ${error.message}`);
     } finally {
@@ -236,7 +240,8 @@ const BillForm: React.FC = () => {
             await deleteObject(storageRef);
             console.log("Associated file deleted from storage");
           }
-        } catch (error: any) {
+        } catch (caught: unknown) {
+      const error = toError(caught);
           if (error.code !== "storage/object-not-found") {
             console.warn(
               "Error deleting associated file, continuing with bill deletion:",
@@ -255,7 +260,8 @@ const BillForm: React.FC = () => {
       navigate("/jewellery", {
         state: { activeTab: "bills" },
       });
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error deleting bill:", error);
       alert(`Failed to delete bill: ${error.message}`);
     } finally {
@@ -419,7 +425,8 @@ const BillForm: React.FC = () => {
       navigate("/jewellery", {
         state: { activeTab: "bills" },
       });
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error saving bill:", error);
 
       let errorMessage = "Error saving bill. Please try again.";

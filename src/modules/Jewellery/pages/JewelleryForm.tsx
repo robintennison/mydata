@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect, useRef } from "react";
 import {
   getFirestore,
@@ -125,7 +126,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
         });
 
         setBills(billsList);
-      } catch (error: any) {
+      } catch (caught: unknown) {
+      const error = toError(caught);
         console.error("Error fetching bills:", error);
       } finally {
         setLoadingBills(false);
@@ -217,7 +219,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       console.log(
         `Image will be optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
       );
-    } catch (err: any) {
+    } catch (caught: unknown) {
+      const err = toError(caught);
       console.error("Error optimizing image:", err);
       setOptimizationInfo(null);
     }
@@ -278,7 +281,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error uploading image:", error);
       setImageError(`Failed to upload image: ${error.message}`);
     } finally {
@@ -312,7 +316,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
       } else {
         throw new Error("Could not extract file path from URL");
       }
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error deleting image:", error);
       setImageError(`Failed to delete image: ${error.message}`);
     } finally {

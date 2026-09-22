@@ -6,8 +6,9 @@ import type { DocumentData } from "firebase/firestore";
  * @param data - The data object to convert
  * @returns Firestore-compatible data without the 'id' field
  */
-export const toFirestoreData = <T extends Record<string, any>>(data: T): DocumentData => {
-  const { id, ...rest } = data;
+export const toFirestoreData = <T extends object>(data: T): DocumentData => {
+  const rest = { ...data };
+  Reflect.deleteProperty(rest, "id");
   return rest;
 };
 

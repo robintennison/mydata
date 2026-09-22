@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,9 +11,7 @@ import {
 import { Jewellery, VerificationStatus } from "../models/types";
 import { useJewellerySettings } from "../hooks/useSettingsData";
 
-interface BatchEditPageProps {}
-
-const BatchEditPage: React.FC<BatchEditPageProps> = () => {
+const BatchEditPage: React.FC = () => {
   const navigate = useNavigate();
   const [jewelleryItems, setJewelleryItems] = useState<Jewellery[]>([]);
   const [filteredItems, setFilteredItems] = useState<Jewellery[]>([]);
@@ -159,7 +158,8 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
           selectedItems.size !== 1 ? "s" : ""
         }`,
       );
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error updating locations:", error);
       setUpdateMessage(`Error updating: ${error.message}`);
     } finally {

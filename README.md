@@ -1,73 +1,29 @@
-# React + TypeScript + Vite
+# MyData
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Personal data application built with React, TypeScript, Vite, and Firebase. Modules cover banking/deposits/history, jewellery/bills, online records/renewals, and shared settings.
 
-Currently, two official plugins are available:
+## Local development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Use a current Node.js LTS version supported by Vite (Node 22.12+ or 24). Run `npm ci`, copy `.env.example` to `.env.local`, fill in the Firebase project configuration, then run `npm run dev`.
 
-## React Compiler
+Firebase configuration in a browser bundle is public configuration, not an authorization boundary. Access to records depends on the deployed Firebase security rules. This repository contains hosting configuration but no checked-in Firestore, Storage, or Realtime Database rules; review/export those separately from the project console before changing access policies.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Checks
 
-## Expanding the ESLint configuration
+- `npm test`: regression tests for settings, timestamp/error handling, and session data lifecycles. Tests mock Firebase; they never write production records.
+- `npm run lint`: full ESLint scan. Existing issues are recorded in `docs/application-health.md`; rules have not been disabled to hide them.
+- `npm run build`: TypeScript compilation followed by the production bundle in `dist`.
+- `npm run check`: lint, tests, and build, stopping at the first failure.
+- `npm run preview`: preview the built bundle locally.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+If a Windows global npm shim is broken, repair the Node/npm installation or invoke the bundled npm CLI with `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js"` followed by the usual npm arguments.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Storage and deployment
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+The app uses the default Cloud Firestore database from the configured Firebase project. Shared settings are stored at `settings/app`; see `docs/settings-persistence.md`. Images and files use Firebase Storage. A legacy file-upload component also uses Realtime Database; do not remove its configuration without retiring or migrating that component.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The Vite entry point is `index.html` → `src/main.tsx`. Compatibility re-export files keep older import paths working while sharing a single implementation.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Build before deploying. Firebase Hosting configuration is in `firebase.json`; `.firebaserc` currently targets `robintennison-mydata`. Publish only when intended: `firebase deploy --only hosting --project robintennison-mydata`. Reload existing browser tabs after releasing fixes.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Keep `.env*`, build output, local audit reports, and `.firebase` cache files out of commits. `.env.example` contains names only and is safe to track.

@@ -207,7 +207,7 @@ const JewelleryDetail: React.FC = () => {
         return decodeURIComponent(encodedPath);
       }
       return url;
-    } catch (e) {
+    } catch {
       return url;
     }
   };
@@ -269,7 +269,7 @@ Uploaded: ${formatDate(bill.uploadedAt, "en-GB", {
       if (lastPart && lastPart.includes(".")) {
         filename = lastPart;
       }
-    } catch (e) {
+    } catch {
       console.log("Could not parse URL for filename");
     }
 

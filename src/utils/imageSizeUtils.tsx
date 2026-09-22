@@ -1,3 +1,4 @@
+import { toError } from "./errors";
 import React from "react";
 import { getStorage, ref, getMetadata } from "firebase/storage";
 import { formatFileSize } from "./fileOptimizer";
@@ -58,7 +59,8 @@ export const useImageSize = (imageUrl: string | null) => {
         setSizeInfo((prev) => ({ ...prev, loading: true, error: null }));
         const size = await fetchImageSizeFromUrl(imageUrl);
         setSizeInfo({ size, loading: false, error: null });
-      } catch (error: any) {
+      } catch (caught: unknown) {
+      const error = toError(caught);
         setSizeInfo({
           size: null,
           loading: false,

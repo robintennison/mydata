@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 // BillAssignment.tsx
 import React, { useState, useEffect } from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
@@ -89,7 +90,8 @@ const BillAssignment: React.FC<BillAssignmentProps> = ({
           setBillError("Bill document not found");
           setShowBillDropdown(true);
         }
-      } catch (error: any) {
+      } catch (caught: unknown) {
+      const error = toError(caught);
         console.error("Error fetching assigned bill:", error);
         setAssignedBill(null);
         setBillError(`Failed to load bill: ${error.message}`);
@@ -132,7 +134,7 @@ const BillAssignment: React.FC<BillAssignmentProps> = ({
       if (lastPart && lastPart.includes(".")) {
         filename = lastPart;
       }
-    } catch (e) {
+    } catch {
       console.log("Could not parse URL for filename");
     }
 

@@ -1,3 +1,4 @@
+import { parseTimestamp } from "../../../utils/timestamps";
 import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useOnlineDataContext } from "../../../contexts/OnlineDataContext";
@@ -61,20 +62,8 @@ const OnlineHomepage: React.FC = () => {
     const thirtyDaysFromNow = now + 30 * 24 * 60 * 60 * 1000;
     
     let expiringSoonCount = 0;
-    renewals.forEach((renewal: any) => {
-      let endDate = 0;
-      if (renewal.endDate && typeof renewal.endDate === "number") {
-        endDate = renewal.endDate;
-      } else if (
-        renewal.endDate &&
-        typeof renewal.endDate === "object" &&
-        (renewal.endDate as any).toDate
-      ) {
-        endDate = (renewal.endDate as any).toDate().getTime();
-      } else if (renewal.endDate && typeof renewal.endDate === "string") {
-        const parsed = Date.parse(renewal.endDate);
-        endDate = isNaN(parsed) ? 0 : parsed;
-      }
+    renewals.forEach((renewal) => {
+      const endDate = parseTimestamp(renewal.endDate);
 
       if (endDate && endDate <= thirtyDaysFromNow && endDate > now) {
         expiringSoonCount++;

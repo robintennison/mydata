@@ -1,3 +1,4 @@
+import { toError } from "../utils/errors";
 // contexts/AuthContext.tsx
 import React, {
   createContext,
@@ -61,7 +62,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setError(null);
       await signInWithEmailAndPassword(auth, email, password);
       // No need to set user here - onAuthStateChanged will handle it
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Login error:", error);
 
       // Provide user-friendly error messages
@@ -96,7 +98,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setError(null);
       await createUserWithEmailAndPassword(auth, email, password);
       // No need to set user here - onAuthStateChanged will handle it
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Signup error:", error);
 
       // Provide user-friendly error messages
@@ -129,7 +132,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Clear any additional app data
       localStorage.clear();
       sessionStorage.clear();
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Logout error:", error);
       setError("Failed to sign out. Please try again.");
       throw error;

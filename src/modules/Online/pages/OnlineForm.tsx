@@ -70,7 +70,7 @@ const OnlineForm: React.FC = () => {
         return decodeURIComponent(encodedPath);
       }
       return url;
-    } catch (e) {
+    } catch {
       return url;
     }
   };

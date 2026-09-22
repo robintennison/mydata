@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom"; // ADD useLocation
 import {
@@ -81,7 +82,8 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
       }
 
       if (isEditing && id) {
-        const { id: _, ...updateData } = formData;
+        const updateData = { ...formData };
+        delete updateData.id;
         const docRef = doc(db, "jewellery", id);
         await setDoc(
           docRef,
@@ -143,7 +145,8 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
       navigate(returnTo, {
         state: { activeTab: activeTab },
       });
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error deleting jewellery item:", error);
       setError(`Failed to delete jewellery item: ${error.message}`);
       setDeleting(false);

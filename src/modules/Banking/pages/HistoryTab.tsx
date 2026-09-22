@@ -1,3 +1,4 @@
+import { toError } from "../../../utils/errors";
 import React, { useState, useEffect } from "react";
 import HistoryChart from "./HistoryChart";
 import { useBankingData } from "../hooks/useBankingData";
@@ -174,7 +175,7 @@ const HistoryTab: React.FC = () => {
       }
 
       return age;
-    } catch (e) {
+    } catch {
       return null;
     }
   };
@@ -368,7 +369,8 @@ const HistoryTab: React.FC = () => {
       setShowWarning(hasMissingLiabilities);
       cancelEditing();
       alert("✓ History updated successfully!");
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error updating history:", error);
       alert(`Failed to update: ${error.message || "Unknown error"}`);
     } finally {
@@ -455,7 +457,8 @@ const HistoryTab: React.FC = () => {
       setShowWarning(hasMissingLiabilities);
       setDeleteConfirmMonth(null);
       alert("✓ History records deleted!");
-    } catch (error: any) {
+    } catch (caught: unknown) {
+      const error = toError(caught);
       console.error("Error deleting history:", error);
       alert(`Failed to delete: ${error.message || "Unknown error"}`);
     } finally {

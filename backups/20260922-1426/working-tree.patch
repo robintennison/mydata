@@ -1,0 +1,3740 @@
+diff --git a/.firebase/hosting.ZGlzdA.cache b/.firebase/hosting.ZGlzdA.cache
+deleted file mode 100644
+index 41fd4aa..0000000
+--- a/.firebase/hosting.ZGlzdA.cache
++++ /dev/null
+@@ -1,38 +0,0 @@
+-vite.svg,1768279666000,699a02e0e68a579f687d364bbbe7633161244f35af068220aee37b1b33dfb3c7
+-favicon.svg,1776490208000,76ddc4991d7a7d3ef6487bdf8fc6b780fceb6ae4679cc8dd1d7742b956dc9cd6
+-index.html,1790000651440,1bff6ae8c16f1688329a10c2884cd6a7a06210a2426e1cfa0213d28f86778c1f
+-assets/VerificationTab-Dml3Bydq.js,1790000651440,0aa99f909c4470e90442fb9bc520ea235d1f09ff08fb2f47653448070b9b302e
+-assets/useSettingsData-BNaUyVML.js,1790000651440,066c304143b6be21c38c310a756a775b96fde16f62eac833525568d8944dcbbb
+-assets/useBankingData-BHJndvNO.js,1790000651440,40bc40b468c6009f610ef256607c7510bbb8bf493c828315edc2078e7b09ee2e
+-assets/types-BfuyKs5V.js,1790000651440,322b4eb3a2e7c845096f994fb59b6b03cc94cf55e2a082195f134cd7f92a3104
+-assets/SettingsPage-Bwyk98LK.js,1790000651391,3320f631a45adb05a8460fabaeb624346b608b08ac8a8919f0fb9611f9b5eb8f
+-assets/OnlineHomepage-BUOcj4ka.js,1790000651440,d3ac28d7ac3db8681038c6b641e761663c99a6dabff979f694e4bef5f947e86a
+-assets/MyDataHomepage-s2gKjBGn.js,1790000651391,dfdf19d0169d66caeef66bddfd181b9aa6a236fa7d72902e374395e1590e47b6
+-assets/Login-DEwRdS6y.js,1790000651436,fa853ab4f5ad5e911cb05727311c6815906c9b8ace369b60199145914ee97939
+-assets/ListTab-CSmdvykB.js,1790000651391,8b155244609e07cb264e84a41aeb7256533039e0c98bc38dc33c5c06cf54c06c
+-assets/JewelleryDetail-DR179R_y.js,1790000651440,c14ec986b4fd5465246ab85cf444c0e7f44a045458b6130ffade6639df9d1d2a
+-assets/ViewDepositPage-B7DhZjOv.js,1790000651440,142aa63e462a23d25ed9b95adf0738e7e255b307318413146c7117c4d139dda2
+-assets/JewelleryFormWrapper-CoKj7JAI.js,1790000651436,3c85684057a9ded31e9a8924178b0c8775d9c668048f7861a528e12750a0b598
+-assets/JewelleryForBill-Dn9UDxjo.js,1790000651440,e02f139634adbc3c00708d458ada5ddc7a2488b866178ab5dfb50c56948e2874
+-assets/index-hQnsu7wo.js,1790000651436,456c12ec34ab0240a3409eaa9612050a20b2bcb2179044647f86edd1f34f5de0
+-assets/OnlineForm-DZ8s7iVz.js,1790000651440,53674b13e4f958573a39f9ba26600173542d92cec455e65562d0381fb764103d
+-assets/imageSizeUtils-D5GGQLHL.js,1790000651440,109a0e6f2c9c5489f3f62ed027b9e4efa57da5e8a143bdb0663ebddc7ca871cd
+-assets/HistoryChart-OGLMfBJm.js,1790000651391,de221dbd0fc19d8e0c0e3d95932fd5c05e20e41be3f68d6ee1b77970f937b412
+-assets/formatters-B9_mGdDO.js,1790000651440,222bcf50dc4d4ad2fac9f3b0c0fe7e0f13e73c85c3ef987e55b8e332b4ee56c2
+-assets/firestoreHelpers-LZ2sQTv1.js,1790000651391,d083d5341c29acaee7f7f320fcb301a271a784839efc0ffc9f549f83540eeb73
+-assets/EditAccountPage-DfzaOHKW.js,1790000651391,9284556c147abc5822b6a32ffbf4ecaf91ada943cfed443054b5ef547ad200d2
+-assets/DeleteConfirmationDialog-ctR4uY0X.js,1790000651440,986dd301b1964fef2c448fae2777da8851f12dbfd1462cd806f55bcf4ad6797a
+-assets/CustomCalendar-C5xAQmsy.js,1790000651440,1826b91fa59b825d9888bb1e04433193287f343f46b3209bcb9efa6b566851d7
+-assets/CategoryForm-D4992_6u.js,1790000651440,1049e65e21856b4921268356c252659092f60b4e87faaf23febf5eef70308036
+-assets/BillsTab-DOO0GFFs.js,1790000651436,7e43a1e44963d3a239aa9254134ce5aee0013f24b519319386422b6a9a752201
+-assets/BatchEditPage-iTOIo-jz.js,1790000651440,df8156d3393a62260a179a03a205b17fd22c92a166d8e349dd301767c769d55c
+-assets/BillForm-DBbhL6er.js,1790000651440,20effa11547c12e142e9086088ce275e5d65a1306c96d20c93d4693afd66cc4e
+-assets/AddEditDepositPage-BwHwECxu.js,1790000651391,2859aabbc0d1be1dbf2be3a1a30bc9b02a5b66747c43d8fa34bf763ca101363a
+-assets/AddAccountPage-BXzyiOoO.js,1790000651391,3627fa5f98c4b3c9b26b210faaf13828cda411aca64eb068b72264eb010d708c
+-assets/index-DZ-vkqPM.css,1790000651376,ed494bfd71d5859221007c7b8eb738ab5e1ab33f6d13d07c728eece422f42d38
+-assets/fileOptimizer-DWl0xelU.js,1790000651440,d9aa173faca6444c9b911f60a3aa8105a8a0a039a589fcab126ec5558c518478
+-assets/BankingHomePage-fJNd37mY.js,1790000651391,e03a1b9c72568919d753f613f7ee8f2f294ba8eab94f876fb84f6959e78c66dc
+-assets/chartjs-plugin-datalabels.esm-Db63xja5.js,1790000651391,acd40850eb3cf53baae175e5eefe08c33528b7129c6e61e9fadbd3966298677a
+-assets/index-BTYG5HI1.js,1790000651440,9f6f77e4a29af104582ab7e166dcb2881cc538d029c885f17da4c238e7ad0181
+-assets/index-BtMKDDeO.js,1790000651440,01c7a5c8b2543304d31276138285dea14b9bad2c06d6b9f403b859ed80c492a1
+-assets/heic2any-DoZg1LKP.js,1790000651456,41d6c030c63b0f609687cc47d0637d2f5b7e74cd4b012a2584d26425f3ab34d2
+diff --git a/.gitignore b/.gitignore
+index a547bf3..c885ced 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -22,3 +22,13 @@ dist-ssr
+ *.njsproj
+ *.sln
+ *.sw?
++
++# Local Firebase state and environment configuration
++.firebase/
++.env
++.env.*
++!.env.example
++
++# Local audit output
++lint-report*.json
++dependency-audit.json
+diff --git a/README.md b/README.md
+index d2e7761..637ca46 100644
+--- a/README.md
++++ b/README.md
+@@ -1,73 +1,29 @@
+-# React + TypeScript + Vite
++# MyData
+ 
+-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
++Personal data application built with React, TypeScript, Vite, and Firebase. Modules cover banking/deposits/history, jewellery/bills, online records/renewals, and shared settings.
+ 
+-Currently, two official plugins are available:
++## Local development
+ 
+-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
++Use a current Node.js LTS version supported by Vite (Node 22.12+ or 24). Run `npm ci`, copy `.env.example` to `.env.local`, fill in the Firebase project configuration, then run `npm run dev`.
+ 
+-## React Compiler
++Firebase configuration in a browser bundle is public configuration, not an authorization boundary. Access to records depends on the deployed Firebase security rules. This repository contains hosting configuration but no checked-in Firestore, Storage, or Realtime Database rules; review/export those separately from the project console before changing access policies.
+ 
+-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
++## Checks
+ 
+-## Expanding the ESLint configuration
++- `npm test`: regression tests for settings, timestamp/error handling, and session data lifecycles. Tests mock Firebase; they never write production records.
++- `npm run lint`: full ESLint scan. Existing issues are recorded in `docs/application-health.md`; rules have not been disabled to hide them.
++- `npm run build`: TypeScript compilation followed by the production bundle in `dist`.
++- `npm run check`: lint, tests, and build, stopping at the first failure.
++- `npm run preview`: preview the built bundle locally.
+ 
+-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
++If a Windows global npm shim is broken, repair the Node/npm installation or invoke the bundled npm CLI with `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js"` followed by the usual npm arguments.
+ 
+-```js
+-export default defineConfig([
+-  globalIgnores(['dist']),
+-  {
+-    files: ['**/*.{ts,tsx}'],
+-    extends: [
+-      // Other configs...
++## Storage and deployment
+ 
+-      // Remove tseslint.configs.recommended and replace with this
+-      tseslint.configs.recommendedTypeChecked,
+-      // Alternatively, use this for stricter rules
+-      tseslint.configs.strictTypeChecked,
+-      // Optionally, add this for stylistic rules
+-      tseslint.configs.stylisticTypeChecked,
++The app uses the default Cloud Firestore database from the configured Firebase project. Shared settings are stored at `settings/app`; see `docs/settings-persistence.md`. Images and files use Firebase Storage. A legacy file-upload component also uses Realtime Database; do not remove its configuration without retiring or migrating that component.
+ 
+-      // Other configs...
+-    ],
+-    languageOptions: {
+-      parserOptions: {
+-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+-        tsconfigRootDir: import.meta.dirname,
+-      },
+-      // other options...
+-    },
+-  },
+-])
+-```
++The Vite entry point is `index.html` → `src/main.tsx`. Compatibility re-export files keep older import paths working while sharing a single implementation.
+ 
+-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
++Build before deploying. Firebase Hosting configuration is in `firebase.json`; `.firebaserc` currently targets `robintennison-mydata`. Publish only when intended: `firebase deploy --only hosting --project robintennison-mydata`. Reload existing browser tabs after releasing fixes.
+ 
+-```js
+-// eslint.config.js
+-import reactX from 'eslint-plugin-react-x'
+-import reactDom from 'eslint-plugin-react-dom'
+-
+-export default defineConfig([
+-  globalIgnores(['dist']),
+-  {
+-    files: ['**/*.{ts,tsx}'],
+-    extends: [
+-      // Other configs...
+-      // Enable lint rules for React
+-      reactX.configs['recommended-typescript'],
+-      // Enable lint rules for React DOM
+-      reactDom.configs.recommended,
+-    ],
+-    languageOptions: {
+-      parserOptions: {
+-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+-        tsconfigRootDir: import.meta.dirname,
+-      },
+-      // other options...
+-    },
+-  },
+-])
+-```
++Keep `.env*`, build output, local audit reports, and `.firebase` cache files out of commits. `.env.example` contains names only and is safe to track.
+diff --git a/index.html b/index.html
+index c879b4b..d4c35b5 100644
+--- a/index.html
++++ b/index.html
+@@ -4,7 +4,7 @@
+     <meta charset="UTF-8" />
+     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+-    <title>mydata-web</title>
++    <title>MyData</title>
+   </head>
+   <body>
+     <div id="root"></div>
+diff --git a/package-lock.json b/package-lock.json
+index 0e23410..d6cfc27 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1801,12 +1801,6 @@
+       "integrity": "sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==",
+       "license": "BSD-3-Clause"
+     },
+-    "node_modules/@protobufjs/inquire": {
+-      "version": "1.1.2",
+-      "resolved": "https://registry.npmjs.org/@protobufjs/inquire/-/inquire-1.1.2.tgz",
+-      "integrity": "sha512-pa0vFRuws4wkvaXKK1uXZMAwAX4/t8ANaJo45iw/oQHNQ9q5xUzwgFmVJGXiga2BeN+zpX7Vf9vmsiIa2J+MUw==",
+-      "license": "BSD-3-Clause"
+-    },
+     "node_modules/@protobufjs/path": {
+       "version": "1.1.2",
+       "resolved": "https://registry.npmjs.org/@protobufjs/path/-/path-1.1.2.tgz",
+@@ -2514,16 +2508,16 @@
+       }
+     },
+     "node_modules/@typescript-eslint/typescript-estree/node_modules/brace-expansion": {
+-      "version": "5.0.6",
+-      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.6.tgz",
+-      "integrity": "sha512-kLpxurY4Z4r9sgMsyG0Z9uzsBlgiU/EFKhj/h91/8yHu0edo7XuixOIH3VcJ8kkxs6/jPzoI6U9Vj3WqbMQ94g==",
++      "version": "5.0.12",
++      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.12.tgz",
++      "integrity": "sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+         "balanced-match": "^4.0.2"
+       },
+       "engines": {
+-        "node": "18 || 20 || >=22"
++        "node": "20 || >=22"
+       }
+     },
+     "node_modules/@typescript-eslint/typescript-estree/node_modules/minimatch": {
+@@ -2775,9 +2769,9 @@
+       "license": "MIT"
+     },
+     "node_modules/baseline-browser-mapping": {
+-      "version": "2.10.35",
+-      "resolved": "https://registry.npmjs.org/baseline-browser-mapping/-/baseline-browser-mapping-2.10.35.tgz",
+-      "integrity": "sha512-honAfLBde0HAFLdNyBEfuuENkF6zR+ozxqxa/2zJKHBe1qzLqyTSeRKpdPEHAP03rlDGyQOPnCSxnVpVqQo9Mg==",
++      "version": "2.11.25",
++      "resolved": "https://registry.npmjs.org/baseline-browser-mapping/-/baseline-browser-mapping-2.11.25.tgz",
++      "integrity": "sha512-gMmEShwwq7FJqMwvfRwvCl00v4kN+KOfJqXn+f4nrufak5gNHJOksd/60Dvjuz7sI8Y5WiSFBa8FEYr+zoyqCw==",
+       "dev": true,
+       "license": "Apache-2.0",
+       "bin": {
+@@ -2801,9 +2795,9 @@
+       }
+     },
+     "node_modules/brace-expansion": {
+-      "version": "1.1.15",
+-      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.15.tgz",
+-      "integrity": "sha512-EwOCDEex4quD37XhqM3omwtMoJjr//isUZz1JopUNWms+4Z2ViyM/k1YIRePpoVNnQhENnxtFjLaxNHrT7xIUg==",
++      "version": "1.1.21",
++      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.21.tgz",
++      "integrity": "sha512-9zeA+KLZNNzglF2TPKRQEDyx6Yby7daAkuy8MiPzpXPsYDWi/DRM8jmwUDxokQjYqBpv5DgPiwD4h4ZZSy1Ujw==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+@@ -2834,9 +2828,9 @@
+       }
+     },
+     "node_modules/browserslist": {
+-      "version": "4.28.2",
+-      "resolved": "https://registry.npmjs.org/browserslist/-/browserslist-4.28.2.tgz",
+-      "integrity": "sha512-48xSriZYYg+8qXna9kwqjIVzuQxi+KYWp2+5nCYnYKPTr0LvD89Jqk2Or5ogxz0NUMfIjhh2lIUX/LyX9B4oIg==",
++      "version": "4.29.0",
++      "resolved": "https://registry.npmjs.org/browserslist/-/browserslist-4.29.0.tgz",
++      "integrity": "sha512-3GSvyjvDI4Dur1Meg2BekJquu5uF+9R9a1+5M1Mde192eZoXbeXjzgOsgqPS2V8D5wrrip0gR5Hf/GhWQ9ZzaA==",
+       "dev": true,
+       "funding": [
+         {
+@@ -2854,11 +2848,11 @@
+       ],
+       "license": "MIT",
+       "dependencies": {
+-        "baseline-browser-mapping": "^2.10.12",
+-        "caniuse-lite": "^1.0.30001782",
+-        "electron-to-chromium": "^1.5.328",
+-        "node-releases": "^2.0.36",
+-        "update-browserslist-db": "^1.2.3"
++        "baseline-browser-mapping": "^2.11.23",
++        "caniuse-lite": "^1.0.30001810",
++        "electron-to-chromium": "^1.5.427",
++        "node-releases": "^2.0.55",
++        "update-browserslist-db": "^1.3.3"
+       },
+       "bin": {
+         "browserslist": "cli.js"
+@@ -2888,9 +2882,9 @@
+       }
+     },
+     "node_modules/caniuse-lite": {
+-      "version": "1.0.30001797",
+-      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001797.tgz",
+-      "integrity": "sha512-l8xKG+gwAIExZGl9FrF7KUwuOmk6wbEPC9Xoy/RtnWv1XG0Q4LFlagaLpUv3Kiza3W/wm27zy0yWJEieYKAP6w==",
++      "version": "1.0.30001810",
++      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001810.tgz",
++      "integrity": "sha512-TITQPUkaz+aVk5GL6NhOdwk1aEaNTSDPsGFWrTuhKGtjTF70jL/Oht2W4c6rXUe5fu7Ie19VIahAXHIIiWWNeg==",
+       "dev": true,
+       "funding": [
+         {
+@@ -3141,9 +3135,9 @@
+       "license": "MIT"
+     },
+     "node_modules/electron-to-chromium": {
+-      "version": "1.5.371",
+-      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.371.tgz",
+-      "integrity": "sha512-e9htk9mAYL6AzmkEhSvVVw7IWGSBJ/Bqdn2eRyRLrj1g6sncN4WbFt5qnILYoCktktr45pyjIrOiRvBThQ808w==",
++      "version": "1.5.433",
++      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.433.tgz",
++      "integrity": "sha512-5lCAbyZBjtmUt/RAGHRqrL2q0oEFRThDAsZHHDn9XHa89Qw7gMYOeSicBTy+AHfvo0r6vwsZvqNJTQIQy1BLzA==",
+       "dev": true,
+       "license": "ISC"
+     },
+@@ -3868,9 +3862,9 @@
+       "license": "MIT"
+     },
+     "node_modules/js-yaml": {
+-      "version": "4.2.0",
+-      "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-4.2.0.tgz",
+-      "integrity": "sha512-ePWsvanv0DWuDRsW8dnt+R4jQ31SCRCQ7hhNcPXZPsoBZiemuZNYGf7adZdqX2D86j6rvKp3RpCxVTSb8WQlOw==",
++      "version": "4.3.2",
++      "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-4.3.2.tgz",
++      "integrity": "sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==",
+       "dev": true,
+       "funding": [
+         {
+@@ -4083,9 +4077,9 @@
+       }
+     },
+     "node_modules/nanoid": {
+-      "version": "3.3.12",
+-      "resolved": "https://registry.npmjs.org/nanoid/-/nanoid-3.3.12.tgz",
+-      "integrity": "sha512-ZB9RH/39qpq5Vu6Y+NmUaFhQR6pp+M2Xt76XBnEwDaGcVAqhlvxrl3B2bKS5D3NH3QR76v3aSrKaF/Kiy7lEtQ==",
++      "version": "3.3.19",
++      "resolved": "https://registry.npmjs.org/nanoid/-/nanoid-3.3.19.tgz",
++      "integrity": "sha512-Y2tUNy4ouw6tq5oDSKeQYGOyhkUBhNOcGV/02KC+6kd9eDGqdZd++mjMiIDilrBYvjEnCYvVtsuHCuP+okSfug==",
+       "dev": true,
+       "funding": [
+         {
+@@ -4109,9 +4103,9 @@
+       "license": "MIT"
+     },
+     "node_modules/node-releases": {
+-      "version": "2.0.47",
+-      "resolved": "https://registry.npmjs.org/node-releases/-/node-releases-2.0.47.tgz",
+-      "integrity": "sha512-Uzmd6LXpouKo8EUK68IjH4+E01w/hXyV3R3g/geCJo+rXLNfh1xucB+LOzYEOQPSiUK3h/xZf0cQGcSsmyL2Og==",
++      "version": "2.0.56",
++      "resolved": "https://registry.npmjs.org/node-releases/-/node-releases-2.0.56.tgz",
++      "integrity": "sha512-x0InOIyzgdk+eyaWaRJFH5snEtiImgBgblZ2CyPrLmqqcuMQkEvcDPHbzqbD8eDsSeJbVOjn+crzyzHaM4D+/A==",
+       "dev": true,
+       "license": "MIT",
+       "engines": {
+@@ -4303,9 +4297,9 @@
+       }
+     },
+     "node_modules/postcss": {
+-      "version": "8.5.15",
+-      "resolved": "https://registry.npmjs.org/postcss/-/postcss-8.5.15.tgz",
+-      "integrity": "sha512-FfR8sjd4em2T6fb3I2MwAJU7HWVMr9zba+enmQeeWFfCbm+UOC/0X4DS8XtpUTMwWMGbjKYP7xjfNekzyGmB3A==",
++      "version": "8.5.28",
++      "resolved": "https://registry.npmjs.org/postcss/-/postcss-8.5.28.tgz",
++      "integrity": "sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==",
+       "dev": true,
+       "funding": [
+         {
+@@ -4323,7 +4317,7 @@
+       ],
+       "license": "MIT",
+       "dependencies": {
+-        "nanoid": "^3.3.12",
++        "nanoid": "^3.3.18",
+         "picocolors": "^1.1.1",
+         "source-map-js": "^1.2.1"
+       },
+@@ -4476,9 +4470,9 @@
+       }
+     },
+     "node_modules/protobufjs": {
+-      "version": "7.6.3",
+-      "resolved": "https://registry.npmjs.org/protobufjs/-/protobufjs-7.6.3.tgz",
+-      "integrity": "sha512-+k0vdJKNdW+Vu+dYe8tZA/VvQb6XKNWexC6URwBFXxNnjLJz9nQJCemGyNgRAWD+B7+nGNc9qMPGwcD7s4nzUw==",
++      "version": "7.6.6",
++      "resolved": "https://registry.npmjs.org/protobufjs/-/protobufjs-7.6.6.tgz",
++      "integrity": "sha512-dYDWdjSl5RNb7SgPxGQcRU+GtvP7s2fpkrY0r432PcOIaZ0/rBcxEZnQN67iJhFuQiVw754JDoPruPCNdGsbjg==",
+       "hasInstallScript": true,
+       "license": "BSD-3-Clause",
+       "dependencies": {
+@@ -4488,7 +4482,6 @@
+         "@protobufjs/eventemitter": "^1.1.1",
+         "@protobufjs/fetch": "^1.1.1",
+         "@protobufjs/float": "^1.0.2",
+-        "@protobufjs/inquire": "^1.1.2",
+         "@protobufjs/path": "^1.1.2",
+         "@protobufjs/pool": "^1.1.0",
+         "@protobufjs/utf8": "^1.1.1",
+@@ -4572,9 +4565,9 @@
+       }
+     },
+     "node_modules/react-router": {
+-      "version": "7.17.0",
+-      "resolved": "https://registry.npmjs.org/react-router/-/react-router-7.17.0.tgz",
+-      "integrity": "sha512-FDELK7rTMlCHO5+reyXsPlmfr7N1F91lPHsWYfMEGQm/KQ+F4JFM8jGoeQDmDvdTs93Fw9aSilH+uKRb4/jXvQ==",
++      "version": "7.18.4",
++      "resolved": "https://registry.npmjs.org/react-router/-/react-router-7.18.4.tgz",
++      "integrity": "sha512-PUPQcMhMGRAslLcvtlPz/kmzBEWPhLdgLFrL7pLNepBL6dX0lWj4WD2cUYVgYCuT3jxvghYFg81cDTj44DhetQ==",
+       "license": "MIT",
+       "dependencies": {
+         "cookie": "^1.0.1",
+@@ -4594,12 +4587,12 @@
+       }
+     },
+     "node_modules/react-router-dom": {
+-      "version": "7.17.0",
+-      "resolved": "https://registry.npmjs.org/react-router-dom/-/react-router-dom-7.17.0.tgz",
+-      "integrity": "sha512-fyU2yjGups/hE6Xz0I5ZYbVL8Gx29eCjgpHaRaTaVU+OOAdfRX05KsvyRm0GO8YQwOkhpU3MurW1jyMUJn+zSw==",
++      "version": "7.18.4",
++      "resolved": "https://registry.npmjs.org/react-router-dom/-/react-router-dom-7.18.4.tgz",
++      "integrity": "sha512-yrfmJHIpDG7taCpqKjT1G5B6q3O2K+RN8/fgNf0lTjCwiPbQ0ei6vXX9ZjQR+7ld8Tr7Z5xmyMnZ8YJrphWQUw==",
+       "license": "MIT",
+       "dependencies": {
+-        "react-router": "7.17.0"
++        "react-router": "7.18.4"
+       },
+       "engines": {
+         "node": ">=20.0.0"
+@@ -5122,9 +5115,9 @@
+       "license": "MIT"
+     },
+     "node_modules/update-browserslist-db": {
+-      "version": "1.2.3",
+-      "resolved": "https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.2.3.tgz",
+-      "integrity": "sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==",
++      "version": "1.3.3",
++      "resolved": "https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.3.3.tgz",
++      "integrity": "sha512-pJ2sYawQS0R/WI928Gj5GlPhTGzbMelq0+4INtSYNDV9ErKJcX6xjGWkoG/VnB3dpUm00zALaqkrUD77pO5TDQ==",
+       "dev": true,
+       "funding": [
+         {
+diff --git a/package.json b/package.json
+index e2aec11..4f1b115 100644
+--- a/package.json
++++ b/package.json
+@@ -8,7 +8,9 @@
+     "build": "tsc -b && vite build",
+     "lint": "eslint .",
+     "preview": "vite preview",
+-    "test:settings": "node --test tests/settings.test.mjs"
++    "test:settings": "node --test tests/settings.test.mjs",
++    "test": "node --test tests/*.test.mjs",
++    "check": "npm run lint && npm test && npm run build"
+   },
+   "dependencies": {
+     "@pdf-lib/fontkit": "^1.1.1",
+diff --git a/public/index.html b/public/index.html
+deleted file mode 100644
+index 662192e..0000000
+--- a/public/index.html
++++ /dev/null
+@@ -1 +0,0 @@
+-<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.3/dist/heic2any.min.js"></script>
+\ No newline at end of file
+diff --git a/src/App.tsx b/src/App.tsx
+index 1255429..78db7fe 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1,33 +1,38 @@
++import type { ReactNode } from "react";
+ import { BrowserRouter } from "react-router-dom";
+ import { AppRoutes } from "./routes";
+ import { SettingsProvider } from "./contexts/SettingsContext";
+ import { ErrorProvider } from "./contexts/ErrorContext";
+-import { AuthProvider } from "./contexts/AuthContext";
++import { AuthProvider, useAuth } from "./contexts/AuthContext";
+ import { BankingDataProvider } from "./contexts/BankingDataContext";
+ import { JewelleryDataProvider } from "./contexts/JewelleryDataContext";
+ import { OnlineDataProvider } from "./contexts/OnlineDataContext";
+ 
++// Remount all private data when the account changes, including at logout.
++function SessionData({ children }: { children: ReactNode }) {
++  const { user } = useAuth();
++  return <BankingDataProvider key={user?.uid ?? "signed-out"}>
++    <JewelleryDataProvider><OnlineDataProvider>{children}</OnlineDataProvider></JewelleryDataProvider>
++  </BankingDataProvider>;
++}
++
+ function App() {
+   return (
+     <ErrorProvider>
+       <AuthProvider>
+         <BrowserRouter>
+           <SettingsProvider>
+-            <BankingDataProvider>
+-              <JewelleryDataProvider>
+-                <OnlineDataProvider>
+-                  {/* Main container with responsive max-width constraint */}
+-                  <div className="min-h-screen bg-gray-50 md:bg-gradient-to-br md:from-gray-100 md:to-gray-200">
+-                    {/* Desktop: Centered container with shadow */}
+-                    <div className="w-full md:max-w-2xl md:mx-auto md:min-h-screen md:bg-white md:shadow-xl">
+-                      <main className="w-full">
+-                        <AppRoutes />
+-                      </main>
+-                    </div>
+-                  </div>
+-                </OnlineDataProvider>
+-              </JewelleryDataProvider>
+-            </BankingDataProvider>
++            <SessionData>
++              {/* Main container with responsive max-width constraint */}
++              <div className="min-h-screen bg-gray-50 md:bg-gradient-to-br md:from-gray-100 md:to-gray-200">
++                {/* Desktop: Centered container with shadow */}
++                <div className="w-full md:max-w-2xl md:mx-auto md:min-h-screen md:bg-white md:shadow-xl">
++                  <main className="w-full">
++                    <AppRoutes />
++                  </main>
++                </div>
++              </div>
++            </SessionData>
+           </SettingsProvider>
+         </BrowserRouter>
+       </AuthProvider>
+diff --git a/src/components/Auth/Login.tsx b/src/components/Auth/Login.tsx
+index 955d97c..096739b 100644
+--- a/src/components/Auth/Login.tsx
++++ b/src/components/Auth/Login.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../utils/errors";
+ // components/Auth/Login.tsx
+ import React, { useState, useEffect } from "react";
+ import { useNavigate } from "react-router-dom";
+@@ -49,7 +50,8 @@ const Login: React.FC = () => {
+     try {
+       await login(email, password);
+       // No need to navigate here - the useEffect will handle redirection
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       // Error is already handled in AuthContext, but we can add additional handling here
+       if (!error.code) {
+         setFormError("Network error. Please check your connection.");
+diff --git a/src/components/FileUpload.tsx b/src/components/FileUpload.tsx
+index 88aec7f..ab704e8 100644
+--- a/src/components/FileUpload.tsx
++++ b/src/components/FileUpload.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../utils/errors";
+ import { useState } from "react";
+ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+ import { storage, database } from "../lib/firebase";
+@@ -70,7 +71,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
+       console.log(
+         `File optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
+       );
+-    } catch (err: any) {
++    } catch (caught: unknown) {
++      const err = toError(caught);
+       console.error("Error optimizing file:", err);
+       setOptimizedFile(selectedFile);
+       setOptimizationInfo(null);
+@@ -143,7 +145,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
+           if (fileInput) fileInput.value = "";
+         },
+       );
+-    } catch (err: any) {
++    } catch (caught: unknown) {
++      const err = toError(caught);
+       setError(`Upload error: ${err.message}`);
+       setUploading(false);
+     }
+diff --git a/src/components/FirestoreFileList.tsx b/src/components/FirestoreFileList.tsx
+index e33437b..87b7c34 100644
+--- a/src/components/FirestoreFileList.tsx
++++ b/src/components/FirestoreFileList.tsx
+@@ -13,7 +13,7 @@ interface FileDocument {
+   url: string;
+   size: number;
+   type: string;
+-  uploadedAt: any;
++  uploadedAt: unknown;
+   storagePath: string;
+ }
+ 
+diff --git a/src/components/UI/DeleteConfirmationDialog.tsx b/src/components/UI/DeleteConfirmationDialog.tsx
+index 2d70e99..7280aad 100644
+--- a/src/components/UI/DeleteConfirmationDialog.tsx
++++ b/src/components/UI/DeleteConfirmationDialog.tsx
+@@ -1,54 +1,2 @@
+-interface DeleteConfirmationDialogProps {
+-  isOpen: boolean;
+-  onClose: () => void;
+-  onConfirm: () => void;
+-  title?: string;
+-  message?: string;
+-  itemName?: string;
+-  isDeleting?: boolean;
+-}
+-
+-const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
+-  isOpen,
+-  onClose,
+-  onConfirm,
+-  title = "Confirm Deletion",
+-  message,
+-  itemName,
+-  isDeleting = false,
+-}) => {
+-  if (!isOpen) return null;
+-
+-  const defaultMessage = itemName 
+-    ? `Are you sure you want to delete "${itemName}"? This action cannot be undone.`
+-    : "Are you sure you want to delete this item? This action cannot be undone.";
+-
+-  return (
+-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
+-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6 animate-slide-up">
+-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+-        <p className="text-gray-600 mb-6">{message || defaultMessage}</p>
+-        <div className="flex justify-end gap-3">
+-          <button
+-            type="button"
+-            onClick={onClose}
+-            disabled={isDeleting}
+-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-normal disabled:opacity-50 disabled:cursor-not-allowed"
+-          >
+-            Cancel
+-          </button>
+-          <button
+-            type="button"
+-            onClick={onConfirm}
+-            disabled={isDeleting}
+-            className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 transition-colors duration-normal disabled:opacity-50 disabled:cursor-not-allowed"
+-          >
+-            {isDeleting ? "Deleting..." : "Delete"}
+-          </button>
+-        </div>
+-      </div>
+-    </div>
+-  );
+-};
+-
+-export default DeleteConfirmationDialog;
+\ No newline at end of file
++// Compatibility import path; keep one implementation.
++export { default } from "../DeleteConfirmationDialog";
+diff --git a/src/components/UI/FileUpload.tsx b/src/components/UI/FileUpload.tsx
+index 49eeebb..338b717 100644
+--- a/src/components/UI/FileUpload.tsx
++++ b/src/components/UI/FileUpload.tsx
+@@ -1,263 +1,2 @@
+-import { useState } from "react";
+-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+-import { storage, database } from "../../lib/firebase";
+-import { ref as dbRef, set, push } from "firebase/database";
+-import {
+-  optimizeFile,
+-  validateFile,
+-  formatFileSize,
+-} from "../../utils/fileOptimizer";
+-
+-interface FileUploadProps {
+-  userId: string;
+-  allowedTypes?: string[];
+-  maxSizeMB?: number;
+-  pathPrefix?: string;
+-  onUploadComplete?: (fileInfo: any) => void;
+-}
+-
+-const FileUpload: React.FC<FileUploadProps> = ({
+-  userId,
+-  allowedTypes = ["image/*", "application/pdf", "text/plain"],
+-  maxSizeMB = 10,
+-  pathPrefix = "users",
+-  onUploadComplete,
+-}) => {
+-  const [file, setFile] = useState<File | null>(null);
+-  const [optimizedFile, setOptimizedFile] = useState<File | null>(null);
+-  const [uploading, setUploading] = useState(false);
+-  const [progress, setProgress] = useState(0);
+-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+-  const [error, setError] = useState("");
+-  const [optimizationInfo, setOptimizationInfo] = useState<{
+-    originalSize: number;
+-    optimizedSize: number;
+-    savedPercentage: number;
+-  } | null>(null);
+-
+-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+-    if (!e.target.files || !e.target.files[0]) return;
+-
+-    const selectedFile = e.target.files[0];
+-
+-    const validation = validateFile(selectedFile, allowedTypes, maxSizeMB);
+-    if (!validation.valid) {
+-      setError(validation.error || "Invalid file");
+-      setFile(null);
+-      setOptimizedFile(null);
+-      setOptimizationInfo(null);
+-      return;
+-    }
+-
+-    setFile(selectedFile);
+-    setError("");
+-
+-    try {
+-      setOptimizationInfo(null);
+-      const optimized = await optimizeFile(selectedFile);
+-      setOptimizedFile(optimized);
+-
+-      const originalSize = selectedFile.size;
+-      const optimizedSize = optimized.size;
+-      const savedPercentage = ((originalSize - optimizedSize) / originalSize) * 100;
+-
+-      setOptimizationInfo({
+-        originalSize,
+-        optimizedSize,
+-        savedPercentage,
+-      });
+-
+-      console.log(
+-        `File optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
+-      );
+-    } catch (err: any) {
+-      console.error("Error optimizing file:", err);
+-      setOptimizedFile(selectedFile);
+-      setOptimizationInfo(null);
+-    }
+-  };
+-
+-  const handleUpload = async () => {
+-    if (!file || !userId) {
+-      setError("Please select a file");
+-      return;
+-    }
+-
+-    const fileToUpload = optimizedFile || file;
+-
+-    setUploading(true);
+-    setError("");
+-
+-    try {
+-      const timestamp = Date.now();
+-      const randomId = Math.random().toString(36).substring(2, 9);
+-      const fileExtension = fileToUpload.name.split(".").pop();
+-      const fileName = `${timestamp}_${randomId}.${fileExtension}`;
+-
+-      const storageRef = ref(storage, `${pathPrefix}/${userId}/${fileName}`);
+-      const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
+-
+-      uploadTask.on(
+-        "state_changed",
+-        (snapshot) => {
+-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+-          setProgress(progress);
+-        },
+-        (error) => {
+-          setError(`Upload failed: ${error.message}`);
+-          setUploading(false);
+-        },
+-        async () => {
+-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+-
+-          const filesRef = dbRef(database, `${pathPrefix}/${userId}/files`);
+-          const newFileRef = push(filesRef);
+-
+-          const fileInfo = {
+-            name: file.name,
+-            originalName: file.name,
+-            optimizedName: fileName,
+-            url: downloadURL,
+-            originalSize: file.size,
+-            optimizedSize: fileToUpload.size,
+-            type: file.type,
+-            uploadedAt: Date.now(),
+-            savedBytes: file.size - fileToUpload.size,
+-            savedPercentage: optimizationInfo?.savedPercentage || 0,
+-          };
+-
+-          await set(newFileRef, fileInfo);
+-
+-          setUploadedFiles((prev) => [...prev, file.name]);
+-          setFile(null);
+-          setOptimizedFile(null);
+-          setOptimizationInfo(null);
+-          setProgress(0);
+-          setUploading(false);
+-
+-          if (onUploadComplete) {
+-            onUploadComplete(fileInfo);
+-          }
+-
+-          const fileInput = document.getElementById("file-input") as HTMLInputElement;
+-          if (fileInput) fileInput.value = "";
+-        },
+-      );
+-    } catch (err: any) {
+-      setError(`Upload error: ${err.message}`);
+-      setUploading(false);
+-    }
+-  };
+-
+-  return (
+-    <div className="bg-white rounded-xl p-6 shadow-lg mb-8">
+-      <h3 className="text-2xl font-semibold text-gray-800 mt-0 mb-2">
+-        📁 Upload Files to Firebase Storage
+-      </h3>
+-      <p className="text-gray-600 mb-6">
+-        Files will be automatically optimized to save space
+-      </p>
+-
+-      <div className="border-2 border-dashed border-blue-500 rounded-lg p-8 text-center bg-gray-50 mb-5">
+-        <input
+-          id="file-input"
+-          type="file"
+-          onChange={handleFileSelect}
+-          disabled={uploading}
+-          className="block mx-auto mb-5 p-2.5 border border-gray-300 rounded-md cursor-pointer w-full max-w-md disabled:opacity-50 disabled:cursor-not-allowed"
+-        />
+-
+-        {file && (
+-          <div className="mb-5 p-4 bg-white rounded-lg border border-gray-200">
+-            <div className="flex justify-between items-center mb-2.5">
+-              <span className="font-semibold text-sm">
+-                📄 {file.name}
+-              </span>
+-              <span className="text-gray-600 text-xs bg-gray-100 px-2 py-0.5 rounded">
+-                {formatFileSize(file.size)}
+-              </span>
+-            </div>
+-
+-            {optimizationInfo && optimizationInfo.savedPercentage > 0 && (
+-              <div className="flex flex-col gap-2 mt-2.5 pt-2.5 border-t border-dashed border-gray-300">
+-                <div className="bg-green-500 text-white px-3 py-1 rounded-xl text-xs font-bold inline-block w-fit">
+-                  🎯 {optimizationInfo.savedPercentage.toFixed(1)}% saved
+-                </div>
+-                <div className="text-xs text-gray-600 font-mono">
+-                  {formatFileSize(optimizationInfo.originalSize)} →{" "}
+-                  {formatFileSize(optimizationInfo.optimizedSize)}
+-                </div>
+-              </div>
+-            )}
+-
+-            {optimizationInfo && optimizationInfo.savedPercentage === 0 && (
+-              <div className="text-xs text-gray-500 italic mt-1">
+-                File is already optimized
+-              </div>
+-            )}
+-          </div>
+-        )}
+-
+-        {uploading && (
+-          <div className="my-5">
+-            <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden mb-1">
+-              <div
+-                className="h-full bg-green-600 transition-all duration-300 rounded-full"
+-                style={{ width: `${progress}%` }}
+-              ></div>
+-            </div>
+-            <span className="text-sm text-gray-600">
+-              {progress.toFixed(1)}%
+-            </span>
+-          </div>
+-        )}
+-
+-        {error && (
+-          <div className="bg-red-50 text-red-700 p-3 rounded-md my-4 text-center">
+-            ⚠️ {error}
+-          </div>
+-        )}
+-
+-        <button
+-          onClick={handleUpload}
+-          disabled={!file || uploading}
+-          className="bg-blue-500 text-white px-8 py-3 rounded-md text-base font-semibold cursor-pointer mt-2.5 transition-all hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
+-        >
+-          {uploading ? "Uploading..." : "Upload Optimized File"}
+-        </button>
+-      </div>
+-
+-      {uploadedFiles.length > 0 && (
+-        <div className="bg-green-50 p-5 rounded-lg mt-6">
+-          <h4 className="font-semibold text-gray-800 mb-2">
+-            ✅ Recently Uploaded:
+-          </h4>
+-          <ul className="list-none p-0 m-0">
+-            {uploadedFiles.map((filename, index) => (
+-              <li
+-                key={index}
+-                className="py-2 border-b border-dashed border-green-200 last:border-b-0"
+-              >
+-                📄 {filename}
+-              </li>
+-            ))}
+-          </ul>
+-        </div>
+-      )}
+-
+-      <div className="bg-blue-50 p-4 rounded-lg mt-5 text-sm">
+-        <p className="mb-2">
+-          <strong>Storage Path:</strong> {pathPrefix}/{userId}/
+-        </p>
+-        <p className="mb-2">
+-          <strong>File Optimization:</strong> Automatic size reduction
+-        </p>
+-        <p className="text-blue-700 italic mt-2.5">
+-          Images are compressed, HEIC files are converted to JPEG
+-        </p>
+-      </div>
+-    </div>
+-  );
+-};
+-
+-export default FileUpload;
+\ No newline at end of file
++// Compatibility import path; keep one implementation.
++export { default } from "../FileUpload";
+diff --git a/src/components/UI/FirestoreFileList.tsx b/src/components/UI/FirestoreFileList.tsx
+index 943f21f..4774353 100644
+--- a/src/components/UI/FirestoreFileList.tsx
++++ b/src/components/UI/FirestoreFileList.tsx
+@@ -1,80 +1,2 @@
+-// components/FirestoreFileList.tsx
+-import { useState, useEffect } from "react";
+-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+-import { firestore } from "../../lib/firebase";
+-
+-interface FileListProps {
+-  userId: string;
+-}
+-
+-interface FileDocument {
+-  id: string;
+-  name: string;
+-  url: string;
+-  size: number;
+-  type: string;
+-  uploadedAt: any;
+-  storagePath: string;
+-}
+-
+-const FirestoreFileList: React.FC<FileListProps> = ({ userId }) => {
+-  const [files, setFiles] = useState<FileDocument[]>([]);
+-  const [loading, setLoading] = useState(true);
+-  const [error, setError] = useState("");
+-
+-  useEffect(() => {
+-    if (!userId) return;
+-
+-    const filesCollection = collection(firestore, `users/${userId}/files`);
+-    const filesQuery = query(filesCollection, orderBy("uploadedAt", "desc"));
+-
+-    const unsubscribe = onSnapshot(
+-      filesQuery,
+-      (snapshot) => {
+-        const filesList = snapshot.docs.map((doc) => ({
+-          id: doc.id,
+-          ...doc.data(),
+-        })) as FileDocument[];
+-        setFiles(filesList);
+-        setLoading(false);
+-      },
+-      (err) => {
+-        console.error("Firestore error:", err);
+-        setError("Failed to load files");
+-        setLoading(false);
+-      },
+-    );
+-
+-    return () => unsubscribe();
+-  }, [userId]);
+-
+-  if (loading) {
+-    return <div>Loading files...</div>;
+-  }
+-
+-  if (error) {
+-    return <div style={{ color: "red" }}>{error}</div>;
+-  }
+-
+-  return (
+-    <div>
+-      <h3>📁 Files in Firestore</h3>
+-      {files.length === 0 ? (
+-        <p>No files uploaded yet.</p>
+-      ) : (
+-        <ul>
+-          {files.map((file) => (
+-            <li key={file.id}>
+-              <a href={file.url} target="_blank" rel="noopener noreferrer">
+-                {file.name}
+-              </a>
+-              <span> ({(file.size / 1024).toFixed(2)} KB)</span>
+-            </li>
+-          ))}
+-        </ul>
+-      )}
+-    </div>
+-  );
+-};
+-
+-export default FirestoreFileList;
++// Compatibility import path; keep one implementation.
++export { default } from "../FirestoreFileList";
+diff --git a/src/components/UI/ImageUploadWithSize.tsx b/src/components/UI/ImageUploadWithSize.tsx
+index 7ace91c..5745798 100644
+--- a/src/components/UI/ImageUploadWithSize.tsx
++++ b/src/components/UI/ImageUploadWithSize.tsx
+@@ -1,204 +1,2 @@
+-// components/ImageUploadWithSize.tsx
+-import React, { useState } from "react";
+-import { ImageSizeBadge, useImageSize } from "../../utils/imageSizeUtils";
+-import { formatFileSize } from "../../utils/fileOptimizer";
+-
+-interface ImageUploadWithSizeProps {
+-  imageUrl: string | null;
+-  onFileChange?: (file: File) => void;
+-  onDelete?: () => void;
+-  onRemove?: () => void;
+-  optimizationInfo?: {
+-    originalSize: number;
+-    optimizedSize: number;
+-    savedPercentage: number;
+-    fileName: string;
+-  } | null;
+-  error?: string;
+-  disabled?: boolean;
+-  label?: string;
+-  imageNumber?: number;
+-  isViewMode?: boolean;
+-}
+-
+-export const ImageUploadWithSize: React.FC<ImageUploadWithSizeProps> = ({
+-  imageUrl,
+-  onFileChange,
+-  onDelete,
+-  onRemove,
+-  optimizationInfo,
+-  error,
+-  disabled = false,
+-  label = "Image",
+-  isViewMode = false,
+-}) => {
+-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+-  const { size, loading, error: sizeError } = useImageSize(imageUrl);
+-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+-
+-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+-    const file = e.target.files?.[0];
+-    if (file && onFileChange) {
+-      setSelectedFile(file);
+-      onFileChange(file);
+-    }
+-  };
+-
+-  const handleRemoveClick = () => {
+-    setSelectedFile(null);
+-    if (fileInputRef.current) {
+-      fileInputRef.current.value = "";
+-    }
+-    if (onRemove) {
+-      onRemove();
+-    }
+-  };
+-
+-  const handleDeleteClick = () => {
+-    if (onDelete) {
+-      onDelete();
+-    }
+-  };
+-
+-  const hasExistingImage = !!imageUrl && !selectedFile;
+-  const hasNewFile = !!selectedFile;
+-
+-  return (
+-    <div className="space-y-3">
+-      <label className="block text-sm font-medium text-gray-700 mb-2">
+-        {label}
+-      </label>
+-
+-      {isViewMode ? (
+-        <div className="text-center relative">
+-          {imageUrl ? (
+-            <div className="inline-block relative">
+-              <img
+-                src={imageUrl}
+-                alt={label}
+-                className="max-w-full max-h-48 rounded-lg border border-gray-300 mx-auto"
+-              />
+-              <ImageSizeBadge
+-                size={size}
+-                loading={loading}
+-                error={sizeError}
+-                position="overlay"
+-              />
+-            </div>
+-          ) : (
+-            <div className="p-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-gray-500 text-sm text-center">
+-              No image
+-            </div>
+-          )}
+-        </div>
+-      ) : (
+-        <>
+-          {/* File input */}
+-          <input
+-            ref={fileInputRef}
+-            type="file"
+-            accept="image/*"
+-            onChange={handleFileChange}
+-            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+-            disabled={disabled}
+-          />
+-
+-          {/* Error message */}
+-          {error && (
+-            <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700 flex items-center gap-1">
+-              <span>⚠️</span>
+-              <span>{error}</span>
+-            </div>
+-          )}
+-
+-          {/* Optimization info */}
+-          {optimizationInfo && optimizationInfo.savedPercentage > 0 && (
+-            <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
+-              <div className="flex flex-col text-green-800 text-xs">
+-                <div className="flex items-center gap-1 font-medium mb-1">
+-                  <span>🎯</span>
+-                  <span>
+-                    {optimizationInfo.savedPercentage.toFixed(1)}% space saved
+-                  </span>
+-                </div>
+-                <div className="font-mono text-xs">
+-                  {formatFileSize(optimizationInfo.originalSize)} →{" "}
+-                  {formatFileSize(optimizationInfo.optimizedSize)}
+-                </div>
+-              </div>
+-            </div>
+-          )}
+-
+-          {/* Image previews */}
+-          <div className="space-y-3">
+-            {/* Existing image preview */}
+-            {hasExistingImage && (
+-              <div className="relative">
+-                <img
+-                  src={imageUrl}
+-                  alt={`Current ${label}`}
+-                  className="max-w-full max-h-36 rounded-lg border border-gray-300"
+-                />
+-                <ImageSizeBadge
+-                  size={size}
+-                  loading={loading}
+-                  error={sizeError}
+-                  position="overlay"
+-                />
+-                <div className="mt-2 flex gap-2">
+-                  <button
+-                    type="button"
+-                    onClick={handleDeleteClick}
+-                    disabled={disabled}
+-                    className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-medium hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+-                  >
+-                    Delete Image
+-                  </button>
+-                </div>
+-              </div>
+-            )}
+-
+-            {/* New image preview */}
+-            {hasNewFile && (
+-              <div className="relative">
+-                <img
+-                  src={URL.createObjectURL(selectedFile)}
+-                  alt={`New ${label}`}
+-                  className="max-w-full max-h-36 rounded-lg border border-gray-300"
+-                />
+-                {/* Size badge for new file */}
+-                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+-                  <span className="font-medium">
+-                    {formatFileSize(selectedFile.size)}
+-                  </span>
+-                </div>
+-                <div className="mt-2 flex gap-2">
+-                  <button
+-                    type="button"
+-                    onClick={handleRemoveClick}
+-                    disabled={disabled}
+-                    className="px-3 py-1 bg-gray-50 text-gray-700 border border-gray-300 rounded text-xs font-medium hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+-                  >
+-                    Remove
+-                  </button>
+-                </div>
+-              </div>
+-            )}
+-          </div>
+-
+-          {/* Size badge below image */}
+-          {hasExistingImage && (
+-            <div className="text-center">
+-              <ImageSizeBadge
+-                size={size}
+-                loading={loading}
+-                error={sizeError}
+-                position="below"
+-              />
+-            </div>
+-          )}
+-        </>
+-      )}
+-    </div>
+-  );
+-};
++// Compatibility import path; keep one implementation.
++export * from "../ImageUploadWithSize";
+diff --git a/src/contexts/AuthContext.tsx b/src/contexts/AuthContext.tsx
+index 5c567c3..a73adb5 100644
+--- a/src/contexts/AuthContext.tsx
++++ b/src/contexts/AuthContext.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../utils/errors";
+ // contexts/AuthContext.tsx
+ import React, {
+   createContext,
+@@ -61,7 +62,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+       setError(null);
+       await signInWithEmailAndPassword(auth, email, password);
+       // No need to set user here - onAuthStateChanged will handle it
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Login error:", error);
+ 
+       // Provide user-friendly error messages
+@@ -96,7 +98,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+       setError(null);
+       await createUserWithEmailAndPassword(auth, email, password);
+       // No need to set user here - onAuthStateChanged will handle it
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Signup error:", error);
+ 
+       // Provide user-friendly error messages
+@@ -129,7 +132,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+       // Clear any additional app data
+       localStorage.clear();
+       sessionStorage.clear();
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Logout error:", error);
+       setError("Failed to sign out. Please try again.");
+       throw error;
+diff --git a/src/contexts/BankingDataContext.tsx b/src/contexts/BankingDataContext.tsx
+index 3eaafde..e6061f9 100644
+--- a/src/contexts/BankingDataContext.tsx
++++ b/src/contexts/BankingDataContext.tsx
+@@ -1,4 +1,4 @@
+-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
++import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+ import { firestore } from "../lib/firebase";
+ import { collection, getDocs } from "firebase/firestore";
+ import { useError } from "./ErrorContext";
+@@ -52,28 +52,23 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
+   const { setError } = useError();
+   const { isAuthenticated } = useAuth();
+ 
+-  const loadAllData = async () => {
+-    if (!isAuthenticated) {
+-      setLoading(false);
+-      return;
+-    }
+-    setLoading(true);
+-    try {
+-      const [
+-        accountsSnap,
+-        depositsSnap,
+-        historySnap,
+-        adjustmentsSnap,
+-        historyDetailSnap,
+-        liabilitiesSnap,
+-      ] = await Promise.all([
+-        getDocs(collection(firestore, "accounts")),
+-        getDocs(collection(firestore, "deposits")),
+-        getDocs(collection(firestore, "history")),
+-        getDocs(collection(firestore, "deposit_adjustments")),
+-        getDocs(collection(firestore, "history_detail")),
+-        getDocs(collection(firestore, "liabilities")),
+-      ]);
++  const loadAllData = useCallback(() => {
++    if (!isAuthenticated) return Promise.resolve();
++    return Promise.all([
++      getDocs(collection(firestore, "accounts")),
++      getDocs(collection(firestore, "deposits")),
++      getDocs(collection(firestore, "history")),
++      getDocs(collection(firestore, "deposit_adjustments")),
++      getDocs(collection(firestore, "history_detail")),
++      getDocs(collection(firestore, "liabilities")),
++    ]).then(([
++      accountsSnap,
++      depositsSnap,
++      historySnap,
++      adjustmentsSnap,
++      historyDetailSnap,
++      liabilitiesSnap,
++    ]) => {
+ 
+       setAccounts(
+         accountsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as BankAccount))
+@@ -98,22 +93,22 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
+         liabilitiesSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Liability))
+       );
+ 
+-    } catch (error) {
++    }).catch((error: unknown) => {
+       console.error("Error loading banking data:", error);
+       setError("Failed to load banking data. Please check your connection.");
+-    } finally {
++    }).finally(() => {
+       setLoading(false);
+-    }
+-  };
++    });
++  }, [isAuthenticated, setError]);
+ 
+   useEffect(() => {
+     loadAllData();
+-  }, [isAuthenticated, setError]);
++  }, [loadAllData]);
+ 
+   return (
+     <BankingDataContext.Provider
+       value={{
+-        loading,
++        loading: isAuthenticated && loading,
+         accounts,
+         deposits,
+         history,
+@@ -121,7 +116,10 @@ export const BankingDataProvider: React.FC<BankingDataProviderProps> = ({ childr
+         historyDetail,
+         liabilities,
+         settings,
+-        refresh: loadAllData,
++        refresh: async () => {
++          setLoading(true);
++          await loadAllData();
++        },
+       }}
+     >
+       {children}
+diff --git a/src/contexts/ErrorContext.tsx b/src/contexts/ErrorContext.tsx
+index 02865be..80541d9 100644
+--- a/src/contexts/ErrorContext.tsx
++++ b/src/contexts/ErrorContext.tsx
+@@ -1,4 +1,4 @@
+-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
++import React, { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
+ 
+ interface ErrorContextType {
+   error: string | null;
+@@ -23,18 +23,24 @@ interface ErrorProviderProps {
+ export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
+   const [error, setErrorState] = useState<string | null>(null);
+ 
++  const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
++  useEffect(() => () => {
++    if (clearTimer.current !== null) clearTimeout(clearTimer.current);
++  }, []);
++
+   const setError = useCallback((message: string | null) => {
++    if (clearTimer.current !== null) clearTimeout(clearTimer.current);
+     setErrorState(message);
+     if (message) {
+       console.error('App Error:', message);
+       // Automatically clear error after 5 seconds
+-      setTimeout(() => {
++      clearTimer.current = setTimeout(() => {
+         setErrorState(null);
+       }, 5000);
+     }
+   }, []);
+ 
+-  const clearError = () => setErrorState(null);
++  const clearError = () => setError(null);
+ 
+   return (
+     <ErrorContext.Provider value={{ error, setError, clearError }}>
+diff --git a/src/contexts/JewelleryDataContext.tsx b/src/contexts/JewelleryDataContext.tsx
+index 0cbd791..beb1210 100644
+--- a/src/contexts/JewelleryDataContext.tsx
++++ b/src/contexts/JewelleryDataContext.tsx
+@@ -1,23 +1,23 @@
+-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+-import { 
+-  collection, 
+-  addDoc, 
+-  updateDoc, 
+-  doc, 
+-  deleteDoc, 
+-  getDocs, 
+-  query, 
++import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
++import {
++  collection,
++  addDoc,
++  updateDoc,
++  doc,
++  deleteDoc,
++  getDocs,
++  query,
+   orderBy,
+-  Timestamp 
++  Timestamp
+ } from "firebase/firestore";
+ import { firestore } from "../lib/firebase";
+ import { Jewellery } from "../modules/Jewellery/models/types";
+ import { useAuth } from "./AuthContext";
+-import { 
+-  uploadImage, 
+-  getBill, 
+-  uploadBillAndCreateDoc, 
+-  updateBillNotes 
++import {
++  uploadImage,
++  getBill,
++  uploadBillAndCreateDoc,
++  updateBillNotes
+ } from "../modules/Jewellery/hooks/firebaseUtils";
+ 
+ interface JewelleryDataContextType {
+@@ -50,23 +50,16 @@ interface JewelleryDataProviderProps {
+ 
+ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ children }) => {
+   const [items, setItems] = useState<Jewellery[]>([]);
+-  const [loading, setLoading] = useState(false);
++  const [loading, setLoading] = useState(true);
+   const [error, setError] = useState<string | null>(null);
+   const { isAuthenticated } = useAuth();
+ 
+-  const loadItems = async () => {
+-    if (!isAuthenticated) {
+-      setItems([]);
+-      setLoading(false);
+-      return;
+-    }
+-    setLoading(true);
+-    setError(null);
+-    try {
+-      const jewelleryRef = collection(firestore, "jewellery");
+-      const q = query(jewelleryRef, orderBy("code"));
+-      const querySnapshot = await getDocs(q);
+-      
++  const loadItems = useCallback(() => {
++    if (!isAuthenticated) return Promise.resolve();
++    const jewelleryRef = collection(firestore, "jewellery");
++    const q = query(jewelleryRef, orderBy("code"));
++    return getDocs(q).then((querySnapshot) => {
++
+       const jewelleryItems: Jewellery[] = [];
+       querySnapshot.forEach((doc) => {
+         const data = doc.data();
+@@ -86,15 +79,15 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
+           verificationNotes: data.verificationNotes || "",
+         });
+       });
+-      
++
+       setItems(jewelleryItems);
+-    } catch (err) {
++    }).catch((err: unknown) => {
+       console.error("Error loading jewellery items:", err);
+       setError("Failed to load jewellery items");
+-    } finally {
++    }).finally(() => {
+       setLoading(false);
+-    }
+-  };
++    });
++  }, [isAuthenticated]);
+ 
+   const getPurchaseTimestamp = (purchaseDate: number | Date): number => {
+     if (purchaseDate instanceof Date) {
+@@ -107,7 +100,7 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
+     setLoading(true);
+     try {
+       const purchaseTimestamp = getPurchaseTimestamp(item.purchaseDate);
+-      
++
+       const jewelleryData = {
+         code: item.code,
+         description: item.description,
+@@ -124,15 +117,15 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
+         createdAt: Timestamp.now(),
+         updatedAt: Timestamp.now(),
+       };
+-      
++
+       const docRef = await addDoc(collection(firestore, "jewellery"), jewelleryData);
+-      
++
+       // Update the document with its own ID
+       await updateDoc(docRef, { id: docRef.id });
+-      
++
+       // Refresh the list
+       await loadItems();
+-      
++
+       return docRef.id;
+     } catch (err) {
+       console.error("Error adding jewellery item:", err);
+@@ -147,9 +140,9 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
+     setLoading(true);
+     try {
+       const jewelleryRef = doc(firestore, "jewellery", id);
+-      
++
+       const purchaseTimestamp = getPurchaseTimestamp(item.purchaseDate);
+-      
++
+       const updateData = {
+         code: item.code,
+         description: item.description,
+@@ -165,7 +158,7 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
+         verificationNotes: item.verificationNotes || "",
+         updatedAt: Timestamp.now(),
+       };
+-      
++
+       await updateDoc(jewelleryRef, updateData);
+       await loadItems();
+     } catch (err) {
+@@ -193,13 +186,13 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
+ 
+   useEffect(() => {
+     loadItems();
+-  }, [isAuthenticated]);
++  }, [loadItems]);
+ 
+   return (
+     <JewelleryDataContext.Provider
+       value={{
+         items,
+-        loading,
++        loading: isAuthenticated && loading,
+         error,
+         addItem,
+         updateItem,
+@@ -208,7 +201,11 @@ export const JewelleryDataProvider: React.FC<JewelleryDataProviderProps> = ({ ch
+         getBill,
+         uploadBillAndCreateDoc,
+         updateBillNotes,
+-        refresh: loadItems,
++        refresh: async () => {
++          setLoading(true);
++          setError(null);
++          await loadItems();
++        },
+       }}
+     >
+       {children}
+diff --git a/src/contexts/OnlineDataContext.tsx b/src/contexts/OnlineDataContext.tsx
+index 9c3d4dc..a343d04 100644
+--- a/src/contexts/OnlineDataContext.tsx
++++ b/src/contexts/OnlineDataContext.tsx
+@@ -1,5 +1,6 @@
+-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+-import { getFirestore, collection, getDocs } from "firebase/firestore";
++import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
++import { collection, getDocs } from "firebase/firestore";
++import { firestore } from "../lib/firebase";
+ import { useAuth } from "./AuthContext";
+ import { useError } from "./ErrorContext";
+ import { OnlineItem, Category, Renewal, FILE_TYPES } from "../modules/Online/types/online.types";
+@@ -34,23 +35,15 @@ export const OnlineDataProvider: React.FC<OnlineDataProviderProps> = ({ children
+   const { setError } = useError();
+   const { isAuthenticated } = useAuth();
+ 
+-  const loadAllData = async () => {
+-    if (!isAuthenticated) {
+-      setItems([]);
+-      setCategories([]);
+-      setRenewals([]);
+-      setLoading(false);
+-      return;
+-    }
+-    setLoading(true);
+-    try {
+-      const db = getFirestore();
+-      
+-      const [categoriesSnap, itemsSnap, renewalsSnap] = await Promise.all([
+-        getDocs(collection(db, "online_categories")),
+-        getDocs(collection(db, "online")),
+-        getDocs(collection(db, "renewals")),
+-      ]);
++  const loadAllData = useCallback(() => {
++    if (!isAuthenticated) return Promise.resolve();
++    const db = firestore;
++
++    return Promise.all([
++      getDocs(collection(db, "online_categories")),
++      getDocs(collection(db, "online")),
++      getDocs(collection(db, "renewals")),
++    ]).then(([categoriesSnap, itemsSnap, renewalsSnap]) => {
+ 
+       // Parse categories
+       const categoriesList: Category[] = categoriesSnap.docs.map((doc) => ({
+@@ -102,26 +95,29 @@ export const OnlineDataProvider: React.FC<OnlineDataProviderProps> = ({ children
+       setCategories(categoriesList);
+       setItems(itemsList);
+       setRenewals(renewalsList);
+-    } catch (error) {
++    }).catch((error: unknown) => {
+       console.error("Error loading online data:", error);
+       setError("Failed to load online data.");
+-    } finally {
++    }).finally(() => {
+       setLoading(false);
+-    }
+-  };
++    });
++  }, [isAuthenticated, setError]);
+ 
+   useEffect(() => {
+     loadAllData();
+-  }, [isAuthenticated, setError]);
++  }, [loadAllData]);
+ 
+   return (
+     <OnlineDataContext.Provider
+       value={{
+-        loading,
++        loading: isAuthenticated && loading,
+         items,
+         categories,
+         renewals,
+-        refresh: loadAllData,
++        refresh: async () => {
++          setLoading(true);
++          await loadAllData();
++        },
+       }}
+     >
+       {children}
+diff --git a/src/index.tsx b/src/index.tsx
+deleted file mode 100644
+index 39397fa..0000000
+--- a/src/index.tsx
++++ /dev/null
+@@ -1,16 +0,0 @@
+-// src/index.tsx
+-import React from "react";
+-import ReactDOM from "react-dom/client";
+-import App from "./App";
+-import "./index.css"; // Minimal CSS
+-import "./App.css"; // Main global CSS
+-
+-const root = ReactDOM.createRoot(
+-  document.getElementById("root") as HTMLElement,
+-);
+-
+-root.render(
+-  <React.StrictMode>
+-    <App />
+-  </React.StrictMode>,
+-);
+diff --git a/src/main.tsx b/src/main.tsx
+index 31290fd..9be2d89 100644
+--- a/src/main.tsx
++++ b/src/main.tsx
+@@ -1,7 +1,3 @@
+-// Note: This file is a duplicate entry point. 
+-// If using Vite, keep this one and delete index.tsx.
+-// If using CRA, keep index.tsx and delete this file.
+-
+ import React from "react";
+ import ReactDOM from "react-dom/client";
+ import App from "./App";
+diff --git a/src/modules/Banking/hooks/useBankingOperations.ts b/src/modules/Banking/hooks/useBankingOperations.ts
+index 2426dcb..541cadc 100644
+--- a/src/modules/Banking/hooks/useBankingOperations.ts
++++ b/src/modules/Banking/hooks/useBankingOperations.ts
+@@ -90,14 +90,12 @@ export const useBankingOperations = (
+         } else {
+           // Document doesn't exist - this is a new deposit with client-generated ID
+           // We should use addDoc instead and let Firebase handle the ID
+-          const { id, ...depositData } = deposit;
+-          const newDocRef = await addDoc(collection(firestore, "deposits"), toFirestoreData(depositData));
++          const newDocRef = await addDoc(collection(firestore, "deposits"), toFirestoreData(deposit));
+           console.log("DEBUG: Created new deposit with Firebase ID:", newDocRef.id);
+         }
+       } else {
+         // No ID provided, create new deposit
+-        const { id, ...depositData } = deposit;
+-        const newDocRef = await addDoc(collection(firestore, "deposits"), toFirestoreData(depositData));
++        const newDocRef = await addDoc(collection(firestore, "deposits"), toFirestoreData(deposit));
+         console.log("DEBUG: Created new deposit with Firebase ID:", newDocRef.id);
+       }
+       
+diff --git a/src/modules/Banking/pages/AccountSelector.tsx b/src/modules/Banking/pages/AccountSelector.tsx
+index f7cfb7c..37cf709 100644
+--- a/src/modules/Banking/pages/AccountSelector.tsx
++++ b/src/modules/Banking/pages/AccountSelector.tsx
+@@ -6,7 +6,7 @@ interface Account {
+   acctCode: string;
+   acctDetails?: string;
+   savingsAmount?: number;
+-  [key: string]: any;
++
+ }
+ 
+ interface AccountSelectorProps {
+@@ -175,4 +175,4 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
+   );
+ };
+ 
+-export default AccountSelector;
+\ No newline at end of file
++export default AccountSelector;
+diff --git a/src/modules/Banking/pages/AccountsTab.tsx b/src/modules/Banking/pages/AccountsTab.tsx
+index 4d18980..d255259 100644
+--- a/src/modules/Banking/pages/AccountsTab.tsx
++++ b/src/modules/Banking/pages/AccountsTab.tsx
+@@ -1,3 +1,4 @@
++import type { BankAccount } from "../../../types/banking.types";
+ import React, { useState } from "react";
+ import { useNavigate } from "react-router-dom";
+ import { useSettings } from "../../../contexts/SettingsContext";
+@@ -11,12 +12,12 @@ const AccountsTab: React.FC = () => {
+   const { settings } = useSettings();
+   const { accounts, loading } = useBankingData();
+   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+-  const [accountToDelete, setAccountToDelete] = useState<any>(null);
++  const [accountToDelete, setAccountToDelete] = useState<BankAccount | null>(null);
+   const [isDeleting, setIsDeleting] = useState(false);
+   const [searchTerm, setSearchTerm] = useState(""); // ✅ New state for search
+ 
+   // Helper function to check if account is active
+-  const isAccountActive = (account: any): boolean => {
++  const isAccountActive = (account: BankAccount): boolean => {
+     if (account.isActive !== undefined) {
+       return account.isActive === true;
+     }
+@@ -51,7 +52,7 @@ const AccountsTab: React.FC = () => {
+     return `${code.substring(0, 12)}...`;
+   };
+ 
+-  const handleDeleteClick = (account: any, e: React.MouseEvent) => {
++  const handleDeleteClick = (account: BankAccount, e: React.MouseEvent) => {
+     e.stopPropagation();
+     setAccountToDelete(account);
+     setShowDeleteDialog(true);
+diff --git a/src/modules/Banking/pages/AddAccountPage.tsx b/src/modules/Banking/pages/AddAccountPage.tsx
+index 3a066fb..cdc0d7c 100644
+--- a/src/modules/Banking/pages/AddAccountPage.tsx
++++ b/src/modules/Banking/pages/AddAccountPage.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ // src/modules/banking/AddAccountPage.tsx
+ import React, { useState, useEffect, useRef } from "react";
+ import { useNavigate } from "react-router-dom";
+@@ -86,7 +87,8 @@ const AddAccountPage: React.FC = () => {
+         state: { activeTab: "accounts" },
+         replace: true,
+       });
+-    } catch (err: any) {
++    } catch (caught: unknown) {
++      const err = toError(caught);
+       console.error("Error adding account:", err);
+       setError(`Failed to add account: ${err.message || "Unknown error"}`);
+     } finally {
+diff --git a/src/modules/Banking/pages/AddEditDepositPage.tsx b/src/modules/Banking/pages/AddEditDepositPage.tsx
+index 3c97218..031c048 100644
+--- a/src/modules/Banking/pages/AddEditDepositPage.tsx
++++ b/src/modules/Banking/pages/AddEditDepositPage.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect } from "react";
+ import { useNavigate, useParams } from "react-router-dom";
+ import { useBankingData } from "../hooks/useBankingData";
+@@ -150,7 +151,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
+         console.log("DEBUG: Save operation was cancelled");
+         setSaving(false);
+       }
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("DEBUG: Error saving deposit:", error);
+       // Provide more specific error messages
+       let errorMessage = "Failed to save deposit. Please try again.";
+@@ -179,7 +181,8 @@ const AddEditDepositPage: React.FC<AddEditDepositPageProps> = ({
+       // Note: The actual navigation will happen after the dialog confirms deletion
+       // For now, just set deleting to false as the dialog will handle the rest
+       setDeleting(false);
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("DEBUG: Error in delete flow:", error);
+       let errorMessage = "Failed to delete deposit. Please try again.";
+ 
+diff --git a/src/modules/Banking/pages/BankingHomePage.tsx b/src/modules/Banking/pages/BankingHomePage.tsx
+index d9017bf..14eca61 100644
+--- a/src/modules/Banking/pages/BankingHomePage.tsx
++++ b/src/modules/Banking/pages/BankingHomePage.tsx
+@@ -27,11 +27,7 @@ type TabType = "dashboard" | "accounts" | "deposits" | "history" | "historydetai
+ // Interface for monthly data with liabilities (now imported from types)
+ // This interface is now defined in banking.types.ts as MonthlyDataWithLiabilities
+ 
+-interface BankingHomePageProps {
+-  // Add any props if needed
+-}
+-
+-const BankingHomePage: React.FC<BankingHomePageProps> = () => {
++const BankingHomePage: React.FC = () => {
+   const navigate = useNavigate();
+   const location = useLocation();
+ 
+diff --git a/src/modules/Banking/pages/CombinedAssetBarChart.tsx b/src/modules/Banking/pages/CombinedAssetBarChart.tsx
+index df4b42e..58cddc9 100644
+--- a/src/modules/Banking/pages/CombinedAssetBarChart.tsx
++++ b/src/modules/Banking/pages/CombinedAssetBarChart.tsx
+@@ -170,7 +170,7 @@ const CombinedAssetBarChart: React.FC<CombinedAssetBarChartProps> = ({ historyDe
+     const majorSummaries = summaries.filter((s) => s.total >= threshold);
+     const minorSummaries = summaries.filter((s) => s.total < threshold);
+ 
+-    let finalSummaries = [...majorSummaries];
++    const finalSummaries = [...majorSummaries];
+ 
+     if (minorSummaries.length > 0) {
+       const othersSavings = minorSummaries.reduce(
+diff --git a/src/modules/Banking/pages/DepositPieChart.tsx b/src/modules/Banking/pages/DepositPieChart.tsx
+index e4def3d..fe96196 100644
+--- a/src/modules/Banking/pages/DepositPieChart.tsx
++++ b/src/modules/Banking/pages/DepositPieChart.tsx
+@@ -168,7 +168,7 @@ const DepositPieChart: React.FC<DepositPieChartProps> = ({
+     const majorSummaries = activeSummaries.filter((s) => s.value >= threshold);
+     const minorSummaries = activeSummaries.filter((s) => s.value < threshold);
+ 
+-    let finalSummaries = [...majorSummaries];
++    const finalSummaries = [...majorSummaries];
+ 
+     if (minorSummaries.length > 0) {
+       const othersValue = minorSummaries.reduce((sum, s) => sum + s.value, 0);
+diff --git a/src/modules/Banking/pages/EditAccountPage.tsx b/src/modules/Banking/pages/EditAccountPage.tsx
+index b8b3ca0..a8c31e7 100644
+--- a/src/modules/Banking/pages/EditAccountPage.tsx
++++ b/src/modules/Banking/pages/EditAccountPage.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ 
+ import React, { useState, useEffect, useRef } from "react";
+ import { useNavigate, useParams } from "react-router-dom";
+@@ -119,7 +120,8 @@ const EditAccountPage: React.FC = () => {
+ 
+       // Navigate back to the Banking Home Accounts tab
+       navigate("/banking", { state: { activeTab: "accounts" } });
+-    } catch (err: any) {
++    } catch (caught: unknown) {
++      const err = toError(caught);
+       console.error("Error updating account:", err);
+       setError("Failed to update account. Please try again.");
+     } finally {
+diff --git a/src/modules/Banking/pages/HistoryDetailTab.tsx b/src/modules/Banking/pages/HistoryDetailTab.tsx
+index 66c9ecc..520e2ce 100644
+--- a/src/modules/Banking/pages/HistoryDetailTab.tsx
++++ b/src/modules/Banking/pages/HistoryDetailTab.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect } from "react";
+ import { firestore } from "../../../lib/firebase";
+ import {
+@@ -231,7 +232,8 @@ const HistoryDetailTab: React.FC = () => {
+       if (historyMap.size > 0) {
+         setHasLoadedPreviousData(true);
+       }
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error loading data:", error);
+       showStatus("error", `Failed to load data: ${error.message}`);
+     } finally {
+@@ -294,7 +296,8 @@ const HistoryDetailTab: React.FC = () => {
+       }
+       
+       showStatus("success", `Loaded data from ${previousMonthStr}`);
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error loading previous month data:", error);
+       showStatus(
+         "error",
+@@ -428,7 +431,8 @@ const HistoryDetailTab: React.FC = () => {
+ 
+       showStatus("success", "All records saved successfully!");
+       setHasChanges(false);
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error saving records:", error);
+       showStatus("error", `Failed to save records: ${error.message}`);
+     } finally {
+@@ -506,7 +510,8 @@ const HistoryDetailTab: React.FC = () => {
+         // No records left for this month, clear stored liabilities
+         setStoredLiabilitiesForMonth(null);
+       }
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error deleting:", error);
+       showStatus("error", `Failed to delete: ${error.message}`);
+     } finally {
+diff --git a/src/modules/Banking/pages/HistoryTab.tsx b/src/modules/Banking/pages/HistoryTab.tsx
+index 2ac3107..10023f1 100644
+--- a/src/modules/Banking/pages/HistoryTab.tsx
++++ b/src/modules/Banking/pages/HistoryTab.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect } from "react";
+ import HistoryChart from "./HistoryChart";
+ import { useBankingData } from "../hooks/useBankingData";
+@@ -174,7 +175,7 @@ const HistoryTab: React.FC = () => {
+       }
+ 
+       return age;
+-    } catch (e) {
++    } catch {
+       return null;
+     }
+   };
+@@ -368,7 +369,8 @@ const HistoryTab: React.FC = () => {
+       setShowWarning(hasMissingLiabilities);
+       cancelEditing();
+       alert("✓ History updated successfully!");
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error updating history:", error);
+       alert(`Failed to update: ${error.message || "Unknown error"}`);
+     } finally {
+@@ -455,7 +457,8 @@ const HistoryTab: React.FC = () => {
+       setShowWarning(hasMissingLiabilities);
+       setDeleteConfirmMonth(null);
+       alert("✓ History records deleted!");
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error deleting history:", error);
+       alert(`Failed to delete: ${error.message || "Unknown error"}`);
+     } finally {
+diff --git a/src/modules/Banking/pages/SavingsPieChart.tsx b/src/modules/Banking/pages/SavingsPieChart.tsx
+index fbe5afe..d5ca297 100644
+--- a/src/modules/Banking/pages/SavingsPieChart.tsx
++++ b/src/modules/Banking/pages/SavingsPieChart.tsx
+@@ -114,7 +114,7 @@ const SavingsPieChart: React.FC<SavingsPieChartProps> = ({
+     const majorSummaries = activeSummaries.filter((s) => s.value >= threshold);
+     const minorSummaries = activeSummaries.filter((s) => s.value < threshold);
+ 
+-    let finalSummaries = [...majorSummaries];
++    const finalSummaries = [...majorSummaries];
+ 
+     if (minorSummaries.length > 0) {
+       const othersValue = minorSummaries.reduce((sum, s) => sum + s.value, 0);
+diff --git a/src/modules/Banking/types/banking.types.ts b/src/modules/Banking/types/banking.types.ts
+index e931f84..fe10948 100644
+--- a/src/modules/Banking/types/banking.types.ts
++++ b/src/modules/Banking/types/banking.types.ts
+@@ -1,215 +1,2 @@
+-import { Timestamp } from "firebase/firestore";
+-
+-// Main data types
+-export interface BankAccount {
+-  id: string;
+-  acctCode: string;
+-  acctDetails: string;
+-  mpin: string;
+-  isActive?: boolean; // Add this property for active/inactive filtering
+-  createdAt?: Timestamp | number;
+-  updatedAt?: Timestamp | number;
+-}
+-
+-export interface Deposit {
+-  id: string;
+-  accountId: string;
+-  amount: number;
+-  startDate: number;
+-  endDate: number;
+-  comments: string;
+-  active: boolean;
+-  createdAt?: Timestamp | number;
+-  updatedAt?: Timestamp | number;
+-}
+-
+-export interface History {
+-  month: string; // Format: YYYY-MM
+-  totalDeposits: number;
+-  savings: number;
+-  createdAt?: Timestamp | number;
+-  updatedAt?: Timestamp | number;
+-}
+-
+-export interface DepositAdjustment {
+-  id: string;
+-  accountId: string;
+-  adjustmentAmount: number;
+-  timestamp: number;
+-  note: string;
+-  createdAt?: Timestamp | number;
+-  updatedAt?: Timestamp | number;
+-}
+-
+-export interface ChartPoint {
+-  month: string;
+-  value: number;
+-  displayValue: string;
+-  normalizedValue: number;
+-}
+-
+-// Form data types
+-export interface AccountFormData {
+-  id: string;
+-  acctCode: string;
+-  acctDetails: string;
+-  mpin: string;
+-  isActive?: boolean; // Add to form data as well
+-}
+-
+-export interface DepositFormData {
+-  id: string;
+-  accountId: string;
+-  amount: number;
+-  startDate: number;
+-  endDate: number;
+-  comments: string;
+-  active: boolean;
+-}
+-
+-export interface HistoryFormData {
+-  month: string;
+-  totalDeposits: number;
+-  savings: number;
+-}
+-
+-// Component props types
+-export type BankingTab = "accounts" | "deposits" | "summary" | "history" | "settings";
+-
+-export interface AccountsTabProps {
+-  accounts: BankAccount[];
+-  editingAccount: BankAccount | null;
+-  setEditingAccount: (account: BankAccount | null) => void;
+-  onSaveAccount: (account: BankAccount) => void;
+-  onDeleteAccount: (accountId: string) => void;
+-  enableEditDelete: boolean;
+-  formatCurrency: (amount: number) => string;
+-}
+-
+-export interface DepositsTabProps {
+-  deposits: Deposit[];
+-  accounts: BankAccount[];
+-  editingDeposit: Deposit | null;
+-  setEditingDeposit: (deposit: Deposit | null) => void;
+-  onSaveDeposit: (deposit: Deposit) => Promise<void>;
+-  onDeleteDeposit: (depositId: string) => Promise<void>;
+-  enableEditDelete: boolean;
+-  formatCurrency: (amount: number) => string;
+-  formatDate: (timestamp: number) => string;
+-}
+-
+-export interface SummaryTabProps {
+-  accounts: BankAccount[];
+-  deposits: Deposit[];
+-  adjustments: DepositAdjustment[];
+-  onAdjustment: (accountId: string, adjustmentAmount: number, note: string) => void;
+-  enableEditDelete: boolean;
+-  formatCurrency: (amount: number) => string;
+-  formatDate: (timestamp: number) => string;
+-}
+-
+-export interface HistoryTabProps {
+-  history: History[];
+-  chartData: ChartPoint[];
+-  editingHistory: History | null;
+-  setEditingHistory: (history: History | null) => void;
+-  onSaveHistory: (history: History) => void;
+-  onDeleteHistory: (month: string) => void;
+-  enableEditDelete: boolean;
+-  formatCurrency: (amount: number) => string;
+-}
+-
+-export interface SettingsTabProps {
+-  // Add props here if needed later
+-}
+-
+-// Hook return types
+-export interface UseBankingDataReturn {
+-  loading: boolean;
+-  accounts: BankAccount[];
+-  deposits: Deposit[];
+-  history: History[];
+-  adjustments: DepositAdjustment[];
+-}
+-
+-export interface UseBankingOperationsReturn {
+-  handleSaveAccount: (account: BankAccount) => Promise<void>;
+-  handleDeleteAccount: (accountId: string) => Promise<void>;
+-  handleSaveDeposit: (deposit: Deposit) => Promise<void>;
+-  handleDeleteDeposit: (depositId: string) => Promise<void>;
+-  handleSaveHistory: (history: History) => Promise<void>;
+-  handleDeleteHistory: (month: string) => Promise<void>;
+-  handleSummaryAdjustment: (accountId: string, adjustmentAmount: number, note: string) => Promise<void>;
+-}
+-
+-// API response types
+-export interface BankingApiResponse<T> {
+-  success: boolean;
+-  data?: T;
+-  error?: string;
+-  message?: string;
+-}
+-
+-// Filter/Sort types
+-export interface BankingFilters {
+-  accountId?: string;
+-  active?: boolean;
+-  startDate?: Date;
+-  endDate?: Date;
+-  minAmount?: number;
+-  maxAmount?: number;
+-}
+-
+-export interface BankingSortOptions {
+-  field: keyof BankAccount | keyof Deposit | keyof History;
+-  direction: 'asc' | 'desc';
+-}
+-
+-// Helper type for safe property access
+-export type WithOptionalIsActive<T> = T & {
+-  isActive?: boolean;
+-};
+-
+-export interface HistoryDetail {
+-  id?: string; // Document ID from Firestore
+-  month: string; // Format: YYYY-MM
+-  acctCode: string; // Account code
+-  savings: number; // Savings amount for this account in this month
+-  deposits: number; // Deposits amount for this account in this month
+-  totalLiabilities?: number;
+-}
+-
+-export interface Liability {
+-  id: string;
+-  description: string;
+-  amount: number;
+-}
+-
+-// Liability History for monthly liability tracking
+-export interface LiabilityHistory {
+-  id: string;
+-  month: string; // Format: YYYY-MM
+-  description: string;
+-  amount: number;
+-  createdAt?: Timestamp | number;
+-  updatedAt?: Timestamp | number;
+-}
+-
+-// Monthly summary for history tab
+-export interface MonthlySummary {
+-  month: string;
+-  savings: number;
+-  deposits: number;
+-  liabilities: number;
+-  totalAssets: number;
+-  hasStoredLiabilities: boolean;
+-}
+-
+-// Monthly data with liabilities for BankingHomePage dashboard
+-export interface MonthlyDataWithLiabilities {
+-  month: string;
+-  savings: number;
+-  deposits: number;
+-  liabilities: number;
+-  total: number;
+-}
+\ No newline at end of file
++// Compatibility import path; keep one implementation.
++export * from "../../../types/banking.types";
+diff --git a/src/modules/Home/utils/emwCalculations.ts b/src/modules/Home/utils/emwCalculations.ts
+index 051b561..5cafc93 100644
+--- a/src/modules/Home/utils/emwCalculations.ts
++++ b/src/modules/Home/utils/emwCalculations.ts
+@@ -1,80 +1,2 @@
+-// utils/emwCalculations.ts
+-
+-/**
+- * Calculate EMW (Equivalent Monthly Withdrawal) amount
+- * @param currentBalance - Current total balance
+- * @param targetDate - Target date for withdrawals
+- * @param annualInterestRate - Annual interest rate as percentage (default: 0%)
+- * @returns EMW amount rounded to 2 decimal places
+- */
+-export const calculateEMW = (
+-  currentBalance: number,
+-  targetDate: Date,
+-  annualInterestRate: number = 0,
+-): number => {
+-  if (currentBalance <= 0) return 0;
+-
+-  const today = new Date();
+-  if (targetDate <= today) return 0;
+-
+-  // Calculate number of months until target date
+-  const monthsDiff =
+-    (targetDate.getFullYear() - today.getFullYear()) * 12 +
+-    (targetDate.getMonth() - today.getMonth());
+-
+-  if (monthsDiff <= 0) return currentBalance;
+-
+-  // Convert annual interest rate to monthly rate
+-  const monthlyInterestRate = annualInterestRate / 12 / 100;
+-
+-  // Calculate EMW using the formula: PMT = PV × r / [1 - (1 + r)^-n]
+-  const numerator = currentBalance * monthlyInterestRate;
+-  const denominator = 1 - Math.pow(1 + monthlyInterestRate, -monthsDiff);
+-
+-  if (denominator <= 0) {
+-    return currentBalance / monthsDiff; // Simple division without interest
+-  }
+-
+-  const emw = numerator / denominator;
+-
+-  // Round to 2 decimal places
+-  return Math.round(emw * 100) / 100;
+-};
+-
+-/**
+- * Parse EMW settings from app settings
+- * @param appSettings - Application settings object
+- * @returns Object containing interest rate, target date, and target date string
+- */
+-export const getEmwSettings = (appSettings: any) => {
+-  // Default values
+-  let interestRate = 0; // 0% default
+-  let targetDateStr = "2039-10"; // November 2039 default
+-
+-  if (appSettings) {
+-    // Use EMW_Interest from settings or default
+-    interestRate =
+-      appSettings.EMW_interest !== undefined ? appSettings.EMW_interest : 0;
+-
+-    // Use EMW_Date from settings or default
+-    targetDateStr = appSettings.EMW_Date || "2039-10";
+-  }
+-
+-  // Parse target date string (format: YYYY-MM)
+-  let targetDate: Date;
+-  try {
+-    const [year, month] = targetDateStr.split("-").map(Number);
+-    targetDate = new Date(year, month - 1, 1); // month is 0-indexed
+-  } catch (error) {
+-    // Fallback to default date if parsing fails
+-    console.error("Error parsing EMW date:", error);
+-    targetDate = new Date(2039, 10, 1); // November 2039
+-    targetDateStr = "2039-10";
+-  }
+-
+-  return {
+-    interestRate,
+-    targetDate,
+-    targetDateStr,
+-  };
+-};
+\ No newline at end of file
++// Compatibility import path; keep one implementation.
++export * from "../../../utils/emwCalculations";
+diff --git a/src/modules/Jewellery/pages/BatchEditPage.tsx b/src/modules/Jewellery/pages/BatchEditPage.tsx
+index 5eacd37..15025a0 100644
+--- a/src/modules/Jewellery/pages/BatchEditPage.tsx
++++ b/src/modules/Jewellery/pages/BatchEditPage.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect } from "react";
+ import { useNavigate } from "react-router-dom";
+ import {
+@@ -10,9 +11,7 @@ import {
+ import { Jewellery, VerificationStatus } from "../models/types";
+ import { useJewellerySettings } from "../hooks/useSettingsData";
+ 
+-interface BatchEditPageProps {}
+-
+-const BatchEditPage: React.FC<BatchEditPageProps> = () => {
++const BatchEditPage: React.FC = () => {
+   const navigate = useNavigate();
+   const [jewelleryItems, setJewelleryItems] = useState<Jewellery[]>([]);
+   const [filteredItems, setFilteredItems] = useState<Jewellery[]>([]);
+@@ -159,7 +158,8 @@ const BatchEditPage: React.FC<BatchEditPageProps> = () => {
+           selectedItems.size !== 1 ? "s" : ""
+         }`,
+       );
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error updating locations:", error);
+       setUpdateMessage(`Error updating: ${error.message}`);
+     } finally {
+diff --git a/src/modules/Jewellery/pages/BillAssignment.tsx b/src/modules/Jewellery/pages/BillAssignment.tsx
+index 74f0037..5d5ad2d 100644
+--- a/src/modules/Jewellery/pages/BillAssignment.tsx
++++ b/src/modules/Jewellery/pages/BillAssignment.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ // BillAssignment.tsx
+ import React, { useState, useEffect } from "react";
+ import { getFirestore, doc, getDoc } from "firebase/firestore";
+@@ -89,7 +90,8 @@ const BillAssignment: React.FC<BillAssignmentProps> = ({
+           setBillError("Bill document not found");
+           setShowBillDropdown(true);
+         }
+-      } catch (error: any) {
++      } catch (caught: unknown) {
++      const error = toError(caught);
+         console.error("Error fetching assigned bill:", error);
+         setAssignedBill(null);
+         setBillError(`Failed to load bill: ${error.message}`);
+@@ -132,7 +134,7 @@ const BillAssignment: React.FC<BillAssignmentProps> = ({
+       if (lastPart && lastPart.includes(".")) {
+         filename = lastPart;
+       }
+-    } catch (e) {
++    } catch {
+       console.log("Could not parse URL for filename");
+     }
+ 
+diff --git a/src/modules/Jewellery/pages/BillForm.tsx b/src/modules/Jewellery/pages/BillForm.tsx
+index 970bffd..c0e40b6 100644
+--- a/src/modules/Jewellery/pages/BillForm.tsx
++++ b/src/modules/Jewellery/pages/BillForm.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect } from "react";
+ import { useNavigate, useParams, useLocation } from "react-router-dom"; // ADD useLocation
+ import { Bill } from "../models/types";
+@@ -149,7 +150,8 @@ const BillForm: React.FC = () => {
+       console.log(
+         `Bill file optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
+       );
+-    } catch (err: any) {
++    } catch (caught: unknown) {
++      const err = toError(caught);
+       console.error("Error optimizing bill file:", err);
+       setOptimizationInfo(null);
+     }
+@@ -192,7 +194,8 @@ const BillForm: React.FC = () => {
+           setFileName("");
+ 
+           alert("Document deleted successfully!");
+-        } catch (error: any) {
++        } catch (caught: unknown) {
++      const error = toError(caught);
+           if (error.code === "storage/object-not-found") {
+             console.log("File already deleted from storage");
+             // Still update the form data even if file doesn't exist
+@@ -210,7 +213,8 @@ const BillForm: React.FC = () => {
+       } else {
+         throw new Error("Could not extract file path from URL");
+       }
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error deleting document:", error);
+       alert(`Failed to delete document: ${error.message}`);
+     } finally {
+@@ -236,7 +240,8 @@ const BillForm: React.FC = () => {
+             await deleteObject(storageRef);
+             console.log("Associated file deleted from storage");
+           }
+-        } catch (error: any) {
++        } catch (caught: unknown) {
++      const error = toError(caught);
+           if (error.code !== "storage/object-not-found") {
+             console.warn(
+               "Error deleting associated file, continuing with bill deletion:",
+@@ -255,7 +260,8 @@ const BillForm: React.FC = () => {
+       navigate("/jewellery", {
+         state: { activeTab: "bills" },
+       });
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error deleting bill:", error);
+       alert(`Failed to delete bill: ${error.message}`);
+     } finally {
+@@ -419,7 +425,8 @@ const BillForm: React.FC = () => {
+       navigate("/jewellery", {
+         state: { activeTab: "bills" },
+       });
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error saving bill:", error);
+ 
+       let errorMessage = "Error saving bill. Please try again.";
+diff --git a/src/modules/Jewellery/pages/BillsTab.tsx b/src/modules/Jewellery/pages/BillsTab.tsx
+index 4687aa7..a46a695 100644
+--- a/src/modules/Jewellery/pages/BillsTab.tsx
++++ b/src/modules/Jewellery/pages/BillsTab.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect } from "react";
+ import { useNavigate } from "react-router-dom";
+ import {
+@@ -110,7 +111,8 @@ const BillsTab: React.FC<BillsTabProps> = ({ compact = false }) => {
+ 
+         setBills(billsWithLinkStatus);
+         setFilteredBills(billsWithLinkStatus);
+-      } catch (error: any) {
++      } catch (caught: unknown) {
++      const error = toError(caught);
+         console.error("❌ Error fetching bills:", error);
+       } finally {
+         setLoading(false);
+diff --git a/src/modules/Jewellery/pages/JewelleryDetail.tsx b/src/modules/Jewellery/pages/JewelleryDetail.tsx
+index 94b4eb9..03306fd 100644
+--- a/src/modules/Jewellery/pages/JewelleryDetail.tsx
++++ b/src/modules/Jewellery/pages/JewelleryDetail.tsx
+@@ -207,7 +207,7 @@ const JewelleryDetail: React.FC = () => {
+         return decodeURIComponent(encodedPath);
+       }
+       return url;
+-    } catch (e) {
++    } catch {
+       return url;
+     }
+   };
+@@ -269,7 +269,7 @@ Uploaded: ${formatDate(bill.uploadedAt, "en-GB", {
+       if (lastPart && lastPart.includes(".")) {
+         filename = lastPart;
+       }
+-    } catch (e) {
++    } catch {
+       console.log("Could not parse URL for filename");
+     }
+ 
+diff --git a/src/modules/Jewellery/pages/JewelleryForm.tsx b/src/modules/Jewellery/pages/JewelleryForm.tsx
+index 6ccc137..0c2a356 100644
+--- a/src/modules/Jewellery/pages/JewelleryForm.tsx
++++ b/src/modules/Jewellery/pages/JewelleryForm.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect, useRef } from "react";
+ import {
+   getFirestore,
+@@ -125,7 +126,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
+         });
+ 
+         setBills(billsList);
+-      } catch (error: any) {
++      } catch (caught: unknown) {
++      const error = toError(caught);
+         console.error("Error fetching bills:", error);
+       } finally {
+         setLoadingBills(false);
+@@ -217,7 +219,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
+       console.log(
+         `Image will be optimized: ${formatFileSize(originalSize)} → ${formatFileSize(optimizedSize)} (${savedPercentage.toFixed(1)}% saved)`,
+       );
+-    } catch (err: any) {
++    } catch (caught: unknown) {
++      const err = toError(caught);
+       console.error("Error optimizing image:", err);
+       setOptimizationInfo(null);
+     }
+@@ -278,7 +281,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
+       if (fileInputRef.current) {
+         fileInputRef.current.value = "";
+       }
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error uploading image:", error);
+       setImageError(`Failed to upload image: ${error.message}`);
+     } finally {
+@@ -312,7 +316,8 @@ const JewelleryForm: React.FC<JewelleryFormProps> = ({
+       } else {
+         throw new Error("Could not extract file path from URL");
+       }
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error deleting image:", error);
+       setImageError(`Failed to delete image: ${error.message}`);
+     } finally {
+diff --git a/src/modules/Jewellery/pages/JewelleryFormWrapper.tsx b/src/modules/Jewellery/pages/JewelleryFormWrapper.tsx
+index 19f61e7..f81b929 100644
+--- a/src/modules/Jewellery/pages/JewelleryFormWrapper.tsx
++++ b/src/modules/Jewellery/pages/JewelleryFormWrapper.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect } from "react";
+ import { useNavigate, useParams, useLocation } from "react-router-dom"; // ADD useLocation
+ import {
+@@ -81,7 +82,8 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
+       }
+ 
+       if (isEditing && id) {
+-        const { id: _, ...updateData } = formData;
++        const updateData = { ...formData };
++        delete updateData.id;
+         const docRef = doc(db, "jewellery", id);
+         await setDoc(
+           docRef,
+@@ -143,7 +145,8 @@ const JewelleryFormWrapper: React.FC<JewelleryFormWrapperProps> = ({
+       navigate(returnTo, {
+         state: { activeTab: activeTab },
+       });
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error deleting jewellery item:", error);
+       setError(`Failed to delete jewellery item: ${error.message}`);
+       setDeleting(false);
+diff --git a/src/modules/Jewellery/pages/JewelleryStats.tsx b/src/modules/Jewellery/pages/JewelleryStats.tsx
+index e6deed5..7374036 100644
+--- a/src/modules/Jewellery/pages/JewelleryStats.tsx
++++ b/src/modules/Jewellery/pages/JewelleryStats.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect } from "react";
+ import { useNavigate } from "react-router-dom";
+ import {
+@@ -158,7 +159,8 @@ const JewelleryStats: React.FC = () => {
+           topLocations,
+           topPeople,
+         });
+-      } catch (error: any) {
++      } catch (caught: unknown) {
++      const error = toError(caught);
+         console.error("Error fetching statistics:", error);
+         setError(`Failed to load statistics: ${error.message}`);
+       } finally {
+@@ -276,7 +278,8 @@ const JewelleryStats: React.FC = () => {
+             topPeople,
+           });
+           setError(null);
+-        } catch (error: any) {
++        } catch (caught: unknown) {
++      const error = toError(caught);
+           console.error("Error refreshing statistics:", error);
+           setError(`Refresh failed: ${error.message}`);
+         } finally {
+diff --git a/src/modules/Jewellery/pages/ListTab.tsx b/src/modules/Jewellery/pages/ListTab.tsx
+index 4b148b2..3845cfb 100644
+--- a/src/modules/Jewellery/pages/ListTab.tsx
++++ b/src/modules/Jewellery/pages/ListTab.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import React, { useState, useEffect, useRef } from "react";
+ import { useNavigate } from "react-router-dom";
+ import {
+@@ -144,7 +145,8 @@ const ListTab: React.FC = () => {
+         const sortedItems = sortItems(items, currentSort);
+         setFilteredItems(sortedItems);
+         setBills(billItems);
+-      } catch (error: any) {
++      } catch (caught: unknown) {
++      const error = toError(caught);
+         console.error("Error fetching data:", error);
+ 
+         if (
+@@ -348,7 +350,8 @@ const ListTab: React.FC = () => {
+       setFilteredItems(sortedItems);
+       setBills(billItems);
+       setError(null);
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Refresh error:", error);
+       setError(`Refresh failed: ${error.message}`);
+     } finally {
+diff --git a/src/modules/Jewellery/utils/firebaseUtils.ts b/src/modules/Jewellery/utils/firebaseUtils.ts
+index e36a610..01ac218 100644
+--- a/src/modules/Jewellery/utils/firebaseUtils.ts
++++ b/src/modules/Jewellery/utils/firebaseUtils.ts
+@@ -1,119 +1,2 @@
+-// jewellery/utils/firebaseUtils.ts
+-import { 
+-  collection, 
+-  addDoc, 
+-  updateDoc, 
+-  doc, 
+-  getDoc,
+-  Timestamp
+-} from "firebase/firestore";
+-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+-import { firestore, storage } from "../../../lib/firebase";
+-import { Bill } from "../models/types";
+-
+-// Upload image with compression - matching your Kotlin uploadImage function
+-export const uploadImage = async (file: File): Promise<string> => {
+-  try {
+-    // Generate UUID for filename
+-    const fileName = `${generateUUID()}.jpg`;
+-    const imageRef = ref(storage, `jewellery_images/${fileName}`);
+-
+-    console.log(`Uploading to path: jewellery_images/${fileName}`);
+-
+-    // Upload the file
+-    await uploadBytes(imageRef, file);
+-
+-    // Get download URL
+-    const downloadUri = await getDownloadURL(imageRef);
+-    return downloadUri.toString();
+-  } catch (e) {
+-    console.error("Exception during upload", e);
+-    throw new Error("Failed to upload image");
+-  }
+-};
+-
+-// Update bill notes - matching your Kotlin updateBillNotes
+-export const updateBillNotes = async (billId: string, notes?: string): Promise<void> => {
+-  try {
+-    const updateData = {
+-      notes: notes || null,
+-      // No updatedAt field in Bill model, only uploadedAt
+-    };
+-    
+-    await updateDoc(doc(firestore, "bills", billId), updateData);
+-  } catch (e) {
+-    console.error("Error updating bill notes", e);
+-    throw e;
+-  }
+-};
+-
+-// Get bill by ID - matching your Kotlin getBill
+-export const getBill = async (billId: string): Promise<Bill | null> => {
+-  try {
+-    const snap = await getDoc(doc(firestore, "bills", billId));
+-    if (snap.exists()) {
+-      const data = snap.data();
+-      return {
+-        id: snap.id,
+-        downloadUrl: data.downloadUrl || "",
+-        mimeType: data.mimeType || "",
+-        notes: data.notes || null, // Keep null like Kotlin
+-        createdAt: data.createdAt?.toMillis() || data.createdAt || Date.now(),
+-        uploadedAt: data.uploadedAt?.toMillis() || data.uploadedAt || Date.now(), // Use uploadedAt, not updatedAt
+-      };
+-    }
+-    return null;
+-  } catch (e) {
+-    console.error("Error getting bill", e);
+-    throw e;
+-  }
+-};
+-
+-// Upload bill and create document - matching your Kotlin uploadBillAndCreateDoc
+-export const uploadBillAndCreateDoc = async (
+-  file: File,
+-  notes?: string
+-): Promise<string> => {
+-  try {
+-    const mime = file.type || "application/octet-stream";
+-    const ext = mime === "application/pdf" 
+-      ? "pdf" 
+-      : mime.startsWith("image/") 
+-        ? mime.split('/')[1] || "jpg" 
+-        : "bin";
+-
+-    const fileName = `${generateUUID()}.${ext}`;
+-    const storageRef = ref(storage, `bills/${fileName}`);
+-
+-    // Upload the file
+-    await uploadBytes(storageRef, file);
+-    const httpsUrl = await getDownloadURL(storageRef);
+-
+-    const billData = {
+-      downloadUrl: httpsUrl,
+-      mimeType: mime,
+-      createdAt: Timestamp.now(),
+-      uploadedAt: Timestamp.now(), // Add uploadedAt
+-      notes: notes || null,
+-    };
+-
+-    const docRef = await addDoc(collection(firestore, "bills"), billData);
+-    return docRef.id;
+-  } catch (e) {
+-    console.error("Error uploading bill", e);
+-    throw e;
+-  }
+-};
+-
+-// Utility to generate UUID (since crypto.randomUUID might not be available everywhere)
+-const generateUUID = (): string => {
+-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+-    return crypto.randomUUID();
+-  }
+-  // Fallback for environments without crypto.randomUUID
+-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+-    const r = Math.random() * 16 | 0;
+-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+-    return v.toString(16);
+-  });
+-};
+\ No newline at end of file
++// Compatibility import path; keep one implementation.
++export * from "../hooks/firebaseUtils";
+diff --git a/src/modules/Online/hooks/useOnlineForm.ts b/src/modules/Online/hooks/useOnlineForm.ts
+index bf61c30..08be844 100644
+--- a/src/modules/Online/hooks/useOnlineForm.ts
++++ b/src/modules/Online/hooks/useOnlineForm.ts
+@@ -1,3 +1,4 @@
++import { toError } from "../../../utils/errors";
+ import { useState, useEffect } from "react";
+ import { useNavigate, useParams, useLocation } from "react-router-dom";
+ import {
+@@ -340,7 +341,8 @@ export const useOnlineForm = () => {
+         } else {
+           setFile2Info((prev) => ({ ...prev, ...optimizationUpdate }));
+         }
+-      } catch (err: any) {
++      } catch (caught: unknown) {
++      const err = toError(caught);
+         console.error(`Error optimizing file ${fileNumber}:`, err);
+       }
+     }
+@@ -397,7 +399,8 @@ export const useOnlineForm = () => {
+         type: fileInfo.type,
+         name: fileInfo.file.name,
+       };
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error(`Error uploading file ${fileNumber}:`, error);
+       throw error;
+     }
+@@ -447,7 +450,8 @@ export const useOnlineForm = () => {
+       }
+ 
+       alert(`${fileTypeDisplay} ${fileNumber} deleted successfully!`);
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error(`Error deleting file ${fileNumber}:`, error);
+       alert(`Failed to delete file: ${error.message}`);
+     }
+@@ -520,7 +524,8 @@ export const useOnlineForm = () => {
+       }
+ 
+       navigate("/online", { state: { activeTab: "items" } });
+-    } catch (error: any) {
++    } catch (caught: unknown) {
++      const error = toError(caught);
+       console.error("Error saving item:", error);
+       let errorMessage = "Failed to save item";
+       if (error.message?.includes("quota")) {
+diff --git a/src/modules/Online/pages/CategoryForm.tsx b/src/modules/Online/pages/CategoryForm.tsx
+index b70f351..04d4c18 100644
+--- a/src/modules/Online/pages/CategoryForm.tsx
++++ b/src/modules/Online/pages/CategoryForm.tsx
+@@ -171,7 +171,7 @@ const CategoryForm: React.FC = () => {
+       const date = new Date(timestamp);
+       if (isNaN(date.getTime())) return "Invalid date";
+       return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+-    } catch (error) {
++    } catch {
+       return "Error formatting date";
+     }
+   };
+diff --git a/src/modules/Online/pages/OnlineForm.tsx b/src/modules/Online/pages/OnlineForm.tsx
+index 396b458..b749a8e 100644
+--- a/src/modules/Online/pages/OnlineForm.tsx
++++ b/src/modules/Online/pages/OnlineForm.tsx
+@@ -70,7 +70,7 @@ const OnlineForm: React.FC = () => {
+         return decodeURIComponent(encodedPath);
+       }
+       return url;
+-    } catch (e) {
++    } catch {
+       return url;
+     }
+   };
+diff --git a/src/modules/Online/pages/OnlineHomepage.tsx b/src/modules/Online/pages/OnlineHomepage.tsx
+index 66dd751..25114e3 100644
+--- a/src/modules/Online/pages/OnlineHomepage.tsx
++++ b/src/modules/Online/pages/OnlineHomepage.tsx
+@@ -1,3 +1,4 @@
++import { parseTimestamp } from "../../../utils/timestamps";
+ import React, { useState, useEffect, useMemo } from "react";
+ import { useLocation, useNavigate } from "react-router-dom";
+ import { useOnlineDataContext } from "../../../contexts/OnlineDataContext";
+@@ -61,20 +62,8 @@ const OnlineHomepage: React.FC = () => {
+     const thirtyDaysFromNow = now + 30 * 24 * 60 * 60 * 1000;
+     
+     let expiringSoonCount = 0;
+-    renewals.forEach((renewal: any) => {
+-      let endDate = 0;
+-      if (renewal.endDate && typeof renewal.endDate === "number") {
+-        endDate = renewal.endDate;
+-      } else if (
+-        renewal.endDate &&
+-        typeof renewal.endDate === "object" &&
+-        (renewal.endDate as any).toDate
+-      ) {
+-        endDate = (renewal.endDate as any).toDate().getTime();
+-      } else if (renewal.endDate && typeof renewal.endDate === "string") {
+-        const parsed = Date.parse(renewal.endDate);
+-        endDate = isNaN(parsed) ? 0 : parsed;
+-      }
++    renewals.forEach((renewal) => {
++      const endDate = parseTimestamp(renewal.endDate);
+ 
+       if (endDate && endDate <= thirtyDaysFromNow && endDate > now) {
+         expiringSoonCount++;
+diff --git a/src/modules/Online/pages/useOnlineForm.ts b/src/modules/Online/pages/useOnlineForm.ts
+index f31374b..659ccbf 100644
+--- a/src/modules/Online/pages/useOnlineForm.ts
++++ b/src/modules/Online/pages/useOnlineForm.ts
+@@ -1,631 +1,2 @@
+-import { useState, useEffect } from "react";
+-import { useNavigate, useParams, useLocation } from "react-router-dom";
+-import {
+-  getFirestore,
+-  doc,
+-  getDoc,
+-  setDoc,
+-  addDoc,
+-  collection,
+-  getDocs,
+-  deleteDoc,
+-} from "firebase/firestore";
+-import { getStorage, ref, uploadBytes, deleteObject } from "firebase/storage";
+-import {
+-  OnlineItem,
+-  Category,
+-  FileType,
+-  FileInfo,
+-  FILE_TYPES,
+-} from "../types/online.types";
+-import { useSettings } from "../../../contexts/SettingsContext";
+-import {
+-  optimizeFile,
+-  validateFile,
+-} from "../../../utils/fileOptimizer";
+-import { parseTimestamp, getFileTypeFromName } from "../../../utils/onlineFormHelpers";
+-
+-export const useOnlineForm = () => {
+-  const navigate = useNavigate();
+-  const location = useLocation();
+-  const { id } = useParams<{ id?: string }>();
+-  const { settings } = useSettings();
+-  const showDelete = settings?.showDelete || false;
+-  const [storage] = useState(() => getStorage());
+-
+-  // Calendar state - simplified
+-  const [showCalendar, setShowCalendar] = useState<"start" | "end" | null>(null);
+-
+-  const getModeFromPath = (): "add" | "edit" | "view" => {
+-    const path = location.pathname;
+-    if (path.includes("/online/items/add")) return "add";
+-    if (path.includes("/online/items/edit/")) return "edit";
+-    if (path.includes("/online/items/view/")) return "view";
+-    return id ? "view" : "add";
+-  };
+-
+-  const mode = getModeFromPath();
+-  const isAddMode = mode === "add";
+-  const isEditMode = mode === "edit";
+-  const isViewMode = mode === "view";
+-
+-  const [formData, setFormData] = useState<Partial<OnlineItem>>({
+-    id: "",
+-    name: "",
+-    detail: "",
+-    category: "",
+-    startDate: null,
+-    endDate: null,
+-    file1: "",
+-    file2: "",
+-    file1Type: FILE_TYPES.NONE,
+-    file2Type: FILE_TYPES.NONE,
+-    file1Name: "",
+-    file2Name: "",
+-    createdAt: Date.now(),
+-    updatedAt: Date.now(),
+-  });
+-
+-  const [categories, setCategories] = useState<Category[]>([]);
+-  const [loading, setLoading] = useState(false);
+-  const [saving, setSaving] = useState(false);
+-  const [deleting, setDeleting] = useState(false);
+-  const [uploadingFiles, setUploadingFiles] = useState(false);
+-
+-  // File states
+-  const [file1Info, setFile1Info] = useState<FileInfo>({
+-    file: null,
+-    optimization: null,
+-    type: FILE_TYPES.NONE,
+-    url: "",
+-    name: "",
+-  });
+-
+-  const [file2Info, setFile2Info] = useState<FileInfo>({
+-    file: null,
+-    optimization: null,
+-    type: FILE_TYPES.NONE,
+-    url: "",
+-    name: "",
+-  });
+-
+-  useEffect(() => {
+-    fetchCategories();
+-    if (id) {
+-      fetchItem();
+-    } else {
+-      resetForm();
+-    }
+-  }, [id, location.pathname]);
+-
+-  const resetForm = () => {
+-    setFormData({
+-      id: "",
+-      name: "",
+-      detail: "",
+-      category: "",
+-      startDate: null,
+-      endDate: null,
+-      file1: "",
+-      file2: "",
+-      file1Type: FILE_TYPES.NONE,
+-      file2Type: FILE_TYPES.NONE,
+-      file1Name: "",
+-      file2Name: "",
+-      createdAt: Date.now(),
+-      updatedAt: Date.now(),
+-    });
+-    resetFileStates();
+-  };
+-
+-  const resetFileStates = () => {
+-    setFile1Info({
+-      file: null,
+-      optimization: null,
+-      type: FILE_TYPES.NONE,
+-      url: "",
+-      name: "",
+-    });
+-    setFile2Info({
+-      file: null,
+-      optimization: null,
+-      type: FILE_TYPES.NONE,
+-      url: "",
+-      name: "",
+-    });
+-  };
+-
+-  const fetchCategories = async () => {
+-    try {
+-      const db = getFirestore();
+-      const categoriesRef = collection(db, "online_categories");
+-      const snapshot = await getDocs(categoriesRef);
+-
+-      const categoriesList: Category[] = [];
+-      snapshot.forEach((doc) => {
+-        const data = doc.data();
+-        categoriesList.push({
+-          id: doc.id,
+-          name: data.name || "",
+-          createdAt: parseTimestamp(data.createdAt) || undefined,
+-          updatedAt: parseTimestamp(data.updatedAt) || undefined,
+-        });
+-      });
+-      categoriesList.sort((a, b) => a.name.localeCompare(b.name));
+-      setCategories(categoriesList);
+-    } catch (error) {
+-      console.error("Error fetching categories:", error);
+-    }
+-  };
+-
+-  const fetchItem = async () => {
+-    if (!id) return;
+-
+-    try {
+-      setLoading(true);
+-      const db = getFirestore();
+-      const itemRef = doc(db, "online", id);
+-      const itemDoc = await getDoc(itemRef);
+-
+-      if (itemDoc.exists()) {
+-        const data = itemDoc.data();
+-        const startDate = parseTimestamp(data.startDate);
+-        const endDate = parseTimestamp(data.endDate);
+-
+-        const hasOldImageFields =
+-          data.image1 !== undefined || data.image2 !== undefined;
+-
+-        let file1Type = data.file1Type;
+-        if (!file1Type && data.file1) {
+-          file1Type = data.file1?.match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/i)
+-            ? FILE_TYPES.IMAGE
+-            : data.file1?.match(/\.pdf$/i)
+-              ? FILE_TYPES.PDF
+-              : FILE_TYPES.NONE;
+-        } else if (!file1Type && data.image1) {
+-          file1Type = FILE_TYPES.IMAGE;
+-        }
+-
+-        let file2Type = data.file2Type;
+-        if (!file2Type && data.file2) {
+-          file2Type = data.file2?.match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/i)
+-            ? FILE_TYPES.IMAGE
+-            : data.file2?.match(/\.pdf$/i)
+-              ? FILE_TYPES.PDF
+-              : FILE_TYPES.NONE;
+-        } else if (!file2Type && data.image2) {
+-          file2Type = FILE_TYPES.IMAGE;
+-        }
+-
+-        setFormData({
+-          id: itemDoc.id,
+-          name: data.name || "",
+-          detail: data.detail || "",
+-          category: data.category || "",
+-          startDate: startDate,
+-          endDate: endDate,
+-          file1: data.file1 || data.image1 || "",
+-          file2: data.file2 || data.image2 || "",
+-          file1Type: file1Type || FILE_TYPES.NONE,
+-          file2Type: file2Type || FILE_TYPES.NONE,
+-          file1Name:
+-            data.file1Name ||
+-            (hasOldImageFields && data.image1 ? "Legacy Image" : ""),
+-          file2Name:
+-            data.file2Name ||
+-            (hasOldImageFields && data.image2 ? "Legacy Image" : ""),
+-          createdAt: parseTimestamp(data.createdAt) || Date.now(),
+-          updatedAt: parseTimestamp(data.updatedAt) || Date.now(),
+-        });
+-        resetFileStates();
+-      } else {
+-        alert("Item not found");
+-        navigate("/online", { state: { activeTab: "items" } });
+-      }
+-    } catch (error) {
+-      console.error("Error fetching item:", error);
+-      alert("Failed to load item");
+-      navigate("/online", { state: { activeTab: "items" } });
+-    } finally {
+-      setLoading(false);
+-    }
+-  };
+-
+-  // Simplified calendar functions
+-  const selectDate = (timestamp: number, field: "start" | "end") => {
+-    setFormData((prev) => ({
+-      ...prev,
+-      [field === "start" ? "startDate" : "endDate"]: timestamp,
+-    }));
+-    setShowCalendar(null);
+-  };
+-
+-  // File functions
+-  const handleFileChange = async (
+-    e: React.ChangeEvent<HTMLInputElement>,
+-    fileNumber: 1 | 2,
+-  ) => {
+-    const file = e.target.files?.[0];
+-    if (!file) return;
+-
+-    const fileType = getFileTypeFromName(file.name);
+-
+-    if (fileType === FILE_TYPES.NONE) {
+-      const errorInfo: Partial<FileInfo> = {
+-        error: "Unsupported file type. Please upload images or PDF files.",
+-        file: null,
+-        optimization: null,
+-        type: FILE_TYPES.NONE,
+-        url: "",
+-        name: "",
+-      };
+-
+-      if (fileNumber === 1) {
+-        setFile1Info((prev) => ({ ...prev, ...errorInfo }));
+-      } else {
+-        setFile2Info((prev) => ({ ...prev, ...errorInfo }));
+-      }
+-      return;
+-    }
+-
+-    const allowedTypes =
+-      fileType === FILE_TYPES.IMAGE
+-        ? [
+-            "image/jpeg",
+-            "image/png",
+-            "image/gif",
+-            "image/webp",
+-            "image/jpg",
+-            "image/heic",
+-            "image/heif",
+-          ]
+-        : ["application/pdf"];
+-
+-    const validation = validateFile(file, allowedTypes, 10);
+-    if (!validation.valid) {
+-      const errorInfo: Partial<FileInfo> = {
+-        error: validation.error,
+-        file: null,
+-        optimization: null,
+-        type: fileType,
+-        url: "",
+-        name: file.name,
+-      };
+-
+-      if (fileNumber === 1) {
+-        setFile1Info((prev) => ({ ...prev, ...errorInfo }));
+-      } else {
+-        setFile2Info((prev) => ({ ...prev, ...errorInfo }));
+-      }
+-      return;
+-    }
+-
+-    const fileInfo: Partial<FileInfo> = {
+-      error: undefined,
+-      file: file,
+-      optimization: null,
+-      type: fileType,
+-      url: "",
+-      name: file.name,
+-    };
+-
+-    if (fileNumber === 1) {
+-      setFile1Info((prev) => ({ ...prev, ...fileInfo }));
+-    } else {
+-      setFile2Info((prev) => ({ ...prev, ...fileInfo }));
+-    }
+-
+-    if (fileType === FILE_TYPES.IMAGE) {
+-      try {
+-        const optimized = await optimizeFile(file);
+-        const originalSize = file.size;
+-        const optimizedSize = optimized.size;
+-        const savedPercentage =
+-          ((originalSize - optimizedSize) / originalSize) * 100;
+-
+-        const optimizationInfo = {
+-          originalSize,
+-          optimizedSize,
+-          savedPercentage,
+-          fileName: file.name,
+-        };
+-
+-        const optimizationUpdate: Partial<FileInfo> = {
+-          optimization: optimizationInfo,
+-          file: optimized,
+-        };
+-
+-        if (fileNumber === 1) {
+-          setFile1Info((prev) => ({ ...prev, ...optimizationUpdate }));
+-        } else {
+-          setFile2Info((prev) => ({ ...prev, ...optimizationUpdate }));
+-        }
+-      } catch (err: any) {
+-        console.error(`Error optimizing file ${fileNumber}:`, err);
+-      }
+-    }
+-  };
+-
+-  const handleRemoveFile = (fileNumber: 1 | 2) => {
+-    const resetInfo: FileInfo = {
+-      file: null,
+-      optimization: null,
+-      type: FILE_TYPES.NONE,
+-      url: "",
+-      name: "",
+-      error: undefined,
+-    };
+-
+-    if (fileNumber === 1) {
+-      setFile1Info(resetInfo);
+-    } else {
+-      setFile2Info(resetInfo);
+-    }
+-
+-    const input = document.getElementById(
+-      `file${fileNumber}Input`,
+-    ) as HTMLInputElement;
+-    if (input) input.value = "";
+-  };
+-
+-  const uploadFile = async (
+-    fileInfo: FileInfo,
+-    fileNumber: 1 | 2,
+-  ): Promise<{ url: string; type: FileType; name: string }> => {
+-    if (!fileInfo.file) throw new Error("No file to upload");
+-
+-    try {
+-      let fileToUpload = fileInfo.file;
+-
+-      if (fileInfo.type === FILE_TYPES.IMAGE && fileInfo.optimization) {
+-        fileToUpload = fileInfo.file;
+-      }
+-
+-      const timestamp = Date.now();
+-      const randomId = Math.random().toString(36).substring(2, 9);
+-      const fileExtension = fileToUpload.name.split(".").pop();
+-      const fileType = fileInfo.type === FILE_TYPES.IMAGE ? "image" : "pdf";
+-      const fileName = `online_${fileType}_${fileNumber}_${timestamp}_${randomId}.${fileExtension}`;
+-
+-      const storageRef = ref(storage, `online_files/${fileName}`);
+-      const snapshot = await uploadBytes(storageRef, fileToUpload);
+-
+-      const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${snapshot.ref.bucket}/o/${encodeURIComponent(snapshot.ref.fullPath)}?alt=media`;
+-
+-      return {
+-        url: downloadURL,
+-        type: fileInfo.type,
+-        name: fileInfo.file.name,
+-      };
+-    } catch (error: any) {
+-      console.error(`Error uploading file ${fileNumber}:`, error);
+-      throw error;
+-    }
+-  };
+-
+-  const handleDeleteExistingFile = async (fileNumber: 1 | 2) => {
+-    const fileUrl = fileNumber === 1 ? formData.file1 : formData.file2;
+-    const fileType =
+-      (fileNumber === 1 ? formData.file1Type : formData.file2Type) ||
+-      FILE_TYPES.NONE;
+-
+-    if (!fileUrl) return;
+-
+-    const fileTypeDisplay = fileType === FILE_TYPES.IMAGE ? "Image" : "PDF";
+-    const confirmDelete = window.confirm(
+-      `Are you sure you want to delete ${fileTypeDisplay} ${fileNumber}? This action cannot be undone.`,
+-    );
+-
+-    if (!confirmDelete) return;
+-
+-    try {
+-      if (fileUrl.includes("firebasestorage.googleapis.com")) {
+-        const url = new URL(fileUrl);
+-        const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+-
+-        if (pathMatch) {
+-          const filePath = decodeURIComponent(pathMatch[1]);
+-          const storageRef = ref(storage, filePath);
+-          await deleteObject(storageRef);
+-        }
+-      }
+-
+-      if (fileNumber === 1) {
+-        setFormData((prev) => ({
+-          ...prev,
+-          file1: "",
+-          file1Type: FILE_TYPES.NONE,
+-          file1Name: "",
+-        }));
+-      } else {
+-        setFormData((prev) => ({
+-          ...prev,
+-          file2: "",
+-          file2Type: FILE_TYPES.NONE,
+-          file2Name: "",
+-        }));
+-      }
+-
+-      alert(`${fileTypeDisplay} ${fileNumber} deleted successfully!`);
+-    } catch (error: any) {
+-      console.error(`Error deleting file ${fileNumber}:`, error);
+-      alert(`Failed to delete file: ${error.message}`);
+-    }
+-  };
+-
+-  const handleSubmit = async (e: React.FormEvent) => {
+-    e.preventDefault();
+-
+-    if (!formData.name?.trim()) {
+-      alert("Item name is required");
+-      return;
+-    }
+-
+-    if (
+-      formData.startDate &&
+-      formData.endDate &&
+-      formData.startDate > formData.endDate
+-    ) {
+-      alert("End date must be after start date");
+-      return;
+-    }
+-
+-    try {
+-      setSaving(true);
+-      setUploadingFiles(true);
+-      const db = getFirestore();
+-
+-      let file1Url = formData.file1 || "";
+-      let file2Url = formData.file2 || "";
+-      let file1Type = formData.file1Type || FILE_TYPES.NONE;
+-      let file2Type = formData.file2Type || FILE_TYPES.NONE;
+-      let file1Name = formData.file1Name || "";
+-      let file2Name = formData.file2Name || "";
+-
+-      if (file1Info.file) {
+-        const result = await uploadFile(file1Info, 1);
+-        file1Url = result.url;
+-        file1Type = result.type;
+-        file1Name = result.name;
+-      }
+-      if (file2Info.file) {
+-        const result = await uploadFile(file2Info, 2);
+-        file2Url = result.url;
+-        file2Type = result.type;
+-        file2Name = result.name;
+-      }
+-
+-      const itemData = {
+-        name: (formData.name || "").trim(),
+-        detail: (formData.detail || "").trim(),
+-        category: formData.category || "",
+-        startDate: formData.startDate,
+-        endDate: formData.endDate,
+-        file1: file1Url,
+-        file2: file2Url,
+-        file1Type: file1Type,
+-        file2Type: file2Type,
+-        file1Name: file1Name,
+-        file2Name: file2Name,
+-        updatedAt: new Date(),
+-        ...(isAddMode ? { createdAt: new Date() } : {}),
+-      };
+-
+-      if (isEditMode && id) {
+-        await setDoc(doc(db, "online", id), itemData, { merge: true });
+-        alert("Item updated successfully!");
+-      } else if (isAddMode) {
+-        await addDoc(collection(db, "online"), itemData);
+-        alert("Item added successfully!");
+-      }
+-
+-      navigate("/online", { state: { activeTab: "items" } });
+-    } catch (error: any) {
+-      console.error("Error saving item:", error);
+-      let errorMessage = "Failed to save item";
+-      if (error.message?.includes("quota")) {
+-        errorMessage = "Storage quota exceeded. Files are optimized to save space.";
+-      } else if (error.code === "storage/unauthorized") {
+-        errorMessage = "Upload failed: You don't have permission to upload files.";
+-      } else if (error.message) {
+-        errorMessage = `Error: ${error.message}`;
+-      }
+-      alert(errorMessage);
+-    } finally {
+-      setSaving(false);
+-      setUploadingFiles(false);
+-    }
+-  };
+-
+-  const handleDelete = async () => {
+-    if (!id) return;
+-
+-    const confirmDelete = window.confirm(
+-      "Are you sure you want to delete this item? This action cannot be undone.",
+-    );
+-
+-    if (!confirmDelete) return;
+-
+-    try {
+-      setDeleting(true);
+-
+-      if (formData.file1) {
+-        try {
+-          const url = new URL(formData.file1);
+-          const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+-          if (pathMatch) {
+-            const filePath = decodeURIComponent(pathMatch[1]);
+-            const storageRef = ref(storage, filePath);
+-            await deleteObject(storageRef);
+-          }
+-        } catch (error) {
+-          console.error("Error deleting file 1:", error);
+-        }
+-      }
+-
+-      if (formData.file2) {
+-        try {
+-          const url = new URL(formData.file2);
+-          const pathMatch = url.pathname.match(/\/o\/(.+?)(?:\?|$)/);
+-          if (pathMatch) {
+-            const filePath = decodeURIComponent(pathMatch[1]);
+-            const storageRef = ref(storage, filePath);
+-            await deleteObject(storageRef);
+-          }
+-        } catch (error) {
+-          console.error("Error deleting file 2:", error);
+-        }
+-      }
+-
+-      const db = getFirestore();
+-      await deleteDoc(doc(db, "online", id));
+-
+-      alert("Item deleted successfully!");
+-      navigate("/online", { state: { activeTab: "items" } });
+-    } catch (error) {
+-      console.error("Error deleting item:", error);
+-      alert("Failed to delete item");
+-    } finally {
+-      setDeleting(false);
+-    }
+-  };
+-
+-  const getPageTitle = () => {
+-    if (isAddMode) return "Add Item";
+-    if (isEditMode) return "Edit Item";
+-    if (isViewMode) return "View Item";
+-    return "Item Details";
+-  };
+-
+-  return {
+-    // State
+-    formData,
+-    setFormData,
+-    categories,
+-    loading,
+-    saving,
+-    deleting,
+-    uploadingFiles,
+-    file1Info,
+-    file2Info,
+-    showDelete,
+-    isAddMode,
+-    isEditMode,
+-    isViewMode,
+-    id,
+-    
+-    // Calendar state - simplified
+-    showCalendar,
+-    selectDate,
+-    setShowCalendar,
+-    
+-    // Actions
+-    handleSubmit,
+-    handleDelete,
+-    handleFileChange,
+-    handleRemoveFile,
+-    handleDeleteExistingFile,
+-    getPageTitle,
+-    navigate,
+-  };
+-};
+\ No newline at end of file
++// Compatibility import path; keep one implementation.
++export * from "../hooks/useOnlineForm";
+diff --git a/src/modules/Online/types/online.types.ts b/src/modules/Online/types/online.types.ts
+index fe1c76d..bbf3646 100644
+--- a/src/modules/Online/types/online.types.ts
++++ b/src/modules/Online/types/online.types.ts
+@@ -132,7 +132,7 @@ export interface UseOnlineFormReturn {
+   handleRemoveFile: (fileNumber: 1 | 2) => void;
+   handleDeleteExistingFile: (fileNumber: 1 | 2) => Promise<void>;
+   getPageTitle: () => string;
+-  navigate: (to: string, options?: { state?: any }) => void;
++  navigate: (to: string, options?: { state?: unknown }) => void;
+ }
+ 
+ /**
+@@ -165,7 +165,7 @@ export interface CalendarUtils {
+   formatDateDisplay: (timestamp?: number | null) => string;
+   getFileTypeFromName: (filename: string) => FileType;
+   getFileIcon: (type: FileType) => string;
+-  parseTimestamp: (timestamp: any) => number | null;
++  parseTimestamp: (timestamp: unknown) => number | null;
+ }
+ 
+ // Constants for file types (optional, for convenience)
+diff --git a/src/modules/SettingsPage.tsx b/src/modules/SettingsPage.tsx
+index 26359b4..0397919 100644
+--- a/src/modules/SettingsPage.tsx
++++ b/src/modules/SettingsPage.tsx
+@@ -1,5 +1,5 @@
+ // src/modules/SettingsPage.tsx
+-import React, { useState, useEffect } from "react";
++import React, { useState } from "react";
+ import { useNavigate } from "react-router-dom";
+ import { useSettings } from "../contexts/SettingsContext";
+ 
+@@ -31,16 +31,6 @@ const SettingsPage: React.FC = () => {
+   const [newBoughtFor, setNewBoughtFor] = useState("");
+   const [renameValue, setRenameValue] = useState("");
+ 
+-  const [financialSettings, setFinancialSettings] = useState({
+-    goldRate: 0,
+-    makingTax: 0,
+-    resaleDiscount: 0,
+-    emwInterest: 0,
+-  });
+-
+-  // EMW state - start with empty values
+-  const [emwDate, setEmwDate] = useState<string>("");
+-  const [targetAge, setTargetAge] = useState<number | null>(null);
+   const [useAgeMode, setUseAgeMode] = useState(false); // Toggle between Age and Date mode
+ 
+   // Editing states
+@@ -54,29 +44,6 @@ const SettingsPage: React.FC = () => {
+   // Date of birth (Oct 17, 1959)
+   const DOB = new Date(1959, 9, 17); // Month is 0-indexed, so 9 = October
+ 
+-  useEffect(() => {
+-    // Update local state whenever settings change from context
+-    if (settings) {
+-      setFinancialSettings({
+-        goldRate: settings.goldRatePerGram ?? 0,
+-        makingTax: settings.makingTaxPercent ?? 0,
+-        resaleDiscount: settings.resaleDiscountPercent ?? 0,
+-        emwInterest: settings.EMW_interest ?? 0,
+-      });
+-
+-      // Only set EMW date and calculate age if we have a valid date
+-      if (settings.EMW_Date) {
+-        setEmwDate(settings.EMW_Date);
+-        const calculatedAge = calculateAgeFromDate(settings.EMW_Date);
+-        setTargetAge(calculatedAge);
+-      } else {
+-        // If no date in settings, use default
+-        setEmwDate("2044-10");
+-        setTargetAge(85);
+-      }
+-    }
+-  }, [settings]);
+-
+   // Calculate age from date string (YYYY-MM)
+   const calculateAgeFromDate = (dateStr: string): number => {
+     if (!dateStr) return 85; // Return default age if no date
+@@ -94,7 +61,7 @@ const SettingsPage: React.FC = () => {
+       }
+ 
+       return age;
+-    } catch (e) {
++    } catch {
+       return 85; // Return default age on error
+     }
+   };
+@@ -106,6 +73,15 @@ const SettingsPage: React.FC = () => {
+     return `${targetYear}-10`; // October
+   };
+ 
++  const financialSettings = {
++    goldRate: settings?.goldRatePerGram ?? 0,
++    makingTax: settings?.makingTaxPercent ?? 0,
++    resaleDiscount: settings?.resaleDiscountPercent ?? 0,
++    emwInterest: settings?.EMW_interest ?? 0,
++  };
++  const emwDate = settings?.EMW_Date ?? "";
++  const targetAge = emwDate ? calculateAgeFromDate(emwDate) : null;
++
+   const toggleMode = () => {
+     setUseAgeMode(!useAgeMode);
+     // Cancel any ongoing edits when switching modes
+@@ -133,9 +109,6 @@ const SettingsPage: React.FC = () => {
+     }
+ 
+     if (!await updateSettings({ EMW_Date: targetDateValue })) return;
+-    setEmwDate(targetDateValue);
+-    const newAge = calculateAgeFromDate(targetDateValue);
+-    setTargetAge(newAge);
+     setEditingTargetDate(false);
+   };
+ 
+@@ -150,8 +123,6 @@ const SettingsPage: React.FC = () => {
+ 
+     const newDate = calculateDateFromAge(age);
+     if (!await updateSettings({ EMW_Date: newDate })) return;
+-    setEmwDate(newDate);
+-    setTargetAge(age);
+     setEditingTargetAge(false);
+   };
+ 
+@@ -280,7 +251,7 @@ const SettingsPage: React.FC = () => {
+         year: "numeric",
+         month: "long",
+       });
+-    } catch (e) {
++    } catch {
+       return dateStr;
+     }
+   };
+diff --git a/src/routes/index.tsx b/src/routes/index.tsx
+index 846ad55..7d0ad33 100644
+--- a/src/routes/index.tsx
++++ b/src/routes/index.tsx
+@@ -362,11 +362,7 @@ const routeExists = (path: string) =>
+   allRoutes.some((route) => route.path === path);
+ 
+ // ==================== APP ROUTES COMPONENT ====================
+-interface AppRoutesProps {
+-  // Remove isAuthenticated and user props since we use AuthContext
+-}
+-
+-const AppRoutes: React.FC<AppRoutesProps> = () => {
++const AppRoutes: React.FC = () => {
+   // Helper function to render routes with children
+   const renderRoute = (route: RouteConfig) => {
+     if (route.path === "/login") {
+diff --git a/src/utils/dateUtils.ts b/src/utils/dateUtils.ts
+index 6758954..dc920a6 100644
+--- a/src/utils/dateUtils.ts
++++ b/src/utils/dateUtils.ts
+@@ -11,22 +11,7 @@ export const FILE_TYPES = {
+ } as const;
+ 
+ // Helper function to safely parse timestamps
+-export const parseTimestamp = (timestamp: any): number | null => {
+-  if (timestamp === null || timestamp === undefined) return null;
+-  if (typeof timestamp === "number") {
+-    return timestamp;
+-  }
+-  if (timestamp && typeof timestamp.toDate === "function") {
+-    return timestamp.toDate().getTime();
+-  }
+-  if (typeof timestamp === "string") {
+-    const parsed = Date.parse(timestamp);
+-    if (!isNaN(parsed)) {
+-      return parsed;
+-    }
+-  }
+-  return null;
+-};
++export { parseTimestamp } from "./timestamps";
+ 
+ // Helper to determine file type from name
+ export const getFileTypeFromName = (filename: string): FileType => {
+@@ -64,7 +49,7 @@ export const formatDateDisplay = (timestamp?: number | null): string => {
+       month: "short",
+       year: "numeric",
+     });
+-  } catch (error) {
++  } catch {
+     return "Error formatting date";
+   }
+ };
+diff --git a/src/utils/emwCalculations.ts b/src/utils/emwCalculations.ts
+index 051b561..339bf1b 100644
+--- a/src/utils/emwCalculations.ts
++++ b/src/utils/emwCalculations.ts
+@@ -1,3 +1,4 @@
++import type { Settings } from "./settings";
+ // utils/emwCalculations.ts
+ 
+ /**
+@@ -46,10 +47,10 @@ export const calculateEMW = (
+  * @param appSettings - Application settings object
+  * @returns Object containing interest rate, target date, and target date string
+  */
+-export const getEmwSettings = (appSettings: any) => {
++export const getEmwSettings = (appSettings: Partial<Settings> | null | undefined) => {
+   // Default values
+   let interestRate = 0; // 0% default
+-  let targetDateStr = "2039-10"; // November 2039 default
++  let targetDateStr = "2039-10"; // October 2039 default
+ 
+   if (appSettings) {
+     // Use EMW_Interest from settings or default
+@@ -68,7 +69,7 @@ export const getEmwSettings = (appSettings: any) => {
+   } catch (error) {
+     // Fallback to default date if parsing fails
+     console.error("Error parsing EMW date:", error);
+-    targetDate = new Date(2039, 10, 1); // November 2039
++    targetDate = new Date(2039, 9, 1); // October 2039
+     targetDateStr = "2039-10";
+   }
+ 
+diff --git a/src/utils/firestoreHelpers.ts b/src/utils/firestoreHelpers.ts
+index 0a147e4..4f2f6bd 100644
+--- a/src/utils/firestoreHelpers.ts
++++ b/src/utils/firestoreHelpers.ts
+@@ -6,8 +6,9 @@ import type { DocumentData } from "firebase/firestore";
+  * @param data - The data object to convert
+  * @returns Firestore-compatible data without the 'id' field
+  */
+-export const toFirestoreData = <T extends Record<string, any>>(data: T): DocumentData => {
+-  const { id, ...rest } = data;
++export const toFirestoreData = <T extends object>(data: T): DocumentData => {
++  const rest = { ...data };
++  Reflect.deleteProperty(rest, "id");
+   return rest;
+ };
+ 
+diff --git a/src/utils/formatters.ts b/src/utils/formatters.ts
+index ce46dd3..9d1d284 100644
+--- a/src/utils/formatters.ts
++++ b/src/utils/formatters.ts
+@@ -64,17 +64,17 @@ export const formatDateShort = (timestamp: number): string => {
+  * @returns Formatted date string or fallback value
+  */
+ export const formatDateDisplay = (
+-  timestamp: any,
++  timestamp: unknown,
+   locale: string = "en-IN",
+   options?: Intl.DateTimeFormatOptions
+ ): string => {
+   try {
+-    if (!timestamp) return "N/A";
++    if (timestamp === null || timestamp === undefined || timestamp === "") return "N/A";
+     
+     let date: Date;
+     
+     // Handle Firestore Timestamp object
+-    if (typeof timestamp === "object" && timestamp !== null && "toDate" in timestamp) {
++    if (typeof timestamp === "object" && timestamp !== null && "toDate" in timestamp && typeof timestamp.toDate === "function") {
+       date = timestamp.toDate();
+     } 
+     // Handle numeric timestamp
+diff --git a/src/utils/imageSizeUtils.tsx b/src/utils/imageSizeUtils.tsx
+index 33a44e1..2cee5f1 100644
+--- a/src/utils/imageSizeUtils.tsx
++++ b/src/utils/imageSizeUtils.tsx
+@@ -1,3 +1,4 @@
++import { toError } from "./errors";
+ import React from "react";
+ import { getStorage, ref, getMetadata } from "firebase/storage";
+ import { formatFileSize } from "./fileOptimizer";
+@@ -58,7 +59,8 @@ export const useImageSize = (imageUrl: string | null) => {
+         setSizeInfo((prev) => ({ ...prev, loading: true, error: null }));
+         const size = await fetchImageSizeFromUrl(imageUrl);
+         setSizeInfo({ size, loading: false, error: null });
+-      } catch (error: any) {
++      } catch (caught: unknown) {
++      const error = toError(caught);
+         setSizeInfo({
+           size: null,
+           loading: false,
+diff --git a/src/utils/onlineFormHelpers.ts b/src/utils/onlineFormHelpers.ts
+index 6758954..dc920a6 100644
+--- a/src/utils/onlineFormHelpers.ts
++++ b/src/utils/onlineFormHelpers.ts
+@@ -11,22 +11,7 @@ export const FILE_TYPES = {
+ } as const;
+ 
+ // Helper function to safely parse timestamps
+-export const parseTimestamp = (timestamp: any): number | null => {
+-  if (timestamp === null || timestamp === undefined) return null;
+-  if (typeof timestamp === "number") {
+-    return timestamp;
+-  }
+-  if (timestamp && typeof timestamp.toDate === "function") {
+-    return timestamp.toDate().getTime();
+-  }
+-  if (typeof timestamp === "string") {
+-    const parsed = Date.parse(timestamp);
+-    if (!isNaN(parsed)) {
+-      return parsed;
+-    }
+-  }
+-  return null;
+-};
++export { parseTimestamp } from "./timestamps";
+ 
+ // Helper to determine file type from name
+ export const getFileTypeFromName = (filename: string): FileType => {
+@@ -64,7 +49,7 @@ export const formatDateDisplay = (timestamp?: number | null): string => {
+       month: "short",
+       year: "numeric",
+     });
+-  } catch (error) {
++  } catch {
+     return "Error formatting date";
+   }
+ };

@@ -13,7 +13,7 @@ interface FileDocument {
   url: string;
   size: number;
   type: string;
-  uploadedAt: any;
+  uploadedAt: unknown;
   storagePath: string;
 }
 

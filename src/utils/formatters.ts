@@ -64,17 +64,17 @@ export const formatDateShort = (timestamp: number): string => {
  * @returns Formatted date string or fallback value
  */
 export const formatDateDisplay = (
-  timestamp: any,
+  timestamp: unknown,
   locale: string = "en-IN",
   options?: Intl.DateTimeFormatOptions
 ): string => {
   try {
-    if (!timestamp) return "N/A";
+    if (timestamp === null || timestamp === undefined || timestamp === "") return "N/A";
     
     let date: Date;
     
     // Handle Firestore Timestamp object
-    if (typeof timestamp === "object" && timestamp !== null && "toDate" in timestamp) {
+    if (typeof timestamp === "object" && timestamp !== null && "toDate" in timestamp && typeof timestamp.toDate === "function") {
       date = timestamp.toDate();
     } 
     // Handle numeric timestamp
